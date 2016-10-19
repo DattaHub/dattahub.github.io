@@ -151,7 +151,34 @@ Of course, we can skip the step-by-step calculation and use a pre-canned package
 results <- aov(pain~drug, data=migraine)
 summary(results)
 ```
+### Pairwise tests {.smaller}
 
+-  ANOVA test tells you whether there is a significant difference between the means, but it does not provide any more information about which ones are different. 
+-  The R function pairwise.t.test() compares all possible pairs with **corrections for multiple testing**. 
+
+```{r, echo = TRUE}
+ pairwise.t.test(pain, drug, p.adjust="bonferroni")
+```
+
+
+```{r, fig.width = 5, fig.height=4}
+trellis.par.set(theme=col.mosaic()) # better color scheme for lattice
+bwplot(pain ~ drug, data=migraine)
+```
+ ***A is different from both B and C, but B & C are similar***
+
+
+### Tukey's HSD
+
+Another multiple comparisons procedure is Tukey‟s method (a.k.a. Tukey's
+Honest Significance Test). The function TukeyHSD() creates a set of confidence
+intervals on the differences between means with the specified family-wise
+probability of coverage. 
+
+```{r, echo = TRUE}
+results = aov(pain ~ drug, data=migraine)
+TukeyHSD(results, conf.level = 0.95)
+```
 ## Another Example
 
 We are going to see another data-set InsectSprays. 6 different insect sprays (1 Categorical Variable with 6 levels) were tested to see if there was a difference in the number of insects found in the field after each spraying (Dependent Variable).
@@ -246,4 +273,24 @@ Of course, we can skip the step-by-step calculation and use a pre-canned package
 ```{r, echo = TRUE}
 results <- aov(count~spray, data=InsectSprays)
 summary(results)
+```
+
+### Pairwise tests 
+-  ANOVA test tells you whether there is a significant difference between the means, but it does not provide any more information about which ones are different. 
+-  The R function pairwise.t.test() compares all possible pairs with **corrections for multiple testing**. 
+```{r, echo = TRUE}
+ pairwise.t.test(count, spray, p.adjust="bonferroni")
+```
+
+```{r, fig.width = 5, fig.height=4}
+trellis.par.set(theme=col.mosaic()) # better color scheme for lattice
+bwplot(count ~ spray, data=InsectSprays)
+```
+
+***A, B and F are similar, C, D and E are similar. But each of A, B & F are different from each of C, D and E !***
+
+### Tukey's HSD 
+```{r, echo = TRUE, message= FALSE}
+results = aov(count ~ spray, data=InsectSprays)
+TukeyHSD(results, conf.level = 0.95)
 ```
