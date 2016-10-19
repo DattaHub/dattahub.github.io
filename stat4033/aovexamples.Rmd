@@ -15,7 +15,10 @@ This is an R Markdown presentation. Markdown is a simple formatting syntax for a
 
 When you click the **Knit** button a document will be generated that includes both **content** as well as the output of **any embedded R code chunks** within the document.
 
-I will show you the R codes for ANOVA using this presentation. 
+I will show here the R codes for ANOVA. The two examples are taken from the following websites.
+
+  -  [Spray Insects Example](http://homepages.inf.ed.ac.uk/bwebb/statistics/ANOVA_in_R.pdf)
+  -  [Migraine Example (Martin Lindquist)](http://www.stat.columbia.edu/~martin/W2024/R3.pdf)
 
 
 ## The Data
@@ -123,7 +126,6 @@ cat("SSE =", SSE, "\n")
 ```
 
 ## F-statistic 
-
 -  Mean square for treatments = MST = $\frac{SST}{k-1} = \frac{28.2}{2} = 14.11$
 -  Mean square for errors = MSE = $\frac{SSE}{n-k} = \frac{28.4}{27-3} = 1.19$.
 -  The ratio of the variability among the treatment means to that within the treatment means is an $F$-statistic:
@@ -131,9 +133,8 @@ $$
 				F_{k-1,n-k} = \frac{MST}{MSE} = \frac{14.11}{1.19} = 11.9
 $$
 with $k-1 = 2$ numerator and $n-k = 24$ denominator degrees of freedom.
--  P-value 
 ```{r, echo = TRUE}
-p.value = 1-pf(11.9,2,24);cat("P value =", p.value, "\n")
+p.value = 1-pf(11.9,2,24); cat("P value =", p.value)
 ```
 Reject the null.
 
@@ -146,7 +147,10 @@ results <- aov(pain~drug, data=migraine)
 summary(results)
 ```
 
-## Another Example
+
+# Another Example
+
+## Insect and Sprays
 
 We are going to see another data-set InsectSprays. 6 different insect sprays (1 Categorical Variable with 6 levels) were tested to see if there was a difference in the number of insects found in the field after each spraying (Dependent Variable).
 ```{r, echo=TRUE, message= FALSE, warning = FALSE}
@@ -219,7 +223,6 @@ cat("SSE =", SSE, "\n")
 ```
 
 ## F-statistic 
-
 -  Mean square for treatments = MST = $\frac{SST}{k-1} = \frac{2669}{5} = 533.8$
 -  Mean square for errors = MSE = $\frac{SSE}{n-k} = \frac{1015}{72-6} = 15.378$.
 -  The ratio of the variability among the treatment means to that within the treatment means is an $F$-statistic:
@@ -227,9 +230,8 @@ $$
 				F_{k-1,n-k} = \frac{MST}{MSE} = \frac{533.8}{15.378} = 34.7
 $$
 with $k-1 = 5$ numerator and $n-k = 66$ denominator degrees of freedom.
--  P-value 
 ```{r, echo = TRUE}
-p.value = 1-pf(34.7,5,66);cat("P value =", p.value, "\n")
+p.value = 1-pf(34.7,5,66);cat("P value =", p.value)
 ```
 Reject the null.
 
