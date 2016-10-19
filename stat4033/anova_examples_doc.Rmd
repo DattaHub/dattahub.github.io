@@ -294,3 +294,62 @@ bwplot(count ~ spray, data=InsectSprays)
 results = aov(count ~ spray, data=InsectSprays)
 TukeyHSD(results, conf.level = 0.95)
 ```
+
+## Assumptions in ANOVA | Conditions required for a Valid ANOVA F-Test:
+1. Completely Randomized Design: The samples are randomly selected in an
+independent manner from the k treatment populations.
+2.  All k sampled populations have distributions that are approximately normal.
+3.  The k population variances are equal.
+
+### Testing homogeneity of variances
+
+```{r, echo = TRUE}
+bartlett.test(count ~ spray, data=InsectSprays)
+```
+-  ***Note that this implies a significant difference between the group variance, which means we cannot assume that the k population variances are equal.***
+-  ***We cannot trust the ANOVA results for this data***
+
+### Model checking plots
+
+```{r, echo = TRUE}
+results = aov(count ~ spray, data=InsectSprays)
+opar <- par(mfrow = c(2,2), oma = c(0, 0, 1.1, 0))
+plot(results, las = 1)      # Residuals, Fitted, ...
+par(opar)
+```
+
+### Kruskal-Wallis Test
+
+-  When the assumptions for a parametric ANOVA are violated, we use a nonparametric alternative. 
+-  For one-way ANOVA, the alternative is known as is known as Kruskal-Wallis test. 
+```{r, echo = TRUE}
+# Kruskal Wallis Test One Way Anova by Ranks 
+kruskal.test(count ~ spray, data=InsectSprays) 
+```
+Reject the null hypothesis! 
+
+### First example revisited | Testing homogeneity of variances
+
+```{r, echo = TRUE}
+bartlett.test(pain ~ drug, data=migraine)
+```
+-  ***Note that although this does not imply a significant difference between the group variance, the P-value is low. We have to be careful!***
+
+### Model checking plots
+
+```{r, echo = TRUE}
+results = aov(pain ~ drug, data=migraine)
+opar <- par(mfrow = c(2,2), oma = c(0, 0, 1.1, 0))
+plot(results, las = 1)      # Residuals, Fitted, ...
+par(opar)
+```
+
+### Kruskal-Wallis Test
+
+-  When the assumptions for a parametric ANOVA are violated, we use a nonparametric alternative. 
+-  For one-way ANOVA, the alternative is known as is known as Kruskal-Wallis test. 
+```{r, echo = TRUE}
+# Kruskal Wallis Test One Way Anova by Ranks 
+kruskal.test(pain ~ drug, data=migraine) 
+```
+Reject the null hypothesis! 
