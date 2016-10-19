@@ -1,0 +1,243 @@
+---
+title: "ANOVA Examples in R"
+author: "Jyotishka Datta"
+date: "October 18, 2016"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## R Markdown
+
+This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both **content** as well as the output of **any embedded R code chunks** within the document.
+
+I will show you the R codes for ANOVA using this presentation. 
+
+
+## The Data
+
+We first read the InsectSprays dataset that has data on pain levels for three types of drugs. We create a data frame in R to store the data. 
+
+```{r, echo=TRUE, eval=TRUE}
+pain = c(4, 5, 4, 3, 2, 4, 3, 4, 4, 6, 8, 4, 5, 4, 6, 5, 
+         8, 6, 6, 7, 6, 6, 7, 5, 6, 5, 5)
+drug = c(rep("A",9), rep("B",9), rep("C",9))
+migraine = data.frame(pain,drug)
+str(migraine)
+```
+
+## Descriptive statistics
+-  Mean, variance, number of elements in each cell
+-  Visualise the data - boxplot; look at distribution, look for outliers
+-  We'll use the tapply() function which is a helpful shortcut in processing data. 
+-  tapply() basically allows you to specify a response variable, a factor (or factors) and a function that should be applied to each subset of the response variable defined by each level of the factor. 
+
+## Descriptive Statistics
+Instead of doing 
+```{r, echo = TRUE, eval = TRUE}
+mean(pain[drug=="A"])
+mean(pain[drug=="B"])
+```
+We can simply call 
+```{r,echo = TRUE, eval = TRUE}
+tapply(pain, drug, mean)
+```
+
+## Descriptive Statistics
+
+-  We need the sample variances, i.e. $s_j^2$ for $j = 1, 2, 3$.
+```{r,echo = TRUE, eval = TRUE}
+tapply(pain, drug, var)
+```
+-  We also need the sample sizes for each group. (Note: it will not always be equal or obvious!)
+```{r,echo = TRUE, eval = TRUE}
+tapply(pain, drug, length)
+```
+
+## Visual comparison 
+
+We can look at the boxplot for the three groups: 
+
+```{r, echo = TRUE}
+plot(pain ~ drug, data=migraine)
+```
+
+## More Visual comparisons
+R package 'mosaic' and 'gmodel' can create better looking plots and summary:
+
+```{r, echo = TRUE, warning=FALSE, message=FALSE}
+require(mosaic)
+require(gmodels)
+options(digits=3)
+favstats(pain ~ drug, data=migraine)
+```
+
+## Histogram for the three groups
+
+```{r, echo = TRUE, warning=FALSE, message=FALSE}
+trellis.par.set(theme=col.mosaic()) # better color scheme for lattice
+histogram(~ pain| drug, fit="normal", layout=c(1, 3), data=migraine)
+```
+
+## Density Plots for the three groups
+
+```{r, echo = TRUE, warning=FALSE, message=FALSE}
+trellis.par.set(theme=col.mosaic()) # better color scheme for lattice
+densityplot(~ pain, groups=drug, auto.key=TRUE, data=migraine)
+```
+
+## Box and Whisker Plots for the three groups
+
+```{r, echo = TRUE, warning=FALSE, message=FALSE}
+trellis.par.set(theme=col.mosaic()) # better color scheme for lattice
+bwplot(pain ~ drug, data=migraine)
+```
+
+
+## ANOVA Sum of squares 
+-  We need to calculate two sum of squares for the F-statistic. 
+-  The numertaor is between groups variation or $\sum_{j=1}^{K} n_j (\bar{x}_j - \bar{X})^2$. ($n_j$: sample size of the $j^{th}$ group).
+- We have calculated the $n_j$'s and the $\bar{x}_j$'s before using tapply().
+
+```{r, echo = TRUE}
+n_j = tapply(pain,drug,length)
+SST_j = n_j * (tapply(pain,drug,mean)-mean(pain))^2
+SST = sum(SST_j)
+cat("SST = ", SST, '\n')
+```
+
+## SSE
+Variation within the treatments = Sum of squares for Error (SSE):
+$$
+SSE = (n_1 -1)s_1^2 + (n_2 - 1)s_2^2 + \cdots + (n_K -1)s_K^2 
+$$
+
+```{r, echo = TRUE}
+SSE_j = (n_j-1)*tapply(pain,drug,var)
+SSE = sum(SSE_j)
+cat("SSE =", SSE, "\n")
+```
+
+## F-statistic 
+
+-  Mean square for treatments = MST = $\frac{SST}{k-1} = \frac{28.2}{2} = 14.11$
+-  Mean square for errors = MSE = $\frac{SSE}{n-k} = \frac{28.4}{27-3} = 1.19$.
+-  The ratio of the variability among the treatment means to that within the treatment means is an $F$-statistic:
+$$
+				F_{k-1,n-k} = \frac{MST}{MSE} = \frac{14.11}{1.19} = 11.9
+$$
+with $k-1 = 2$ numerator and $n-k = 24$ denominator degrees of freedom.
+-  P-value 
+```{r, echo = TRUE}
+p.value = 1-pf(11.9,2,24);cat("P value =", p.value, "\n")
+```
+Reject the null.
+
+## ANOVA in R 
+
+Of course, we can skip the step-by-step calculation and use a pre-canned package in R: 
+
+```{r, echo = TRUE}
+results <- aov(pain~drug, data=migraine)
+summary(results)
+```
+
+## Another Example
+
+We are going to see another data-set InsectSprays. 6 different insect sprays (1 Categorical Variable with 6 levels) were tested to see if there was a difference in the number of insects found in the field after each spraying (Dependent Variable).
+```{r, echo=TRUE, message= FALSE, warning = FALSE}
+attach(InsectSprays)
+data(InsectSprays)
+str(InsectSprays)
+```
+
+## Descriptive Statistics 
+```{r, echo=TRUE, message= FALSE, warning = FALSE}
+tapply(count, spray, mean)
+tapply(count, spray, var)
+tapply(count, spray, length)
+```
+
+## More Visual comparisons
+R package 'mosaic' and 'gmodel' can create better looking plots and summary:
+
+```{r, echo = TRUE, warning=FALSE, message=FALSE}
+require(mosaic)
+require(gmodels)
+options(digits=3)
+favstats(count ~ spray, data=InsectSprays)
+```
+
+## Histogram for the three groups
+
+```{r, echo = TRUE, warning=FALSE, message=FALSE}
+trellis.par.set(theme=col.mosaic()) # better color scheme for lattice
+histogram(~ count| spray, fit="normal", layout=c(2, 3), data=InsectSprays)
+```
+
+## Density Plots for the three groups
+
+```{r, echo = TRUE, warning=FALSE, message=FALSE}
+trellis.par.set(theme=col.mosaic()) # better color scheme for lattice
+densityplot(~ count, groups=spray, auto.key=TRUE, data=InsectSprays)
+```
+
+## Box and Whisker Plots for the three groups
+
+```{r, echo = TRUE, warning=FALSE, message=FALSE}
+trellis.par.set(theme=col.mosaic()) # better color scheme for lattice
+bwplot(count ~ spray, data=InsectSprays)
+```
+
+
+## ANOVA Sum of squares 
+-  We need to calculate two sum of squares for the F-statistic. 
+-  The numertaor is between groups variation or $\sum_{j=1}^{K} n_j (\bar{x}_j - \bar{X})^2$. ($n_j$: sample size of the $j^{th}$ group).
+- We have calculated the $n_j$'s and the $\bar{x}_j$'s before using tapply().
+
+```{r, echo = TRUE}
+n_j = tapply(count,spray,length)
+SST_j = n_j * (tapply(count,spray,mean)-mean(count))^2
+SST = sum(SST_j)
+cat("SST = ", SST, '\n')
+```
+
+## SSE
+Variation within the treatments = Sum of squares for Error (SSE):
+$$
+SSE = (n_1 -1)s_1^2 + (n_2 - 1)s_2^2 + \cdots + (n_K -1)s_K^2 
+$$
+
+```{r, echo = TRUE}
+SSE_j = (n_j-1)*tapply(count,spray,var)
+SSE = sum(SSE_j)
+cat("SSE =", SSE, "\n")
+```
+
+## F-statistic 
+
+-  Mean square for treatments = MST = $\frac{SST}{k-1} = \frac{2669}{5} = 533.8$
+-  Mean square for errors = MSE = $\frac{SSE}{n-k} = \frac{1015}{72-6} = 15.378$.
+-  The ratio of the variability among the treatment means to that within the treatment means is an $F$-statistic:
+$$
+				F_{k-1,n-k} = \frac{MST}{MSE} = \frac{533.8}{15.378} = 34.7
+$$
+with $k-1 = 5$ numerator and $n-k = 66$ denominator degrees of freedom.
+-  P-value 
+```{r, echo = TRUE}
+p.value = 1-pf(34.7,5,66);cat("P value =", p.value, "\n")
+```
+Reject the null.
+
+## ANOVA in R 
+
+Of course, we can skip the step-by-step calculation and use a pre-canned package in R: 
+
+```{r, echo = TRUE}
+results <- aov(count~spray, data=InsectSprays)
+summary(results)
+```
