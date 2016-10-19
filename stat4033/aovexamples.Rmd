@@ -276,7 +276,7 @@ summary(results)
 
 ## Pairwise tests {.smaller .build}
 <div class="columns-2">
--  ANOVA test tells you whether there is a significant difference between the means, but it does not provide any more information about which ones are different. 
+-  Pairwise test tell us which ones are different. 
 -  The R function pairwise.t.test() compares all possible pairs with **corrections for multiple testing**. 
 ```{r, echo = TRUE}
  pairwise.t.test(count, spray, p.adjust="bonferroni")
