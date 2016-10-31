@@ -1,5 +1,5 @@
 ---
-title: "Correlation Examples"
+title: "Tests for trends and association"
 author: "Jyotishka Datta"
 date: "October 31, 2016"
 output: ioslides_presentation
