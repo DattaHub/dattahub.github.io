@@ -71,20 +71,16 @@ cor.test(log(cars$speed),log(cars$dist))
 
 ## Example 
 
-- Here $r_{X,Y} = 0$, but $Y = X^2$, not independent, but not **linearly dependent**. 
+- Here $\rho_{X,Y} = 0$, but $Y = X^2$, not independent, but not **linearly dependent**. 
 
-<div class="columns-2">
-```{r, echo = T}
-x = c(-3,-2,-1,1,2,3)
-y = x^2 
+```{r, echo = T,fig.width = 4, fig.height=4,fig.align='center'}
+x = c(-5,-4,-3,-2,-1,1,2,3,4,5);y = x^2 
 cor(x,y)
 ```
-```{r, echo = T,fig.width = 4, fig.height=4}
-plot(x,y,type="l")
-points(x,y)
+```{r, echo = F,fig.width = 5, fig.height=4,fig.align='center'}
+plot(x,y,type="p")
 ```
 
-</div>
 
 # Spearman's correlation 
 
