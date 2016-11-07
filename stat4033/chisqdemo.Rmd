@@ -1,0 +1,150 @@
+---
+title: "Chi-square test for association"
+author: "Jyotishka Datta"
+date: "November 7, 2016"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Source materials 
+ 
+- Music and Wine as well Pet ownership examples taken from an old introductory Stat classes I took in Purdue. 
+- The small counts example is taken from 
+## Wine and Music 
+
+```{r, echo = TRUE}
+row1 = c(30,39,30)
+row2 = c(11,1,19)
+row3 = c(45,35,35)
+data.table = rbind(row1,row2,row3)
+dimnames(data.table) = list(wine = c("french","italian","other"),
+                            music=c("None","french","italian"))
+data.table
+```
+
+## Examine marginal distributions..
+
+```{r, echo = TRUE}
+addmargins(data.table)
+```
+
+## Examine conditional distributions...
+
+```{r, echo = TRUE}
+prop.table(data.table, 1) 
+```
+
+## And finally a barplot...
+
+```{r, echo = TRUE}
+barplot(data.table, beside = T)
+```
+
+## Okay, a better barplot !
+
+```{r, echo = TRUE}
+barplot(t(data.table), beside=T, legend=T, ylim=c(0,100),
+        ylab="Observed frequencies in sample",
+        main="Frequency of Wine Purchase by Music")
+```
+
+## The Chi-square test
+
+```{r, echo = TRUE}
+chisq.test(data.table)
+```
+
+
+## Pet ownership {.smaller}
+
+```{r, echo = TRUE}
+row1 = c(28,50)
+row2 = c(11,3)
+data.table = rbind(row1,row2)
+dimnames(data.table) = list(survival = c("alive","dead"),
+                            petownership=c("No","Yes"))
+addmargins(data.table)
+prop.table(data.table)
+```
+
+## Chi-square test {.smaller}
+
+```{r, echo = TRUE}
+chisq.test(data.table)
+```
+
+**R applies the Yates' continuity correction automatically for 2x2 table. We can set it off, but we shouldn't. **
+```{r, echo = TRUE}
+chisq.test(data.table, correct = F)
+```
+
+## Conclusion and validity
+- We have enough evidence to say that there is an association between pet ownership  	and patient status in the population.
+
+- It is appropriate to use the chi-square test because none of the cells have expected counts < 5.
+
+```{r, echo = TRUE}
+chisq.test(data.table)$expected
+```
+
+## A Third Example 
+
+The following data are from a Stanford University study of the effectiveness of the antidepressant Celexa in the treatment of compulsive shopping. These data were found in Verzani (2005, p.262f), and the analysis here is similar to his. 
+
+                     outcome
+                 -----------------
+       treat     worse same better
+       ---------------------------
+       Celexa      2     3     7
+       placebo     2     8     2
+       ---------------------------
+       
+## Data in R 
+```{r, echo = TRUE}
+freqs = c(2, 2, 3, 8, 7, 2) # entered "down the columns"
+data.matrix = matrix(freqs, nrow=2) #fills down columns by default
+dimnames(data.matrix) = list(treatment=c("Celexa","placebo"),
+                             outcome=c("worse","same","better"))
+addmargins(prop.table(data.matrix))
+```
+
+## Chi-square test and its validity 
+
+```{r, echo = TRUE}
+chisq.test(data.matrix)
+```
+
+-  The chi square procedure produces a warning message when any of the expected frequencies fall below 5. 
+- The P-value is close to zero, so it's worth further investigation!
+
+## Small counts 
+```{r, echo = TRUE}
+chisq.test(data.matrix)$expected
+```
+
+- The P-value might not be accurate. 
+-  Options 1: p-value calculated by Monte Carlo simulation. 
+
+## Monte Carlo 
+-  Simulate the sampling distribution of the test statistic (in this case, chi squared) using Monte Carlo methods.
+
+```{r, echo = TRUE}
+chisq.test(data.matrix, simulate.p.value=T)
+```
+-  Another option is Fisher's exact test, that works for a 2x2 table. 
+-  In class, we will learn Fisher's exact test for 2x2 tables !
+-  The R function can do FET for larger than 2x2 tables, but the accuracy is a concern for large expected frequencies. 
+
+## Fisher's exact test 
+
+```{r, echo = T}
+fisher.test(data.matrix)
+```
+
+- Still a large P-value ! 
+- We should retain the null hypothesis, and "it doesn't look like we can fish up a signficant relationship here!"
+
+
