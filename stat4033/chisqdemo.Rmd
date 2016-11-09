@@ -19,34 +19,34 @@ knitr::opts_chunk$set(echo = FALSE)
 row1 = c(30,39,30)
 row2 = c(11,1,19)
 row3 = c(45,35,35)
-data.table = rbind(row1,row2,row3)
-dimnames(data.table) = list(wine = c("french","italian","other"),
+music.wine = rbind(row1,row2,row3)
+dimnames(music.wine) = list(wine = c("french","italian","other"),
                             music=c("None","french","italian"))
-data.table
+music.wine
 ```
 
 ## Examine marginal distributions..
 
 ```{r, echo = TRUE}
-addmargins(data.table)
+addmargins(music.wine)
 ```
 
 ## Examine conditional distributions...
 
 ```{r, echo = TRUE}
-prop.table(data.table, 1) 
+prop.table(music.wine, 1) 
 ```
 
 ## And finally a barplot...
 
 ```{r, echo = TRUE}
-barplot(data.table, beside = T)
+barplot(music.wine, beside = T)
 ```
 
 ## Okay, a better barplot !
 
 ```{r, echo = TRUE}
-barplot(t(data.table), beside=T, legend=T, ylim=c(0,100),
+barplot(t(music.wine), beside=T, legend=T, ylim=c(0,100),
         ylab="Observed frequencies in sample",
         main="Frequency of Wine Purchase by Music")
 ```
@@ -54,7 +54,7 @@ barplot(t(data.table), beside=T, legend=T, ylim=c(0,100),
 ## The Chi-square test
 
 ```{r, echo = TRUE}
-chisq.test(data.table)
+chisq.test(music.wine)
 ```
 
 
@@ -63,22 +63,22 @@ chisq.test(data.table)
 ```{r, echo = TRUE}
 row1 = c(28,50)
 row2 = c(11,3)
-data.table = rbind(row1,row2)
-dimnames(data.table) = list(survival = c("alive","dead"),
+pet = rbind(row1,row2)
+dimnames(pet) = list(survival = c("alive","dead"),
                             petownership=c("No","Yes"))
-addmargins(data.table)
-prop.table(data.table)
+addmargins(pet)
+prop.table(pet)
 ```
 
 ## Chi-square test {.smaller}
 
 ```{r, echo = TRUE}
-chisq.test(data.table)
+chisq.test(pet)
 ```
 
 **R applies the Yates' continuity correction automatically for 2x2 table. We can set it off, but we shouldn't. **
 ```{r, echo = TRUE}
-chisq.test(data.table, correct = F)
+chisq.test(pet, correct = F)
 ```
 
 ## Conclusion and validity
@@ -87,7 +87,7 @@ chisq.test(data.table, correct = F)
 - It is appropriate to use the chi-square test because none of the cells have expected counts < 5.
 
 ```{r, echo = TRUE}
-chisq.test(data.table)$expected
+chisq.test(pet)$expected
 ```
 
 ## A Third Example 
@@ -105,16 +105,16 @@ The following data are from a Stanford University study of the effectiveness of 
 ## Data in R 
 ```{r, echo = TRUE}
 freqs = c(2, 2, 3, 8, 7, 2) # entered "down the columns"
-data.matrix = matrix(freqs, nrow=2) #fills down columns by default
-dimnames(data.matrix) = list(treatment=c("Celexa","placebo"),
+shopping = matrix(freqs, nrow=2) #fills down columns by default
+dimnames(shopping) = list(treatment=c("Celexa","placebo"),
                              outcome=c("worse","same","better"))
-addmargins(prop.table(data.matrix))
+addmargins(prop.table(shopping))
 ```
 
 ## Chi-square test and its validity 
 
 ```{r, echo = TRUE}
-chisq.test(data.matrix)
+chisq.test(shopping)
 ```
 
 -  The chi square procedure produces a warning message when any of the expected frequencies fall below 5. 
@@ -122,7 +122,7 @@ chisq.test(data.matrix)
 
 ## Small counts 
 ```{r, echo = TRUE}
-chisq.test(data.matrix)$expected
+chisq.test(shopping)$expected
 ```
 
 - The P-value might not be accurate. 
@@ -132,7 +132,7 @@ chisq.test(data.matrix)$expected
 -  Simulate the sampling distribution of the test statistic (in this case, chi squared) using Monte Carlo methods.
 
 ```{r, echo = TRUE}
-chisq.test(data.matrix, simulate.p.value=T)
+chisq.test(shopping, simulate.p.value=T)
 ```
 -  Another option is Fisher's exact test, that works for a 2x2 table. 
 -  In class, we will learn Fisher's exact test for 2x2 tables !
@@ -141,10 +141,140 @@ chisq.test(data.matrix, simulate.p.value=T)
 ## Fisher's exact test 
 
 ```{r, echo = T}
-fisher.test(data.matrix)
+fisher.test(shopping)
 ```
 
 - Still a large P-value ! 
 - We should retain the null hypothesis, and "it doesn't look like we can fish up a signficant relationship here!"
 
+## Another Example {.smaller}
 
+Streissguth et al. (1984) investigated the effect of alcohol and nicotine consumption during pregnancy on the resulting children by examining the children's attention span and reaction time at age four. First, the 452 mothers in the study were classified as shown in Table 2.1 according to their levels of consumption of alcohol and nicotine. Test the null hypothesis of no association between levels of consumption.
+
+```{r, echo = FALSE} 
+row1 = c(105,7,11)
+row2 = c(58,5,13)
+row3 = c(84,37,42)
+row4 = c(37,16,17)
+alcohol = rbind(row1,row2,row3,row4)
+dimnames(alcohol) = list(alcohol = c("none","0.01-0.1","0.11-0.99","1.00 or more"), 
+                            nicotine = c("None","1-15", "16 or more"))
+alcohol
+```
+
+## Another Example (contd.) 
+```{r, echo = TRUE}
+chisq.test(alcohol, correct = F)
+```
+None of the cells have expected counts < 5.
+```{r, echo = TRUE}
+chisq.test(alcohol)$expected
+```
+
+## Association Measures 
+
+In R, use the package "vcd", function assocstats()
+
+In case of a 2-dimensional table, a list with components:
+
+| chisq_tests	| a 2 x 3 table with the chi-squared statistics |
+|-------------|-----------------------------------------------|
+| phi	| The absolute value of the phi coefficient (only defined for 2 x 2 tables)|
+| cont | The contingency coefficient |
+| cramer | Cramer's V |
+
+
+
+## Association Measures ~ Music & Wine
+
+```{r, echo = TRUE, cache=TRUE}
+#install.packages("vcd")
+library(vcd)
+assocstats(music.wine)
+```
+
+## Association Measures ~ Pet Ownership
+
+```{r, echo = TRUE, cache=TRUE}
+#install.packages("vcd")
+library(vcd)
+assocstats(pet)
+```
+R gives us $\phi$ because it is a 2x2 table.
+
+## Association Measures ~ Shopping
+
+```{r, echo = TRUE, cache=TRUE}
+#install.packages("vcd")
+library(vcd)
+assocstats(shopping)
+```
+
+## Association Measures 
+```{r, echo = TRUE, cache=TRUE}
+#install.packages("vcd")
+library(vcd)
+assocstats(alcohol)
+```
+
+## Lady tasting tea 
+
+```{r, echo = TRUE}
+tea<- matrix(c(3, 1, 1, 3), ncol= 2, 
+             dimnames = list(Truth = c("Tea","Milk" ),
+                        Lady_says = c("Tea first","Milk first")))
+tea
+```
+
+## Lady tasting tea : Fisher's Exact Test 
+
+```{r, echo = TRUE}
+fisher.test(tea)
+```
+
+
+## One-sided test 
+- Fisher's exact test can be one-sided or two-sided, based on the Odds ratio, which measures association for a 2x2 table, high odds ratio means higehr association. 
+
+```{r, echo = TRUE}
+fisher.test(tea, alternative = "greater")
+```
+
+## More examples 
+
+The data in table 1 come from an RCT comparing intramuscular
+magnesium injections with placebo for the treatment of chronic
+fatigue syndrome Of the 15 patients who had the intra-muscular
+magnesium injections 12 felt better (80 per cent) whereas, of the 17 on placebo,
+only three felt better (18 per cent). 
+
++---------------+---------------+--------------------+
+|               | Magnesium     | Placebo            |
++===============+===============+====================+
+| Felt Better   | 12            | 3                  |
++---------------+---------------+--------------------+
+| Fel worse     | 3             | 14                 |
++---------------+---------------+--------------------+
+
+
+## Using R 
+
+```{r, echo = TRUE}
+RCT <- matrix(c(12,3,3,14), ncol= 2, 
+             dimnames = list(Outcome = c("Better", "Worse" ),
+                        Medicine = c("Magnesium", "Placebo")))
+
+chisq.test(RCT)
+```
+
+## Validity 
+<div class="columns-2">
+```{r, echo = T}
+chisq.test(RCT)$expected
+```
+. . . 
+
+```{r, echo = T}
+fisher.test(RCT)
+```
+</div>

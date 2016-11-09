@@ -102,10 +102,10 @@
 <pre class = 'prettyprint lang-r'>row1 = c(30,39,30)
 row2 = c(11,1,19)
 row3 = c(45,35,35)
-data.table = rbind(row1,row2,row3)
-dimnames(data.table) = list(wine = c(&quot;french&quot;,&quot;italian&quot;,&quot;other&quot;),
+music.wine = rbind(row1,row2,row3)
+dimnames(music.wine) = list(wine = c(&quot;french&quot;,&quot;italian&quot;,&quot;other&quot;),
                             music=c(&quot;None&quot;,&quot;french&quot;,&quot;italian&quot;))
-data.table</pre>
+music.wine</pre>
 
 <pre >##          music
 ## wine      None french italian
@@ -115,7 +115,7 @@ data.table</pre>
 
 </article></slide><slide class=''><hgroup><h2>Examine marginal distributions..</h2></hgroup><article  id="examine-marginal-distributions..">
 
-<pre class = 'prettyprint lang-r'>addmargins(data.table)</pre>
+<pre class = 'prettyprint lang-r'>addmargins(music.wine)</pre>
 
 <pre >##          music
 ## wine      None french italian Sum
@@ -126,7 +126,7 @@ data.table</pre>
 
 </article></slide><slide class=''><hgroup><h2>Examine conditional distributions&#8230;</h2></hgroup><article  id="examine-conditional-distributions...">
 
-<pre class = 'prettyprint lang-r'>prop.table(data.table, 1) </pre>
+<pre class = 'prettyprint lang-r'>prop.table(music.wine, 1) </pre>
 
 <pre >##          music
 ## wine           None     french   italian
@@ -136,13 +136,13 @@ data.table</pre>
 
 </article></slide><slide class=''><hgroup><h2>And finally a barplot&#8230;</h2></hgroup><article  id="and-finally-a-barplot...">
 
-<pre class = 'prettyprint lang-r'>barplot(data.table, beside = T)</pre>
+<pre class = 'prettyprint lang-r'>barplot(music.wine, beside = T)</pre>
 
 <p><img src="data:image/png;base64,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ZNKYcenpr5y8IXKloDffO10glKmTZMmkMePS019R0M+jZNk7XSCUqZNkyaQx49LTOxT05nunC4QydZIsmTRmnPnw41v2v/hk6H9+96Xe7xoly97pAqFMnSRLJo0ZJz776TcIn397UEG/c5Qse6cLhDJ1kiyZNGac9+ivn8Dx9CJaQb9zlCx7pwuEMnWSLJk0Zpz25Pv3N+6/n93N14ZW0O8cJcve6QKhTJ0kSyaNGac9+frp6wbvv+b7oaEV9DtHybJ3ukAoUyfJkkljxlkPvivj5/eerx8bWkG/c5Qse6cLhDJ1kiyZNGac9eBX37D/saEV9DtHybJ3ukAoUyfJkkljxlkPfv0nqlwfn8uhoN85Spa90wVCmTpJlkwaM8568OuCfvhW0Ar6naNk2TtdUDeUT5Elk0Zasx788j3ohx9e/aag3zlKlr1T0HVDUdBj0pr25JurV39q7F9frn74Hwr6faNk2TsFXTeU/zlfnovSSGvak+8/D/rlH3B1e/wrT0G/Z5Qse6eg64aioMekNe/R91+h8vJtjlsF/d5Rsuydgq4bioIek9bEZ9839MvX0PevqRX0e0bJsncKum4oCnpMWjMf/s/vb/4U7xsF/a5Rsuydgq4bioIek9bS0zsU9OZ7p6DrhqKgx6S19PQOBb353inouqEo6DFpLT29Q0FvvncKum4oCnpMWktP71DQm++dgq4bioIek9bS0zsU9OZ7p6DrhqKgx6S19PQOBb353inouqEo6DFpLT29Q0FvvncKum4oCnpMWktP71DQm++dgq4bioIek9bS0zsU9OZ7p6DrhqKgx6S19PQOBb353inouqEo6DFpLT29Q0FvvncKum4oCnpMWktP71DQm++dgq4bioIek9bS0zsU9OZ7p6DrhqKgx6S19PQOBb353inouqEo6DFpLT29Q0FvvncKum4oCnpMWktP71DQm++dgq4bioIek9bS0zsU9OZ7p6DrhqKgx6S19PQOBb353inouqEo6DFpLT29Q0FvvncKum4oCnpMWktP71DQm++dgq4bioIek9bS0zsU9OZ7p6DrhqKgx6S19PQOBb353inouqEo6DFpLT29Q0FvvncKum4oCnpMWktP71DQm++dgq4bioIek9bS0zsU9OZ7p6DrhqKgx6S19PQOBb353inouqEo6DFpLT29Q0FvvncKum4oCnpMWktP71DQm++dgq4bioIek9bS0zsU9OZ7p6DrhqKgx6S19PQOBb353inouqEo6DFpLT29Q0FvvncKum4oCnpMWktP71DQm++dgq4bioIek9bS0zsU9OZ7p6DrhqKgx6S19PQOBb353inouqEo6DFpLT29Q0FvvncKum4oCnpMWktP71DQm++dgq4bioIek9bS0zsU9OZ7p6DrhqKgx6S19PQOBb353inouqEo6DFpLT29Q0FvvncKum4oCnpMWktP71DQm++dgq4bioIek9bS0zsU9OZ7p6DrhqKgx6S19PQOBb353inouqEo6DFpLT29Q0FvvncKum4oCnpMWktP71DQm++dgq4bioIek9bS0zsU9OZ7p6DrhqKgx6S19PQOBb353inouqEo6DFpLT29Q0FvvncKum4oCnpMWktP71DQm++dgq4bioIek9bS0zsU9OZ7p6DrhqKgx6S19PQOBb353inouqEo6DFpLT29Q0FvvncKum4oCnpMWktP71DQm++dgq4bioIek9bS0zsU9OZ7p6DrhqKgx6S19PQOBb353inouqEo6DFpLT29Q0FvvncKum4oCnpMWktP71DQm++dgq4bioIek9bS0zsU9OZ7p6DrhqKgx6S19PQOBb353inouqEo6DFpLT29Q0FvvncKum4oCnpMWktP71DQm++dgq4bioIek9bS0zsU9OZ7p6DrhqKgx6S19PQOBb353inouqEo6DFpLT29Q0FvvncKum4oCnpMWktP71DQm++dgq4bioIek9bS0zsU9OZ7p6DrhqKgx6S19PQOBb353inouqEo6DFpLT29Q0FvvncKum4oCnpMWktP71DQm++dgq4bioIek9bS0zsU9OZ7p6DrhqKgx6S19PQOBb353inouqEo6DFpLT29Q0FvvncKum4oCnpMWktP71DQm++dgq4bioIek9bS0zsU9OZ7p6DrhqKgx6S19PQOBb353inouqEo6DFpLT29Q0FvvncKum4oCnpMWktP71DQm++dgq4bioIek9bS0zsU9OZ7p6DrhqKgx6S19PQOBb353inouqEo6DFpTX7+9dWTny//mxX05nunoOuGoqDHpDXz4TdXr13a0Qp6871T0HVDUdBj0pr36L++XL31458XPUFBb753CrpuKAp6TFrTnvzP768b+e9f7378078ueYSC3nzvFHTdUBT0mLSmPfn2pI7vK/u3Sx6hoDffOwVdNxQFPSataU++Pn1D4+5F9EVvQ0cs6E+RZe8UdN1QFPSYtGY9+O7l8i8nf/Hmsvc4FPTme6eg64aioMekNevBd6+WT9/OuL3stwkjFrS9u4CCrhuKizImrVkPVtD2TkEXDsVFGZPWrAdnfYvD3l1AQdcNxUUZk9a0Jyf9TUJ7dwEFXTcUF2VMWtOefP7T7E5fVTco6M33TkHXDcVFGZPWtCef/UKVy76UUEFvvncKum4oLsqYtOY9+mjk137446InKOjN905B1w3FRRmT1syHX7/p5wzfLMneXUBB1w3FRRmT1uTnp/t2o/buAgq6biguypi0lp7+yrkvqbvk7/6EtbN3l1HQdUNxUcaktfT0VxR0ur1T0HVDcVHGpLX09A4FvfneKei6obgoY9JaenqHgt587xR03VBclDFpLT29Q0FvvncKum4oLsqYtJae3qGgN987BV03FBdlTFpLT+9Q0JvvnYKuG4qLMiatWQ8+83WEV5d+rbeC3nzvFHTdUFyUMWnNerCCtncKunAoLsqYtKY9+a8vCrr63inouqG4KGPSmvfo+9fQF3130RMKevO9U9B1Q3FRxqQ18dl3DX3ht697Q0FvvncKum4oLsqYtGY+/K8vl/0RV28p6M33TkHXDcVFGZPW1KffXJ35k2PfT0FvvncKum4oLsqYtKY+/e9fP/QSWkFvvncKum4oLsqYtOY+/mMvoRX05nunoOuG4qKMSWvp6R0KevO9U9B1Q3FRxqS19PQOBb353inouqG4KGPSWnp6h4LefO8UdN1QXJQxaS09vUNBb753CrpuKC7KmLSWnt6hoDffOwVdNxQXZUxaS0/vUNCb752CrhuKizImraWndyjozfdOQdcNxUUZk9bS0zsU9OZ7p6DrhuKijElr6ekdCnrzvVPQdUNxUcaktfT0DgW9+d4p6LqhuChj0lp6eoeC3nzvFHTdUFyUMWktPb1DQW++dwq6biguypi0lp7eoaA33zsFXTcUF2VMWktP71DQm++dgq4biosyJq2lp3co6M33TkHXDcVFGZPW0tM7FPTme6eg64biooxJa+npHQp6871T0HVDcVHGpLX09A4FvfneKei6obgoY9JaenqHgt587xR03VBclDFpLT29Q0FvvncKum4oLsqYtJae3qGgN987BV03FBdlTFpLT+9Q0JvvnYKuG4qLMiatpad3KOjN905B1w3FRRmT1tLTOxT05nunoOuG4qKMSWvp6R0KevO9U9B1Q3FRxqS19PQOBb353inouqG4KGPSWnp6h4LefO8UdN1QXJQxaS09vUNBb753CrpuKC7KmLSWnt6hoDffOwVdNxQXZUxaS0/vUNCb752CrhuKizImraWndyjozfdOQdcNxUUZk9bS0zsU9OZ7p6DrhuKijElr6ekdCnrzvVPQdUNxUcaktfT0DgW9+d4p6LqhuChj0lp6eoeC3nzvFHTdUFyUMWktPb1DQW++dwq6biguypi0lp7eoaA33zsFXTcUF2VMWktP71DQm++dgq4bin4DUnkAAAviSURBVIsyJq2lp3co6M33TkHXDcVFGZPW0tM7FPTme6eg64biooxJa+npHQp6871T0HVDcVHGpLX09A4FvfneKei6obgoY9JaenqHgt587xR03VBclDFpLT29Q0FvvncKum4oLsqYtJae3qGgN987BV03FBdlTFpLT+9Q0JvvnYKuG4qLMiatpad3KOjN905B1w3FRRmT1tLTOxT05nunoOuG4qKMSWvp6R0KevO9U9B1Q3FRxqS19PQOBb353inouqG4KGPSWnp6h4LefO8UdN1QXJQxaS09vUNBb753CrpuKC7KmLSWnt6hoDffOwVdNxQXZUxaS0/vUNCb752CrhuKizImraWndyjozfdOQdcNxUUZk9bS0zsU9OZ7p6DrhuKijElr6ekdCnrzvVPQdUNxUcaktfT0DgW9+d4p6LqhuChj0lp6eoeC3nzvFHTdUFyUMWktPb1DQW++dwq6biguypi0lp7eoaA33zsFXTcUF2VMWktP71DQm++dgq4biosyJq2lp3co6M33TkHXDcVFGZPW0tM7FPTme6eg64biooxJa+npHQp6871T0HVDcVHGpLX09A4FvfneKei6obgoY9JaenqHgt587xR03VBclDFpLT29Q0FvvncKum4oLsqYtJae3qGgN987BV03FBdlTFpLT+9Q0JvvnYKuG4qLMiatpad3KOjN905B1w3FRRmT1tLTOxT05nunoOuG4qKMSWvp6R0KevO9U9B1Q3FRxqS19PQOBb353inouqG4KGPSWnp6h4LefO8UdN1QXJQxaS09vUNBb753CrpuKC7KmLSWnt6hoDffOwVdNxQX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" width="720" /></p>
 
 </article></slide><slide class=''><hgroup><h2>Okay, a better barplot !</h2></hgroup><article  id="okay-a-better-barplot">
 
-<pre class = 'prettyprint lang-r'>barplot(t(data.table), beside=T, legend=T, ylim=c(0,100),
+<pre class = 'prettyprint lang-r'>barplot(t(music.wine), beside=T, legend=T, ylim=c(0,100),
         ylab=&quot;Observed frequencies in sample&quot;,
         main=&quot;Frequency of Wine Purchase by Music&quot;)</pre>
 
@@ -150,22 +150,22 @@ data.table</pre>
 
 </article></slide><slide class=''><hgroup><h2>The Chi-square test</h2></hgroup><article  id="the-chi-square-test">
 
-<pre class = 'prettyprint lang-r'>chisq.test(data.table)</pre>
+<pre class = 'prettyprint lang-r'>chisq.test(music.wine)</pre>
 
 <pre >## 
 ##  Pearson&#39;s Chi-squared test
 ## 
-## data:  data.table
+## data:  music.wine
 ## X-squared = 18.822, df = 4, p-value = 0.0008519</pre>
 
 </article></slide><slide class=''><hgroup><h2>Pet ownership</h2></hgroup><article  id="pet-ownership" class="smaller">
 
 <pre class = 'prettyprint lang-r'>row1 = c(28,50)
 row2 = c(11,3)
-data.table = rbind(row1,row2)
-dimnames(data.table) = list(survival = c(&quot;alive&quot;,&quot;dead&quot;),
+pet = rbind(row1,row2)
+dimnames(pet) = list(survival = c(&quot;alive&quot;,&quot;dead&quot;),
                             petownership=c(&quot;No&quot;,&quot;Yes&quot;))
-addmargins(data.table)</pre>
+addmargins(pet)</pre>
 
 <pre >##         petownership
 ## survival No Yes Sum
@@ -173,7 +173,7 @@ addmargins(data.table)</pre>
 ##    dead  11   3  14
 ##    Sum   39  53  92</pre>
 
-<pre class = 'prettyprint lang-r'>prop.table(data.table)</pre>
+<pre class = 'prettyprint lang-r'>prop.table(pet)</pre>
 
 <pre >##         petownership
 ## survival        No       Yes
@@ -182,22 +182,22 @@ addmargins(data.table)</pre>
 
 </article></slide><slide class=''><hgroup><h2>Chi-square test</h2></hgroup><article  id="chi-square-test" class="smaller">
 
-<pre class = 'prettyprint lang-r'>chisq.test(data.table)</pre>
+<pre class = 'prettyprint lang-r'>chisq.test(pet)</pre>
 
 <pre >## 
 ##  Pearson&#39;s Chi-squared test with Yates&#39; continuity correction
 ## 
-## data:  data.table
+## data:  pet
 ## X-squared = 7.1899, df = 1, p-value = 0.007331</pre>
 
 <p><strong>R applies the Yates&#39; continuity correction automatically for 2x2 table. We can set it off, but we shouldn&#39;t. </strong></p>
 
-<pre class = 'prettyprint lang-r'>chisq.test(data.table, correct = F)</pre>
+<pre class = 'prettyprint lang-r'>chisq.test(pet, correct = F)</pre>
 
 <pre >## 
 ##  Pearson&#39;s Chi-squared test
 ## 
-## data:  data.table
+## data:  pet
 ## X-squared = 8.8511, df = 1, p-value = 0.002929</pre>
 
 </article></slide><slide class=''><hgroup><h2>Conclusion and validity</h2></hgroup><article  id="conclusion-and-validity">
@@ -207,7 +207,7 @@ addmargins(data.table)</pre>
 <li><p>It is appropriate to use the chi-square test because none of the cells have expected counts &lt; 5.</p></li>
 </ul>
 
-<pre class = 'prettyprint lang-r'>chisq.test(data.table)$expected</pre>
+<pre class = 'prettyprint lang-r'>chisq.test(pet)$expected</pre>
 
 <pre >##         petownership
 ## survival        No       Yes
@@ -230,10 +230,10 @@ addmargins(data.table)</pre>
 </article></slide><slide class=''><hgroup><h2>Data in R</h2></hgroup><article  id="data-in-r">
 
 <pre class = 'prettyprint lang-r'>freqs = c(2, 2, 3, 8, 7, 2) # entered &quot;down the columns&quot;
-data.matrix = matrix(freqs, nrow=2) #fills down columns by default
-dimnames(data.matrix) = list(treatment=c(&quot;Celexa&quot;,&quot;placebo&quot;),
+shopping = matrix(freqs, nrow=2) #fills down columns by default
+dimnames(shopping) = list(treatment=c(&quot;Celexa&quot;,&quot;placebo&quot;),
                              outcome=c(&quot;worse&quot;,&quot;same&quot;,&quot;better&quot;))
-addmargins(prop.table(data.matrix))</pre>
+addmargins(prop.table(shopping))</pre>
 
 <pre >##          outcome
 ## treatment      worse      same     better Sum
@@ -243,15 +243,14 @@ addmargins(prop.table(data.matrix))</pre>
 
 </article></slide><slide class=''><hgroup><h2>Chi-square test and its validity</h2></hgroup><article  id="chi-square-test-and-its-validity">
 
-<pre class = 'prettyprint lang-r'>chisq.test(data.matrix)</pre>
+<pre class = 'prettyprint lang-r'>chisq.test(shopping)</pre>
 
-<pre >## Warning in chisq.test(data.matrix): Chi-squared approximation may be
-## incorrect</pre>
+<pre >## Warning in chisq.test(shopping): Chi-squared approximation may be incorrect</pre>
 
 <pre >## 
 ##  Pearson&#39;s Chi-squared test
 ## 
-## data:  data.matrix
+## data:  shopping
 ## X-squared = 5.0505, df = 2, p-value = 0.08004</pre>
 
 <ul>
@@ -261,10 +260,9 @@ addmargins(prop.table(data.matrix))</pre>
 
 </article></slide><slide class=''><hgroup><h2>Small counts</h2></hgroup><article  id="small-counts">
 
-<pre class = 'prettyprint lang-r'>chisq.test(data.matrix)$expected</pre>
+<pre class = 'prettyprint lang-r'>chisq.test(shopping)$expected</pre>
 
-<pre >## Warning in chisq.test(data.matrix): Chi-squared approximation may be
-## incorrect</pre>
+<pre >## Warning in chisq.test(shopping): Chi-squared approximation may be incorrect</pre>
 
 <pre >##          outcome
 ## treatment worse same better
@@ -282,14 +280,14 @@ addmargins(prop.table(data.matrix))</pre>
 <li>Simulate the sampling distribution of the test statistic (in this case, chi squared) using Monte Carlo methods.</li>
 </ul>
 
-<pre class = 'prettyprint lang-r'>chisq.test(data.matrix, simulate.p.value=T)</pre>
+<pre class = 'prettyprint lang-r'>chisq.test(shopping, simulate.p.value=T)</pre>
 
 <pre >## 
 ##  Pearson&#39;s Chi-squared test with simulated p-value (based on 2000
 ##  replicates)
 ## 
-## data:  data.matrix
-## X-squared = 5.0505, df = NA, p-value = 0.1114</pre>
+## data:  shopping
+## X-squared = 5.0505, df = NA, p-value = 0.09445</pre>
 
 <ul>
 <li>Another option is Fisher&#39;s exact test, that works for a 2x2 table.</li>
@@ -299,19 +297,249 @@ addmargins(prop.table(data.matrix))</pre>
 
 </article></slide><slide class=''><hgroup><h2>Fisher&#39;s exact test</h2></hgroup><article  id="fishers-exact-test">
 
-<pre class = 'prettyprint lang-r'>fisher.test(data.matrix)</pre>
+<pre class = 'prettyprint lang-r'>fisher.test(shopping)</pre>
 
 <pre >## 
 ##  Fisher&#39;s Exact Test for Count Data
 ## 
-## data:  data.matrix
+## data:  shopping
 ## p-value = 0.07303
 ## alternative hypothesis: two.sided</pre>
 
 <ul>
 <li>Still a large P-value !</li>
 <li>We should retain the null hypothesis, and &quot;it doesn&#39;t look like we can fish up a signficant relationship here!&quot;</li>
-</ul></article></slide>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Another Example</h2></hgroup><article  id="another-example" class="smaller">
+
+<p>Streissguth et al. (1984) investigated the effect of alcohol and nicotine consumption during pregnancy on the resulting children by examining the children&#39;s attention span and reaction time at age four. First, the 452 mothers in the study were classified as shown in Table 2.1 according to their levels of consumption of alcohol and nicotine. Test the null hypothesis of no association between levels of consumption.</p>
+
+<pre >##               nicotine
+## alcohol        None 1-15 16 or more
+##   none          105    7         11
+##   0.01-0.1       58    5         13
+##   0.11-0.99      84   37         42
+##   1.00 or more   37   16         17</pre>
+
+</article></slide><slide class=''><hgroup><h2>Another Example (contd.)</h2></hgroup><article  id="another-example-contd.">
+
+<pre class = 'prettyprint lang-r'>chisq.test(alcohol, correct = F)</pre>
+
+<pre >## 
+##  Pearson&#39;s Chi-squared test
+## 
+## data:  alcohol
+## X-squared = 46.74, df = 6, p-value = 2.109e-08</pre>
+
+<p>None of the cells have expected counts &lt; 5.</p>
+
+<pre class = 'prettyprint lang-r'>chisq.test(alcohol)$expected</pre>
+
+<pre >##               nicotine
+## alcohol             None     1-15 16 or more
+##   none          80.86111 18.50694   23.63194
+##   0.01-0.1      49.96296 11.43519   14.60185
+##   0.11-0.99    107.15741 24.52546   31.31713
+##   1.00 or more  46.01852 10.53241   13.44907</pre>
+
+</article></slide><slide class=''><hgroup><h2>Association Measures</h2></hgroup><article  id="association-measures">
+
+<p>In R, use the package &quot;vcd&quot;, function assocstats()</p>
+
+<p>In case of a 2-dimensional table, a list with components:</p>
+
+<table class = 'rmdtable'>
+<col width="19%" />
+<col width="66%" />
+<tr class="header">
+<th align="left">chisq_tests</th>
+<th align="left">a 2 x 3 table with the chi-squared statistics</th>
+</tr>
+<tr class="odd">
+<td align="left">phi</td>
+<td align="left">The absolute value of the phi coefficient (only defined for 2 x 2 tables)</td>
+</tr>
+<tr class="even">
+<td align="left">cont</td>
+<td align="left">The contingency coefficient</td>
+</tr>
+<tr class="odd">
+<td align="left">cramer</td>
+<td align="left">Cramer&#39;s V</td>
+</tr>
+</table>
+
+</article></slide><slide class=''><hgroup><h2>Association Measures ~ Music &amp; Wine</h2></hgroup><article  id="association-measures-music-wine">
+
+<pre class = 'prettyprint lang-r'>#install.packages(&quot;vcd&quot;)
+library(vcd)
+assocstats(music.wine)</pre>
+
+<pre >##                     X^2 df   P(&gt; X^2)
+## Likelihood Ratio 22.285  4 0.00017585
+## Pearson          18.822  4 0.00085186
+## 
+## Phi-Coefficient   : NA 
+## Contingency Coeff.: 0.267 
+## Cramer&#39;s V        : 0.196</pre>
+
+</article></slide><slide class=''><hgroup><h2>Association Measures ~ Pet Ownership</h2></hgroup><article  id="association-measures-pet-ownership">
+
+<pre class = 'prettyprint lang-r'>#install.packages(&quot;vcd&quot;)
+library(vcd)
+assocstats(pet)</pre>
+
+<pre >##                     X^2 df  P(&gt; X^2)
+## Likelihood Ratio 9.0113  1 0.0026832
+## Pearson          8.8511  1 0.0029291
+## 
+## Phi-Coefficient   : 0.31 
+## Contingency Coeff.: 0.296 
+## Cramer&#39;s V        : 0.31</pre>
+
+<p>R gives us \(\phi\) because it is a 2x2 table.</p>
+
+</article></slide><slide class=''><hgroup><h2>Association Measures ~ Shopping</h2></hgroup><article  id="association-measures-shopping">
+
+<pre class = 'prettyprint lang-r'>#install.packages(&quot;vcd&quot;)
+library(vcd)
+assocstats(shopping)</pre>
+
+<pre >##                     X^2 df P(&gt; X^2)
+## Likelihood Ratio 5.3002  2 0.070644
+## Pearson          5.0505  2 0.080038
+## 
+## Phi-Coefficient   : NA 
+## Contingency Coeff.: 0.417 
+## Cramer&#39;s V        : 0.459</pre>
+
+</article></slide><slide class=''><hgroup><h2>Association Measures</h2></hgroup><article  id="association-measures-1">
+
+<pre class = 'prettyprint lang-r'>#install.packages(&quot;vcd&quot;)
+library(vcd)
+assocstats(alcohol)</pre>
+
+<pre >##                     X^2 df   P(&gt; X^2)
+## Likelihood Ratio 49.816  6 5.1184e-09
+## Pearson          46.740  6 2.1088e-08
+## 
+## Phi-Coefficient   : NA 
+## Contingency Coeff.: 0.312 
+## Cramer&#39;s V        : 0.233</pre>
+
+</article></slide><slide class=''><hgroup><h2>Lady tasting tea</h2></hgroup><article  id="lady-tasting-tea">
+
+<pre class = 'prettyprint lang-r'>tea&lt;- matrix(c(3, 1, 1, 3), ncol= 2, 
+             dimnames = list(Truth = c(&quot;Tea&quot;,&quot;Milk&quot; ),
+                        Lady_says = c(&quot;Tea first&quot;,&quot;Milk first&quot;)))
+tea</pre>
+
+<pre >##       Lady_says
+## Truth  Tea first Milk first
+##   Tea          3          1
+##   Milk         1          3</pre>
+
+</article></slide><slide class=''><hgroup><h2>Lady tasting tea : Fisher&#39;s Exact Test</h2></hgroup><article  id="lady-tasting-tea-fishers-exact-test">
+
+<pre class = 'prettyprint lang-r'>fisher.test(tea)</pre>
+
+<pre >## 
+##  Fisher&#39;s Exact Test for Count Data
+## 
+## data:  tea
+## p-value = 0.4857
+## alternative hypothesis: true odds ratio is not equal to 1
+## 95 percent confidence interval:
+##    0.2117329 621.9337505
+## sample estimates:
+## odds ratio 
+##   6.408309</pre>
+
+</article></slide><slide class=''><hgroup><h2>One-sided test</h2></hgroup><article  id="one-sided-test">
+
+<ul>
+<li>Fisher&#39;s exact test can be one-sided or two-sided, based on the Odds ratio, which measures association for a 2x2 table, high odds ratio means higehr association.</li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>fisher.test(tea, alternative = &quot;greater&quot;)</pre>
+
+<pre >## 
+##  Fisher&#39;s Exact Test for Count Data
+## 
+## data:  tea
+## p-value = 0.2429
+## alternative hypothesis: true odds ratio is greater than 1
+## 95 percent confidence interval:
+##  0.3135693       Inf
+## sample estimates:
+## odds ratio 
+##   6.408309</pre>
+
+</article></slide><slide class=''><hgroup><h2>More examples</h2></hgroup><article  id="more-examples">
+
+<p>The data in table 1 come from an RCT comparing intramuscular magnesium injections with placebo for the treatment of chronic fatigue syndrome Of the 15 patients who had the intra-muscular magnesium injections 12 felt better (80 per cent) whereas, of the 17 on placebo, only three felt better (18 per cent).</p>
+
+<table class = 'rmdtable'>
+<col width="22%" />
+<col width="22%" />
+<col width="29%" />
+<tr class="header">
+<th align="left"></th>
+<th align="left">Magnesium</th>
+<th align="left">Placebo</th>
+</tr>
+<tr class="odd">
+<td align="left"><p>Felt Better</p></td>
+<td align="left"><p>12</p></td>
+<td align="left"><p>3</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>Fel worse</p></td>
+<td align="left"><p>3</p></td>
+<td align="left"><p>14</p></td>
+</tr>
+</table>
+
+</article></slide><slide class=''><hgroup><h2>Using R</h2></hgroup><article  id="using-r">
+
+<pre class = 'prettyprint lang-r'>RCT &lt;- matrix(c(12,3,3,14), ncol= 2, 
+             dimnames = list(Outcome = c(&quot;Better&quot;, &quot;Worse&quot; ),
+                        Medicine = c(&quot;Magnesium&quot;, &quot;Placebo&quot;)))
+
+chisq.test(RCT)</pre>
+
+<pre >## 
+##  Pearson&#39;s Chi-squared test with Yates&#39; continuity correction
+## 
+## data:  RCT
+## X-squared = 10.063, df = 1, p-value = 0.001512</pre>
+
+</article></slide><slide class=''><hgroup><h2>Validity</h2></hgroup><article  id="validity">
+
+<div class="columns-2">
+<pre class = 'prettyprint lang-r'>chisq.test(RCT)$expected</pre>
+
+<pre >##         Medicine
+## Outcome  Magnesium Placebo
+##   Better   7.03125 7.96875
+##   Worse    7.96875 9.03125</pre>
+
+<p>. . .</p>
+
+<pre class = 'prettyprint lang-r'>fisher.test(RCT)</pre>
+
+<pre >## 
+##  Fisher&#39;s Exact Test for Count Data
+## 
+## data:  RCT
+## p-value = 0.001033
+## alternative hypothesis: true odds ratio is not equal to 1
+## 95 percent confidence interval:
+##    2.507119 159.407427
+## sample estimates:
+## odds ratio 
+##   16.41917</pre></div></article></slide>
 
 
   <slide class="backdrop"></slide>
