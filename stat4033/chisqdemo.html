@@ -95,9 +95,11 @@
 <slide class=''><hgroup><h2>Source materials</h2></hgroup><article  id="source-materials">
 
 <ul>
-<li>Music and Wine as well Pet ownership examples taken from an old introductory Stat classes I took in Purdue.</li>
-<li>The small counts example is taken from ## Wine and Music</li>
+<li>Music and Wine as well Pet ownership examples taken from an old introductory Stat class at Purdue.</li>
+<li>The shopping example is taken from the <a href='https://ww2.coastal.edu/kingw/statistics/R-tutorials/independ.html' title=''>tutorials by William B. King:</a></li>
 </ul>
+
+</article></slide><slide class=''><hgroup><h2>Wine and Music</h2></hgroup><article  id="wine-and-music">
 
 <pre class = 'prettyprint lang-r'>row1 = c(30,39,30)
 row2 = c(11,1,19)
@@ -525,7 +527,7 @@ chisq.test(RCT)</pre>
 ##   Better   7.03125 7.96875
 ##   Worse    7.96875 9.03125</pre>
 
-<p>. . .</p>
+<p>The expected counts are all more than 5 so a chi-sqaure approximation would be valid here, but, we can still do Fisher&#39;s exact test to get the exact P-value.</p>
 
 <pre class = 'prettyprint lang-r'>fisher.test(RCT)</pre>
 

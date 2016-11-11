@@ -11,8 +11,11 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## Source materials 
  
-- Music and Wine as well Pet ownership examples taken from an old introductory Stat classes I took in Purdue. 
-- The small counts example is taken from 
+- Music and Wine as well Pet ownership examples taken from an old introductory Stat class at Purdue. 
+- The shopping example is taken from the [tutorials by William B. King:](https://ww2.coastal.edu/kingw/statistics/R-tutorials/independ.html) 
+
+
+
 ## Wine and Music 
 
 ```{r, echo = TRUE}
@@ -272,9 +275,12 @@ chisq.test(RCT)
 ```{r, echo = T}
 chisq.test(RCT)$expected
 ```
-. . . 
+
+The expected counts are all more than 5 so a chi-sqaure approximation would be valid here, but, we can still do Fisher's exact test to get the exact P-value. 
 
 ```{r, echo = T}
 fisher.test(RCT)
 ```
 </div>
+
+
