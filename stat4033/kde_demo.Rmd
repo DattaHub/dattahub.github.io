@@ -1,0 +1,61 @@
+---
+title: "Kernel Density"
+author: "Jyotishka Datta"
+date: "December 2, 2016"
+output: ioslides_presentation
+---
+  ```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Kernel Density Estimation
+
+## Sampling distribution 
+
+```{r,echo = TRUE}
+data(mtcars)
+hist(mtcars$mpg)
+```
+
+## Colored Histogram with Different Number of Bins
+```{r,echo = TRUE}
+hist(mtcars$mpg, breaks=12, col="red")
+```
+
+
+## Kernel Density Plot
+
+```{r,echo = TRUE}
+d <- density(mtcars$mpg) # returns the density data 
+plot(d) # plots the results
+```
+
+## Kernel Density Plot with 1/3rd bandwith 
+
+```{r,echo = TRUE}
+d <- density(mtcars$mpg,adjust = 1/3) # returns the density data 
+plot(d) # plots the results
+```
+
+## Kernel Density Plot with 2x bandwith 
+
+```{r,echo = TRUE}
+d <- density(mtcars$mpg,adjust = 2) # returns the density data 
+plot(d) # plots the results
+```
+
+## Kernel Density Plot with a rectangular kernel
+
+```{r,echo = TRUE}
+d <- density(mtcars$mpg, kernel = "rectangular") # returns the density data 
+plot(d) # plots the results
+```
+
+## Kernel Density Plot with the Epanechnikov kernel
+
+```{r,echo = TRUE}
+d <- density(mtcars$mpg, kernel = "epanechnikov") # returns the density data 
+plot(d) # plots the results
+```
+
+
