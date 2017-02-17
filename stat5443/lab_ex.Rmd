@@ -1,0 +1,92 @@
+---
+title: "Lab Solutions"
+author: "Jyotishka Datta"
+date: "February 17, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem 1
+
+A ``truncated" distribution is a distribution where the support of the random variable is restricted to some interval $[a,b]$. If we know the pdf $f(x)$ and cdf $F(x)$ of the original random variable, then the pdf and cdf of the truncated random variable can be easily derived as: 
+$$
+f_{Tr}(x) = \begin{cases}
+\frac{f(x)}{F(b) - F(a)} \; \forall a < x \le b \\
+0 \; \text{otherwise}
+\end{cases}
+$$
+Consider the exponential random variable $X \sim \text{Exp}(\lambda)$, with pdf 
+$$
+f(x) = \lambda e^{-\lambda x}, \; x \ge 0, \lambda > 0 
+$$
+
+Answer the following: 
+
+1.  How would you generate from an exponential truncated to the interval $[0,b]$ using accept-reject scheme? Try the R code for $\lambda = 2$, $b = 5$.
+
+2.  Can you use the inverse CDF transformation here? 
+
+
+## Solution 
+
+Part 1 is easy. All you have to do is sample from $Exp(\lambda)$ and discard all samples that fall outside the truncation boundary. 
+Also, to generate from exponential we can use the inverse CDF method with 
+$$
+F^{-1}(u) = - \frac{1}{\lambda} \log(1-u)
+$$
+
+```{r, echo = TRUE}
+set.seed(123)
+n = 1000
+u = runif(n)
+lambda = 2 
+a = 0
+b = 5
+
+x = (-1/lambda)*log(1-u*(1-exp(-lambda*b)))
+## Standard Exponential then truncate 
+x = -1/lambda*log(u) #u ~ U[0,1] implies 1-u ~ U[0,1]
+x = x[x<=b]
+
+## Plotting
+library(ggplot2)
+ggplot(data.frame(x))+geom_histogram(aes(x=x),bins = 50)
+```
+
+Part 2 involves a little math! The pdf of the truncated distribution is given above. We can then calculate the CDF of the truncated exponential: 
+
+First the area between $[a,b]$ would be 
+$$
+\int_{a}^{b} \lambda e^{-\lambda x} d x = F(b)-F(a) = e^{-\lambda a} - e^{-\lambda b}
+$$
+
+The CDF for the truncated distribution can be written as: 
+$$
+F_{tr}(x) = \frac{F(x)-F(a)}{F(b)-F(a)}, a \le x \le b 
+$$
+
+Since $F(0) = 0$ for exponential, the inverse can be derived by solving the following equation for $x$ 
+$$
+\text{Solve } u = \frac{F(x)-F(a)}{F(b)-F(a)} = {1- \exp(-\lambda x)}{1- exp(-\lambda b)} \\
+1 - exp(-\lambda x) = u (1 - exp(-\lambda b)) \\
+x = (-1/\lambda)*\log(1-u (1 - exp(-\lambda b)))
+$$
+The R code can be written as follows: 
+
+```{r, echo = TRUE}
+n = 1000
+lambda = 2
+b = 5
+u = runif(n)
+x = (-1/lambda)*log(1-u*(1-exp(-lambda*b)))
+
+## Plotting
+library(ggplot2)
+ggplot(data.frame(x))+geom_histogram(aes(x=x),bins = 50)
+```
+
+
+
