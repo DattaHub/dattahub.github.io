@@ -70,7 +70,7 @@ $$
 
 Since $F(0) = 0$ for exponential, the inverse can be derived by solving the following equation for $x$ 
 $$
-\text{Solve } u = \frac{F(x)-F(a)}{F(b)-F(a)} = {1- \exp(-\lambda x)}{1- exp(-\lambda b)} \\
+\text{Solve } u = \frac{F(x)-F(a)}{F(b)-F(a)} = \frac{1- \exp(-\lambda x)}{1- exp(-\lambda b)} \\
 1 - exp(-\lambda x) = u (1 - exp(-\lambda b)) \\
 x = (-1/\lambda)*\log(1-u (1 - exp(-\lambda b)))
 $$
