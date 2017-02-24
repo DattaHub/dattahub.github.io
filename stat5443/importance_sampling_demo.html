@@ -100,7 +100,9 @@
 
 <slide class=''><hgroup><h2>Source</h2></hgroup><article  id="source">
 
-<p>Both the examples were taken from Jason Goldstick&#39;s R Lab Notes, available at <a href='http://dept.stat.lsa.umich.edu/~jasoneg/Stat406/index.html' title=''>http://dept.stat.lsa.umich.edu/~jasoneg/Stat406/index.html</a>. ## Importance Sampling</p>
+<p>Both the examples were taken from Jason Goldstick&#39;s R Lab Notes, available at <a href='http://dept.stat.lsa.umich.edu/~jasoneg/Stat406/index.html' title=''>http://dept.stat.lsa.umich.edu/~jasoneg/Stat406/index.html</a>.</p>
+
+</article></slide><slide class=''><hgroup><h2>Importance Sampling</h2></hgroup><article  id="importance-sampling">
 
 <p>Suppose you want to evaluate the integral:</p>
 
@@ -135,7 +137,7 @@ integrate(h, 0,10)$val</pre>
 <li>Something more like a gaussian function with a peak at 5 and small variance, say, 1, would provide greater precision.</li>
 </ol>
 
-</article></slide><slide class=''><hgroup><h2>Importance Sampling</h2></hgroup><article  id="importance-sampling">
+</article></slide><slide class=''><hgroup><h2>Importance Sampling</h2></hgroup><article  id="importance-sampling-1">
 
 <p>Write the same integral as an expectation of a function under Normal distribution:</p>
 
@@ -145,7 +147,7 @@ I = 10 \int_{0}^{10} 10 \exp(-2 | x- 5| ) \frac{\frac{1}{10}}{\phi(x-5)} \phi(x-
 = E(h(X)w(X)), \text{ for } X \sim N(5,1)
 \] Q. What are \(h(x)\) and \(w(x)\) in the above example?</p>
 
-</article></slide><slide class=''><hgroup><h2>Importance Sampling</h2></hgroup><article  id="importance-sampling-1" class="smaller">
+</article></slide><slide class=''><hgroup><h2>Importance Sampling</h2></hgroup><article  id="importance-sampling-2" class="smaller">
 
 <p>\[
 \begin{align}

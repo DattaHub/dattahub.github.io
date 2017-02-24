@@ -1,0 +1,127 @@
+---
+title: "Sampling Lab"
+author: "Jyotishka Datta"
+date: "February 24, 2017"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Source 
+
+Both the examples were taken from Jason Goldstick's R Lab Notes, available at [http://dept.stat.lsa.umich.edu/~jasoneg/Stat406/index.html](http://dept.stat.lsa.umich.edu/~jasoneg/Stat406/index.html). 
+
+
+## Importance Sampling 
+
+Suppose you want to evaluate the integral: 
+
+$$
+\int_a^b h(x) dx = \int_{0}^{10} \exp(-2 | x- 5| ) dx 
+$$
+The simplest way is to generate $U_i \sim \text{Unif}(0,10)$ and look at the sample mean $(b-a) \times h(U_i)$. 
+
+## R codes 
+
+```{r, echo = T}
+set.seed(123)
+U <-  runif(1e4, 0, 10)
+Y <- 10* exp(-2*abs(U - 5))
+(I <- mean(Y))
+(Error <- var(Y))
+```
+
+```{r, echo = TRUE}
+h <- function(u) exp(-2*abs(u - 5))
+integrate(h, 0,10)$val
+```
+
+## Improving the accuracy 
+
+1.  This method has a high variance, or, estimation error. 
+2.  The function h in this case is peaked at 5, and decays quickly elsewhere. 
+3.  Under the $U[0,10]$ density, many of the points are contributing very little to this  expectation.
+4. Something more like a gaussian function with a peak at 5 and small variance, say, 1, would provide greater precision.
+
+## Importance Sampling 
+
+Write the same integral as an expectation of a function under Normal distribution: 
+
+$$
+I = 10 \int_{0}^{10} 10 \exp(-2 | x- 5| ) \frac{\frac{1}{10}}{\phi(x-5)} \phi(x-5)dx \\
+\text{where } \phi(x-5) = \frac{1}{\sqrt{2\pi}} e^{-(x-5)^2/2} \\
+= E(h(X)w(X)), \text{ for } X \sim N(5,1)
+$$
+Q. What are $h(x)$ and $w(x)$ in the above example? 
+
+## Importance Sampling {.smaller}
+
+$$
+\begin{align}
+I & = 10 \int_{0}^{10} 10 \exp(-2 | x- 5| ) \frac{\frac{1}{10}}{\phi(x-5)} \phi(x-5)dx \\
+& \text{ where }\phi(x-5) = \frac{1}{\sqrt{2\pi}} e^{-(x-5)^2/2} \; (\text{Normal density}) 
+\end{align}
+$$
+Hence, we can write the integral as 
+
+$$
+\begin{align}
+I & = E(h(x)w(x)), \text{ for } X \sim N(5,1) \\
+& \text{ Here, } h(x) = 10 \exp(-2 | x- 5| ) \\
+& \text{ and } w(x) = \frac{\frac{1}{10}}{\phi(x-5)} = \frac{\texttt{dunif}(x, 0, 10)}{\texttt{dnorm}(x, mean=5, sd=1)}
+\end{align}
+$$ 
+
+## R code 
+
+```{r, echo = TRUE}
+w <- function(x) dunif(x, 0, 10)/dnorm(x, mean=5, sd=1)
+f <- function(x) 10*exp(-2*abs(x-5))
+X=rnorm(1e5,mean=5,sd=1)
+Y=w(X)*f(X)
+
+(I <- mean(Y))
+(Error <- var(Y))
+```
+
+Same integral but the new error is 1/10th of the previous error. 
+
+## Lab Exercise 
+
+The standard double exponential or Laplace density is given by: 
+
+$$
+p(x) = \frac{1}{2} e^{-\lvert x \rvert}
+$$
+
+Calculate the second moment $E(X^2)$ for Laplace using the Normal(0,4) density as the proposal. In other words, calculate the integral: 
+
+$$
+\int_{-\infty}^{\infty}  \frac{1}{2} x^2 e^{-\lvert x \rvert} dx 
+$$
+
+Report both your estimate and the variance of your estimate. 
+
+Could you also calculate the true value? 
+
+## Solution 
+
+```{r, echo = TRUE}
+X <- rnorm(1e5, sd=4)
+Y <- (X^2) * .5 * exp(-abs(X))/dnorm(X, sd=4)
+(I <- mean(Y))
+(Error <- var(Y))
+```
+ 
+Think: What happens if we use N(0,1) instead? Or a Cauchy instead?
+
+## True Value
+The true value of the integral is 2. You can find that by integrating by hand, or, evaluating it in R. 
+
+```{r, echo = TRUE}
+h <- function(x) 0.5*x^2*exp(-abs(x))
+integrate(h,-Inf,Inf)$val
+```
+
