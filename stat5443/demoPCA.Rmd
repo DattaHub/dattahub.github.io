@@ -1,0 +1,358 @@
+---
+title: "PCA Demo"
+author: "Jyotishka Datta"
+date: "March 10, 2017"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Source 
+
+-  A lot of R codes in this demo are taken from R codes in the excellent book "Introduction to Statistical Learning with Applications in R" by James, Witten, Hastie and Tibshirani. The Book website has R codes, labs and lots of other resources [http://www.statlearning.com/](http://www.statlearning.com/).
+
+- The Crime data and Iris data codes were provided by Dr. Sumanta Basu. 
+
+## Recap (PCA) {.build}
+
+-  In practice, we observe $n$ observations of the $(x_1, \ldots, x_p)$.
+-  Let $X$ be a data matrix with $n$ rows and $p$ columns. Subtract the column mean from each variable. 
+-  The first principal component direction is the vector $\beta_1 = (\beta_{11}, \ldots, \beta_{p1})'$ s.t. 
+$$
+		\max_{\beta_{11}, \ldots, \beta_{p1}} \left\{ \frac{1}{n} \left( \sum_{j=1}^{p} \beta_{j1} x_{ij} \right)^2 \right\}
+		\text{ subject to } \sum_{j=1}^{p}\beta_{j1}^2  = 1 
+$$
+-  Inside (): Projection of $i^{th}$ sample into $\beta_1$ - also called score $y_{i1}$.
+- Maximize: Sample variance of the scores $y_{i1}$.
+
+## Second PC
+
+-  The second principal component direction is the vector $\beta_2 = (\beta_{12}, \ldots, \beta_{p2})'$ s.t. 
+$$
+		\max_{\beta_{12}, \ldots, \beta_{p2}} \left\{ \frac{1}{n} \left( \sum_{j=1}^{p} \beta_{j2} x_{ij} \right)^2 \right\} \\
+		\text{ subject to } \sum_{j=1}^{p}\beta_{j2}^2  = 1, \sum_{j=1}^{p}\beta_{j1} \beta_{j2} = 0 
+$$
+-  First and second principal components must be orthogonal.
+-  Scores $(y_{i1}, i = 1, \ldots, n)$ and $(y_{i2}, i = 1, \ldots, n)$ are independent. 
+
+
+## Optimization for PCA
+
+- PCA can be performed in two different ways: 
+- The singular value decomposition of $X$: 
+$$ 
+X = U \Sigma B^{T}
+$$ 
+where the $i$-th column of $B$ is the $i$-th principal component direction $\beta_i$. 
+- The Eigen-Decomposition of $X^TX$:
+$$
+X^T X = B \Sigma^2 B^T 
+$$ 
+
+## Using R 
+
+- Two packages `prcomp` and `princomp`. 
+- Difference: 
+
+prcomp: The calculation is done by a singular value decomposition of the (centered and possibly scaled) data matrix, not by using eigen on the covariance matrix. This is generally the preferred method for numerical accuracy.
+
+primcomp: uses Eigen-decomposition. 
+
+## US Arrest data 
+
+Reminiscient of the US Crime data, but different. 
+
+Description
+
+This data set contains statistics, in arrests per 100,000 residents for assault, murder, and rape in each of the 50 US states in 1973. Also given is the percent of the population living in urban areas.
+
+## Data 
+
+```{r, echo = T}
+states=row.names(USArrests)
+states
+```
+
+## Variable Names 
+
+```{R, echo = T}
+names(USArrests)
+apply(USArrests, 2, mean)
+apply(USArrests, 2, var)
+```
+
+-  If we failed to scale the variables before performing PCA, then most of the principal components that we observed would be driven by the Assault variable, since it has by far the largest mean and variance.
+
+
+## PCA 
+
+```{r, echo = T }
+pr.out=prcomp(USArrests, scale=TRUE)
+names(pr.out)
+pr.out$center
+pr.out$scale
+```
+
+
+## Loadings 
+
+The rotation matrix provides the principal component loadings; each column
+of `pr.out$rotation` contains the corresponding principal component
+loading vector.
+
+```{r, echo = T}
+pr.out$rotation
+dim(pr.out$x)
+```
+
+## Biplots 
+
+-  Biplot provides an efficient way of visualizing together objects (observations) and variables. 
+-  The emphasis of the PCA of the city crime data was on cities
+(objects). 
+-  However, a graphical representation of the data that contains some information about the variables is particularly useful.
+
+## Biplot 
+
+```{r}
+biplot(pr.out, scale=0,  cex=c(1/2, 1),xlim=c(-4,4))
+```
+
+The scale=0 argument to biplot() ensures that the arrows are scaled to
+represent the loadings.
+
+## Biplot 
+
+**The principal components are only unique up to a sign change** 
+
+```{r, echo = T, fig.height = 4}
+pr.out$rotation=-pr.out$rotation; pr.out$x=-pr.out$x
+biplot(pr.out, scale=0,cex=c(1/2, 1),xlim=c(-4,4))
+```
+
+
+## Without Scaling the Data 
+
+```{r, echo = T}
+biplot(prcomp(USArrests, scale = F),scale=0,cex=c(1/2, 1))
+```
+
+
+## Standard Deviations 
+
+```{R, echo = T}
+pr.out$sdev
+pr.var=pr.out$sdev^2
+pr.var
+pve=pr.var/sum(pr.var)
+pve
+```
+
+## Proportion of Variance Explained 
+
+```{r, echo = T, fig.height=3}
+par(mfrow=c(1,2))
+plot(pve, xlab="Principal Component", ylab="Proportion of Variance Explained", ylim=c(0,1),type='b')
+plot(cumsum(pve), xlab="Principal Component", ylab="Cumulative Proportion of Variance Explained", ylim=c(0,1),type='b')
+```
+
+
+## More Examples 
+
+Now we will see two more examples, using the princomp package. 
+
+## PCA for Crime Data-set
+
+The following R commands perform PCA on the city crime dataset. The data give crime rates per 100,000 people for the 72 largest US cities in 1994. 
+
+The variables are:
+1) Murder
+2) Rape
+3) Robbery
+4) Assault
+5) Burglary
+6) Larceny
+7) Motor Vehicle Thefts
+
+## The Data 
+
+The data are in the "city_crime.txt" file that I read next.
+```{r, echo = T}
+setwd("C:/Users/Jyotishka/OneDrive/Documents/Course Notes/stat5443/R codes")
+crime<-read.table("city_crime.txt")
+```
+
+## Plots 
+We can then look at the scatterplot matrix. 
+
+```{r, echo = T}
+pairs(crime)
+```
+
+## R
+Then apply PCA on the data by rescaling and centering the 
+data using the R function princomp
+```{r, echo = T}
+pca.crime<-princomp(scale(crime,scale=TRUE,center=TRUE),cor=FALSE)
+```
+
+## Look at the results
+
+```{r, echo = T}
+
+summary(pca.crime)
+```
+
+## Loadings 
+
+```{r, echo = T}
+loadings(pca.crime)
+```
+
+## Proportion of Variance 
+
+```{r, echo = T}
+PoV <- pca.crime$sdev^2/sum(pca.crime$sdev^2)
+barplot(PoV, main="Prop Var Exp")
+```
+
+## How many?
+
+```{r, echo = T}
+screeplot(pca.crime, type="line")
+```
+
+## Calculate the principal component scores
+Once we calculate the principal components, we can plot them
+against each other in order to produce low-dimensional views of the data.
+
+First we calculate the principal component scores. 
+
+```{r, echo = T}
+pcs.crime<-predict(pca.crime)
+```
+
+## Plot the first 2 PCs. 
+
+```{r, echo = T}
+plot(pcs.crime[,1:2],type="n",xlab='1st PC',ylab='2nd PC') 
+text(pcs.crime[,1:2],row.names(crime))
+```
+
+## Plot the first 2 PCs. 
+
+```{r, echo = T}
+pcs.crime<-predict(pca.crime)
+plot(pcs.crime[,1:2],type="n",xlab='1st PC',ylab='2nd PC') 
+text(pcs.crime[,1:2],row.names(crime))
+```
+
+## Biplots 
+
+-  Biplot provides an efficient way of visualizing together objects (observations) and variables. 
+-  The emphasis of the PCA of the city crime data was on cities
+(objects). 
+-  However, a graphical representation of the data that contains some information about the variables is particularly useful.
+
+## Biplot 
+
+```{r, echo = T}
+biplot(pca.crime, cex=c(1/2, 1),xlim=c(-0.5,0.5))
+```
+
+
+## Lab Questions 
+
+1.  Which cities are most safe? Which are most crime-prone?
+2.  How to interpret high/low values in the second PC?
+
+## Iris Data
+
+```{r, echo = T}
+data(iris)
+str(iris)
+dat.iris = data.matrix(iris[,1:4])
+```
+
+## Add noise variables, permute all variables randomly
+
+```{r, echo = TRUE}
+dat.iris = cbind(dat.iris, array(rnorm(150*6), c(150, 6)))
+colnames(dat.iris)[5:10] <- paste('V', 1:6, sep='')
+dat.iris = dat.iris[,sample(10, 10, replace=FALSE)]
+```
+
+## Center and Scale before PCA
+
+```{r, echo = T}
+dat.iris = scale(dat.iris, center=TRUE, scale=TRUE)
+```
+
+Perform principal component analysis on correlation matrix
+
+```{r, echo = T}
+pca.iris <- princomp(dat.iris, cor=TRUE)
+```
+
+## Summarize PCA {.smaller}
+
+```{r, echo = T}
+summary(pca.iris)
+```
+
+## Choose no. of PCs to look into
+
+```{r, echo = T}
+screeplot(pca.iris, type="line")
+```
+
+## calculate PC scores
+
+```{r, echo = T}
+pcs.iris <- predict(pca.iris)
+```
+
+ Set color code for observations from different groups
+
+```{r, echo = TRUE}
+col.code = as.character(iris$Species)
+col.code[col.code == "setosa"] = 'red'
+col.code[col.code == "versicolor"] = 'blue'
+col.code[col.code == "virginica"] = 'green'
+```
+
+
+## plot first two principal components {.smaller}
+
+```{r, echo = TRUE, fig.height=5}
+plot(pcs.iris[,1:2], type='p', pch=15, col=col.code, xlab="PC1", ylab="PC2")
+legend("topright", col=c('red', 'blue', 'green')
+     , legend = c('setosa', 'versicolor', 'virginica'), pch = 15
+      )
+```
+
+## Importance of PC {.smaller}
+
+plot first two variables instead of the first two principal components: do we see any pattern? Obviously, no.
+
+```{r, echo = TRUE, fig.height = 4}
+plot(dat.iris[,1:2], type='p', pch=15, col=col.code, xlab="PC1", ylab="PC2")
+legend("topright", col=c('red', 'blue', 'green')
+       , legend = c('setosa', 'versicolor', 'virginica'), pch = 15
+)
+```
+
+## Importance of PC {.smaller}
+
+When we have many variables, projecting obs. into top few PC scores help
+avoid searching over important variables
+
+```{r, echo = TRUE, fig.height=4}
+plot(dat.iris[,1:2], type='p', pch=15, col=col.code, xlab="PC1", ylab="PC2")
+legend("topright", col=c('red', 'blue', 'green')
+       , legend = c('setosa', 'versicolor', 'virginica'), pch = 15
+)
+```
+
