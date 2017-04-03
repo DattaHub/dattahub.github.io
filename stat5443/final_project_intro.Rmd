@@ -1,0 +1,122 @@
+---
+title: "Project Ideas"
+author: "Jyotishka Datta"
+date: "April 3, 2017"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+<style>
+  .col2 {
+    columns: 2 200px;         /* number of columns and width in pixels*/
+    -webkit-columns: 2 200px; /* chrome, safari */
+    -moz-columns: 2 200px;    /* firefox */
+  }
+  .col3 {
+    columns: 3 100px;
+    -webkit-columns: 3 100px;
+    -moz-columns: 3 100px;
+  }
+</style>
+
+
+## Project Data-sets
+
+Two possible data-sets: 
+
+1. Leukemia (Classification, Unsupervised Learning)
+2. HIV (Regression, Supervised Learning).
+3. This intro will show you how to read the two data-sets and get basic summary. It will also suggest some of the analysis that you can perform.
+4. You can use one of the methods taught in class or try new methods - it's upto you (and your team). 
+5. You need to present your work. 
+
+## Leukemia Data (Unsupervised)
+
+- Leukemia Data, Golub et al. Science $1999$
+- Matrix of gene expression levels for the 38 tumor mRNA samples, rows correspond to genes (3051 genes) and columns to mRNA samples.
+- First install the `multtest` R package from `Bioconductor`.
+
+```{r, echo = T, eval = F}
+source("https://bioconductor.org/biocLite.R")
+biocLite("multtest")
+```
+```{r, echo = T, message=F, warning=F}
+require(multtest)
+data(golub)
+dim(golub)
+```
+
+## Leukemia Data {.smaller}
+
+Class labels:
+```{r, echo = T}
+golub.cl
+````
+Gene names:
+```{r, echo = T}
+dim(golub.gnames)
+golub.gnames[1:4, ]
+```
+
+## Possible Inferential Goals
+
+1. Visualize the data: e.g. compare the baseline expression values between two groups (ALL `golub.cl=0` vs AML `golub.cl=1`)
+2. Perform unsupervised classification / clustering and calculate accuracy. 
+3. Carry out Multiple testing. 
+4. Identify Genes that are differentially expressed in two classes: Classification with variable selection.
+5. Focus on new, efficient Methods e.g. K-NN, Logistic with $\ell_1$ penalty, Fisher's LDA or hierarchical clustering. 
+6. K-NN has been covered, I will teach the other methods in class next week. 
+
+## Supervised Learning for Leukemia Data
+
+1. If you want to try supervised classification with this data, the full data-set with $n = 72$ samples (38 training, 34 test) is available on the R bioconductor site. 
+2. This site [https://github.com/ramhiser/datamicroarray/wiki/Golub-(1999)](https://github.com/ramhiser/datamicroarray/wiki/Golub-(1999)) has info regarding the full data-set and the paper. 
+
+
+## HIV Data (Supervised)
+
+PNAS paper studies in vitro drug resistance of $n = 1057$ HIV-1 isolates to protease and reverse transcriptase mutations. There are $p = 208$ (binary) mutation variables. 
+
+The original paper compares 5 different regression methods: decision trees, neural networks, SVM regression, OLS and LASSO.
+
+Full paper (if you're interested): [http://www.pnas.org/content/103/46/17355.full](http://www.pnas.org/content/103/46/17355.full)
+
+## HIV Data
+
+```{r, echo = T, tidy = T}
+setwd("C:/Users/Jyotishka/OneDrive/Documents/Course Notes/stat5443/R codes/datasets")
+## save the hiv.rda file somewhere that R can find and use that path
+load("hiv.rda")
+dim(hiv.train$x)
+dim(hiv.test$x)
+```
+
+## Simple Lasso 
+
+```{r, echo = F, warning = F, message = F}
+library(glmnet)
+fit=glmnet(hiv.train$x,hiv.train$y, alpha = 1)
+plot(fit)
+```
+
+## Inferential Goals 
+
+1. Apply different sparse regression (regularization/shrinkage/dimension reduction technique) on this data. 
+2. Compare between different methods? e.g. Would Elastic Net be a better fit than Lasso? How do you test? How about Bayesian methods or PC Regression?
+3. Could try extensions: The next slide show histogram of $y_{tr}$ - would it be better if we change the response to binary from continuous and apply classification methods? 
+
+## Dichotomizing Response 
+
+<div class="col2">
+```{r, echo = T, fig.width=3.5}
+hist(hiv.train$y, col = "red")
+abline(v = log(25,10))
+ytr_b = hiv.train$y > log(25,10)
+table(ytr_b)
+```
+Should we treat `ytr_b` as our new response and try a classification algorithm? 
+</div>
+
