@@ -6,7 +6,7 @@ output: ioslides_presentation
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, cache = TRUE)
 ```
 
 <style>
@@ -39,7 +39,7 @@ Two possible data-sets:
 - Matrix of gene expression levels for the 38 tumor mRNA samples, rows correspond to genes (3051 genes) and columns to mRNA samples.
 - First install the `multtest` R package from `Bioconductor`.
 
-```{r, echo = T, eval = F}
+```{r, echo = T, eval = F, cache=T}
 source("https://bioconductor.org/biocLite.R")
 biocLite("multtest")
 ```
@@ -86,7 +86,7 @@ Full paper (if you're interested): [http://www.pnas.org/content/103/46/17355.ful
 
 ## HIV Data
 
-```{r, echo = T, tidy = T}
+```{r, echo = T, tidy = T, cache=T}
 setwd("C:/Users/Jyotishka/OneDrive/Documents/Course Notes/stat5443/R codes/datasets")
 ## save the hiv.rda file somewhere that R can find and use that path
 load("hiv.rda")
@@ -96,7 +96,7 @@ dim(hiv.test$x)
 
 ## Simple Lasso 
 
-```{r, echo = F, warning = F, message = F}
+```{r, echo = F, warning = F, message = F, cache=T}
 library(glmnet)
 fit=glmnet(hiv.train$x,hiv.train$y, alpha = 1)
 plot(fit)
@@ -108,15 +108,315 @@ plot(fit)
 2. Compare between different methods? e.g. Would Elastic Net be a better fit than Lasso? How do you test? How about Bayesian methods or PC Regression?
 3. Could try extensions: The next slide show histogram of $y_{tr}$ - would it be better if we change the response to binary from continuous and apply classification methods? 
 
-## Dichotomizing Response 
+## Dichotomizing Response {.smaller}
 
-<div class="col2">
+<div style="float: left; width: 50%;">
 ```{r, echo = T, fig.width=3.5}
 hist(hiv.train$y, col = "red")
 abline(v = log(25,10))
+```
+</div>
+<div style="float: right; width: 50%;">
+```{r, echo = T}
 ytr_b = hiv.train$y > log(25,10)
 table(ytr_b)
 ```
 Should we treat `ytr_b` as our new response and try a classification algorithm? 
 </div>
+
+## Using dichotomized response 
+
+```{r, echo = T}
+#library(glmnet)
+fit.bin=glmnet(hiv.train$x,ytr_b, alpha = 1, family = "binomial")
+plot(fit.bin)
+```
+
+## Side-by-side {.smaller}
+
+```{r, echo = F}
+par(mfrow=c(1,2))
+plot(fit)
+plot(fit.bin)
+```
+
+## A full-scale Bioinformatic Analysis 
+
+-  I will show a full scale data analysis. 
+-  Assume that we are in a unsupervised setting, we only observe an $n \times p$ matrix $X$, no outcomes $y$. 
+-  However, we know that the $n$ subjects belong to two different groups: disease/normal, type-a/type-b. 
+-  I want to test which of the $p$ variables are different between the two groups? 
+
+## Large Scale Testing
+
+- We can carry out $p$ simultaneous tests for each of the variables: 
+- Suppose for the $i^{th}$ variable $x_{i}$ the two group means are $\theta_{i,1}$ and $\theta_{i,2}$.
+$$
+H_{0i}: \theta_{i,1} = \theta_{i,2} \text{ vs. } H_{1i}: \theta_{i,1} \neq \theta_{i,2}
+$$
+- If $H_{0i}$ is true, the group means $\bar{x}_{i,1}$ and  $\bar{x}_{i,1}$ should be close. 
+- We can do an independent samples t-test for each of the $p$ variables. - Need care about multiplicity !
+
+## Example from T-cell lymphoma {.build}
+
+```{r,echo=TRUE, message=FALSE, warning=FALSE, cache=T}
+## required for gene expression data classification example
+require(ALL)
+data(ALL)
+dim(ALL)
+```
+
+## Simplifying features 
+
+We are going to use the first three features. 
+
+```{r, echo=TRUE}
+resp <- gsub("B[0-9]", "B", ALL$BT) 
+## B-cell tumors of type B, B1,B2, T, T1, T2 
+resp <- factor(gsub("T[0-9]", "T", resp))
+xmat <- t(exprs(ALL))
+mydata <- data.frame(y = resp,x1 = xmat[,1],x2=xmat[,2],x3=xmat[,3])
+head(mydata,n=3)
+```
+
+## Further Analysis 
+
+We can looks at the results of molecular biology testing for the 128 samples:
+
+```{r, echo = T}
+table(ALL$mol.biol)
+```
+
+## Filter 
+
+Ignoring the samples which came back negative on this test (NEG), most have been classified as (BCR/ABL) or (ALL1/AF4).
+
+For the purposes of this example, we are only interested in these two subgroups, so we will create a filtered version of the dataset using this as a selection criteria:
+
+```{r, echo = T}
+eset <- ALL[, ALL$mol.biol %in% c("BCR/ABL", "ALL1/AF4")]
+dim(eset)
+```
+
+## Heatmap of the Genes? {.smaller}
+
+The resulting variable, eset, contains just 47 samples - each with the full 12,625 gene expression levels. This is far too much data to draw a heatmap with, but we can do one for the first 100 genes as follows:
+
+```{r, echo = T, cache=T}
+heatmap(exprs(eset[1:100,]))
+```
+
+## How do we analyze this data?
+
+- We have the expression levels 12,625 genes for 47 samples. 
+- We also have a factor `ALL$mol.biol` that has two levels: BCR/ABL and ALL1/AF4. 
+- We can ask for which genes, the gene expression values differ between these two subgroups? 
+
+## Simple test 
+
+- One idea would be use a two sample t-test for equality of group mean for each of the 12,625 genes. 
+- The `mt.teststat` function from the `multtest` library does this for you. 
+
+```{r, echo = T, cache=T}
+require(multtest)
+all.mat = exprs(eset)
+all.cl <- factor(as.character(eset$mol.biol))
+teststat = mt.teststat(all.mat,all.cl,test="t")
+```
+
+- mt.teststat {multtest}: **Computing test statistics for each row of a data frame**
+
+- These functions provide a convenient way to compute test statistics, e.g., two-sample Welch t-statistics, Wilcoxon statistics, F-statistics, paired t-statistics, block F-statistics, for each row of a data frame.
+
+## Visualize 
+
+```{r, echo = F}
+par(mfrow=c(1,2))
+qqnorm(teststat, ylim = c(-5,5))
+qqline(teststat)
+hist(teststat, breaks = 30, col = "red", freq = F, xlim = c(-5,5), ylim = c(0,0.5))
+curve(dnorm(x), lty = 2, lwd = 2, add=TRUE)
+curve(dnorm(x, mean = mean(teststat), sd = sd(teststat)), lty = 3, lwd = 2, add=TRUE)
+````
+
+- Histogram and N(0,1) density different on the tails - a few interesting genes?
+
+
+## Multiple Testing Issues 
+
+- We have a large number of tests: 12,625. If we use standard hypothesis testing at a 5% significance level, 5% of all tests will be falsely rejected (type 1 error) just by pure chance. 
+
+- We need some kind of multiplicity control. 
+
+- The most stringent is Bonferroni: Divide each $\alpha$ by the total number of tests $p = 12,625$. 
+
+## Bonferroni 
+
+- Bonferroni's correction controls for the familywise error rate (FWER) instead of each $\alpha$. 
+$$
+FWER = P(\text{at least one false rejection}) \le \alpha 
+$$
+
+- Bonferroni leads to a stringent test, since $\alpha/p$ could be very small if we are carrying out a large number of $p$ tests simultaneously. 
+- In R, we can apply the `p.adjust` function for this task. 
+
+- `p.adjust` also has other useful methods such as "Benjamini-Hochberg False Discovery Rate control procedure".
+
+## Bonferroni 
+
+```{r, echo = T}
+rawp = 2 * (1 - pnorm(abs(teststat)))
+selected  <- p.adjust(rawp, method = "bonferroni") <0.05
+esetSel <- eset [selected, ]
+sum(selected)
+````
+
+- Bonferroni's correction leads to rejection of `r sum(selected)
+` tests - these genes significantly differ between two groups
+
+## Visualize the outcomes
+
+```{r, echo = T}
+heatmap(exprs(esetSel))
+```
+
+## Better heatmap {.smaller}
+
+```{r, echo = T}
+library(RColorBrewer)
+hmcol<-brewer.pal(11,"RdBu")
+heatmap(exprs(esetSel), col = hmcol, xlab = "Significant Genes", ylab =  "Samples")
+```
+
+## Bonferroni 
+
+- $M$ hypothesis tests: $H_{0m}$ vs. $H_{1m}$ for $m = 1, \ldots, M$. 
+- Let $p_1, \ldots, p_M$ be the p-values for these $M$ tests. 
+- In our case $M = p$ (no. of genes)
+- Bonferroni method: 
+$$
+\text{Reject null hypothesis } H_{0m} \text{ if } p_m \le \frac{\alpha}{M}
+$$
+
+- Outcome: The probability of falsely rejecting any null hypothesis is less than or equal to $\alpha$. 
+
+## Benjamini-Hochberg {.smaller}
+
+- Let $M_0$ be the number of null hypotheses that are true, $M_0 = M - M_1$. 
+
+|           |$H_0$ acc |	$H_0$ rej | Total |
+|-----------|----------|------------|-------|
+|$H_0$ true |	U        | V          | $M_0$ |
+|$H_0$ false|	T        | S          | $M_1$ |
+|Total      |	M-R      | R          | $M$   |
+
+Define the false discovery proportion (FDP): 
+$$
+FDP = \begin{cases} 
+V/R \text{ if } R > 0 \\
+0 \text { otherwise}
+\end{cases}
+$$
+
+## Benjamini-Hochberg {.smaller}
+
+- $M$ hypothesis tests We order the p-values in increasing order.
+$p_{(1)} \le \ldots \le p_{(M)}$. 
+- *Benjamini-Hochberg Method* 
+    1.  For a given $\alpha$ find the largest $k$ such that
+$$
+p_{(k)} \le k \frac{\alpha}{M}
+$$
+    2.  Then reject all $H_{0m}$ for $m = 1, \ldots, k$.
+-  *Theorem* : 
+$$
+FDR = E(FDP) \le \frac{M_0}{M}\alpha \le \alpha
+$$
+-  *Outcome*: For a given significance level $\alpha$, the Benjamini Hochberg method bounds the false discovery rate.
+
+## Benjamini-Hochberg
+
+```{r, echo = T}
+rawp = 2 * (1 - pnorm(abs(teststat)))
+selected  <- p.adjust(rawp, method = "BH") <0.05
+esetSel <- eset [selected, ]
+sum(selected)
+````
+
+- Benjamini-Hochberg method leads to rejection of `r sum(selected)
+` tests - less stringent than Bonferroni. 
+
+## Benjamini-Hochberg's heatmap {.smaller}
+
+```{r, echo = T}
+library(RColorBrewer)
+hmcol<-brewer.pal(11,"RdBu")
+heatmap(exprs(esetSel), col = hmcol, xlab = "Significant Genes", ylab =  "Samples")
+```
+
+## Many different ways
+
+- There are many different ways of doing the same analysis - we usually pick the one that gives us a reasonably accurate and yet meaningful answer. 
+
+- For example, in a Statistical genetics study, your collaborator (a geneticist) might have some prior biological knowledge about which genes should be different, and that provides a way of checking validity. 
+
+- I will show another multiple testing function without explaining the stats behind it - the point is to show that outcomes could differ. 
+
+## Empirical Bayes 
+
+There's an `lmFit` function (from the `limma` package) to look for genes differentially expressed between the two groups. 
+
+The fitted model object is further processed by the `eBayes` function to produce empirical Bayes test statistics for each gene. 
+
+```{r, echo = T, warning = F, message = F}
+library(limma)
+f <- factor(as.character(eset$mol.biol))
+design <- model.matrix(~f)
+fit <- eBayes(lmFit(eset,design))
+```
+
+## P-values an all {.smaller}
+
+```{r, echo = T}
+topTable(fit, coef=2)
+```
+
+The leftmost numbers are row indices, ID is the Affymetrix HGU95av2 accession number, M is the log ratio of expression, A is the log average expression, t the moderated t-statistic, and B is the log odds of differential expression.
+
+## Selection 
+
+Next, we select those genes that have adjusted p-values below 0.05, using a Benjamini-Hochberg method to select a small number of genes.
+
+```{r, echo = T}
+selected  <- p.adjust(fit$p.value[, 2], method = "BH") <0.05
+esetSel <- eset [selected, ]
+sum(selected)
+```
+
+## Heatmap 
+
+The variable esetSel has data on (only) 749 genes for all 47 samples . We can easily produce a heatmap as follows:
+
+```{r, echo = T}
+heatmap(exprs(esetSel))
+```
+
+## Selection 
+
+We could be very stringent - use Bonferroni! 
+
+```{r, echo = T}
+selected  <- p.adjust(fit$p.value[, 2], method = "bonferroni") <0.05
+esetSel <- eset [selected, ]
+sum(selected)
+```
+
+## Heatmap 
+
+The variable `esetSel` has data on (only) 165 genes for all 47 samples . We can easily produce a heatmap as follows:
+
+```{r, echo = T}
+heatmap(exprs(esetSel))
+```
+
 
