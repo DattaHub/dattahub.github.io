@@ -1,0 +1,288 @@
+---
+title: "Tree-based methods"
+author: "Jyotishka Datta"
+date: "April 12, 2017"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Tree Based Methods 
+
+We will show how to grow a tree for classification. Regression trees are developed in a very similar way. 
+
+As before, these codes are taken from the Introduction to Statistical Learning book. 
+
+
+## Carseats data
+In these data, Sales is a continuous variable, and so we begin by recoding it as a binary variable.
+
+```{r, echo = T, warning= F, message = F}
+library(tree)
+library(ISLR)
+attach(Carseats)
+High=ifelse(Sales<=8,"No","Yes")
+Carseats=data.frame(Carseats,High)
+```
+
+## Fit a tree 
+
+```{r, echo = T}
+tree.carseats=tree(High~.-Sales,Carseats)
+summary(tree.carseats)
+```
+
+## Interpretaion 
+
+We see that the training error rate is 9%. 
+
+For classification trees, the deviance reported in the output of summary() is given by
+$$
+-2 \sum_{m} \sum_k n_{mk} \log(\hat{p}_{mk})
+$$
+where $n_{mk}$ is the number of observations in the $m$th terminal node that belong to the $k$th class. 
+
+A small deviance indicates a tree that provides a good fit to the (training) data. 
+
+The residual mean deviance reported is simply the deviance divided by $n - |T_0|$, which in this case is 400 - 27 = 373.
+
+## Plotting the tree 
+
+ -  One of the most attractive properties of trees is that they can be
+graphically displayed. 
+ -  We use the `plot()` function to display the tree structure,
+and the `text()` function to display the node labels.
+
+## Plot tree 
+
+```{r, echo = T}
+plot(tree.carseats)
+```
+
+## Plot tree 
+
+```{r, echo = T}
+plot(tree.carseats)
+text(tree.carseats,pretty=0)
+```
+
+## Plot tree 
+
+The most important indicator of Sales appears to be shelving location.
+```{r, echo = T}
+plot(tree.carseats)
+text(tree.carseats,pretty=1, cex = 0.5)
+```
+
+## Tree output 
+
+ -  If we just type the name of the tree object, `R` prints output corresponding to each branch of the tree. 
+ -  `R` displays the split criterion (e.g. `Price<92.5`), the
+number of observations in that branch, the deviance, the overall prediction for the branch (`Yes` or `No`), and the fraction of observations in that branch that take on values of `Yes` and `No`.
+
+## Tree output in R {.smaller}
+
+```{r, echo = T}
+tree.carseats
+```
+
+## Training and Testing 
+
+ - Need test error for proper evaluation. 
+ - Split the observations into a training set and a test set, *build the tree using the training set*, and evaluate its performance on the test data. 
+ - The `predict()` function can be used for this purpose. 
+ - In the case of a classification tree, the argument `type="class"` instructs `R` to return the actual class prediction.
+
+## Test error 
+
+```{r, echo = T}
+set.seed(2)
+train=sample(1:nrow(Carseats), 200)
+Carseats.test=Carseats[-train,]
+High.test=High[-train]
+tree.carseats=tree(High~.-Sales,Carseats,subset=train)
+tree.pred=predict(tree.carseats,Carseats.test,type="class")
+table(tree.pred,High.test)
+```
+
+This approach leads to correct predictions for `r (86+57)/200` cases. 
+
+## Pruning 
+
+ -  What you just saw was the full tree. 
+ -  Next, we consider whether pruning the tree might lead to improved
+results. 
+ - The function `cv.tree()` performs cross-validation in order to
+determine the optimal level of tree complexity; **cost complexity pruning** is used in order to select a sequence of trees for consideration. 
+
+## Pruning (continued)
+
+ -  We use the argument `FUN=prune.misclass` in order to indicate that we want the *classification error rate* to guide the cross-validation and pruning process, rather than the default for the `cv.tree()` function, which is deviance.
+
+ - The `cv.tree()` function reports the number of terminal nodes of each tree considered (size) as well as the corresponding error rate and the value of the cost-complexity parameter used (`k` corresponds to our $\alpha$)
+ 
+## Using `cv.tree()` {.smaller}
+
+```{r, echo = T}
+set.seed(3)
+cv.carseats=cv.tree(tree.carseats,FUN=prune.misclass)
+names(cv.carseats)
+cv.carseats
+```
+ 
+## Output explanation 
+
+ -  Note that, despite the name, `dev` corresponds to the cross-validation error rate in this instance. 
+ -  The tree with 9 terminal nodes results in the lowest
+cross-validation error rate, with 50 cross-validation errors.
+
+## Plotting CV errors 
+
+```{r, echo = T}
+par(mfrow=c(1,2))
+plot(cv.carseats$size,cv.carseats$dev,type="b")
+plot(cv.carseats$k,cv.carseats$dev,type="b")
+```
+
+## Prune the tree {.smaller}
+
+We now apply the `prune.misclass()` function in order to prune the tree to obtain the nine-node tree.
+
+```{r, echo = T}
+prune.carseats=prune.misclass(tree.carseats,best=9)
+plot(prune.carseats)
+text(prune.carseats,pretty=0, cex = 0.7)
+```
+
+## Pruned tree 
+
+ - How does the pruned tree do in terms of prediction? 
+
+```{r}
+tree.pred=predict(prune.carseats,Carseats.test,type="class")
+table(tree.pred,High.test)
+```
+
+Now precentage of correct prediction is `r (94+60)/200`. 
+
+## Different k
+
+```{r}
+prune.carseats=prune.misclass(tree.carseats,best=15)
+tree.pred=predict(prune.carseats,Carseats.test,type="class")
+table(tree.pred,High.test)
+```
+
+Percentage of correct predictions `r (86+62)/200` < `r (94+60)/200` (the best model by CV)
+
+## How does this compare to Logistic? {.smaller}
+
+```{r}
+glm.fits=glm(High~.-Sales,Carseats,family=binomial,subset=train)
+summary(glm.fits)
+```
+
+## Prediction {.smaller}
+
+```{r}
+glm.probs=predict(glm.fits,Carseats.test,type="response")
+contrasts(as.factor(High))
+glm.pred=rep("No",200)
+glm.pred[glm.probs>.5]="Yes"
+table(glm.pred,High.test)
+mean(glm.pred==High.test)
+```
+
+
+## Significant predictors drive the prediction. 
+
+```{r, fig.height=3}
+par(mfrow=c(1,2))
+plot(Carseats.test$ShelveLoc,glm.probs); abline(h=0.5)
+plot(Carseats.test$Price,glm.probs);abline(h=0.5)
+```
+
+## Linear Regression vs. Tree 
+
+  - Linear Regression: 
+$$
+f(X) = \beta_0 + \sum_{j=1}^{p}X_j \beta_j
+$$
+
+ -  Regression Tree Method:
+$$
+f(X) = \sum_{m=1}^{M} c_m 1_{(X \in R_m)}
+$$
+where $R_1, \ldots, R_m$ is a partition of the $X$-space. 
+
+ -  Which model is better? It depends on the problem at hand.
+
+
+## Which model is better?
+
+```{r, echo = F, out.height = "400px", out.width = "600px"}
+knitr::include_graphics("8_7.jpg")
+```
+
+If true decision boundary is linear, classical methods work well, if it's non-linear tree-based methods might work better. 
+
+## Regression 
+
+```{r}
+tree.car=tree(Sales~.,Carseats,subset=train)
+summary(tree.car)
+```
+
+## Plot Regression Tree
+
+```{r}
+plot(tree.car, type = "unif")
+text(tree.car,pretty=0,cex=0.7)
+```
+
+## CV for Regression Tree {.smaller}
+
+```{r, fig.height = 3}
+cv.car=cv.tree(tree.car)
+cv.car
+```
+
+## Plot the CV error 
+
+```{r}
+plot(cv.car)
+```
+
+## Manually plot the deviance 
+
+```{r}
+plot(cv.car$size,cv.car$dev,type='b')
+```
+
+## Prune the Regression Tree
+
+```{r}
+prune.car=prune.tree(tree.car,best=9)
+plot(prune.car,type = "unif")
+text(prune.car,pretty=0,cex=0.7)
+```
+
+## MSE with full tree {.smaller}
+
+```{r, fig.height = 3}
+yhat=predict(tree.car,newdata=Carseats[-train,])
+car.test=Carseats[-train,"Sales"]
+mean((yhat-car.test)^2)
+plot(yhat,car.test); abline(0,1)
+```
+
+## MSE with Pruned Tree {.smaller}
+
+```{r, fig.height = 3}
+yhat=predict(prune.car,newdata=Carseats[-train,])
+car.test=Carseats[-train,"Sales"]
+mean((yhat-car.test)^2)
+plot(yhat,car.test); abline(0,1)
+```
