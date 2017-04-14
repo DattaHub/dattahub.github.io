@@ -7,6 +7,7 @@ output: ioslides_presentation
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache=TRUE)
 ```
 
 ## Tree Based Methods 
@@ -285,4 +286,128 @@ yhat=predict(prune.car,newdata=Carseats[-train,])
 car.test=Carseats[-train,"Sales"]
 mean((yhat-car.test)^2)
 plot(yhat,car.test); abline(0,1)
+```
+
+
+# Bagging and Random Forest 
+
+Here we apply bagging and random forests to the Boston data, using the
+`randomForest` package in R.
+
+## We use the Boston housing data 
+
+```{r}
+library(MASS);data(Boston)
+str(Boston)
+```
+
+## Bagging 
+
+ - Bagging is a special case of a random forest with $m = p$. 
+ - `randomForest()` can perform both random forests and bagging.
+```{r, warning = F, message = F}
+library(randomForest)
+train = sample(1:nrow(Boston), nrow(Boston)/2)
+boston.test=Boston[-train,"medv"]
+bag.boston=randomForest(medv~.,data=Boston,subset=train,mtry=13,importance=TRUE)
+```
+
+ -  The argument `mtry=13` indicates that all 13 predictors should be considered for each split of the tree-in other words, that bagging should be done.
+
+## Bagging output 
+
+```{r}
+bag.boston
+```
+
+## Test error 
+
+```{r, fig.height = 3, fig.width = 3}
+yhat.bag = predict(bag.boston,newdata=Boston[-train,])
+mean((yhat.bag-boston.test)^2)
+plot(yhat.bag, boston.test); abline(0,1)
+```
+
+## A Single Tree 
+
+```{r, fig.height = 3, fig.width = 3}
+tree.boston=tree(medv~.,Boston,subset=train)
+yhat=predict(tree.boston,newdata=Boston[-train,])
+boston.test=Boston[-train,"medv"]
+mean((yhat-boston.test)^2)
+plot(yhat,boston.test);abline(0,1)
+```
+
+## Number of Trees 
+
+We could change the number of trees grown by `randomForest()` using the `ntree` argument:
+
+```{r}
+bag.boston=randomForest(medv~.,data=Boston,subset=train,mtry=13,ntree=25)
+yhat.bag = predict(bag.boston,newdata=Boston[-train,])
+mean((yhat.bag-boston.test)^2)
+```
+
+## Random Forest 
+
+  -  Growing a random forest proceeds in exactly the same way, except that we use a smaller value of the `mtry` argument.
+  -  By default, `randomForest()` uses $p/3$ variables when building a random forest of regression trees, and $\sqrt{p}$ variables when building a random forest of classification trees. 
+  -  Here we use `mtry = 6`.
+  
+## Random Forest 
+
+
+```{r}
+set.seed(1)
+rf.boston=randomForest(medv~.,data=Boston,subset=train,mtry=6,importance=TRUE)
+yhat.rf = predict(rf.boston,newdata=Boston[-train,])
+mean((yhat.rf-boston.test)^2)
+````
+
+The test set MSE is 11.31: this indicates that random forests yielded an
+improvement over bagging in this case.
+
+
+## Importance {.smaller}
+
+ -  Using the importance() function, we can view the importance of each
+variable.
+
+```{r}
+importance(rf.boston)
+```
+ 1.  Mean decrease of accuracy in predictions on the out of bag samples when a given variable is excluded from the model 
+ 2.  Measure of the total decrease in node impurity that results from splits over that variable, averaged over all trees.
+
+
+## Importance Plot
+
+```{r}
+varImpPlot(rf.boston)
+```
+
+## Compare Bagging and RF
+
+```{r}
+ntreeset = seq(10,300,by = 10)
+mse.bag = rep(0,length(ntreeset));mse.rf = rep(0,length(ntreeset))
+
+for(i in 1:length(ntreeset)){
+  nt = ntreeset[i]
+  bag.boston=randomForest(medv~.,data=Boston,subset=train,mtry=13,ntree=nt)
+  yhat.bag = predict(bag.boston,newdata=Boston[-train,])
+  mse.bag[i] = mean((yhat.bag-boston.test)^2)
+  
+  rf.boston=randomForest(medv~.,data=Boston,subset=train,ntree=nt)
+  yhat.bag = predict(rf.boston,newdata=Boston[-train,])
+  mse.rf[i] = mean((yhat.bag-boston.test)^2)
+}
+```
+
+## Plot the test error 
+
+```{r}
+plot(ntreeset,mse.bag,type="l",col=2,ylim=c(5,20))
+lines(ntreeset,mse.rf,col=3)
+legend("bottomright",c("Bagging","Random Forest"),col=c(2,3),lty=c(1,1))
 ```
