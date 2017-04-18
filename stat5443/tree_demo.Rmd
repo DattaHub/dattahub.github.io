@@ -294,6 +294,15 @@ plot(yhat,car.test); abline(0,1)
 Here we apply bagging and random forests to the Boston data, using the
 `randomForest` package in R.
 
+
+## Random Forest 
+
+ - Ensemble Learning: Generae many predictors and aggregate their results. 
+ - Two well-known methods: Boosting (Shapire et al. , 1998) and Bagging (Breiman, 1996)
+ - In boosting, successive trees give extra weight to points incorrectly predicted by earlier predictors. In the end, a weighted vote is taken for prediction. 
+  - In bagging, successive trees do not depend on earlier trees - each is independently constructed using a bootstrap sample of the data set.
+
+
 ## We use the Boston housing data 
 
 ```{r}
@@ -309,10 +318,13 @@ str(Boston)
 library(randomForest)
 train = sample(1:nrow(Boston), nrow(Boston)/2)
 boston.test=Boston[-train,"medv"]
-bag.boston=randomForest(medv~.,data=Boston,subset=train,mtry=13,importance=TRUE)
+bag.boston=randomForest(medv~.,data=Boston,subset=train,mtry=13,
+                        importance=TRUE)
 ```
 
- -  The argument `mtry=13` indicates that all 13 predictors should be considered for each split of the tree-in other words, that bagging should be done.
+ -  The argument `mtry=13` indicates that all 13 predictors should be considered for each split of the tree. 
+ -  In other words, bagging should be done.
+ - `importance=TRUE`: should importance of the predictors be assessed? 
 
 ## Bagging output 
 
@@ -340,18 +352,22 @@ plot(yhat,boston.test);abline(0,1)
 
 ## Number of Trees 
 
-We could change the number of trees grown by `randomForest()` using the `ntree` argument:
+ -  By default `ntree = 500`. 
+ -  We could change the number of trees grown by `randomForest()` using the `ntree` argument:
 
 ```{r}
-bag.boston=randomForest(medv~.,data=Boston,subset=train,mtry=13,ntree=25)
+bag.boston=randomForest(medv~.,data=Boston,subset=train,mtry=13,
+                        ntree=25)
 yhat.bag = predict(bag.boston,newdata=Boston[-train,])
 mean((yhat.bag-boston.test)^2)
 ```
 
+ -  This is still bagging as `mtry = 13`, but the test error has decreased. 
+
 ## Random Forest 
 
   -  Growing a random forest proceeds in exactly the same way, except that we use a smaller value of the `mtry` argument.
-  -  By default, `randomForest()` uses $p/3$ variables when building a random forest of regression trees, and $\sqrt{p}$ variables when building a random forest of classification trees. 
+  -  By default, `randomForest()` uses $p/3$ variables when building a random forest of regression trees, and $[\sqrt{p}]$ variables when building a random forest of classification trees. 
   -  Here we use `mtry = 6`.
   
 ## Random Forest 
@@ -411,3 +427,37 @@ plot(ntreeset,mse.bag,type="l",col=2,ylim=c(5,20))
 lines(ntreeset,mse.rf,col=3)
 legend("bottomright",c("Bagging","Random Forest"),col=c(2,3),lty=c(1,1))
 ```
+
+## Try three different sizes 
+
+```{r}
+ntreeset = seq(10,300,by = 10)
+mse.bag = rep(0,length(ntreeset));mse.rf1 = rep(0,length(ntreeset));
+mse.rf2 = rep(0,length(ntreeset));
+
+for(i in 1:length(ntreeset)){
+  nt = ntreeset[i]
+  bag.boston=randomForest(medv~.,data=Boston,subset=train,mtry=13,ntree=nt)
+  yhat.bag = predict(bag.boston,newdata=Boston[-train,])
+  mse.bag[i] = mean((yhat.bag-boston.test)^2)
+  
+  rf.boston=randomForest(medv~.,data=Boston,mtry = 6, subset=train,ntree=nt)
+  yhat.bag = predict(rf.boston,newdata=Boston[-train,])
+  mse.rf1[i] = mean((yhat.bag-boston.test)^2)
+  
+  rf.boston=randomForest(medv~.,data=Boston,mtry = 4, subset=train,ntree=nt)
+  yhat.bag = predict(rf.boston,newdata=Boston[-train,])
+  mse.rf2[i] = mean((yhat.bag-boston.test)^2)
+}
+```
+
+## and plot the test error 
+
+```{r}
+plot(ntreeset,mse.bag,type="l",col=2,ylim=c(5,20))
+lines(ntreeset,mse.rf1,col=3); lines(ntreeset,mse.rf2,col=4)
+legend("bottomright",c("Bagging","Random Forest (m = 6)",
+                       "Random Forest (m = 4)"),col=c(2,3,4), lty=c(1,1,1))
+```
+
+
