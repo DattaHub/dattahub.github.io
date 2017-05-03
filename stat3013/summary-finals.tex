@@ -1,0 +1,216 @@
+\documentclass[10pt,twocolumn]{article}
+%\documentclass[aos,preprint]{imsart} %IMS
+\RequirePackage[OT1]{fontenc} %IMS
+\usepackage[slantedGreek]{mathpazo}
+\usepackage[pdftex]{graphicx}
+\usepackage{amsfonts}
+\usepackage{setspace}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{lscape}
+%\usepackage{caption}
+\usepackage{subcaption}
+\setcounter{MaxMatrixCols}{30}
+\usepackage{suffix}
+\usepackage{color}
+\usepackage{multirow}
+\usepackage{bigstrut}
+% this order is important
+%\usepackage{hyperref}
+%\RequirePackage[colorlinks,citecolor=blue,urlcolor=blue]{hyperref} %IMS
+%%\usepackage[author-year]{amsrefs}
+
+\usepackage[square,sort,comma]{natbib}
+
+%\arxiv{1502.00560}
+\renewcommand{\baselinestretch}{1.2}
+
+\allowdisplaybreaks
+
+\numberwithin{equation}{section}
+
+\setlength{\textheight}{9.2in}
+\setlength{\textwidth}{6.5in}
+\setlength{\topmargin}{-36pt}
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+
+\renewcommand{\arraystretch}{1.5}
+\addtolength{\tabcolsep}{5pt}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\usepackage{array}
+
+\newcommand{\bit}{\begin{itemize}}
+\newcommand{\eit}{\end{itemize}}
+\newcommand{\bde}{\begin{description}}
+\newcommand{\ede}{\end{description}}
+
+%%%%%%
+\usepackage{color}
+\definecolor{DarkBlue}{rgb}{0.1,0.1,0.5}
+\definecolor{Red}{rgb}{0.9,0.0,0.1}
+\definecolor{Navy}{rgb}{0.00,0.00,0.30}
+\definecolor{Yellow}{rgb}{1.00,1.00,0.00}
+\definecolor{Gold}{rgb}{1.00,0.84,0.00}
+\definecolor{Lightgoldenrod}{rgb}{0.93,0.87,0.51}
+\definecolor{Goldenrod}{rgb}{0.85,0.65,0.13}
+\definecolor{Black2}{rgb}{0.00,0.00,0.00}
+\definecolor{orange}{rgb}{0.85,0.65,0.13}
+\definecolor{SkyBlue}{rgb}{0.941176,0.972549,1.}
+\definecolor{MyLightMagenta}{cmyk}{0.1,0.8,0,0.1}
+
+\usepackage{xcolor}
+% \highlight[<colour>]{<stuff>}
+\newcommand{\highlight}[2][yellow]{\mathchoice%
+  {\colorbox{#1}{$\displaystyle#2$}}%
+  {\colorbox{#1}{$\textstyle#2$}}%
+  {\colorbox{#1}{$\scriptstyle#2$}}%
+  {\colorbox{#1}{$\scriptscriptstyle#2$}}}%
+	
+\include{math-commands}
+
+\begin{document}
+%% The left and right page headers are defined here:
+\markboth{Datta, Jyotishka}{STAT 3013}
+
+%% Here are the title, author names and addresses
+\title{Summary for Finals} 
+\author{STAT 3013, Introduction to Probability}
+\date{\today}
+\maketitle
+\paragraph{Basic Properties}
+\ben
+\item For any event $A$ of sample space $\Omega$, the probability of $A$, denoted as $P(A)$ satisfies (1) $0 \le P(A) \le 1$, (2) $P(\Omega) = 1$ and (3) for mutually exclusive events, $A_i$, $i \ge 1$, $P(\cup_{i=1}^{\infty} A_i) = \sum_{i=1}^{\infty} P(A_i)$. 
+\item $P(A^c) = 1 - P(A)$. $P(A \cup B) = P(A) + P(B) - P(A \cap B)$. (Principle of Inclusion-Exclusion or PIE). 
+\een
+\paragraph{Conditional Probability and Independence}
+\ben 
+\item For any two events $E$ and $F$, the conditional probability of $E$ given $F$ is denoted by 
+\[
+P(E \mid F) = P(E \cap F)/P(F).
+\]
+\item $P(E) = P(E \mid F) P(F) + P(E \mid F^c) P(F^c)$.
+\item \textbf{Bayes rule} Let $F_i$, $i = 1, \ldots, n$ be mutually exclusive events whose union is the sample space $\Omega$. Then:
+\[
+P(F_j \mid E) = \frac{P(E \mid F_j)P(F_j)}{\sum_{i=1}^{n} P(E \mid F_i)P(F_i)}
+\]
+\item Two events $E$ and $F$ are said to be independent if they satisfy $P(E \cap F) = P(E)P(F)$. 
+\een
+\paragraph{Discrete Random Variable}
+\ben
+\item A real-valued function defined on the outcome of a probability experiment is called
+a random variable. 
+\item For \textit{any} random variable $X$, the distribution function is $F(x) = P(X \le x)$. 
+\item A random variable whose set of possible values is either finite or countably infinite
+is called discrete. For a discrete random variable: $p(x) = P(X = x)$ is called the probability mass function of $X$. Expectation is defined as $E(X) = \sum_{x: p(x) > 0} x p(x)$. 
+\item For any function $g$, $E(g(X)) = \sum_{x: p(x) > 0} g(x) p(x)$. 
+\item The variance of \textit{any} random variable $X$, denoted by $Var(X)$, is defined by: 
+\[
+Var(X) = E[(X - E[X])^2] = E[X^2] - (E[X])^2 
+\]
+\item For $k$ random variables $X_1, \ldots, X_k$ and constants $c_1, \ldots, c_k$,
+\[
+E(\sum_{i=1}^{k} c_i X_i) = c_i E(X_i)
+\]
+\item If in addition, $X_1, X_2, \ldots, X_k$ are independent: 
+\[
+Var(\sum_{i=1}^{k} c_i X_i) = c_i^2 Var(X_i)
+\]
+\item \textbf{Tail sum method} For a nonnegative integer-valued random variable: 
+\[
+E(X) = \sum_{n=0}^{\infty} P(X >n)
+\]
+\een
+\paragraph{Standard Discrete Distributions}
+\ben
+\item \textbf{Binomial$(n,p)$} Number of heads in $n$ coin tosses, each with probability $p$: 
+\begin{align*}
+\text{PMF: } p(x) &= \binom{n}{x} p^x (1-p)^{n-x}, x = 0, \ldots, n. \\
+E[X] & = np, Var[X] = np(1-p). 
+\end{align*}
+\item \textbf{Geometric($(p)$} Number of tosses to get the first head, $P(head) = p$. 
+\begin{align*}
+\text{PMF: } p(x) &= p(1-p)^{x-1}, x = 1, 2, \ldots, \\
+E[X] & = 1/p, Var[X] = (1-p)/p^2. 
+\end{align*}
+\item Geometric is memoryless: $P(X > m +n \mid X>m ) = P(X>n)$. 
+\item \textbf{Negative Binomial$(r,p)$} Number of tosses to get $r$ heads, $P(head) = p$. 
+Neg-Bin$(r,p)$ is sum of $r$ $Geom(p)$ r.v.s.
+\begin{align*}
+\text{PMF: } p(x) &= \binom{x-1}{r-1} p^r(1-p)^{x-r}, x \ge r\\
+E[X] & = r/p, Var[X] = r(1-p)/p^2. 
+\end{align*}
+\item \textbf{Poisson$(\lambda)$} Used to model number of events. 
+\begin{align*}
+\text{PMF: } p(x) &= \frac{e^{-\lambda}\lambda^x}{x!}, x \ge 0\\
+E[X] & = \lambda, Var[X] = \lambda
+\end{align*}
+\item \textbf{Hypergeometric$(n,N,m)$} Number of white balls selected when $n$ balls are randomly chosen from an urn that contains $N$ balls of which $m$ are white. Let $p = \frac{m}{N}$.
+\begin{align*}
+\text{PMF: } p(x) &= \frac{\binom{m}{x}\binom{N-m}{n-x}}{\binom{N}{n}}, x = 0, \ldots, m\\
+E[X] = np, & Var[X] = \frac{N-n}{N-1}np(1-p).
+\end{align*}
+\item An important property of the expected value is that the expected value of a sum of random variables is equal to the sum of their expected values:
+\[
+E\left[ \sum_{i=1}^{n} X_i\right] = \sum_{i=1}^{n} E[X_i] 
+\]
+\item If $X \equiv X_n \sim Bin(n, p), n \to \infty, p = p_n \to 0, np_n \to \lambda$ for some $0 < \lambda < \infty$, $X_n \approx \text{Poisson}(\lambda)$. This is called the \textbf{Poisson approximation to Binomial}. Useful for rare events modeling. 
+\een
+\paragraph{Continuous Distributions}
+\ben 
+\item A random variable $X$ is continuous if there is a nonnegative function $f$ , called the probability density function of $X$, such that, for any set $B$,
+\[
+P( X \in B) = \int_B f(x) dx \equiv P(a \le X \le b) = \int_{a}^{b} f(x) dx
+\]
+\item For a density $f$: $\int_{-\infty}^{\infty} f(x) dx = 1$. Useful for validating if a given function is a density and for finding normalizing constants. 
+\item Continuous random variable puts zero probability to discrete sets or single points. 
+\item If $X$ is continuous, its CDF $F(x)$ is differentiable and 
+\[
+\frac{d}{dx}F(x) = f(x) 
+\]
+\item The expected value of a continuous random variable $X$ is defined by
+$E[X] = \int_{-\infty}^{\infty} xf(x) dx$.
+\item For any function $g$: $E[g(X)] = \int_{-\infty}^{\infty} g(x) f(x) dx$. 
+\item \textbf{Uniform$(a,b)$}: Denoted by $X \sim \UnifRV(a,b)$
+\begin{align*}
+\text{PDF: } p(x) &= \begin{cases} \frac{1}{b-a} &\text{ if } a \le x \le b \\
+0 &\text{ otherwise}.
+\end{cases} \\
+E[X] & = \frac{b+a}{2}, Var[X] = \frac{(b-a)^2}{12} 
+\end{align*}
+\item \textbf{Normal$(\mu,\sigma)$}: Denoted by $X \sim \NormRV(\mu,\sigma)$
+\begin{align*}
+\text{PDF: } p(x) &= \frac{1}{\sqrt{2\pi} \sigma} e^{-\frac{(x-\mu)^2}{2\sigma^2}} \\
+E[X] & = \mu, Var[X] = \sigma^2. 
+\end{align*}
+\item If $X \sim \NormRV(\mu,\sigma)$, then $Z = \frac{X-\mu}{\sigma} \sim \NormRV(0,1)$. 
+\item $P(X \le x) = P(Z \le \frac{x-\mu}{\sigma}) \doteq \Phi(\frac{x-\mu}{\sigma})$.
+\item Probabilities about $X$ can be expressed in terms of probabilities about the standard normal variable $Z$, obtained from \textbf{Normal Table}.
+\item \textbf{Central Limit Thoerem:} When $n$ is large, the probability distribution function of a binomial random variable with parameters $n$ and $p$ can be approximated by that of a normal random variable having mean $np$ and variance $np(1 − p)$. 
+\een
+
+\end{document}
