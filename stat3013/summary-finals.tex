@@ -105,7 +105,7 @@
 \paragraph{Basic Properties}
 \ben
 \item For any event $A$ of sample space $\Omega$, the probability of $A$, denoted as $P(A)$ satisfies (1) $0 \le P(A) \le 1$, (2) $P(\Omega) = 1$ and (3) for mutually exclusive events, $A_i$, $i \ge 1$, $P(\cup_{i=1}^{\infty} A_i) = \sum_{i=1}^{\infty} P(A_i)$. 
-\item $P(A^c) = 1 - P(A)$. $P(A \cup B) = P(A) + P(B) - P(A \cap B)$. (Principle of Inclusion-Exclusion or PIE). 
+\item $P(A^c) = 1 - P(A)$. $P(A \cup B) = P(A) + P(B) - P(A \cap B)$. (Principle of Inclusion-Exclusion). 
 \een
 \paragraph{Conditional Probability and Independence}
 \ben 
@@ -122,8 +122,7 @@ P(F_j \mid E) = \frac{P(E \mid F_j)P(F_j)}{\sum_{i=1}^{n} P(E \mid F_i)P(F_i)}
 \een
 \paragraph{Discrete Random Variable}
 \ben
-\item A real-valued function defined on the outcome of a probability experiment is called
-a random variable. 
+\item A real-valued function defined on the outcome of an experiment is called a random variable. 
 \item For \textit{any} random variable $X$, the distribution function is $F(x) = P(X \le x)$. 
 \item A random variable whose set of possible values is either finite or countably infinite
 is called discrete. For a discrete random variable: $p(x) = P(X = x)$ is called the probability mass function of $X$. Expectation is defined as $E(X) = \sum_{x: p(x) > 0} x p(x)$. 
@@ -186,9 +185,9 @@ E\left[ \sum_{i=1}^{n} X_i\right] = \sum_{i=1}^{n} E[X_i]
 \[
 P( X \in B) = \int_B f(x) dx \equiv P(a \le X \le b) = \int_{a}^{b} f(x) dx
 \]
-\item For a density $f$: $\int_{-\infty}^{\infty} f(x) dx = 1$. Useful for validating if a given function is a density and for finding normalizing constants. 
+\item For a density unction $f$: $\int_{-\infty}^{\infty} f(x) dx = 1$. Useful for validating if a given $f$ is a density and for finding normalizing constants. 
 \item Continuous random variable puts zero probability to discrete sets or single points. 
-\item If $X$ is continuous, its CDF $F(x)$ is differentiable and 
+\item If $X$ is continuous, its CDF $F(x)$ is differentiable
 \[
 \frac{d}{dx}F(x) = f(x) 
 \]
@@ -210,7 +209,7 @@ E[X] & = \mu, Var[X] = \sigma^2.
 \item If $X \sim \NormRV(\mu,\sigma)$, then $Z = \frac{X-\mu}{\sigma} \sim \NormRV(0,1)$. 
 \item $P(X \le x) = P(Z \le \frac{x-\mu}{\sigma}) \doteq \Phi(\frac{x-\mu}{\sigma})$.
 \item Probabilities about $X$ can be expressed in terms of probabilities about the standard normal variable $Z$, obtained from \textbf{Normal Table}.
-\item \textbf{Central Limit Thoerem:} When $n$ is large, the probability distribution function of a binomial random variable with parameters $n$ and $p$ can be approximated by that of a normal random variable having mean $np$ and variance $np(1 − p)$. 
+\item \textbf{Central Limit Thoerem:} When $n$ is large, the probability distribution function of a binomial random variable with parameters $n$ and $p$ can be approximated by that of a normal random variable having mean $np$ and variance $np(1 - p)$. 
 \een
 
 \end{document}
