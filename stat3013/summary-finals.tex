@@ -126,7 +126,7 @@ P(F_j \mid E) = \frac{P(E \mid F_j)P(F_j)}{\sum_{i=1}^{n} P(E \mid F_i)P(F_i)}
 \item For \textit{any} random variable $X$, the distribution function is $F(x) = P(X \le x)$. 
 \item A random variable whose set of possible values is either finite or countably infinite
 is called discrete. For a discrete random variable: $p(x) = P(X = x)$ is called the probability mass function of $X$. Expectation is defined as $E(X) = \sum_{x: p(x) > 0} x p(x)$. 
-\item For any function $g$, $E(g(X)) = \sum_{x: p(x) > 0} g(x) p(x)$. 
+\item $E(g(X)) = \sum_{x: p(x) > 0} g(x)p(x)$. ($g$ any function)
 \item The variance of \textit{any} random variable $X$, denoted by $Var(X)$, is defined by: 
 \[
 Var(X) = E[(X - E[X])^2] = E[X^2] - (E[X])^2 
