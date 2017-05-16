@@ -1,9 +1,62 @@
 ---
-title: "R Demos"
+title: "Stat 5443: Computational Statistics"
+subtitle: "Syllabus and R demos"
 author: "Jyotishka Datta"
-date: "April 17, 2017"
+date: "Fall Semester, 2017-18"
 output: html_document
 ---
+# Syllabus 
+
+### Foundations: 
+1.  Computational Complexity 
+2.  Introduction to R / basic programming. 
+3.  Introduction to Algorithms and basic concepts (e.g. sorting)
+4.  Divide-and-Conquer Strategy. 
+5.  Linear Systems (Gaussian Elimination, Cholesky Decomposition etc.)
+
+### Sampling:
+1.  Accept-Reject Scheme 
+2.  Rejection sampling and Envelope.
+3.  Advanced Sampling Techniques: 
+    *  Monte Carlo Integration
+    *  Importance Sampling, SIR, Adaptive Rejection Sampling. 
+4. Markov Chain Monte Carlo. 
+    *  Basic Theory. 
+    *  Metropolis & Metropolis-Hastings. 
+    *  Gibbs sampler. 
+5.  Sampling strategies for Bayesian Inference. 
+
+### Statistical Learning: 
+1.  Unsupervised and Supervised Learning. 
+2.  Examples. 
+3.  Bias-Variance Decomposition. 
+4.  Accuracy vs. Model Interpretability. 
+
+### Unsupervised 
+1.  K-nearest neighbour 
+2.  PCA. 
+
+### Supervised 
+1. Modern Regression: (large $p$, small $n$: **wide** data)
+   *  Basics - Geometry of Regression. 
+   *  Subset selection: forward selection/backward selection/Best subset - AIC. 
+   *  Shrinkage and Selection: Ridge, LASSO, Elastic Net. 
+   *  __Cross-validation__ (general)
+   *  Bayesian Lasso and Horseshoe. 
+   *  Principal Components Regression. 
+
+2. Classification: 
+   *   Logistic Regression (with $\ell_1$ penalty). 
+   *   LDA and QDA. 
+   *   Comparison. 
+3. Decision Tree 
+4. Bagging, Boosting. 
+5. Bootstrap (general)
+
+### Random Forest. 
+### Support Vector Machines. 
+### Multidimensional Scaling. 
+
 
 # In-class examples
 
@@ -27,5 +80,8 @@ The book website also has a link to the MOOC for Statistical Learning by Prof.s 
 11. [Logistic Demo](http://dattahub.github.io/stat5443/logistic_demo.html)
 12. [Final Project Data](http://dattahub.github.io/stat5443/final_projectintro.html)
 13. [Decision Tree, Random Forest](http://dattahub.github.io/stat5443/tree_demo.html)
+14.  [Multidimensional Scaling](http://dattahub.github.io/stat5443/mds_demo.html)
+15.  [Support Vector Machine](http://dattahub.github.io/stat5443/svm_islr.html)
+
 
 
