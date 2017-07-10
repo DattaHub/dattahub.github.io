@@ -1,0 +1,117 @@
+---
+title: "The Curious Case of a Scale Parameter"
+author: "Jyotishka Datta"
+date: "July 9, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+## A Toy Example 
+
+We consider a 2-dimensional linear regression $Y = X \beta + \epsilon$ where $\beta = (20,20)$ and $X$ is an identity matrix. 
+```{r, eval = TRUE}
+set.seed(123)
+X = matrix(c(1,0,0,1),ncol=2,byrow=T)
+beta = c(20,20)
+(y = X%*%beta + rnorm(2))
+```
+
+We will use two different methods: horseshoe using the `horseshoe` R package and a Bayesian version of scaled / square-root Lasso. 
+
+### Horseshoe results 
+
+```{r}
+library(horseshoe)
+res <- horseshoe(y, X, method.tau = "truncatedCauchy",
+                 method.sigma = "Jeffreys",
+                 burn = 1000, nmc = 5000, alpha = 0.05)
+(postmean_HS <- res$BetaHat)
+(postmedian_HS <- res$BetaMedian)
+```
+
+The posterior mean and median estimates are shrunk away from the true mean value, 20. The posterior mode is even more wrong. 
+
+```{r}
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+(map_HS <- apply(res$BetaSamples,1,Mode))
+```
+
+This is unexpected given the tail-robustness property of horseshoe prior. The contour plot also shows that the density is concentrated around zero. 
+
+```{r}
+theta.smpls.hs <- t(res$BetaSamples)
+colnames(theta.smpls.hs) = c("theta1", "theta2")
+
+library(ggplot2)
+hs.2d.density<- ggplot(as.data.frame(theta.smpls.hs), aes(theta1, theta2)) +
+  geom_density2d()+stat_density2d(aes(fill = ..level..), geom="polygon")+
+  xlab(expression(theta[1]))+ylab(expression(theta[2]))+ggtitle("Horseshoe Regression")
+print(hs.2d.density)
+```
+
+### Bayesian Square Root Lasso Results 
+
+```{r}
+setwd("C:/Users/Jyotishka/OneDrive/Documents/R/sqlasso")
+source("bayes.sqrt.lasso.R")
+res2 <- bayes.sqrt.lasso(Y = y,method.tau ="gamma", r = 1, delta = 2, burn = 1000, nmc = 5000, verbose=FALSE)
+
+(postmean_SQL <- res2$ThetaHat)
+```
+
+The mode is close to the true value: 
+```{r}
+(map_SQL <- apply(res2$ThetaSave,2,Mode))
+```
+
+Now, the contour plot: 
+```{r}
+theta.smpls.sql <- res2$ThetaSave
+colnames(theta.smpls.sql) = c("theta1", "theta2")
+
+
+sql.2d.density<- ggplot(as.data.frame(theta.smpls.sql), aes(theta1, theta2)) +
+  geom_density2d()+stat_density2d(aes(fill = ..level..), geom="polygon")+
+  xlab(expression(theta[1]))+ylab(expression(theta[2]))+ggtitle("Bayesian Square-root Lasso")
+print(sql.2d.density)
+```
+
+### Not $\tau$, but $\sigma$
+
+The problem with horseshoe prior doesn't go away if one uses a half-Cauchy (non-truncated) prior on $\tau$ or use the Empirical Bayes method. 
+
+```{r}
+res <- horseshoe(y, X, method.tau = "fixed", method.sigma = "Jeffreys",
+                 burn = 1000, nmc = 5000, alpha = 0.05)
+(postmean_HS <- res$BetaHat)
+(postmedian_HS <- res$BetaMedian)
+(map_HS <- apply(res$BetaSamples,1,Mode))
+```
+
+However, if we use the Empirical Bayes method for estimating $\sigma^2$ instead of using the Jeffrey's prior on $\sigma^2$, the sitaution improves: 
+```{r}
+res3 <- horseshoe(y, X, method.tau = "fixed", method.sigma = "fixed",
+                 burn = 1000, nmc = 5000, alpha = 0.05)
+(postmean_HS <- res3$BetaHat)
+(postmedian_HS <- res3$BetaMedian)
+(map_HS <- apply(res3$BetaSamples,1,Mode))
+```
+
+The contour plot looks correct now. 
+```{r, echo = FALSE}
+theta.smpls.hs <- t(res3$BetaSamples)
+colnames(theta.smpls.hs) = c("theta1", "theta2")
+
+library(ggplot2)
+hs.2d.density<- ggplot(as.data.frame(theta.smpls.hs), aes(theta1, theta2)) +
+  geom_density2d()+stat_density2d(aes(fill = ..level..), geom="polygon")+
+  xlab(expression(theta[1]))+ylab(expression(theta[2]))+ggtitle("Horseshoe Regression (E-Bayes)")
+print(hs.2d.density)
+```
