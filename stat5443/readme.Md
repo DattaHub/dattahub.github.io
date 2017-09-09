@@ -2,7 +2,6 @@
 title: "Stat 5443: Computational Statistics"
 subtitle: "Syllabus and R demos"
 author: "Jyotishka Datta"
-date: "Fall Semester, 2017-18"
 output: html_document
 ---
 # Syllabus 
