@@ -15,17 +15,17 @@ Or, distribution-free Statistics, as we would like to call it.
 
 Here are some of the R tutorials in markdown format that I have written for this class. This is for class purposes only. 
 
-## Apps for fundamental concepts in probability 
+### Apps for fundamental concepts in probability 
 
 1.  [Empirical CDF converges to true CDF](https://jdatta.shinyapps.io/eCDFdemo/)
 2.  [Demoivre-Laplace Central Limit Theorem](https://jdatta.shinyapps.io/demoivre/)
 
-## Introduction to efficient computation in R (a very short tutorial)
+### Beyond basics: Introduction to a few topics in R 
 
 1.  [apply, sapply, lapply and functions in R](http://dattahub.github.io/stat4033/intro_R_pres.html)
 2.  [Matrix Example in R, introduction to parallel computing](http://dattahub.github.io/stat5443/matrix_R.html)
 
-## Topics in Nonparametric Statistics 
+### Topics in Nonparametric Statistics 
 
 1.  Quantile transformation, QQplot and Goodness of fit [Examples in R](http://dattahub.github.io/stat4033/rvgen.html)
 2.  One way Analysis of Variance (ANOVA): [Examples in R](http://dattahub.github.io/stat4033/anova_examples_doc.html)
