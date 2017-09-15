@@ -1,0 +1,36 @@
+---
+title: "R Tutorials"
+author: "Jyotishka Datta"
+date: "September 14, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Non-parametric Statistics 
+
+Or, distribution-free Statistics, as we would like to call it. 
+
+Here are some of the R tutorials in markdown format that I have written for this class. This is for class purposes only. 
+
+## Apps for fundamental concepts in probability 
+
+1.  [Empirical CDF converges to true CDF](https://jdatta.shinyapps.io/eCDFdemo/)
+2.  [Demoivre-Laplace Central Limit Theorem](https://jdatta.shinyapps.io/demoivre/)
+
+## Introduction to efficient computation in R (a very short tutorial)
+
+1.  [apply, sapply, lapply and functions in R](http://dattahub.github.io/stat4033/intro_R_pres.html)
+2.  [Matrix Example in R, introduction to parallel computing](http://dattahub.github.io/stat5443/matrix_R.html)
+
+## Topics in Nonparametric Statistics 
+
+1.  Quantile transformation, QQplot and Goodness of fit [Examples in R](http://dattahub.github.io/stat4033/rvgen.html)
+2.  One way Analysis of Variance (ANOVA): [Examples in R](http://dattahub.github.io/stat4033/anova_examples_doc.html)
+3.  ANOVA in R Demo in [ioslides presentation](http://dattahub.github.io/stat4033/aovexamples.html).
+4.  Tests for trends and associations [R Examples](http://dattahub.github.io/stat4033/association_demo.html#1)
+5.  Bootstrap [R Examples](http://dattahub.github.io/stat4033/bootstrap_demo.html#1)
+6.  Chi-square tests [R Examples](http://dattahub.github.io/stat4033/chisqdemo.html#1)
+7.  Kernel Density Estimation [R Examples](http://dattahub.github.io/stat4033/kde_demo.html#1)
