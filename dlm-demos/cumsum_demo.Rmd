@@ -1,0 +1,39 @@
+---
+title: "Cumulative Sum"
+author: "Jyotishka Datta"
+date: "October 12, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Cumulative Sum
+
+We generate $n = 1000$ random numbers 
+$X_1, \ldots, X_n \sim N(\mu, \sigma)$ 
+from a Normal distribution with mean $\mu = 0.033$ and standard deviation $\sigma = 5.19$ (These are values from some simulation experiments done before). 
+
+We want to see how the cumulative sum $S_k = \sum_{i=1}^{k} X_i$ behaves. Theoretically, $S_k \sim N(k\mu, \sqrt{k}\sigma)$. 
+We also want to normalize the cumulative summation data to make it look more normal. We can do the following transformation:
+$$
+\frac{S_k - k\mu}{\sqrt{k}\sigma} \sim N(\mu, \sigma), \; k = 1, \ldots, n. 
+$$
+
+The outputs are below. As expected, the normalization makes the series staionary but reduces the variance almost to zero as $k$ grows big. 
+
+```{r, fig.align='center'}
+set.seed(222)
+mu = 0.033
+sigma = 5.19
+x = rnorm(1000, mu, sigma)
+par(mfrow=c(1,1))
+plot(cumsum(x),type="l",col="red")
+lines(x,col="blue")
+z = cumsum(x)
+z_std = (cumsum(x)-mu*seq(1,length(x)))/(sqrt(seq(1,length(x)))*sigma)
+lines(z_std, lwd= 2, col="magenta")
+legend("topleft",c("N(mu,sigma)", "Cum-sum", "Normalized Cum-sum"), col=c("red","blue","magenta"),lty = c(1,1,1))
+```
+
