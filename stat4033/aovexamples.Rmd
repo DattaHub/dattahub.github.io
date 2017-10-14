@@ -1,7 +1,7 @@
 ---
 title: "ANOVA Examples in R"
 author: "Jyotishka Datta"
-date: "October 18, 2016"
+date: "October 18, 2017"
 output:
   ioslides_presentation:
     widescreen: true
