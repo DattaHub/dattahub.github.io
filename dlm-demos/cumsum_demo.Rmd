@@ -37,3 +37,25 @@ lines(z_std, lwd= 2, col="magenta")
 legend("topleft",c("N(mu,sigma)", "Cum-sum", "Normalized Cum-sum"), col=c("red","blue","magenta"),lty = c(1,1,1))
 ```
 
+If we have two sensors and measure the angle between them as 
+$$
+\theta_i = (x_{1i}-x_{2i})/d 
+$$
+where $d$ is the distance between the two sensors and $x_{1i}$ and $x_{2i}$ are the measurements between times $t(i)$ and $t(i+1)$. How would the cumulative sum of the angles behave? The variance would ideally depend on the distance $d$, but the general nature should be same as that of the cumulative sum of the Normal variates. 
+
+```{R, fig.align='center'}
+x1 = rnorm(1000, mu, sigma)
+x2 = rnorm(1000, mu, sigma)
+d = 2
+theta_large  = (x1-x2)/d
+theta_small = (x1-x2)/(d^10)
+
+par(mfrow=c(1,2))
+plot(cumsum(theta_small),type="l",col="red", ylab = "angle", main = "Large d")
+lines(theta_small,col="blue")
+legend("topleft",c(expression(Sigma(theta)),expression(theta)), col=c("red","blue"),lty = c(1,1))
+plot(cumsum(theta_large),type="l",col="red",ylab = "angle", main = "Small d")
+lines(theta_large,type="l",col="blue")
+legend("topleft",c(expression(Sigma(theta)),expression(theta)), col=c("red","blue"),lty = c(1,1))
+```
+
