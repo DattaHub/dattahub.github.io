@@ -1,7 +1,7 @@
 ---
 title: "Tests for trends and association"
 author: "Jyotishka Datta"
-date: "October 31, 2016"
+date: "October 25, 2017"
 output: ioslides_presentation
 ---
 
@@ -64,6 +64,7 @@ cor.test(log(cars$speed),log(cars$dist))
 ```
 
 ## Remember 
+
 1.  $X$ and $Y$ independent $\Rightarrow$ $\rho_{X,Y} = 0$, but not the other way round, unless $X,Y$ are jointly normal. 
 2. Correlation $\not \Rightarrow$ Causation. There could be a **lurking** variable, causing a **spurious** relationship. 
 3. Lots of hilarious examples in 
@@ -77,7 +78,20 @@ cor.test(log(cars$speed),log(cars$dist))
 x = c(-5,-4,-3,-2,-1,1,2,3,4,5);y = x^2 
 cor(x,y)
 ```
-```{r, echo = F,fig.width = 5, fig.height=4,fig.align='center'}
+```{r, echo = F,fig.width = 5, fig.height=3,fig.align='center'}
+plot(x,y,type="p")
+```
+
+## Linear is the key {.smaller}
+
+- Here $\rho_{X,Y} = 1$ only for a perfect monotonic 'linear' increasing relationship. 
+
+```{r, echo = T,fig.width = 4, fig.height=4,fig.align='center'}
+x = (1:7) ;y = x^4
+cor(x,y)
+```
+- Correlation is not 1 but there is a perfect relationship, only non-linear. 
+```{r, echo = F,fig.width = 5, fig.height=3,fig.align='center'}
 plot(x,y,type="p")
 ```
 
