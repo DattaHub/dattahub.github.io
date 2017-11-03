@@ -1,0 +1,81 @@
+---
+title: "Test of trend and association"
+subtitle: "More examples"
+author: "Jyotishka Datta"
+date: "November 4, 2017"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## In class example {.small}
+
+```{r, echo = T}
+x = c(1,	5,	9,	7,	4,	6,	8,	2,	3)
+y = c(4,	3,	6,	8,	2,	7,	9,	1,	5)
+cor(x,y, method = "spearman")
+cor.test(x,y, method = "spearman")
+```
+
+## In class example {.small}
+
+How good is the  normal approximation?
+
+```{r, echo = T}
+x = c(1,5,9,7,4,6,8,2,3)
+y = c(4,3,6,8,2,7,9,1,5)
+n = length(x)
+r_s = cor(x,y, method = "spearman")
+(normal.p.value = 2*(1 - pnorm(sqrt(length(x)-1)*r_s)))
+(t.p.value = 2*(1 - pt((r_s*sqrt(n-2))/sqrt(1-r_s^2),df = n-2)))
+```
+
+- The exact P-value is 0.03687. Which one is closer? 
+
+
+## In class example {.small}
+
+```{r, echo = T}
+x = c(1,	5,	9,	7,	4,	6,	8,	2,	3)
+y = c(4,	3,	6,	8,	2,	7,	9,	1,	5)
+cor.test(x,y, method = "kendall")
+```
+
+## In class example {.small}
+
+Using the Normal approximation: 
+$$
+Z = 3 \sqrt{n(n-1)}\tau/\sqrt{2(2n+5)}
+$$
+
+```{r, echo = T}
+x = c(1,5,9,7,4,6,8,2,3)
+y = c(4,3,6,8,2,7,9,1,5)
+n = length(x)
+T = cor(x,y, method = "kendall")
+Z = 3*sqrt(n*(n-1))*T/sqrt(2*(2*n+5))
+normal.p.value = 2*(1 - pnorm(Z))
+cat("P value = ", normal.p.value, "\n")
+```
+
+- Exact P-value = 0.04462. 
+
+## Divorce Example - Mann's Test (Kendall's)  {.small}
+
+```{r,echo = TRUE}
+year = seq(1945,1985,by=5)
+divorce.rate = c(3.5,	2.6,	2.3,	2.2,	2.5,	3.6,
+                 4.8,	5.2,	5)
+cor.test(year,divorce.rate, method = "kendall")
+```
+
+## Divorce Example - Daniel's Test (Separman's)
+
+```{r,echo = TRUE}
+year = seq(1945,1985,by=5)
+divorce.rate = c(3.5,	2.6,	2.3,	2.2,	2.5,	3.6,	
+                 4.8,	5.2,	5)
+cor.test(year,divorce.rate, method = "spearman")
+```
