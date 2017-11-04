@@ -1,0 +1,84 @@
+---
+title: "Linear Growth of Sensors"
+author: "Jyotishka Datta"
+date: "November 4, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+### Sensor Data
+
+The sensor data gives us the following information: 
+
+G-code Instruction: $GX_k$, the global position based on G-code movement at time $t_k$, and th sensor Measurement: $SX_k$, the global measured position by sensor at time $t_k$.
+
+The time points $t_k$ are not given but we can assume that the time points are $1,2,\ldots,n$, where $n$ is the total number of observations. 
+
+```{r, echo = F, fig.height=4, fig.align = 'center'}
+library(stargazer)
+setwd("C:\\Users\\Jyotishka Datta\\Google Drive\\RobotPositioning\\R Codes")
+sensor <- read.csv(file="first-18-xy-couple-adaptive.csv",header=T,
+                   sep=",", na.strings='NULL',
+                   colClasses =rep("numeric",11))
+sensordata = cbind(data.frame(Time=seq(1:length(sensor$sx1))),sensor)
+attach(sensordata)
+plot(Time,sx1,col=rgb(1,0,0,0.2),ylim=c(-100,2000))
+lines(Time,gx,col=rgb(0,0,1,0.2))
+legend("topleft",c("sx1","gx"),pch=c(1,1),col=c("red","blue"))
+
+```
+
+### Linear Growth?
+
+If we have only the G-code but no other sensors, a simple way to model the sensor positional variation would be as a linear combination of G-code position plus a deviation that is a time-dependent random variable. As a linear model, this could be written as: 
+
+$$
+sx_{1k} = \alpha_1 + \beta_1 \times t_k + \gamma_1 \times gx_{1k} + \epsilon_k \\
+sy_{1k} = \alpha_2 + \beta_2 \times t_k + \gamma_2 \times gy_{1k} + \nu_k, \; k = 1, \ldots, n.
+$$
+
+Where the $\alpha_i,\beta_i, \gamma_i$ coefficients are to be estimated from the data fiven. If $\beta_1, \beta_2$ come out as significant, then time has an effect. 
+
+```{r, results = "asis"}
+
+m1 <- lm(sx1 ~ Time + gx,data = sensordata)
+m2 <- lm(sy1 ~ Time + gy,data = sensordata)
+
+stargazer(m1,m2, omit.stat = c("n", "adj.rsq","rsq"), title="Results from Linear Model", type ='html')
+```
+
+### Interpretation and de-trending 
+
+The summary of the linear model fitted tells us that time is a significant variable for both $sx_1$ and $sy_1$ with a negative trend ($\beta_1 = -0.011$ and $\beta_2 = -0.007$) with very small P-values (as expected). 
+Furthermore, the coefficients of $gx$ and $gy$ are close to 1 (1.013 and 1.038 respectivel). 
+
+```{r, echo = F, eval = F, fig.height=4, fig.align = 'center'}
+par(mfrow=c(1,2))
+plot(m1$residuals,type="l")
+plot(m2$residuals,type="l")
+```
+
+Now if we want to get back sensor psoitions without the time-dependent trend, we can simply look at 
+$$
+\tilde{sx}_{1k} = sx_{1k} -  \hat\beta_1 \times t_k \\
+\tilde{sy}_{1k} = sy_{1k} -  \hat\beta_2 \times t_k
+$$
+
+These should align well with the g-code - as the following figure shows: 
+
+
+```{r,echo = T, fig.height=4, fig.align = 'center'}
+(beta1 = m1$coefficients[2])
+(beta2 = m2$coefficients[2])
+
+par(mfrow=c(1,2))
+plot(sx1,sy1,type="l", main = "Original Data")
+plot(sx1-beta1*Time, sy1-beta2*Time, type="l", main = "Detrended Data")
+```
+
+More importantly, this can be done online. We can estimate the time coefficients for a smaller number of observations to de-trend the entire series, or, simply keep track of the time coefficients in an online manner. If it starts getting significance, simply subtract it from the original series. 
+
+
