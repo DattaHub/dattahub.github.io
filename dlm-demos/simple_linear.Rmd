@@ -69,7 +69,6 @@ $$
 
 These should align well with the g-code - as the following figure shows: 
 
-
 ```{r,echo = T, fig.height=4, fig.align = 'center'}
 (beta1 = m1$coefficients[2])
 (beta2 = m2$coefficients[2])
@@ -78,6 +77,8 @@ par(mfrow=c(1,2))
 plot(sx1,sy1,type="l", main = "Original Data")
 plot(sx1-beta1*Time, sy1-beta2*Time, type="l", main = "Detrended Data")
 ```
+
+**We can possibly use this de-trended series as our new sensor positions. The only change is removing a time component**. 
 
 More importantly, this can be done online. We can estimate the time coefficients for a smaller number of observations to de-trend the entire series, or, simply keep track of the time coefficients in an online manner. If it starts getting significance, simply subtract it from the original series. 
 
