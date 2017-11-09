@@ -1,0 +1,193 @@
+---
+title: "DLM-Sensor"
+author: "Jyotishka Datta"
+date: "November 8, 2017"
+output: 
+  ioslides_presentation:
+    widescreen: true
+    smaller: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,warning = FALSE, message = FALSE)
+```
+
+## Dynamic Linear Model 
+
+Dynamic linear models are special cases of state space model where distributions are assumed to be Gaussian. 
+$$ 
+y_t = F_t \theta_t + \nu_t, \quad \nu_t \sim N_m(0, V_t) \\
+\theta_t = G_t \theta_{t-1} + \omega_t, \quad \omega_t \sim N_p(0, W_t)
+$$
+The model is completed by specifying a prior: 
+$$
+\theta_0 \sim N(m_0, C_0)
+$$
+
+## Sensor data
+
+-  In DLM, $y_t$ and $\theta_t$ are $m$ and $p$ dimensional random vectors, respectively. 
+- $y_t$ observed data, $\theta_t$ latent, unobserved state. 
+-  $F_t$, $G_t$, $V_t$ and $W_t$are real matrices of the appropriate dimensions.
+-  We can take $y_t$ as observed data (sensor, gcode etc.) and $\theta_t$ as the true position of the robot.
+-  We want to learn $\theta_t$. 
+
+## Random Walk plus noise model 
+
+- A simple model is the random walk plus noise model where $F_t$, $G_t$, $V_t$ and $W_t$ do not depend on time. 
+
+$$
+y_t = \theta_t + \nu_t, \quad \nu_t \sim N_m(0, V_t) \\
+\theta_t = \theta_{t-1} + \omega_t, \quad \omega_t \sim N_p(0, W_t)
+$$
+
+## Local Linear Trend 
+
+$$
+y_t = \mu_t + \nu_t, \quad \nu_t \sim N_m(0, V_t) \\
+\mu_t = \mu_{t-1} + \delta_{t-1} + \omega_t^{\mu}, \quad \omega_t^{\mu} \sim N(0, W^{\mu}) \\
+\delta_t = \delta_{t-1} + \omega_t^{\delta}, \quad \omega_t^{\delta} \sim N(0, W^{\delta})
+$$
+
+-  This model is used to describes dynamic of straight line observed with noise. 
+
+-  levels $\mu_t$ which are locally linear function of time. 
+
+-  straight line if $W^{\mu}$ and $W^{\delta}$ are equal to 0. 
+
+-  This might be an useful model. Look at the plot !
+
+## Another way 
+
+$$
+y_t = \mu_t + \nu_t, \quad \nu_t \sim N_m(0, V_t) \\
+\Delta \mu_t = \delta_{t-1} + \omega_t^{\mu}, \quad \omega_t^{\mu} \sim N(0, W^{\mu}) \\
+\Delta \delta_t = \omega_t^{\delta}, \quad \omega_t^{\delta} \sim N(0, W^{\delta})
+$$
+- $y_t$ : sensor measurement, $\mu_t$: g-code. 
+- $\delta_t$: true position. 
+- $V_t$: measurement error. 
+- $W^{\delta} + W^{\mu}$: movement error. 
+
+## Plot 
+
+```{r, echo = F, fig.height=4, fig.align = 'center'}
+library(stargazer)
+setwd("C:\\Users\\Jyotishka Datta\\Google Drive\\RobotPositioning\\R Codes")
+sensor <- read.csv(file="first-18-xy-couple-adaptive.csv",header=T,
+                   sep=",", na.strings='NULL',
+                   colClasses =rep("numeric",11))
+sensordata = cbind(data.frame(Time=seq(1:length(sensor$sx1))),sensor)
+attach(sensordata)
+plot(Time,sx1,col=rgb(1,0,0,0.2),ylim=c(-100,2000))
+lines(Time,gx,col=rgb(0,0,1,0.2))
+legend("topleft",c("sx1","gx"),pch=c(1,1),col=c("red","blue"))
+
+```
+
+- Looks like a linear trend !
+
+## Simple detrend 
+
+-  There is a linear trend. $\mu_t$ in model. 
+```{r, echo = T}
+library(pracma)
+plot(detrend(sx1, tt = 'linear'),type="l", main = 'Detrended Time Series')
+```
+
+## Decompose the time series 
+
+```{r,echo = F, fig.height = 5}
+tsx1 = ts(sx1, frequency = 4)
+decompose_sensor1 = decompose(tsx1,'additive')
+plot(decompose_sensor1)
+```
+
+## Local Linear Trend Model 
+
+```{r, echo = T, cache = TRUE}
+library(dlm)
+# Model Construction
+buildLinearTrend <- function(psi) dlmModPoly(2, dV = psi[1], dW = psi[2:3], C0 = diag(1e8, 2))
+# Model Estimation
+mleLinearTrend <- dlmMLE(sx1, parm = c(0.2, 120, 20),build = buildLinearTrend, lower = c(1e-7, 0, 0))
+# Checking convergence
+mleLinearTrend$conv
+# Estimated variances 
+(mleLinearTrend$par)
+# Construct Final Model
+linearTrend <- buildLinearTrend(psi = mleLinearTrend$par)
+```
+
+## Filtering
+
+-  **Filtering**: Estimates of $\theta_t$ given information available time $t$. 
+-  ** Smoothing**: Estimates of $\theta_t$ given information available time $T$.
+- `dlmFilter` for filtering. 
+-  `dlmSmooth` for smoothing. 
+
+```{R, echo = T}
+library(dlm)
+lin.f <- dlmFilter(y = sx1, mod = linearTrend)
+class(lin.f)
+```
+
+## dlmFilter 
+```{r, echo = T}
+names(lin.f)
+```
+
+-  `dlmFilter` returns 
+1. the series of filtering means $m_t = E(\theta_t \mid y_t)$,
+2. the series of filtering variances $C_t = Var(\theta_t \mid y_t)$, 
+3. the series of one-step forecasts for the state $a_t = E(\theta_t \mid y_{t-1})$, 
+4. the series of one-step forecast variances for the state $R_t = Var(\theta_t \mid y_{t-1})$ and 
+5. the series of one-step forecasts for the observation $f_t = E(y_t \mid y_{t-1})$.
+
+## Smooting 
+
+-  dlmSmooth returns:
+1.  the series of smoothing means $s_t=E(\theta_t \mid y_T)$. 
+2.  the series of smoothing variances $S_t=Var(\theta_t \mid y_T)$ : includes t=0. 
+
+```{r, echo = T}
+# Optimal estimates of theta_t given information available at time T.
+lin.s <- dlmSmooth(lin.f)
+names(lin.s)
+```
+
+## Plot $f_t$ and $s_t$
+
+Plot filtered $f_t = E(y_t \mid y_{t-1})$ and smoothing means $s_t=E(\theta_t \mid y_T)$. 
+
+```{r, echo = F}
+par(mfrow=c(1,2))
+plot(Time,lin.f$f,type="l", col=rgb(0,0,1,0.5))
+legend("topleft",c("Filtered"),pch=c(1),col=c("blue"))
+plot(Time,lin.s$s[-1,2],type="l", col=rgb(0,0,1,0.5))
+legend("topleft",c("Smoothed"),pch=c(1),col=c("blue"))
+```
+
+## y-position? 
+
+```{r, echo = T, cache = T}
+mleLinearTrend <- dlmMLE(sy1, parm = c(0.2, 120, 20),build = buildLinearTrend, lower = c(1e-7, 0, 0))
+# Checking convergence
+mleLinearTrend$conv
+# Estimated variances 
+(mleLinearTrend$par)
+# Construct Final Model
+linearTrend <- buildLinearTrend(psi = mleLinearTrend$par)
+lin.f2 <- dlmFilter(y = sy1, mod = linearTrend)
+lin.s2 <- dlmSmooth(lin.f2)
+```
+
+## Plot filtered and smoothed series for y 
+
+```{r, echo = T}
+par(mfrow=c(1,2))
+plot(Time,lin.f2$f,type="l", col=rgb(0,0,1,0.5))
+plot(Time,lin.s2$s[-1,2],type="l", col=rgb(0,0,1,0.5))
+```
+
+
