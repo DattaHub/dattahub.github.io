@@ -1,0 +1,56 @@
+---
+title: "Simulated Data"
+author: "Jyotishka Datta"
+date: "November 15, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = T)
+```
+
+## Correct Simulation Model for Sensors
+
+My hypothesis is that there is a time component and this simulation study supports that further. 
+
+## Basic Idea
+
+We will read the g-code and sensor positions from the real data, then try to simulate the sensor position from the g-code by adding random white noise to it with a time component and then show that the data generated using this scheme is similar to the real data. 
+
+```{r, echo = T}
+rm(list=ls())
+setwd("C:\\Users\\Jyotishka Datta\\Google Drive\\RobotPositioning\\R Codes")
+sensor <- read.csv(file="first-18-xy-couple-adaptive.csv",header=T,
+                   sep=",", na.strings='NULL',
+                   colClasses =rep("numeric",11))
+sensordata = cbind(data.frame(Time=seq(1:length(sensor$sx1))),sensor)
+attach(sensordata)
+```
+
+## Simulation Scheme: 
+
+Hypothesis: The true position is g-code plus error and the sensor measurement is true position plus **a linear trend** plus a random error. The **linear trend** is critical !
+
+$$
+tx_i = gx_i + w_i , \quad w_i \sim N(0, W) \\
+sx_i = gx_i + \beta~ \times t_i + \nu_i, \quad \nu_i \sim N(0, V)
+$$
+
+where $tx_i$, $gx_i$ and $sx_i$ denote the true position, the G-code and the sensor measurement at time = $t_i$. The $\beta \times t_i$ term is the linear trend. 
+
+A small $\beta$ means the error accumulated per time epoch is very small, the cumulative effect is significant.
+
+For generating the plots, I took $\beta = -0.01$, a small negative slope and the variances as $W = 2$ and $V = 5$. 
+
+```{r, echo = T}
+tx = gx + rnorm(length(Time),0,2)
+sx = gx - 0.01*Time + rnorm(length(Time),0,5) ## added a time component
+par(mfrow = c(1,2))
+plot(Time,sx,type="l",col=rgb(1,0,0,0.5), main = "Simulated")
+plot(Time, sx1, type = "l", main = "real")
+```
+
+Why is this important? 
+This is same as the linear trend model that I was fitting earlier. 
+The linear trend model tries to estimate the parameters from the data and then calculate the forecast and smoothing. 
+
