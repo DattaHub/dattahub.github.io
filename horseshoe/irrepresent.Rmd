@@ -6,7 +6,19 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = F, warning = F)
+knitr::opts_chunk$set(echo = TRUE, message = F, warning = F, cache = T)
+```
+
+```{R, echo = F}
+library(glmnet)
+library(monomvn)
+library(bayesm)
+library(plyr)
+library(lars)
+library(horseshoe)
+library("parallel")
+library("foreach")
+library("doParallel")
 ```
 
 ## Background
@@ -49,29 +61,15 @@ We simulated data with $n = 100, p = 32$ and $s_0 = 5$ with the sparse coefficie
 Zhao et al. (2006) showed that the irrepresentability condition may not hold for such a design matrix. In fact, in our simulation studies the $\eta_\infty$'s for the 100 simulated designs were between $[-1.02, 0.36]$. We expect the Lasso to perform well when $\eta_\infty>0$ and poorly when $\eta_\infty<0$. We generate $n = 100$ design matrices and for each design, 100 simulations were conducted by generating the noise vector from $N(0, \sigma^2 I)$. 
 
 ```{r, echo = T}
-library(glmnet)
-# library(BayesVarSel)
-library(monomvn)
-library(bayesm)
-library(plyr)
-library(lars)
-library(horseshoe)
-library("parallel")
-library("foreach")
-library("doParallel")
-
 no_cores <- detectCores()-1
 RNGkind("L'Ecuyer-CMRG")
 cl <- makeCluster(no_cores)
 registerDoParallel(cl)
 clusterSetRNGStream(cl, 13)
 
+niter = 100
 
-niter = 10
-n_inf = rep(0,niter)
-prop_true_hs = rep(0,niter)
-prop_true_lasso = rep(0,niter)
-
+# Uncomment this if you want a progress bar
 # pb <- winProgressBar(title="Progress bar", label="0% done", min=0, max=100, initial=0)
 
 n=100;p=32
@@ -89,7 +87,7 @@ res<- foreach(i = 1:niter, .packages = c("bayesm","horseshoe","glmnet"))%dopar%{
     fx <- x%*% beta
     A <- t(x[,-(1:p1)])%*%x[,(1:p1)]%*%solve((t(x[,(1:p1)])%*%x[,(1:p1)]))%*%rep(1,p1)
     n_inf <- 1-norm(A,'i')
-    reps = 10
+    reps = 50
     mp_hs = rep(0,reps)
     mp_lasso = rep(0, reps)
 
@@ -101,8 +99,7 @@ res<- foreach(i = 1:niter, .packages = c("bayesm","horseshoe","glmnet"))%dopar%{
       ## Using horseshoe
       res <- horseshoe(y, x, method.tau = "truncatedCauchy",
                        method.sigma = "Jeffreys", burn = 1000, nmc = 1000)
-      hs_ind <- HS.var.select(res, y, method = "intervals") #selected betas
-      
+      hs_ind <- HS.var.select(res, y, method = "intervals")
       mp_hs[j] <- sum((hs_ind!=index))
       
       lasso.mod = glmnet(x,y,alpha = 1)
@@ -132,7 +129,7 @@ Figure below shows the percentage of correctly selected model as a function of t
 As expected, Lasso's variable selection performance is crucially dependent on the irrepresentability condition but the Horseshoe prior almost always recovers the true sparse $\beta$ vector irrespective of $\eta_\infty$.
 
 ```{R, echo = F, fig.align = 'center'}
-reps = 10
+reps = 50
 
 prop_true <- matrix(unlist(res), nrow = reps, ncol = 3, byrow = TRUE)
 ## write.table(prop_true, "prop_true_100_100_parallel.csv", sep=",")
