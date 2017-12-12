@@ -1,0 +1,299 @@
+---
+title: "Multidimensional Scaling"
+author: "Jyotishka Datta"
+date: "April 19, 2017"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache=TRUE)
+```
+
+## Multidimensional Scaling
+
+ -  Basic Question: How to represent any data in two dimensions?
+
+ 1.  Projection 
+ 2.  Squeeze data onto a table: close points stay close. 
+
+ -  Both ideas yield sensible visualization - but show a different aspect of the data. 
+
+## Which idea is better? 
+
+```{r, echo = F, out.height = "400px", out.width = "600px"}
+knitr::include_graphics("elephant.jpg")
+```
+
+## Idea of MDS 
+
+ -  Represent high-dimensional point cloud in few (usually 2) dimensions keeping distances between points similar.
+ -  Useful tool in visualizing any big data-set, specially for clustering purposes. 
+ -  Is a popular exploratory tool. Used before any inferential procedure. 
+## Goal of MDS 
+
+ - Given pairwise dissimilarities, reconstruct a map that preserves distances.
+ -  From any dissimilarity (no need to be a metric)
+ -  Reconstructed map has coordinates $\mathbf{x}_i = (x_{i1}, x_{i2})$ and the
+natural distance $\Vert x_i - x_j \Vert^2$.
+ - MDS is a family of different algorithms, each designed to
+arrive at optimal low-dimensional configuration (p = 2 or 3)
+ - Includes: Classical MDS, Metric MDS and Non-metric MDS. 
+ 
+## Examples first - Classical MDS
+  - Problem: Given Euclidean Distance between points, recover the position of the points. 
+ - Example: Road distance between 21 european cities
+
+```{r}
+library(datasets); class(eurodist)
+```
+
+```{}
+                Athens Barcelona Brussels Calais Cherbourg Cologne
+Barcelona         3313                                            
+Brussels          2963      1318                                  
+Calais            3175      1326      204                         
+Cherbourg         3339      1294      583    460                  
+Cologne           2762      1498      206    409       785  
+```
+
+## First Try MDS
+
+```{r}
+eurocmd <- cmdscale(eurodist)
+plot(eurocmd, type = "n")
+text(eurocmd, rownames(eurocmd), cex = 0.7)
+```
+
+## Do we recover? 
+
+```{r, echo = F, out.height = "400px", out.width = "600px"}
+knitr::include_graphics("euromap.jpg")
+```
+
+- Can identify points up to shift, reflection and rotation. 
+
+## Flip Axes 
+
+```{r}
+plot(eurocmd[,1], -eurocmd[,2], type = "n", asp = 1)
+text(eurocmd[,1], -eurocmd[,2], rownames(eurocmd), cex = 0.7)
+```
+
+- Can identify points up to shift, reflection and rotation.
+
+## Another Example {.smaller}
+
+ - Air pollution in US Cities 
+```{r}
+data("USairpollution", package = "HSAUR2")
+summary(USairpollution)
+dat <- USairpollution # less typing
+```
+ - Some variables have larger range - need to standardise. 
+
+## Try MDS at 2-D {.smaller}
+
+```{r}
+xs <- apply(dat, 2, function(x) (x - min(x))/(diff(range(x))))
+poldist <- dist(xs)
+pol.mds <- cmdscale(poldist, k = 2, eig = TRUE)
+x <- pol.mds$points
+pol.mds
+```
+
+
+## Plot the 2-D map 
+
+```{r}
+plot(x[,1], x[,2], type = "n")
+text(x[,1], x[,2], labels = rownames(x), cex = 0.7)
+```
+
+## Star plot {.smaller}
+
+```{r}
+stars(xs, draw.segments = TRUE, key.loc = c(15,2))
+```
+ - Jacksonville and New Orleans have similar profile. 
+
+## Thoery of MDS 
+
+ - Classical MDS: Euclidean distance between $n$ objects in $p$ dimensions. 
+ - Output: Position of points upto rotation, reflection, shift. 
+ - Two steps: 
+ 1.  Compute inner product matrix $B = X X^T$ from distances.
+ 2.  Compute positions from $B$.
+
+## Distance  
+ 
+ -  Distance, dissimilarity and similarity (or proximity) are defined for any pair of objects in any space. 
+ -  In mathematics, a distance function (that gives a distance between two objects) is also called metric, satisfying: 
+ 
+$$
+ d(x,y) \ge 0 \\
+ d(x,y) = 0 \text{ iff } x = y \\
+ d(x,y) = d(y,x) \\
+ d(x,z) \le d(x,y) + d(y,z) 
+$$
+ 
+## Thoery of MDS 
+
+ - Given a dissimilarity matrix $D = (d_{ij})$, MDS seeks to find $x_1, \ldots, x_n \in \mathbb{R}^p$, such that: 
+$$
+d_{ij} \approx \Vert x_i - x_j \Vert^2 \text{ as close as possible}
+$$
+
+-  Oftentimes, for some large $p$, there exists a configuration $x_1, \ldots, x_n$ with exact distance match $d_{ij} = \Vert x_i - x_j \Vert^2$. 
+ -  In such a case $d$ is called a Euclidean distance.
+ -  There are, however, cases where the dissimilarity is distance, but
+there exists no configuration in any $p$ with perfect match. 
+ - Such a distance is called non-Euclidean distance.
+ 
+## Thoery (continued)
+
+ - Suppose for now we have Euclidean distance matrix $D = (d_{ij})$
+ - We want to find $(x_1, \ldots, x_n)$ such that $d_{ij} = dist(x_i,x_j)$.
+ - Not unique solution: $x^* = x + c$. 
+ - Assume the observations are centered. 
+ 
+## Thoery (hand-waving)
+
+ - Find inner product matrix $B = X X^T$ instead of $X$. 
+ - Conenct to distance: $d_{ij}^2 = b_{ii}+b_{jj}-2b_{ij}$.
+ - Center points to avoid shift invariance. 
+ - Invert relationship: 
+$$
+b_{ij} = -1/2(d_{ij}^2 - d_{i.}^2 - d_{.j}^2 + d_{..}^2)
+$$
+  - "Doubly centered" distance. 
+  
+## Thoery 
+
+ - Since $B = X X^T$, we need the square-root of $B$. 
+ - $B$ is symmetric and positive definite. 
+ - Can be diagonalised: $B = V \Lambda V^T$. 
+ - $\Lambda$ is diagonal matrix with eigenvalues $\lambda_1 > \lambda_2 > \cdots > \lambda_n$ 
+ - Some eignevalues are zero, drop them. $B = V_1 \Lambda_1 V_1^T$.
+ - Take "square-root" $X = V_1 \Lambda_1^T$.
+ 
+## Classical MDS 
+
+ - Want a 2-D plot. 
+ - Keep only largest 2 eignevectors and eignevalues. 
+ - The resulting $X$ will be the low-dimensional representation we were looking for. 
+ - Same for 3-D. 
+ - 
+
+## Random Forest and MDS 
+
+```{r, warning = F, message = F}
+library(randomForest)
+ind <- sample(2,nrow(iris),replace=TRUE,prob=c(0.7,0.3))
+trainData <- iris[ind==1,]
+testData <- iris[ind==2,]
+iris_rf <- randomForest(Species~.,data=trainData,ntree=100,proximity=TRUE)
+table(predict(iris_rf),trainData$Species)
+```
+
+## Plot the Random Forest 
+
+```{r}
+plot(iris_rf)
+```
+
+## Variable Importance 
+
+```{r}
+varImpPlot(iris_rf)
+```
+
+## Prediction on new data 
+
+```{r}
+irisPred<-predict(iris_rf,newdata=testData)
+table(irisPred, testData$Species)
+```
+
+## Margin of Random Forest {.smaller}
+
+ - The margin of a data point is defined as the proportion of votes for the correct class minus maximum proportion of votes for the other classes. 
+
+ - Thus under majority votes, positive margin means correct classification, and vice versa.
+
+```{r, fig.height = 3}
+plot(margin(iris_rf,testData$Species))
+```
+
+## MDS 
+
+   - Proximity measure:  The $(i,j)$ element of the proximity matrix produced by `randomForest` is the fraction of trees in which elements $i$ and $j$ fall in the same terminal node. 
+   - The intuition is that **similar** observations should be in the
+same terminal nodes more often than dissimilar ones. 
+  - We can use the proximity measure to identify structure. 
+
+## MDS on the full Iris Data
+
+```{r}
+set.seed(71)
+iris.rf <- randomForest(Species ~ ., data=iris, importance=TRUE,
+                        proximity=TRUE)
+## Do MDS on 1 - proximity:
+iris.mds <- cmdscale(1 - iris.rf$proximity, eig=TRUE)
+## Look at variable importance:
+round(importance(iris.rf), 2)
+```
+
+## Plot the variables {.smaller}
+
+```{r}
+op <- par(pty="s")
+pairs(cbind(iris[,1:4], iris.mds$points), cex=0.6, gap=0,
+      col=c("red", "green", "blue")[as.numeric(iris$Species)],
+      main="Iris Data: Predictors and MDS of Proximity Based on RandomForest")
+par(op)
+```
+
+## Lab Exercise 1
+
+ - Look at the voting data. 
+ - Are Democrats close to each other, republicans?
+
+```{r}
+data("voting", package = "HSAUR")
+require("MASS")
+```
+
+## Solution - Metric
+
+```{r}
+voting.mds <- cmdscale(voting, eig=TRUE)
+names(voting.mds)
+```
+
+## Plot - Metric
+
+```{r}
+plot(voting.mds$points[,1], voting.mds$points[,2],
+     type = "n", xlab = "Coordinate 1", ylab = "Coordinate 2",
+     xlim = range(voting.mds$points[,1])*1.2)
+text(voting.mds$points[,1], voting.mds$points[,2], 
+     labels = colnames(voting))
+```
+
+## Solution - non-metric
+
+```{r}
+voting_mds <- isoMDS(voting)
+```
+
+## Solution 
+
+```{r}
+plot(voting_mds$points[,1], voting_mds$points[,2],
+     type = "n", xlab = "Coordinate 1", ylab = "Coordinate 2",
+     xlim = range(voting_mds$points[,1])*1.2)
+text(voting_mds$points[,1], voting_mds$points[,2], 
+     labels = colnames(voting))
+```
+
