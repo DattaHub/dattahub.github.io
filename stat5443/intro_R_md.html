@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Matrix in R</title>
+  <title>Introduction to R</title>
 
   <meta charset="utf-8">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -10,6 +10,7 @@
 
 
 
+  <meta name="date" content="2018-01-31" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,8 +21,9 @@
     var SLIDE_CONFIG = {
       // Slide settings
       settings: {
-                title: 'Matrix in R',
-                        useBuilds: true,
+                title: 'Introduction to R',
+                        subtitle: 'Efficiency Considerations',
+                useBuilds: true,
         usePrettify: true,
         enableSlideAreas: true,
         enableTouch: true,
@@ -85,7 +87,7 @@
 
 <body style="opacity: 0">
 
-<slides class="layout-widescreen">
+<slides>
 
   <slide class="title-slide segue nobackground">
         <!-- The content of this hgroup is replaced programmatically through the slide_config.json. -->
@@ -93,496 +95,266 @@
       <h1 data-config-title><!-- populated from slide_config.json --></h1>
       <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
       <p data-config-presenter><!-- populated from slide_config.json --></p>
-            <p style="margin-top: 6px; margin-left: -2px;">February 2,2018</p>
+            <p style="margin-top: 6px; margin-left: -2px;">January 31, 2018</p>
           </hgroup>
   </slide>
 
-<slide class=''><hgroup><h2>Sources</h2></hgroup><article  id="sources">
+<slide class=''><hgroup><h2>apply, lapply, sapply, tapply</h2></hgroup><article  id="apply-lapply-sapply-tapply">
 
 <ul>
-<li>Matrix in R tutorial by Prof. Giovanni Petris.</li>
-<li>doParallel guide by Weston and Calaway available <a href='https://cran.r-project.org/web/packages/doParallel/vignettes/gettingstartedParallel.pdf' title=''>here</a>.</li>
-<li>Miscellaneous internet resources.</li>
-<li>Before you run a module or chunk, make sure that you have all the packages installed.</li>
-<li>We need the R package &#39;Matrix&#39; and &#39;doParallel&#39;.</li>
+<li>You have some structured blob of data and you want to perform some operations by dimensions.</li>
+<li>e.g. calculate row-wise means or column-wise means</li>
 </ul>
 
-</article></slide><slide class=''><hgroup><h2>Matrices</h2></hgroup><article  id="matrices" class="smaller">
+<pre class = 'prettyprint lang-r'>m &lt;- matrix(data=cbind(rnorm(30, 0), rnorm(30, 2), rnorm(30, 5)), 
+            nrow=30, ncol=3)
+dim(m)</pre>
+
+<pre >## [1] 30  3</pre>
+
+<pre class = 'prettyprint lang-r'>apply(m, 2, mean)</pre>
+
+<pre >## [1] -0.01042344  2.05554420  4.81932492</pre>
+
+</article></slide><slide class=''><hgroup><h2>apply (contd.)</h2></hgroup><article  id="apply-contd.">
 
 <ul>
-<li>To arrange values into a matrix, we use the <code>matrix()</code> function:</li>
+<li>We can also calculate row-wise mean.</li>
 </ul>
 
-<pre class = 'prettyprint lang-r'>a &lt;- matrix(1 : 6, nrow = 2, ncol = 3)
-a</pre>
+<pre class = 'prettyprint lang-r'>apply(m, 1, mean)</pre>
 
-<pre >##      [,1] [,2] [,3]
-## [1,]    1    3    5
-## [2,]    2    4    6</pre>
+<pre >##  [1] 2.087402 2.515050 1.779077 1.357123 2.251216 2.364160 1.873490
+##  [8] 2.647100 2.924179 2.002750 2.757865 2.253501 1.926392 2.203508
+## [15] 2.572504 1.631736 2.246127 2.396507 2.280130 1.631430 2.216593
+## [22] 3.541210 2.577440 1.438558 2.302298 2.713115 2.753437 2.157364
+## [29] 2.973669 2.269525</pre>
 
 <ul>
-<li>Individual entries can be referred to using a pair of indices. For example, the element in the second row, third column can be printed as:</li>
+<li>Or, our own function: (how many negative numbers in each column?)</li>
 </ul>
 
-<pre class = 'prettyprint lang-r'>a[2, 3]</pre>
+<pre class = 'prettyprint lang-r'>apply(m, 2, function(x) length(x[x&lt;0]))</pre>
 
-<pre >## [1] 6</pre>
+<pre >## [1] 16  0  0</pre>
 
-</article></slide><slide class=''><hgroup><h2>Rows, Columns</h2></hgroup><article  id="rows-columns">
+</article></slide><slide class=''><hgroup><h2>lapply and sapply</h2></hgroup><article  id="lapply-and-sapply">
 
 <ul>
-<li>An entire row or column can be retrieved by specifying its index and leaving the other index empty:</li>
+<li><p>traversing over a set of data like a list or vector, and calling the specified function for each item.</p></li>
+<li><p>Usage: lapply(alist, afunction) - applies afunction to all the elements of a list or vector, returns a list of the results. Example:</p></li>
 </ul>
 
-<pre class = 'prettyprint lang-r'>a[2, ]</pre>
-
-<pre >## [1] 2 4 6</pre>
-
-<ul>
-<li>Similarly to the way R works with vectors, you can use negative indices to exclude row or colums of a matrix:</li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>a[-2,]</pre>
-
-<pre >## [1] 1 3 5</pre>
-
-</article></slide><slide class=''><hgroup><h2>Matrix indices</h2></hgroup><article  id="matrix-indices">
-
-<ul>
-<li><p>Note how the values 1,2,3,4,5,6 are used to create the matrix: the first two are used to fill the first column, then the next two to fill the second column, and so on.</p></li>
-<li><p>R allows matrices to be indexed by a single number, e.g.,</p></li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>a[5]</pre>
-
-<pre >## [1] 5</pre>
-
-<ul>
-<li>The fifth element of a is the fifth element of the vector obtained by &quot;unrolling&quot; the matrix, column by column.</li>
-</ul>
-
-</article></slide><slide class=''><hgroup><h2>Fill by row</h2></hgroup><article  id="fill-by-row">
-
-<ul>
-<li>Sometimes you need to fill a matrix row by row, instead than column by column.</li>
-<li>You can change the default behavior as follows:</li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>a &lt;- matrix(1 : 6, nrow = 2, ncol = 3, byrow = TRUE)
-a</pre>
-
-<pre >##      [,1] [,2] [,3]
-## [1,]    1    2    3
-## [2,]    4    5    6</pre>
-
-</article></slide><slide class=''><hgroup><h2>Diagonals</h2></hgroup><article  id="diagonals">
-
-<ul>
-<li>We have seen rbind() and cbind() before.</li>
-<li>e.g. We can use cbind() to construct a 3 x 3 Hilbert matrix. The (i, j) entry is 1/(i + j - 1).</li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>H3 &lt;- 1 / cbind(1 : 3, 2 : 4, 3 : 5)
-H3</pre>
-
-<pre >##           [,1]      [,2]      [,3]
-## [1,] 1.0000000 0.5000000 0.3333333
-## [2,] 0.5000000 0.3333333 0.2500000
-## [3,] 0.3333333 0.2500000 0.2000000</pre>
-
-</article></slide><slide class=''><hgroup><h2>Diagonals and Determinants</h2></hgroup><article  id="diagonals-and-determinants">
-
-<ul>
-<li>The diagonal of a matrix can be extracted using <code>diag()</code>.</li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>diag(H3)</pre>
-
-<pre >## [1] 1.0000000 0.3333333 0.2000000</pre>
-
-<ul>
-<li>The determinant of a square matrix can be obtained with <code>det()</code>.</li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>det(H3)</pre>
-
-<pre >## [1] 0.000462963</pre>
-
-</article></slide><slide class=''><hgroup><h2>Triangular</h2></hgroup><article  id="triangular">
-
-<ul>
-<li>The functions <code>lower.tri()</code> and <code>upper.tri()</code> can be used to obtain the lower and upper triangular parts of matrices. The output of the functions is a matrix of logical elements, with TRUE representing the relevant triangular elements. For example,</li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>lower.tri(H3)</pre>
-
-<pre >##       [,1]  [,2]  [,3]
-## [1,] FALSE FALSE FALSE
-## [2,]  TRUE FALSE FALSE
-## [3,]  TRUE  TRUE FALSE</pre>
-
-</article></slide><slide class=''><hgroup><h2>Triangular</h2></hgroup><article  id="triangular-1">
-
-<ul>
-<li>A typical use of these functions is to set the upper or lower triangular part of a matrix to zero, thus constructing a triangular matrix.</li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>Htri &lt;- H3
-Htri[lower.tri(Htri)] &lt;- 0
-Htri</pre>
-
-<pre >##      [,1]      [,2]      [,3]
-## [1,]    1 0.5000000 0.3333333
-## [2,]    0 0.3333333 0.2500000
-## [3,]    0 0.0000000 0.2000000</pre>
-
-</article></slide><slide class=''><hgroup><h2>Multiplication</h2></hgroup><article  id="multiplication" class="smaller">
-
-<ul>
-<li>Matrix multiplication in R is performed by the operator %*%. For example,</li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>A &lt;- matrix(c(1, 2, 0, 1), 2)
-B &lt;- matrix(c(1, 3, 3, 1, 4, 5), nr = 2)
-A</pre>
-
-<pre >##      [,1] [,2]
-## [1,]    1    0
-## [2,]    2    1</pre>
-
-<pre class = 'prettyprint lang-r'>B</pre>
-
-<pre >##      [,1] [,2] [,3]
-## [1,]    1    3    4
-## [2,]    3    1    5</pre>
-
-<ul>
-<li>Matrices must conform, i.e. multiplication must make sense !</li>
-</ul>
-
-</article></slide><slide class=''><hgroup><h2>Multiplication</h2></hgroup><article  id="multiplication-1" class="smaller">
-
-<pre class = 'prettyprint lang-r'>A %*% B</pre>
-
-<pre >##      [,1] [,2] [,3]
-## [1,]    1    3    4
-## [2,]    5    7   13</pre>
-
-<pre class = 'prettyprint lang-r'>dim(A)</pre>
-
-<pre >## [1] 2 2</pre>
-
-<pre class = 'prettyprint lang-r'>ncol(A)</pre>
-
-<pre >## [1] 2</pre>
-
-<pre class = 'prettyprint lang-r'>nrow(B)</pre>
-
-<pre >## [1] 2</pre>
-
-</article></slide><slide class=''><hgroup><h2>Multiplication</h2></hgroup><article  id="multiplication-2">
-
-<p>With \(A\) and \(B\) defined as above the matrix product \(BA\) in not defined, but the product \(B^T A\) is (\(B^T\) denotes the transpose of \(B\)). - The transpose of a matrix can be obtained with the function <code>t()</code>.</p>
-
-<pre class = 'prettyprint lang-r'>t(B) %*% A</pre>
-
-<pre >##      [,1] [,2]
-## [1,]    7    3
-## [2,]    5    1
-## [3,]   14    5</pre>
-
-</article></slide><slide class=''><hgroup><h2>Crossprod</h2></hgroup><article  id="crossprod">
-
-<ul>
-<li>A much more efficient way of computing the same matrix product is via the function <code>crossprod()</code>.</li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>all.equal(crossprod(B, A), t(B) %*% A)</pre>
-
-<pre >## [1] TRUE</pre>
-
-<ul>
-<li>A similar function, tcrossprod(), computes the matrix product \(AB^T\) whenever the product is well defined.</li>
-</ul>
-
-</article></slide><slide class=''><hgroup><h2>Exercise (Try at home)</h2></hgroup><article  id="exercise-try-at-home" class="smaller">
-
-<ul>
-<li>Consider the matrix</li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>X &lt;- cbind(1, seq(-1, 1, length = 11))
-X</pre>
-
-<pre >##       [,1] [,2]
-##  [1,]    1 -1.0
-##  [2,]    1 -0.8
-##  [3,]    1 -0.6
-##  [4,]    1 -0.4
-##  [5,]    1 -0.2
-##  [6,]    1  0.0
-##  [7,]    1  0.2
-##  [8,]    1  0.4
-##  [9,]    1  0.6
-## [10,]    1  0.8
-## [11,]    1  1.0</pre>
-
-<ul>
-<li>Use crossprod() and tcrossprod() to find \(X^T X\) and \(X X^T\).</li>
-<li>Note the dimensions of the resulting matrices.</li>
-</ul>
-
-</article></slide><slide class=''><hgroup><h2>Matrix inversion</h2></hgroup><article  id="matrix-inversion">
-
-<ul>
-<li>The inverse of a matrix can be found using <code>solve()</code>:</li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>Ainv &lt;- solve(A)
-Ainv</pre>
-
-<pre >##      [,1] [,2]
-## [1,]    1    0
-## [2,]   -2    1</pre>
-
-<pre class = 'prettyprint lang-r'>all.equal(Ainv %*% A, diag(2))</pre>
-
-<pre >## [1] TRUE</pre>
-
-</article></slide><slide class=''><hgroup><h2>Solve linear system</h2></hgroup><article  id="solve-linear-system">
-
-<ul>
-<li><p>Inverse in R uses QR decomposition, that we might briefly talk about at the very end (if time permits)!</p></li>
-<li><p>For linear systems we don&#39;t need to compute inverses. We can use Gaussian Elimination.</p></li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>b &lt;- c(5, 3)
-solve(A, b) # use this</pre>
-
-<pre >## [1]  5 -7</pre>
-
-<pre class = 'prettyprint lang-r'>Ainv %*% b # don&#39;t use this</pre>
-
-<pre >##      [,1]
-## [1,]    5
-## [2,]   -7</pre>
-
-</article></slide><slide class=''><hgroup><h2>Time comparison</h2></hgroup><article  id="time-comparison">
-
-<ul>
-<li><p>Compare execution times for the different methods of solving the Least Squares problem when the number of observations is large.</p></li>
-<li>Let us start by making up our own random data: \(n \times p\) design matrix \(X\) and an \(n \times 1\) response vector \(y\).</li>
-<li><p>Take \(n = 5 \times 10^5\).</p></li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>set.seed(123)
-n &lt;- 5e5; p &lt;- 20
-X &lt;- matrix(rnorm(n * p, mean = 1 : p, sd = 10), nr = n, nc = p, byrow = TRUE)
-y &lt;- rowSums(X) + rnorm(n)</pre>
-
-</article></slide><slide class=''><hgroup><h2>OLS</h2></hgroup><article  id="ols">
-
-<ul>
-<li>The naive approach to solve the LS problem is to compute: \(\hat{\beta} = (X^T X)^{-1}X^T y\)</li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>system.time(bHat1 &lt;- solve(t(X) %*% X) %*% t(X) %*% y)</pre>
-
-<pre >##    user  system elapsed 
-##    1.34    0.14    1.50</pre>
-
-<ul>
-<li>Not so naive: use <code>crossprod</code>.</li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>system.time(bHat2 &lt;- solve(crossprod(X), crossprod(X, y)))</pre>
-
-<pre >##    user  system elapsed 
-##     0.2     0.0     0.2</pre>
-
-</article></slide><slide class='segue dark nobackground level1'><hgroup class = 'auto-fadein'><h2>More advanced topics</h2></hgroup><article  id="more-advanced-topics">
-
-</article></slide><slide class=''><hgroup><h2>Inverting a matrix using Cholesky helps</h2></hgroup><article  id="inverting-a-matrix-using-cholesky-helps">
-
-<ul>
-<li>A symmetric positive definite matrix can be factorized as: \[
-A = L L^T
-\]</li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>p = 1000; A = array(rnorm(p*p), c(p,p))
-A = crossprod(A)
-ptm &lt;- proc.time(); B = solve(A); proc.time()-ptm</pre>
-
-<pre >##    user  system elapsed 
-##    1.17    0.00    1.17</pre>
-
-<pre class = 'prettyprint lang-r'>ptm &lt;- proc.time(); B = chol2inv(A); proc.time()-ptm</pre>
-
-<pre >##    user  system elapsed 
-##    0.33    0.00    0.33</pre>
-
-</article></slide><slide class=''><hgroup><h2>Storage of sparse matrices</h2></hgroup><article  id="storage-of-sparse-matrices">
-
-<ul>
-<li>Sparse matrices appear in many areas of Statistics and Machine learning.</li>
-</ul>
-
-<ol>
-<li>For large Markov chain, the transition matrix becomes sparse.</li>
-<li>Large design matrix / contingency tables.</li>
-<li>Modern dataset with 0 as imputation for missing values.</li>
-</ol>
-
-<ul>
-<li>If matrix \(A_{n\times n}\) has average \(k\) non-zero entries in each row and \(k &lt;&lt; n\), then storage reduces from \(O(n^2)\) to \(O(n)\).</li>
-</ul>
-
-</article></slide><slide class=''><hgroup><h2>Storage of unstructured sparse matrices</h2></hgroup><article  id="storage-of-unstructured-sparse-matrices">
-
-<pre class = 'prettyprint lang-r'># Demo 2: saving sparse matrices in R can save memory
-library(Matrix)
-m1 = matrix(0, nrow=1000, ncol=1000)
-m2 = Matrix(0, nrow=1000, ncol=1000, sparse=TRUE)
-object.size(m1)</pre>
-
-<pre >## 8000200 bytes</pre>
-
-<pre class = 'prettyprint lang-r'>object.size(m2)</pre>
-
-<pre >## 5632 bytes</pre>
-
-</article></slide><slide class='segue dark nobackground level1'><hgroup class = 'auto-fadein'><h2>Parallel</h2></hgroup><article  id="parallel">
-
-</article></slide><slide class=''><hgroup><h2>A gentle start to parallel computing</h2></hgroup><article  id="a-gentle-start-to-parallel-computing">
-
-<ul>
-<li>Parallel processing breaks up your task, splits it among multiple processors, and puts the components back together.</li>
-<li>Useful and easy if you have a task that can be split up, especially without the different parts needing to &quot;talk to&quot; each other.</li>
-<li>On your typical computer, implementing parallel processing in R might speed up your program by a factor of 2 to 4.</li>
-<li>If you have access to clusters on the web, many many &quot;cores&quot;.</li>
-</ul>
-
-</article></slide><slide class=''><hgroup><h2>How do I know if I can apply these ideas?</h2></hgroup><article  id="how-do-i-know-if-i-can-apply-these-ideas" class="smaller">
-
-<ul>
-<li>Parallel processing works best when you have a task that has to be completed many times, but each repeat is independent.</li>
-<li>For instance, if you are repreating a simulation, and in each case are drawing new parameters from a distribution, that is an easily parallelizable task.</li>
-<li>A good rule of thumb is that if you can wrap your task in an apply function or one of its variants, it&#39;s a good option for parallelization.</li>
-<li>In fact most implementations of parallel processing in R are versions of apply.</li>
-</ul>
-
-</article></slide><slide class=''><hgroup><h2>What happens?</h2></hgroup><article  id="what-happens">
-
-<ul>
-<li>When you run a task in parallel, your computer &quot;dispatches&quot; each task to a CPU core.</li>
-<li>This dispatching adds computational overhead.</li>
-<li>So, it&#39;s usually best to try to minimize the number of dispatches.</li>
-<li>In most cases you are going to have a small number of computing cores relative to your tasks. A powerful laptop or desktop will have 2, 4, or 8 cores, and even the most powerful Amazon virtual machine has 88.</li>
-</ul>
-
-</article></slide><slide class=''><hgroup><h2>Introduction to doParallel</h2></hgroup><article  id="introduction-to-doparallel">
-
-<ul>
-<li>We will first write a super simple R code to explain the mechanism of parallel processing using doParallel.</li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>n = as.numeric(Sys.getenv(&quot;NUMBER_OF_PROCESSORS&quot;)) # on Windows
-require(doParallel)
-cl &lt;- makeCluster(n)
-registerDoParallel(cl)
-ptm &lt;- proc.time()
-foreach(i=1:4) %dopar% {sqrt(i)}
-proc.time()-ptm</pre>
-
-</article></slide><slide class=''><hgroup><h2>Output of the snippet</h2></hgroup><article  id="output-of-the-snippet">
-
-<ul>
-<li>Here is the output !</li>
-</ul>
+<pre class = 'prettyprint lang-r'>cap.state.name &lt;- lapply(state.name, toupper)
+head(cap.state.name, n = 3)</pre>
 
 <pre >## [[1]]
-## [1] 1
+## [1] &quot;ALABAMA&quot;
 ## 
 ## [[2]]
-## [1] 1.414214
+## [1] &quot;ALASKA&quot;
 ## 
 ## [[3]]
-## [1] 1.732051
-## 
-## [[4]]
-## [1] 2</pre>
+## [1] &quot;ARIZONA&quot;</pre>
 
-<pre >##    user  system elapsed 
-##    0.11    0.03    0.22</pre>
-
-</article></slide><slide class=''><hgroup><h2>Hello, world !</h2></hgroup><article  id="hello-world">
+</article></slide><slide class=''><hgroup><h2>sapply</h2></hgroup><article  id="sapply">
 
 <ul>
-<li>This is our &quot;Hello, world&quot; program for parallel computing.</li>
-<li>It tests that everything is installed and set up properly, <strong>but don&#39;t expect it to run faster than a sequential for loop, because it won&#39;t</strong>!</li>
-<li>With small tasks, the overhead of scheduling the task and returning the result can be greater than the time to execute the task itself, resulting in poor performance.</li>
+<li>Similar to lapply, but returns a simpler data structure: either a vector or array.</li>
 </ul>
 
-</article></slide><slide class=''><hgroup><h2>We will see a non-trivial example</h2></hgroup><article  id="we-will-see-a-non-trivial-example">
+<pre class = 'prettyprint lang-r'>sapply(1:3, function(x) x^2)</pre>
+
+<pre >## [1] 1 4 9</pre>
 
 <ul>
-<li><p>Non-trivial examples need sophisticated Statistical methods, and I haven&#39;t covered these yet. So don&#39;t worry at all if you don&#39;t understand any of it. I just want to show you an example of the advantage of using parallel processing.</p></li>
-<li><p>How long does it take to do 10,000 Bootstrap iterations using 2 cores?</p></li>
+<li>Remember: lapply is a list apply, sapply is simple lapply.</li>
+<li>Why do we care? apply, sapply, lapply are easier to read and sometimes faster than traditional for loops.</li>
 </ul>
 
-</article></slide><slide class=''><hgroup><h2>Bootstrapping GLM</h2></hgroup><article  id="bootstrapping-glm">
-
-<pre >## &#39;data.frame&#39;:    100 obs. of  2 variables:
-##  $ Sepal.Length: num  7 6.4 6.9 5.5 6.5 5.7 6.3 4.9 6.6 5.2 ...
-##  $ Species     : Factor w/ 3 levels &quot;setosa&quot;,&quot;versicolor&quot;,..: 2 2 2 2 2 2 2 2 2 2 ...</pre>
+</article></slide><slide class=''><hgroup><h2>Functions</h2></hgroup><article  id="functions">
 
 <ul>
-<li>Logistic Regression: predict species using sepal.length.</li>
-<li>Want the distribution of parameter estimates.</li>
-<li>Fit the model repeatedly (like 10k times) for observations randomly sampled with replacements.</li>
-<li>Gives us Bootstrap distribution.</li>
-<li>Cover Bootstrap in greater details towards the end.</li>
+<li>Functions are blocks of code that allows R to be modular and facilitate code reuse.</li>
+<li>An R programmer can define their own functions as follows:</li>
 </ul>
 
-</article></slide><slide class=''><hgroup><h2>Bootstrap using parallel</h2></hgroup><article  id="bootstrap-using-parallel">
+<pre class = 'prettyprint lang-r'>function_name &lt;- function([arg1], [arg2], ...){
+#function code body
+}</pre>
 
-<pre class = 'prettyprint lang-r'>x &lt;- iris[which(iris[,5] != &quot;setosa&quot;), c(1,5)]
-trials &lt;- 10000
-ptime &lt;- system.time({
-r &lt;- foreach(icount(trials), .combine=cbind) %dopar% {
-  ind &lt;- sample(100, 100, replace=TRUE)
-  result1 &lt;- glm(x[ind,2]~x[ind,1], family=binomial(logit))
-  coefficients(result1)
+<ul>
+<li>The function arguments are optional. Function arguments are the variables passed to the function, used by the function&#39;s code to perform calculations. A function can take no arguments.</li>
+<li>A function can also return any R primitive or object using the return(object) statement.</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Functions</h2></hgroup><article  id="functions-1">
+
+<ul>
+<li>Examples</li>
+</ul>
+
+<pre class = 'prettyprint lang-r'># computes the mean of a vector of numbers
+mean &lt;- function(a_vector) {
+s &lt;- sum(a_vector)
+x &lt;- s/length(a_vector)
+}</pre>
+
+<pre class = 'prettyprint lang-r'># checks to see if a string s starts with letter x
+startsWith &lt;- function(x, s){
+if(x == substr(s, 0, 1){
+return(TRUE)
 }
-})</pre>
+return(FALSE)
+}</pre>
 
-<pre >## Warning: executing %dopar% sequentially: no parallel backend registered</pre>
-
-<pre class = 'prettyprint lang-r'>ptime</pre>
-
-<pre >##    user  system elapsed 
-##   26.11    0.01   26.24</pre>
-
-</article></slide><slide class=''><hgroup><h2>Sequential counter-part</h2></hgroup><article  id="sequential-counter-part">
-
-<pre class = 'prettyprint lang-r'>stime &lt;- system.time({
-r &lt;- foreach(icount(trials), .combine=cbind) %do% {
-  ind &lt;- sample(100, 100, replace=TRUE)
-  result1 &lt;- glm(x[ind,2]~x[ind,1], family=binomial(logit))
-  coefficients(result1)
-}
-})
-stime</pre>
-
-<pre >##    user  system elapsed 
-##   29.43    0.01   30.36</pre>
-
-</article></slide><slide class=''><hgroup><h2>Exercise (Try at home)</h2></hgroup><article  id="exercise-try-at-home-1">
+</article></slide><slide class=''><hgroup><h2>Functions</h2></hgroup><article  id="functions-2">
 
 <ul>
-<li>Can you parallelise any of the divide-and-conquer algorithms you have learned in class?</li>
-</ul></article></slide>
+<li><strong>Default arguments</strong></li>
+<li>Function arguments can be assigned default values as follows:</li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>sort_vector &lt;- function(a_vector, ascending=TRUE){
+# sorting algorithm
+}</pre>
+
+<ul>
+<li>When calling this function, the arguments given default values do not need to be specified. In this case, the defaults are used.</li>
+<li>Example:</li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>sort_vector(a_vector) # returns a_vector in ascending order
+sort_vector(a_vector, FALSE) # returns a vector in descending order</pre>
+
+</article></slide><slide class=''><hgroup><h2>Variable Scoping</h2></hgroup><article  id="variable-scoping">
+
+<ul>
+<li>Variables that are bound to an R object outside a function are called global variables, and are accessible everywhere in an R program.</li>
+<li>Example:</li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>x &lt;- 5
+test &lt;- function() {
+cat(x + 5)
+}
+test(); </pre>
+
+<pre >## 10</pre>
+
+</article></slide><slide class=''><hgroup><h2>Functions</h2></hgroup><article  id="functions-3">
+
+<ul>
+<li>Variables bound inside a function are only accessible within that function. These are called local variables. Example:</li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>x &lt;- 10
+test &lt;- function() {
+x &lt;- 5
+cat(x + 20)
+}
+test() #prints 25</pre>
+
+<pre >## 25</pre>
+
+<pre class = 'prettyprint lang-r'>cat(x + 20) #prints 30</pre>
+
+<pre >## 30</pre>
+
+<ul>
+<li><strong>Note that the local variable assignment takes precedence inside the function test over the global assignment</strong>.</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Functions</h2></hgroup><article  id="functions-4">
+
+<ul>
+<li>R functions have no side effects&#8211; they cannot change the value of global variables. Example:</li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>x &lt;- 10
+test &lt;- function(z) {
+z &lt;- z + 10
+cat(z)
+}
+test(x) #prints 20</pre>
+
+<pre >## 20</pre>
+
+<pre class = 'prettyprint lang-r'>cat(x) #prints 10</pre>
+
+<pre >## 10</pre>
+
+<ul>
+<li><strong>Note that x is still bound to 10 outside of test()</strong>.</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>CPU Times</h2></hgroup><article  id="cpu-times">
+
+<pre class = 'prettyprint lang-r'>system.time(expr)</pre>
+
+<ul>
+<li>Returns CPU times that &quot;expr&quot; used.</li>
+<li>A numeric vector of length 5 containing the user cpu, system cpu, elapsed, subproc1, subproc2 times.</li>
+<li>The subproc times are the user and system cpu time used by child processes (and so are usually zero).</li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>system.time(for(i in 1:50) x&lt;-mean(rnorm(1000)))</pre>
+
+<pre >##    user  system elapsed 
+##    0.02    0.00    0.02</pre>
+
+</article></slide><slide class=''><hgroup><h2><code>proc.time</code> function</h2></hgroup><article  id="proc.time-function">
+
+<ul>
+<li>The other way to get system time is using proc.time() function.</li>
+<li>`proc.time&#39; determines how much time (in seconds) the currently running R process already consumed. For example:</li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>now&lt;-proc.time()
+for(i in 1:50) x&lt;-mean(rnorm(1000))
+proc.time()-now</pre>
+
+<pre >##    user  system elapsed 
+##    0.01    0.00    0.01</pre>
+
+</article></slide><slide class=''><hgroup><h2>Calculating mean</h2></hgroup><article  id="calculating-mean">
+
+<pre class = 'prettyprint lang-r'>x&lt;-c(1:10000)
+sum&lt;-0
+now&lt;-proc.time()
+for(i in 1:10000){sum&lt;-sum+x[i]}
+meanx&lt;-sum/10000
+proc.time()-now</pre>
+
+<pre >##    user  system elapsed 
+##    0.01    0.00    0.02</pre>
+
+</article></slide><slide class=''><hgroup><h2>Avoid for loops</h2></hgroup><article  id="avoid-for-loops">
+
+<ul>
+<li>Use vectorized arithmetic instead of loops:</li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>system.time(sum(x)/length(x))</pre>
+
+<pre >##    user  system elapsed 
+##       0       0       0</pre>
+
+<pre class = 'prettyprint lang-r'>system.time(mean(x))</pre>
+
+<pre >##    user  system elapsed 
+##       0       0       0</pre>
+
+</article></slide><slide class=''><hgroup><h2>Finer control</h2></hgroup><article  id="finer-control">
+
+<pre class = 'prettyprint lang-r'>#install.packages(&quot;microbenchmark&quot;)
+library(microbenchmark)
+microbenchmark(sqrt(x),x^(0.5))</pre>
+
+<pre >## Unit: microseconds
+##     expr     min       lq     mean   median      uq      max neval cld
+##  sqrt(x)  59.281  79.2920 126.0902  80.4250  82.502 2547.165   100  a 
+##  x^(0.5) 414.585 436.8625 442.2542 438.5615 440.261  559.199   100   b</pre></article></slide>
 
 
   <slide class="backdrop"></slide>

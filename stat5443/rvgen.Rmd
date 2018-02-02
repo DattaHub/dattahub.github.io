@@ -1,22 +1,25 @@
 ---
 title: "Random Variable Generation"
 author: "Jyotishka Datta"
-date: "February 10, 2017"
-output: ioslides_presentation
+date: "February 2, 2018"
+output: 
+  ioslides_presentation:
+    widescreen: true
+    smaller: true
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```
 
 ## Inverse CDF Transformation
 
-- $X$ random variable, PDF of $X$ is $p(x)$: $X \sim p(x)$.
-- Cumulative density function CDF: $P(x) = \int_{-\infty}^{x} p(s) ds$
-- IF $P$ is invertible, $Y = P^{-1}(U)$ will have the same distribution as $X$.
-- This is called Inverse CDF/ Quantile/ Probability-Integral transformation. 
+- $X$ random variable, PDF of $X$ is $f(x)$: $X \sim f(x)$.
+- Cumulative density function CDF: $F(x) = \int_{-\infty}^{x} f(s) ds$
+- IF $P$ is invertible, $Y = F^{-1}(U)$ will have the same distribution as $X$.
+- This is called Inverse CDF/ Quantile transformation. 
 
-## First Example: 
+## First Example: Logistic
 
 - PDF of a logistic random variable. 
 $$
@@ -26,10 +29,13 @@ $$
 $$
 P(x \mid \lambda) = \frac{1}{\{1+e^{-\lambda x} \}} 
 $$
-- How do we generate samples from logistic? 
-- Generate $U \sim U[0,1]$, and apply $P^{-1}(U)$ as above. 
 
-## First Example Continued 
+## Inverse CDF method
+
+- How do we generate samples from logistic? 
+- Generate $U \sim U[0,1]$, and apply $F^{-1}(U)$ as above. 
+
+## Logistic Distribution
 
 ```{r, echo = TRUE,message = FALSE, warning = FALSE}
 set.seed(123)
@@ -43,7 +49,7 @@ logistic_rvgen <- function(lamb,n=1){
 
 ## Visualize the samples
 
-- Let us generate 10000 random variables from the logistic distribution
+- Generate 10000 random draws from the logistic distribution and plot their histogram
 
 ```{r, echo = TRUE, fig.height = 4}
 lamb=0.1
@@ -53,11 +59,11 @@ hist(x)
 lines(density(x))
 ```
 
-## Verify that we are correct 
+## Visual Verification
 
 - We can verify that we are correct by drawing the density along with the histogram. 
 
-```{r, echo = TRUE, fig.height=4}
+```{r, echo = TRUE, fig.height=3}
 y=seq(-50,50,0.5)
 fy=lamb*exp(-lamb*y)/((1.0+exp(-lamb*y))^2)
 hist(x, freq  = F)
@@ -74,7 +80,7 @@ X = - 1/lambda*log(U)
 hist(X, breaks = 30, freq=F)
 ```
 
-## Verify that we are correct 
+## Visual Verification
 
 - We can verify that we are correct by drawing the density along with the histogram. 
 
@@ -85,9 +91,30 @@ hist(X, breaks = 30, freq  = F)
 lines(Y,fy, col = "red")
 ```
 
-## Box-Mueller
+## Generating Standard Normal Variables 
 
-- Let's do the Box-Mueller transformation 
+-  The density of a standard Normal distribution is: 
+$$
+f(x) = \frac{1}{\sqrt{2\pi}} \exp(-x^2/2)
+$$
+
+-  The CDF $\Phi(x)$ is not invertible. 
+-  We cannot apply Inverse-CDF directly. 
+
+## Observation 
+
+If $X_1, X_2$ are standard Normal random variables. Let $(R, \theta)$ be the polar coordinates of the pair $(X_1,X_2)$. It can be shown (HW 2) that:
+$$
+R^2 = X_1^2 + X_2^2 \sim \chi^2_{2 \text{ d.f.}} \\
+\theta \sim \text{Unif}[0, 2 \pi]
+$$
+
+- Chi-square with 2 d.f. $\chi^2_{2 \text{ d.f.}}$ is basically Exponential distribution with $\lambda = 1/2$, $Exp(1/2)$. 
+
+- We know how to draw from Exponential. 
+
+## Box-Mueller Transformation
+
 - We generate two normal random variable $X_1$ and $X_2$ by: 
 $$
 U_1, U_2 \sim Unif[0,1] \\
@@ -105,71 +132,58 @@ x2 = sqrt(-2*log(u1))*sin(2*pi*u2)
 x = c(x1,x2)
 ```
 
-## Plotting 
+## Visual Verification
 
 ```{r, echo = TRUE}
 hist(x,breaks = 30, freq = F)
 curve(dnorm,add=T)
 ```
-- Do you know another test for normality?
+- Do you know another test for normality?? 
 
-## QQ plots 
+## Visual: QQ plots 
 
 ```{r, echo = TRUE}
 qqnorm(x)
 qqline(x)
 ```
 
-## Lab Exercise 
+## Statistical: Kolmogorov-Smirnov Test 
 
-- Write a sampler to generate samples from the following density using the inverse transform.
-
+Kolmogorov-Smirnov Test: 
 $$
-p(x) = \frac{\alpha \beta^{\alpha}}{x^{\alpha + 1}} \text{for } x \ge \beta
+H_0: F = F_0 \; ( \text{fully specified CDF}) \; \text{vs.} \; H_1: F \neq F_0 
 $$
 
 
-## Steps 
--  Take $\alpha = 5$, $\beta = 2$. 
--  First calculate the CDF $P(x)$
--  Then calculate the inverse $P^{-1}(x)$. 
--  Generate $U \sim \text{Unif}[0,1]$, apply $P^{-1}(U)$.
-
-## Solution 
-
-```{r, echo = TRUE}
-Finv <- function(u){
-    x = B/((1-u)**(1/a))
-    return(x)
-}
-
-B = 2.0
-a = 5.0
-n = 10000
-u = runif(n)
-x = Finv(u)
+```{r, echo = T}
+ks.test(x,pnorm)
 ```
 
-## Plotting the solution 
+-  Stat 4033: "If $F_0$ is not fully specified, `ks.test` does not work." But we won't run into that here. 
 
-```{r, echo = T, fig.height=4}
-y = seq(B,20,0.1)
-fy = a*(B^a)/(y^(a+1))
-hist(x,breaks=100,freq=F)
-lines(y,fy)
-legend("topright",c("density","histogram"))
-```
 
 ## Generating from the Uniform disk 
 
 - We want to generate samples from the Uniform disk in $\mathbb{R}^2$.
+
 $$
 p(x,y) = 1/\pi \text{ if } x^2 + y^2 \le 1 
 $$ 
 
 - Exercise! 
 
-## What does not work 
+## Naive Idea
+
+-  Generate $R \sim \text{Unif}[0,1]$ and $\theta \sim \text{Unif}[0,2\pi]$. 
+- Set: 
+
+$$
+X_1 = R \cos(\theta) \\
+X_2 = R \sin(\theta)
+$$
+- The naive idea does not work. 
+
+## Naive Idea in R
 
 ```{r, echo = TRUE, fig.align= 'center' ,fig.height = 5, fig.width= 5}
 R = runif(1e4,0,1)
@@ -177,16 +191,32 @@ theta = 2*pi*runif(1e4,0,1)
 X = R*cos(theta);Y = R*sin(theta)
 plot(X,Y)
 ```
-- Concentrated in the center!
+- Thickly concentrated in the center !
+
 
 ## What works 
-- Exercise: Why does this work? Hint = Jacobian.
+
+-  Generate $R \sim \text{Unif}[0,1]$ and $\theta \sim \text{Unif}[0,2\pi]$. 
+- Set: 
+
+$$
+X_1 = \sqrt{R} \cos(\theta) \\
+X_2 = \sqrt{R} \sin(\theta)
+$$
+
+
+## Exercise: Why does this work? 
+
+-  Hint = Jacobian.
+
 ```{r, echo = TRUE, fig.align= 'center' ,fig.height = 5, fig.width= 5}
 X = sqrt(R)*cos(theta);Y = sqrt(R)*sin(theta)
 plot(X,Y)
 ```
 
+
 ## Accept-Reject {.smaller}
+
  - Draw from unit cube in $\mathbb{R}^2$ and accept samples that fall inside the disc. 
  - Inefficient for higher dimensions.
 
@@ -216,6 +246,48 @@ arfunction <- function(n){
 n = 5000
 arfunction(n)
 ```
+
+## Exercise (Friday's Lab)
+
+- Write a sampler to generate samples from the following density using the inverse transform.
+
+$$
+p(x) = \frac{\alpha \beta^{\alpha}}{x^{\alpha + 1}} \text{for } x \ge \beta
+$$
+
+
+## Steps
+
+-  Take $\alpha = 5$, $\beta = 2$. 
+-  First calculate the CDF $F(x)$
+-  Then calculate the inverse $F^{-1}(x)$. 
+-  Generate $U \sim \text{Unif}[0,1]$, apply $F^{-1}(U)$.
+
+## Solution 
+
+```{r, echo = TRUE}
+Finv <- function(u){
+    x = B/((1-u)**(1/a))
+    return(x)
+}
+
+B = 2.0
+a = 5.0
+n = 10000
+u = runif(n)
+x = Finv(u)
+```
+
+## Visual Verification 
+
+```{r, echo = T, fig.height=4}
+y = seq(B,20,0.1)
+fy = a*(B^a)/(y^(a+1))
+hist(x,breaks=100,freq=F, col = rgb(0,0,1,0.5))
+lines(y,fy, col = "red")
+legend("topright",c("histogram","density"),col=c("blue","red"),lty = c(1,1))
+```
+
 
  
 
