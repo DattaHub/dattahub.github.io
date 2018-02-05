@@ -1,7 +1,7 @@
 ---
 title: "Random Variable Generation"
 author: "Jyotishka Datta"
-date: "February 2, 2018"
+date: "February 5, 2018"
 output: 
   ioslides_presentation:
     widescreen: true
@@ -16,18 +16,18 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
 - $X$ random variable, PDF of $X$ is $f(x)$: $X \sim f(x)$.
 - Cumulative density function CDF: $F(x) = \int_{-\infty}^{x} f(s) ds$
-- IF $P$ is invertible, $Y = F^{-1}(U)$ will have the same distribution as $X$.
+- IF $F$ is invertible, $Y = F^{-1}(U)$ will have the same distribution as $X$.
 - This is called Inverse CDF/ Quantile transformation. 
 
 ## First Example: Logistic
 
 - PDF of a logistic random variable. 
 $$
-p(x \mid \lambda) = \frac{\lambda e^{-\lambda x}}{\{1+e^{-\lambda x} \}^2}
+f(x \mid \lambda) = \frac{\lambda e^{-\lambda x}}{\{1+e^{-\lambda x} \}^2}
 $$
 - Hence the CDF can be written as: 
 $$
-P(x \mid \lambda) = \frac{1}{\{1+e^{-\lambda x} \}} 
+F(x \mid \lambda) = \frac{1}{\{1+e^{-\lambda x} \}} 
 $$
 
 ## Inverse CDF method
@@ -132,12 +132,13 @@ x2 = sqrt(-2*log(u1))*sin(2*pi*u2)
 x = c(x1,x2)
 ```
 
-## Visual Verification
+## Visual Verification {.smaller}
 
 ```{r, echo = TRUE}
 hist(x,breaks = 30, freq = F)
 curve(dnorm,add=T)
 ```
+
 - Do you know another test for normality?? 
 
 ## Visual: QQ plots 
@@ -187,9 +188,9 @@ $$
 
 ```{r, echo = TRUE, fig.align= 'center' ,fig.height = 5, fig.width= 5}
 R = runif(1e4,0,1)
-theta = 2*pi*runif(1e4,0,1)
+theta = 2*pi*runif(1e3,0,1)
 X = R*cos(theta);Y = R*sin(theta)
-plot(X,Y)
+plot(X,Y, pch = 20, col=rgb(1,0,0,0.2))
 ```
 - Thickly concentrated in the center !
 
@@ -207,11 +208,9 @@ $$
 
 ## Exercise: Why does this work? 
 
--  Hint = Jacobian.
-
 ```{r, echo = TRUE, fig.align= 'center' ,fig.height = 5, fig.width= 5}
 X = sqrt(R)*cos(theta);Y = sqrt(R)*sin(theta)
-plot(X,Y)
+plot(X,Y,pch = 20, col=rgb(1,0,0,0.2))
 ```
 
 
@@ -242,12 +241,11 @@ arfunction <- function(n){
 
 ## Disc point picking 
 
-```{r, echo = TRUE, fig.align= 'center' ,fig.height = 5 , fig.width= 5}
-n = 5000
-arfunction(n)
+```{r, echo = TRUE, fig.align= 'center' ,fig.height = 4 , fig.width= 4}
+n = 5000; arfunction(n)
 ```
 
-## Exercise (Friday's Lab)
+## Exercise (Lab)
 
 - Write a sampler to generate samples from the following density using the inverse transform.
 
