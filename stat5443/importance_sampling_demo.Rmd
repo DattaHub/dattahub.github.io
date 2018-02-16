@@ -1,7 +1,8 @@
 ---
-title: "Sampling Lab"
+title: "Importance Sampling"
+subtitle: "Examples"
 author: "Jyotishka Datta"
-date: "February 24, 2017"
+date: "February 24, 2018"
 output: ioslides_presentation
 ---
 
@@ -14,7 +15,7 @@ knitr::opts_chunk$set(echo = FALSE)
 Both the examples were taken from Jason Goldstick's R Lab Notes, available at [http://dept.stat.lsa.umich.edu/~jasoneg/Stat406/index.html](http://dept.stat.lsa.umich.edu/~jasoneg/Stat406/index.html). 
 
 
-## Importance Sampling 
+## Importance Sampling : Example 1
 
 Suppose you want to evaluate the integral: 
 
@@ -23,6 +24,16 @@ $$
 $$
 The simplest way is to generate $U_i \sim \text{Unif}(0,10)$ and look at the sample mean $(b-a) \times h(U_i)$. 
 
+## Importance Sampling 
+
+$$
+\begin{align*}
+\int_a^b h(x) dx & = \int_{0}^{10} \exp(-2 | x- 5| ) dx \\
+& = \int_{0}^{10} 10 \exp(-2 |x- 5| ) \frac{1}{10} dx \\
+& = E (10\exp(-2 \lvert U - 5 \rvert )); \; U \sim \text{Unif}(0,10)
+\end{align*}
+$$
+
 ## R codes 
 
 ```{r, echo = T}
@@ -30,49 +41,98 @@ set.seed(123)
 U <-  runif(1e4, 0, 10)
 Y <- 10* exp(-2*abs(U - 5))
 (I <- mean(Y))
-(Error <- var(Y))
 ```
 
 ```{r, echo = TRUE}
 h <- function(u) exp(-2*abs(u - 5))
 integrate(h, 0,10)$val
 ```
+- They are close ! 
 
-## Improving the accuracy 
+## Error 
+
+-  How do you estimate the error ? 
+-  Monte Carlo Error: use the variance of generated samples. 
+
+```{r, echo = T}
+(Error <- var(Y))
+```
+
+-  Now this is quite large ! 
+
+
+## Improving the accuracy {.build}
 
 1.  This method has a high variance, or, estimation error. 
 2.  The function h in this case is peaked at 5, and decays quickly elsewhere. 
 3.  Under the $U[0,10]$ density, many of the points are contributing very little to this  expectation.
-4. Something more like a gaussian function with a peak at 5 and small variance, say, 1, would provide greater precision.
+4. Something more like a gaussian function with a peak at 5 and small variance, (e.g. $\sigma^2 = 1$) would provide greater precision.
+
+## Better 
+
+```{R, echo = F}
+par(mfrow=c(1,2))
+hist(runif(1000,0,10), breaks = 30, col=rgb(1,0,0,0.5), freq=F, main = "Uniform Proposal")
+curve(expr=1/10*exp(-2*abs(x-5)),from = 0, to = 10, lwd=2, add= T)
+
+hist(rnorm(1000,5,1), breaks = 30, col=rgb(1,0,0,0.5), freq=F, main = "Normal Proposal")
+curve(expr=dnorm(x,5,1)*exp(-2*abs(x-5)),from = 0, to = 10, lwd=2, add= T)
+# curve(10*dunif(x,0,10),col="blue",add=T)
+# curve(dnorm(x,5,1),add=T)
+```
+
 
 ## Importance Sampling 
 
 Write the same integral as an expectation of a function under Normal distribution: 
 
 $$
-I = 10 \int_{0}^{10} 10 \exp(-2 | x- 5| ) \frac{\frac{1}{10}}{\phi(x-5)} \phi(x-5)dx \\
-\text{where } \phi(x-5) = \frac{1}{\sqrt{2\pi}} e^{-(x-5)^2/2} \\
-= E(h(X)w(X)), \text{ for } X \sim N(5,1)
+\begin{align*}
+I & = \int_{0}^{10} 10 \exp(-2 | x- 5| ) \frac{\frac{1}{10}}{\phi(x-5)} \phi(x-5) dx \\
+& = \int_{\mathbb{R}} 10 \exp(-2 | x- 5| ) \frac{\frac{1}{10} I(0 \le x \le 10)}{\phi(x-5)} \phi(x-5) dx \\
+& \text{where } \phi(x-5) = \frac{1}{\sqrt{2\pi}} e^{-(x-5)^2/2} \\
+& = E \{ h(X)w(X) \}, \text{ for } X \sim N(5,1)
+\end{align*}
 $$
 Q. What are $h(x)$ and $w(x)$ in the above example? 
 
 ## Importance Sampling {.smaller}
 
-$$
-\begin{align}
-I & = 10 \int_{0}^{10} 10 \exp(-2 | x- 5| ) \frac{\frac{1}{10}}{\phi(x-5)} \phi(x-5)dx \\
-& \text{ where }\phi(x-5) = \frac{1}{\sqrt{2\pi}} e^{-(x-5)^2/2} \; (\text{Normal density}) 
-\end{align}
-$$
-Hence, we can write the integral as 
 
 $$
-\begin{align}
-I & = E(h(x)w(x)), \text{ for } X \sim N(5,1) \\
-& \text{ Here, } h(x) = 10 \exp(-2 | x- 5| ) \\
-& \text{ and } w(x) = \frac{\frac{1}{10}}{\phi(x-5)} = \frac{\texttt{dunif}(x, 0, 10)}{\texttt{dnorm}(x, mean=5, sd=1)}
-\end{align}
-$$ 
+\begin{align*}
+I  & = \int_{\mathbb{R}} 10 \exp(-2 | x- 5| ) \frac{\frac{1}{10} I(0 \le x \le 10)}{\phi(x-5)} \phi(x-5) dx \\
+& = E \{ h(X)w(X) \}, \text{ for } X \sim N(5,1)
+\end{align*}
+$$
+
+-  We can compare sides and find $h(x)$ and $w(x)$: 
+
+$$
+\begin{align*}
+& \Rightarrow h(x) =  10 \exp(-2 | x- 5| ) \\
+& \Rightarrow w(x) = \frac{\text{density function of } U(0,10)}{\text{density function of } N(5,1)} \\
+& \text{in R-language, }w(x) = \frac{\text{dunif(x, 0, 10)}}{\text{dnorm(x, 5, 1)}}
+\end{align*}
+$$
+
+<!-- ## Importance Sampling {.smaller} -->
+
+<!-- $$ -->
+<!-- \begin{align} -->
+<!-- I & = \int_{0}^{10} 10 \exp(-2 | x- 5| ) \frac{\frac{1}{10}}{\phi(x-5)} \phi(x-5)dx \\ -->
+<!-- & \text{ where }\phi(x-5) = \frac{1}{\sqrt{2\pi}} e^{-(x-5)^2/2} \; (\text{Normal density})  -->
+<!-- \end{align} -->
+<!-- $$ -->
+<!-- Hence, we can write the integral as  -->
+
+<!-- $$ -->
+<!-- \begin{align} -->
+<!-- I & = E(h(x)w(x)), \text{ for } X \sim N(5,1) \\ -->
+<!-- & \text{ Here, } h(x) = 10 \exp(-2 | x- 5| ) \\ -->
+<!-- & \text{ and } w(x) = \frac{\frac{1}{10}}{\phi(x-5)} = \frac{\texttt{dunif}(x, 0, 10)}{\texttt{dnorm}(x, mean=5, sd=1)} -->
+<!-- \end{align} -->
+<!-- $$  -->
 
 ## R code 
 
@@ -88,7 +148,7 @@ Y=w(X)*f(X)
 
 Same integral but the new error is 1/10th of the previous error. 
 
-## Lab Exercise 
+## Example 2
 
 The standard double exponential or Laplace density is given by: 
 
@@ -115,13 +175,15 @@ Y <- (X^2) * .5 * exp(-abs(X))/dnorm(X, sd=4)
 (Error <- var(Y))
 ```
  
-Think: What happens if we use N(0,1) instead? Or a Cauchy instead?
+**Think**: What happens if we use $N(0,1)$ instead? Or a Cauchy instead?
 
 ## True Value
+
 The true value of the integral is 2. You can find that by integrating by hand, or, evaluating it in R. 
 
 ```{r, echo = TRUE}
 h <- function(x) 0.5*x^2*exp(-abs(x))
 integrate(h,-Inf,Inf)$val
 ```
+
 
