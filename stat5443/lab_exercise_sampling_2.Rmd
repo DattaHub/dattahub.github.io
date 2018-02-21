@@ -73,9 +73,9 @@ p(x) = \alpha \frac{x_m}{x^{\alpha+1}} \quad \text{where } x \ge x_m, \; x_m \ge
 
 (1)  Write an **one-line function** in `R` based on the inversion method to generate $n=100$ samples from the distribution where $\alpha$ and $x_m$ are the inputs for the function.
 
-(2)  How would you estimate $\text{Median}(X)$ if $X$ has the distribution described above with $\lambda = 3$ using your samples from part (1)? 
+(2)  How would you estimate $\text{Median}(X)$ if $X$ has the distribution described above with $x_m = 1$ and $\alpha = 3$ using your samples from part (1)? 
 
-(3)  The theoretical median of this distribution is given by:
+The theoretical median of this distribution is given by:
 \[
 \text{Median}(X) = x_m 2^{1/\alpha}.
 \]
@@ -90,7 +90,9 @@ How close is your estimate?
 \]
 Calculate the mean for $\alpha = 3$, and report your Monte Carlo mean versus the true mean. 
 
-(4) The true mean is infinite for $\alpha = 0.75$, what happens to the Monte Carlo mean if you keep increasing the number of sample size $n = 10, \ldots, 100$ and calculate the Monte Carlo mean for $\alpha = 0.75$ for each $n$? What pattern do you observe? [You can plot the Monte Carlo mean vs. $n$ for different $\alpha$ and compare, like the one given below.]
+(4) The true mean is infinite for $\alpha = 0.75$, what happens to the Monte Carlo mean if you keep increasing the number of sample size $n = 10, \ldots, 1000$ and calculate the Monte Carlo mean for $\alpha = 0.75$ for each $n$? 
+
+What pattern do you observe? [You can plot the Monte Carlo mean vs. $n$ for different $\alpha$ and compare, like the one given below.]
 
 ```{r, cache = T}
 paretomean <- function(n,x_m,lambda){return(mean(x_m/runif(n)^(1/lambda)))}
