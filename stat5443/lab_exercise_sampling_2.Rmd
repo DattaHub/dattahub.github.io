@@ -1,0 +1,79 @@
+---
+title: "Lab Exercise Sampling 2"
+author: "Jyotishka Datta"
+date: "February 20, 2018"
+output: 
+  html_document:
+         theme: journal
+         highlight: zenburn
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Rules:
+
+1.  Email your answers to [stat5443.fall@gmail.com](stat5443.fall@gmail.com).
+2.  No late submissions. 
+
+
+### Problem 1 
+
+-  We'll see that change of variable often helps with difficult sampling problems. Suppose you have a random variable $X$ with the following density function with an unknown normalizing constant: 
+\[
+f(x) = \exp\{-x^6/10\} \; \text{ where } x \in (0, \infty) 
+\]
+How do we sample from this density? 
+Let's look at a general density of this class with parameters $k$ and $n$: 
+\[
+f(x) \propto \exp\{-k x^{n}\}, \; \text{ where } x \in (0, \infty), k > 0, n > 0.
+\]
+Show that the transformed variable $Y = X^{n}$ is a Gamma random variable with shape = $1/n$ and rate = $k$, following the steps outlined below: 
+
+(1)  Show that under the transformation $x = y^{1/n}$, the transformed density will be: 
+\[
+f(y) \propto y^{\frac{1}{n}-1} \exp\{-k y\} \; \text{ where } y \in (0, \infty)
+\]
+
+(2)  Now, compare the density of $y$ with the Gamma density function with shape parameter $\alpha$ and rate parameter $\lambda$: 
+\[
+f(u) = \frac{\lambda^{\alpha} e^{-\lambda u} u^{\alpha - 1}}{\Gamma(\alpha)}, \; u \ge 0
+\]
+What are your parameters $\alpha$ and $\lambda$? 
+
+(3)  In R, the function for generating $\text{Gamma}(\alpha, \lambda)$ random samples is `rgamma(n, shape = alpha, rate = lambda)`. Generate $10^5$ samples $Y$ from Gamma distribution with $\lambda = 1/10$ and $\alpha =1/6$. This will give you samples from the distribution of $X$.
+
+Plot the histogram of $X = Y^{\alpha}$ along with the function $\exp\{-x^6/10\}$ to visually verify your sampler. You can use the following code for plotting (your plot should look like the Fig. 1): 
+
+```{r, echo =F, cache = T}
+lambda = 1/10
+alpha = 1/6
+n = 1e5
+y = rgamma(n,shape = alpha, rate = lambda)
+z = y^alpha
+```
+
+```{r, echo = T, fig.align = 'center', fig.asp=0.6}
+hist(z, breaks = 30, freq = F, col = rgb(0.75,0.4,0.1,0.5)) # z is your sample
+lambda = 1/10; alpha = 1/6
+target <- function(x){exp(-lambda*x^(1/alpha))/
+integrate(function(x) exp(-lambda*x^(1/alpha)),0,Inf)$value}
+curve(target,lwd=2,add=T)
+```
+
+
+### Problem 2 
+
+Suppose you have a distribution with density: 
+\[
+p(x) = \lambda x^{-\lambda-1} \quad \text{where } x \ge 1, \; \lambda \ge 2. 
+\]
+
+(1)  Write an **one-line function** in `R` based on the inversion method to generate $n=100$ samples from the distribution where $\lambda$ is an input the the function.
+(2)  How would you estimate $\mathbb{E} (X^{2.5})$ if $X$ has the distribution described above with $\lambda = 3$ using your samples from part (1)? 
+
+
+
+
+

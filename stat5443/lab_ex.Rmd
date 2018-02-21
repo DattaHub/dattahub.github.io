@@ -89,4 +89,46 @@ ggplot(data.frame(x))+geom_histogram(aes(x=x),bins = 50)
 ```
 
 
+## Problem 2 (Bonus Problem)
+
+**(Standard Normal Sampling without Box-Muller)**
+
+The aim of this problem is to generate standard normal random variables by a different method. To do this, generate $U \sim \text{Unif}[0.1]$, and apply the following approximation to the inverse CDF for standard Normal: 
+\[
+\Phi^{-1}(\alpha) = t - \frac{a_0 + a_1 t}{1 + b_1 t + b_2 t^2}, 
+\]
+where $t^2 = \log(\alpha^{-2})$ and 
+\[
+a_0 = 2.30753; a_1 = 0.27061;  b_1 = 0.99229, b_2 = 0.04481.
+\]
+Plot the histogram of the generated $X$ samples, and compare it with a standard $N(0,1)$ density curve. Do they look similar? Will you be able to use these samples for your experiments? Submit the plot and the R code.
+
+## Solution 
+
+The following solution was submitted by Samrat Nath. This is a good example of well-documented coding. 
+
+
+```{r}
+# Inverse CDF transform method
+Finv <- function(a){
+  t=sqrt(log(1/(a*a)))
+  a0 = 2.30753
+  a1 = 0.27061
+  b1 = 0.99229
+  b2 = .04481
+  x= t - ((a0+a1*t)/(1+b1*t+b2*t*t))
+}
+
+n=1e5
+u= runif(n)
+x=Finv(u)
+
+y=seq(-2,2,0.05)
+fy= (exp(-(y^2)/2))/(sqrt(2*pi))
+
+hist(x,breaks = 50, freq=F, col= "blue")
+lines(y, fy, col = "red")
+legend("topright",c("Histogram from Inverse CDF \n transform method","Density"),
+       col=c("blue","red"), lty = c(1,1))
+```
 
