@@ -1,0 +1,249 @@
+---
+title: "Gibbs"
+author: "Jyotishka Datta"
+date: "February 27, 2018"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Bivariate normal distribution 
+
+-  Consider a single observation $(y_1,y_2)$ from a bivariate normally distributed population with unknown mean $(\theta_1,\theta_2)$ and known covariance matrix $(1, \rho ; \rho 1)$.
+  
+-  With a uniform prior distribution on $\theta$, the posterior distribution is: 
+  
+$$
+  \begin{bmatrix}
+  \theta_1\\
+  \theta_2
+  \end{bmatrix} 
+  | y \sim 
+  N( 
+  \begin{bmatrix}
+  y_1\\
+  y_2
+  \end{bmatrix}
+  , 
+  \begin{bmatrix}
+  1 & \rho \\
+  \rho & 1 
+  \end{bmatrix}
+  )
+$$
+  
+## Gibbs
+  
+-  Although it's posisble to draw directly from the joint posterior of $(\theta_1,\theta_2)$, we demonstrate the Gibbs sampler here for the purpose of exposition. 
+  
+- We can calculate the conditional distributions as: 
+$$ 
+  (\theta_1 \mid \theta_2, y) \sim N(y_1 + \rho(\theta_2 - y_2), 1- \rho^2) \\
+  (\theta_2 \mid \theta_1, y) \sim N(y_2 + \rho(\theta_1 - y_1), 1- \rho^2)
+$$
+
+## Gibbs sampler in R 
+
+-  First write the gibbs sampler function: 
+
+```{r, echo = TRUE}
+binorm_gibbs<- function(theta_init, y, rho, niter){
+  theta = matrix(0,2,niter)
+  theta[1,] = theta_init
+  for(i in 2:niter){
+    theta[1,i] = rnorm(1,y[1]+rho*(theta[2,(i-1)]-y[2]),1-rho^2)
+    theta[2,i] = rnorm(1,y[2]+rho*(theta[1,i]-y[1]),1-rho^2) ## theta_(i,1) updated
+  }
+  return(theta)
+}
+```
+
+## Gibbs sampler in R  
+
+Fix value of $y$, initial $\theta$, correlation $\rho$ and `niter`.
+```{r, echo=TRUE, fig.height=4}
+y = c(0,0); theta_init = y; niter = 500; rho = 0.8
+theta <- binorm_gibbs(theta_init,y,rho,niter)
+plot(t(theta),type="l")
+```
+
+## Better plot 
+
+```{r, echo = TRUE}
+theta <- binorm_gibbs(theta_init,y,rho,niter=1e4)
+plot(t(theta), col=rgb(0,100,0,50,maxColorValue=255), pch=16)
+```
+
+## Normal hierarchical model 
+
+$$
+y_i  \stackrel{\text{IID}}{\sim}  N(\mu, \sigma^2), i = 1, \ldots, n \\
+\pi(\mu, \sigma^2) \propto \frac{1}{\sigma^2} \; \text{(Jeffreys prior)}
+$$
+
+-  This is a conjugate prior, i.e. we can calculate the posterior of $\mu$ and $\sigma$ easily and they will be easy to sample from. 
+
+## Joint density {.smaller}
+
+$$
+\begin{align*}
+p(\mu, \sigma^2 \mid y_1, \ldots, y_n) & = \prod_{i=1}^{n}\left( \frac{1}{\sqrt{2\pi\sigma^2}}\exp\left(-\frac{(y_i-\mu)^2}{2\sigma^2}\right) \right) \times \frac{1}{\sigma^2} \\
+& \propto (\frac{1}{\sigma^2})^{n/2+1} \exp\left(-\frac{1}{\sigma^2} \frac{\sum_{i=1}^n (y_i -\mu)^2}{2} \right)
+\end{align*}
+$$
+
+-  This is enough. 
+-  We can see $1/\sigma^2$ looks like a Gamma and $\mu$ looks like a Gaussian. 
+
+## Full conditionals 
+
+We also know the full conditionals: 
+$$
+\begin{align*}
+\pi(\mu \mid \sigma^2, y) & = N(\bar{y}, \sigma^2/n) \\
+\pi(\tau^2 \mid \mu, y) & = \text{Gamma}(\frac{n}{2}, \frac{1}{2} \sum_{i=1}^{n} (y_i - \mu)^2 ) \text{ where } \tau = \sigma^{-2}
+\end{align*}		
+$$
+
+## Gibbs Sampling in R 
+Sampling from the full conditionals is easy in R. 
+
+```{r, echo = TRUE}
+normal_gibbs<- function(y, niter, mu0 = mean(y), sigma0 = var(y)){
+  n = length(y)
+  mu = rep(mu0,niter);sigmasq = rep(sigma0,niter)
+  
+  ## initialize
+  mu[1] = mu0; sigmasq[1] = sigma0;
+  
+  for(i in 2:niter){
+    tau = rgamma(1,shape=n/2,rate=0.5*sum((y-mu[i-1])^2)) 
+    sigmasq[i] = 1/tau
+    mu[i] = rnorm(1,mean(y), sigmasq[i]/n)
+    }
+  return(list(mu=mu, sigmasq = sigmasq))
+}
+```
+
+
+## Running Gibbs 
+
+```{r, echo = TRUE}
+m = 2
+s = 4
+y = rnorm(100,m,s)
+nmc = 1000
+burn = 1000
+gibbs.fit <- normal_gibbs(y,niter = nmc+burn, mu0 = 0, sigma0 = 1)
+summary(gibbs.fit$mu[(burn+1):(burn+nmc)])
+summary(gibbs.fit$sigmasq[(burn+1):(burn+nmc)])
+```
+
+## Multiple chains {.smaller}
+
+We plot the entire Markov chains for two different starting values for a small number of iterations to show how fast the two chains will become indistinguishable. 
+
+```{R, echo = T, fig.asp = 0.6}
+plot(normal_gibbs(y,niter = 100, mu0 = 3, sigma0 = 1)$mu, type= "l", col = "red", 
+     main = "Trace", ylim = c(-4,4), ylab = "MC")
+lines(normal_gibbs(y,niter = 100, mu0 = -3, sigma0 = 1)$mu,col = "blue")
+```
+
+
+## Same chain after burn-in 
+
+-  burn 1000 samples, plot the next 1000 samples. 
+
+```{r}
+plot(normal_gibbs(y,niter = 2000, mu0 = 3, sigma0 = 1)$mu[1001:2000], type= "l", col = "red", 
+     main = "Trace", ylab = "MC")
+lines(normal_gibbs(y,niter = 2000, mu0 = -3, sigma0 = 1)$mu[1001:2000],col = "blue")
+```
+
+
+## Multiple Chains for $\sigma^2$ {.smaller}
+
+
+```{r, echo = T, fig.asp = 0.6}
+plot(normal_gibbs(y,niter = 100, mu0 = 0, sigma0 = 1)$sigmasq, type= "l", col = "blue", 
+     main = "Trace", ylab = "MC", ylim = c(0,27))
+lines(normal_gibbs(y,niter = 100, mu0 = 0, sigma0 = 25)$sigmasq,col = "red")
+```
+
+## Multiple chains 
+
+-  Histograms are also nice. 
+-  Histogram of samples after burn-in. 
+
+```{r, echo = F, fig.asp = 0.5}
+hist(normal_gibbs(y,niter = 2000, mu0 = -5, sigma0 = 1)$mu[1001:2000], breaks = 30,  freq = F, col = rgb(1,0,0,0.2), main = "Histogram")
+hist(normal_gibbs(y,niter = 2000, mu0 = 5, sigma0 = 1)$mu[1001:2000],breaks = 30, freq = F, col = rgb(0,0,1,0.5), add = T)
+```
+
+## How many chains? 
+
+- How many parallel chains of MCMC should be run ?
+- **Experiment yourself**.
+- Several long runs (Gelman and Rubin, 1992)
+- gives indication of convergence and a sense of statistical security.
+- One very long run (Geyer, 1992)
+- reaches parts other schemes cannot reach.
+
+## Burn-in? 
+
+- Early iterations of $\theta^1, \ldots, \theta^M$ might reflect starting value $\theta_0^*$
+- These iterations are called burn-in.
+- After the burn-in, we say the chain has 'converged'.
+- In practice, we omit the burn-in from ergodic averages. 
+$$
+\bar{h}_{M,N} = \frac{1}{N-M}\sum_{i=M+1}^{N}h(\theta^{(t)})
+$$
+-  Determining $M$ is called MCMC diagnostics. 
+
+## MCMC Diagnostics 
+
+-  **Must do:**
+-  Plot the time series for each quantity of interest. (Trace Plot)
+-  Plot the autocorrelation function. (ACF Plot)
+
+## Diagnostics 1 - Trace plot 
+
+1. The trace plot should have rapid up-and-down variation with no long-term trends or drifts. 
+2. If you split this plot into a few horizontal sections, the trace within any section would not look much different from the trace in any other section. 
+3. If this has happened, convergence should be fast. Any non-random pattern (Drift/ Periodicity) means slow or no convergence. 
+
+
+## Trace Plot for $\mu$
+
+-  Seen before 
+-  Plot the quantities at each iteration. It shows the values the parameter took during the runtime of the chain. 
+
+```{r, echo = T}
+plot(gibbs.fit$mu, type="l",main = "trace plot")
+```
+
+## Trace plot for $\sigma^2$
+
+```{r, echo = T}
+plot(gibbs.fit$sigmasq,type="l")
+```
+
+## Autocorrelation 
+
+1. High autocorrelation means high nse. Not desirable. 
+2. If autocorrelation is high then N samples are not giving you N pieces of information about your distribution but fewer than that. 
+3. The Effective Sample Size (ESS) is one measure of how much information you're really getting (and is a function of the autocorrelation parameter).
+
+## ACF 
+
+```{r, echo = T}
+par(mfrow=c(1,2))
+acf(gibbs.fit$mu)
+acf(gibbs.fit$sigmasq)
+```
+
+## Fancier plots 
+
+- Look up the R package called `ggmcmc`
