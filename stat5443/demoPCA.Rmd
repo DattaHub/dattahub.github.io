@@ -1,7 +1,7 @@
 ---
 title: "PCA Demo"
 author: "Jyotishka Datta"
-date: "March 10, 2017"
+date: "March 12, 2018"
 output: ioslides_presentation
 ---
 
@@ -24,7 +24,15 @@ $$
 		\max_{\beta_{11}, \ldots, \beta_{p1}} \left\{ \frac{1}{n} \left( \sum_{j=1}^{p} \beta_{j1} x_{ij} \right)^2 \right\}
 		\text{ subject to } \sum_{j=1}^{p}\beta_{j1}^2  = 1 
 $$
--  Inside (): Projection of $i^{th}$ sample into $\beta_1$ - also called score $y_{i1}$.
+
+## Recap (PCA)
+
+$$
+		\max_{\beta_{11}, \ldots, \beta_{p1}} \left\{ \frac{1}{n} \left( \sum_{j=1}^{p} \beta_{j1} x_{ij} \right)^2 \right\}
+		\text{ subject to } \sum_{j=1}^{p}\beta_{j1}^2  = 1 
+$$
+
+-  $\sum_{j=1}^{p} \beta_{j1} x_{ij}$: Projection of $i^{th}$ sample into $\beta_1$ - also called score $y_{i1}$.
 - Maximize: Sample variance of the scores $y_{i1}$.
 
 ## Second PC
@@ -75,7 +83,7 @@ states=row.names(USArrests)
 states
 ```
 
-## Variable Names 
+## Variable Names {.smaller}
 
 ```{R, echo = T}
 names(USArrests)
@@ -114,16 +122,26 @@ dim(pr.out$x)
 (objects). 
 -  However, a graphical representation of the data that contains some information about the variables is particularly useful.
 
-## Biplot 
+## Biplot {.smaller}
 
-```{r}
-biplot(pr.out, scale=0,  cex=c(1/2, 1),xlim=c(-4,4))
+```{r, echo = T, fig.asp = 0.7}
+biplot(pr.out, scale=0,  cex=c(0.6, 0.75),xlim=c(-4,4))
 ```
 
 The scale=0 argument to biplot() ensures that the arrows are scaled to
 represent the loadings.
 
-## Biplot 
+
+## Fancier version {.smaller}
+
+```{r, echo = T, message = F, fig.asp = 0.6}
+# library(devtools); install_github("vqv/ggbiplot")
+library(ggbiplot)
+ggbiplot(pr.out, labels =  rownames(USArrests))
+```
+
+
+## Biplot {.smaller}
 
 **The principal components are only unique up to a sign change** 
 
@@ -133,10 +151,10 @@ biplot(pr.out, scale=0,cex=c(1/2, 1),xlim=c(-4,4))
 ```
 
 
-## Without Scaling the Data 
+## Importance of Scaling {.smaller} 
 
 ```{r, echo = T}
-biplot(prcomp(USArrests, scale = F),scale=0,cex=c(1/2, 1))
+biplot(prcomp(USArrests, scale = F), scale=0, cex=c(1/2, 1))
 ```
 
 
@@ -152,7 +170,7 @@ pve
 
 ## Proportion of Variance Explained 
 
-```{r, echo = T, fig.height=3}
+```{r, echo = F, fig.asp = 0.7}
 par(mfrow=c(1,2))
 plot(pve, xlab="Principal Component", ylab="Proportion of Variance Explained", ylim=c(0,1),type='b')
 plot(cumsum(pve), xlab="Principal Component", ylab="Cumulative Proportion of Variance Explained", ylim=c(0,1),type='b')
@@ -161,7 +179,9 @@ plot(cumsum(pve), xlab="Principal Component", ylab="Cumulative Proportion of Var
 
 ## More Examples 
 
-Now we will see two more examples, using the princomp package. 
+-  Now we will see two more examples, using the princomp package. 
+-  Recall that the `prcomp` and `princomp` package both performs PCA. One does SVD on the $X$ matrix and the other does Eigen-decomposition on the $X^TX$ matrix. 
+-  They are **almost** identical althouch `prcomp` is preferred by some. 
 
 ## PCA for Crime Data-set
 
@@ -180,20 +200,26 @@ The variables are:
 
 The data are in the "city_crime.txt" file that I read next.
 ```{r, echo = T}
-setwd("C:/Users/Jyotishka/OneDrive/Documents/Course Notes/stat5443/R codes")
+setwd("C:/Users/Jyotishka Datta/OneDrive/Documents/Course Notes/stat5443/R codes")
+```
+```{R}
 crime<-read.table("city_crime.txt")
 ```
 
-## Plots 
-We can then look at the scatterplot matrix. 
+- This is city-wise crime data rather than state-wise like the last example. 
+
+
+## Scatterplot Matrix
 
 ```{r, echo = T}
 pairs(crime)
 ```
 
 ## R
+
 Then apply PCA on the data by rescaling and centering the 
-data using the R function princomp
+data using the R function `princomp`:
+
 ```{r, echo = T}
 pca.crime<-princomp(scale(crime,scale=TRUE,center=TRUE),cor=FALSE)
 ```
@@ -201,7 +227,6 @@ pca.crime<-princomp(scale(crime,scale=TRUE,center=TRUE),cor=FALSE)
 ## Look at the results
 
 ```{r, echo = T}
-
 summary(pca.crime)
 ```
 
@@ -225,6 +250,7 @@ screeplot(pca.crime, type="line")
 ```
 
 ## Calculate the principal component scores
+
 Once we calculate the principal components, we can plot them
 against each other in order to produce low-dimensional views of the data.
 
@@ -241,32 +267,31 @@ plot(pcs.crime[,1:2],type="n",xlab='1st PC',ylab='2nd PC')
 text(pcs.crime[,1:2],row.names(crime))
 ```
 
-## Plot the first 2 PCs. 
+
+## Biplot {.smaller}
+
 
 ```{r, echo = T}
-pcs.crime<-predict(pca.crime)
-plot(pcs.crime[,1:2],type="n",xlab='1st PC',ylab='2nd PC') 
-text(pcs.crime[,1:2],row.names(crime))
-```
-
-## Biplots 
-
--  Biplot provides an efficient way of visualizing together objects (observations) and variables. 
--  The emphasis of the PCA of the city crime data was on cities
-(objects). 
--  However, a graphical representation of the data that contains some information about the variables is particularly useful.
-
-## Biplot 
-
-```{r, echo = T}
-biplot(pca.crime, cex=c(1/2, 1),xlim=c(-0.5,0.5))
+biplot(pca.crime, cex = c(0.5,1))
 ```
 
 
-## Lab Questions 
+## Questions 
 
 1.  Which cities are most safe? Which are most crime-prone?
 2.  How to interpret high/low values in the second PC?
+
+## Subtle difference {.smaller}
+
+- For scaling, `prcomp` uses $n-1$ as denominator but `princomp` uses $n$ as its denominator. 
+
+```{r, echo = T, warning = F, message=F}
+pc.cr<-prcomp(crime, scale=TRUE, cor=TRUE, scores=TRUE)
+pc.cr1<-princomp(crime, scale=TRUE, cor=TRUE, scores=TRUE)
+pc.cr$scale
+pc.cr1$scale
+```
+
 
 ## Iris Data
 
@@ -276,13 +301,15 @@ str(iris)
 dat.iris = data.matrix(iris[,1:4])
 ```
 
-## Add noise variables, permute all variables randomly
+## Add noise and shuffle columns
 
 ```{r, echo = TRUE}
 dat.iris = cbind(dat.iris, array(rnorm(150*6), c(150, 6)))
 colnames(dat.iris)[5:10] <- paste('V', 1:6, sep='')
 dat.iris = dat.iris[,sample(10, 10, replace=FALSE)]
 ```
+
+-  Now we have original variables as well as noise variables but we don't know which is which. Let's see if PCA can still detect the species. 
 
 ## Center and Scale before PCA
 
@@ -308,13 +335,13 @@ summary(pca.iris)
 screeplot(pca.iris, type="line")
 ```
 
-## calculate PC scores
+## Calculate PC scores {.smaller}
 
 ```{r, echo = T}
 pcs.iris <- predict(pca.iris)
 ```
 
- Set color code for observations from different groups
+Set color code for observations from different groups
 
 ```{r, echo = TRUE}
 col.code = as.character(iris$Species)
@@ -324,7 +351,7 @@ col.code[col.code == "virginica"] = 'green'
 ```
 
 
-## plot first two principal components {.smaller}
+## Plot first two principal components {.smaller}
 
 ```{r, echo = TRUE, fig.height=5}
 plot(pcs.iris[,1:2], type='p', pch=15, col=col.code, xlab="PC1", ylab="PC2")
@@ -335,24 +362,28 @@ legend("topright", col=c('red', 'blue', 'green')
 
 ## Importance of PC {.smaller}
 
-plot first two variables instead of the first two principal components: do we see any pattern? Obviously, no.
+-  Plot first two variables $X[,1:2]$ instead of the first two principal components. 
+-  Do we see any clustering?
 
-```{r, echo = TRUE, fig.height = 4}
+```{r, echo = F, fig.asp = 0.7}
 plot(dat.iris[,1:2], type='p', pch=15, col=col.code, xlab="PC1", ylab="PC2")
-legend("topright", col=c('red', 'blue', 'green')
-       , legend = c('setosa', 'versicolor', 'virginica'), pch = 15
-)
+legend("topright"
+     , col=c('red', 'blue', 'green')
+     , legend = c('setosa', 'versicolor', 'virginica')
+     , pch = 15
+      )
 ```
 
 ## Importance of PC {.smaller}
 
-When we have many variables, projecting obs. into top few PC scores help
-avoid searching over important variables
+**When we have many variables, projecting observations into top few PC scores help avoid searching over important variables.**
 
-```{r, echo = TRUE, fig.height=4}
-plot(dat.iris[,1:2], type='p', pch=15, col=col.code, xlab="PC1", ylab="PC2")
-legend("topright", col=c('red', 'blue', 'green')
-       , legend = c('setosa', 'versicolor', 'virginica'), pch = 15
-)
+```{r, echo = F, fig.height=4}
+plot(pcs.iris[,1:2], type='p', pch=15, col=col.code, xlab="PC1", ylab="PC2")
+legend("topright"
+     , col=c('red', 'blue', 'green')
+     , legend = c('setosa', 'versicolor', 'virginica')
+     , pch = 15
+      )
 ```
 
