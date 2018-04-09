@@ -1,7 +1,7 @@
 ---
 title: "Project Ideas"
 author: "Jyotishka Datta"
-date: "April 3, 2017"
+date: "April 9, 2018"
 output: ioslides_presentation
 ---
 
@@ -35,7 +35,7 @@ Two possible data-sets:
 
 ## Leukemia Data (Unsupervised)
 
-- Leukemia Data, Golub et al. Science $1999$
+- Leukemia Data, Golub et al. Science $1999$.
 - Matrix of gene expression levels for the 38 tumor mRNA samples, rows correspond to genes (3051 genes) and columns to mRNA samples.
 - First install the `multtest` R package from `Bioconductor`.
 
@@ -54,7 +54,8 @@ dim(golub)
 Class labels:
 ```{r, echo = T}
 golub.cl
-````
+```
+
 Gene names:
 ```{r, echo = T}
 dim(golub.gnames)
@@ -105,7 +106,9 @@ plot(fit)
 ## Inferential Goals 
 
 1. Apply different sparse regression (regularization/shrinkage/dimension reduction technique) on this data. 
+
 2. Compare between different methods? e.g. Would Elastic Net be a better fit than Lasso? How do you test? How about Bayesian methods or PC Regression?
+
 3. Could try extensions: The next slide show histogram of $y_{tr}$ - would it be better if we change the response to binary from continuous and apply classification methods? 
 
 ## Dichotomizing Response {.smaller}
@@ -237,7 +240,7 @@ qqline(teststat)
 hist(teststat, breaks = 30, col = "red", freq = F, xlim = c(-5,5), ylim = c(0,0.5))
 curve(dnorm(x), lty = 2, lwd = 2, add=TRUE)
 curve(dnorm(x, mean = mean(teststat), sd = sd(teststat)), lty = 3, lwd = 2, add=TRUE)
-````
+```
 
 - Histogram and N(0,1) density different on the tails - a few interesting genes?
 
@@ -269,7 +272,7 @@ rawp = 2 * (1 - pnorm(abs(teststat)))
 selected  <- p.adjust(rawp, method = "bonferroni") <0.05
 esetSel <- eset [selected, ]
 sum(selected)
-````
+```
 
 - Bonferroni's correction leads to rejection of `r sum(selected)
 ` tests - these genes significantly differ between two groups
@@ -341,7 +344,7 @@ rawp = 2 * (1 - pnorm(abs(teststat)))
 selected  <- p.adjust(rawp, method = "BH") <0.05
 esetSel <- eset [selected, ]
 sum(selected)
-````
+```
 
 - Benjamini-Hochberg method leads to rejection of `r sum(selected)
 ` tests - less stringent than Bonferroni. 

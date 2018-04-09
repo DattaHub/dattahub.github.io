@@ -1,7 +1,7 @@
 ---
 title: "Elastic Net and Bayesian Sparse Regression"
 author: "Jyotishka Datta"
-date: "March 27, 2017"
+date: "April 9, 2018"
 output: ioslides_presentation
 ---
 
@@ -47,6 +47,9 @@ library(elasticnet)
 en.fit <- enet(x=x,y=y, lambda = 1)
 plot(en.fit, use.color = T, main = "Elastic Net")
 ```
+
+
+# Bayesian Regularization 
 
 ## Bayesian Lasso 
 
@@ -232,6 +235,7 @@ legend("topright", c("b-ridge", "ridge"), col=c(2,3), pch=c(21,18))
 ```
 
 ## Model Dimensions 
+
 We can plot the size of different models visited:
 
 ```{r, echo = T}
@@ -262,6 +266,7 @@ points(sridge$bn0,pch=15,col="blue")
 - Another option in `monomovn` package is "hs" or horseshoe. 
 - Horseshoe prior was proposed by Carvalho, Polson and Scott (2010) for sparse signal recovery. 
 - Horseshoe prior improves on the Laplace prior used for Bayesian Lasso when the underlying data is nearly-black. 
+- R package `horseshoe`, `monomvn`, `bayeslm` etc.
 
 ## Horseshoe R package 
 
@@ -282,8 +287,9 @@ plot(y, x%*%hs.fit$BetaHat)
 
 ```{r, echo = T}
 HS.var.select(hs.fit, y, method = "intervals") #selected betas
-````
-Ideally, none of the betas is selected (all zeros). 
+```
+
+Ideally, none of the $\beta$'s are selected (all zeros). 
 ```{r, echo = T}
 hs.fit$BetaHat
 ```
@@ -295,12 +301,6 @@ Plot the credible intervals
 library(Hmisc)
 xYplot(Cbind(hs.fit$BetaHat, hs.fit$LeftCI, hs.fit$RightCI) ~ 1:60)
 ```
-
-## Shameless self-plug 
-
-Part of my Ph.D. thesis was proving that horseshoe prior is optimal for variable selection. 
-Here is the paper: 
-[Datta and Ghosh (2013)](https://projecteuclid.org/euclid.ba/1362406654)
 
 
 
