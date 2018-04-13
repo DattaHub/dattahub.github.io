@@ -1,7 +1,7 @@
 ---
 title: "Logistic Regression"
 author: "Jyotishka Datta"
-date: "April 5, 2017"
+date: "April 13, 2018"
 output: ioslides_presentation
 ---
 
@@ -173,6 +173,71 @@ glm.pred[glm.probs>.5]="Up"
 table(glm.pred,Direction.2005)
 mean(glm.pred==Direction.2005)
 ```
+
+## Separability 
+
+-  The usual method of fitting a Logistic Regression doesn't work if one of the predictors perfectly separate the response. 
+-  The MLE does not exist in that situation. 
+-   Why? 
+
+## Separability 
+
+- Generate data: $x_1$ is unrelated, $x_2$ perfectly separates $y$.
+
+```{r}
+set.seed(123456)
+d <- data.frame(y  =  c(0,0,0,0,0, 1,1,1,1,1),
+                x1 = rnorm(10),
+                x2 = c(runif(5,-3,0),runif(5,0,3)))
+
+fit <- glm(y ~ x1 + x2, data=d, family="binomial")
+```
+
+
+## What happens to the estimates? {.smaller}
+
+```{r}
+summary(fit,correlation = FALSE)
+```
+
+
+## Why? {.smaller}
+
+-  Classification rule based on probability: 
+$$
+P(Y = 0) = 1/ (1 + \exp(-\beta x))
+$$
+-  Figure below is the sequence of curves: 
+$$
+1/ (1 + \exp(-x)), 1/ (1 + \exp(-2x)), 1/ (1 + \exp(-3x)), \ldots, 1/ (1 + \exp(-n x))
+$$
+
+```{r, fig.height = 3.5}
+plot(d$x2,d$y,type = "p", col = d$y+1, pch = 15, xlim = c(-3,3), ylab = expression(1/(1+exp(-nx))))
+x = seq(-3,3,length.out = 100)
+for(n in 1:20){
+  lines(x, 1/(1+exp(-n*x)), type = "l")
+}
+```
+
+## Solution 
+
+-  The "best" solution is to use a Cauchy prior on each coefficient. 
+-  Gelman (2008): Cauchy(0, 2.5) for variance parameters. 
+-  Intuitively, Cauchy has heavier tails and it allows large values and also it shrinks the $\beta$'s just the right amount. 
+-  [Prior distributions for variance parameters in hierarchical models](http://www.stat.columbia.edu/~gelman/research/published/taumain.pdf)
+-  This is easy enough for you to write your own sampling algorithm. 
+
+
+## The `arm` package on R
+
+```{r, echo = T, message=FALSE, warning = F}
+library(arm)
+fit <- bayesglm(y ~ x1 + x2, data=d, family="binomial")
+display(fit)
+```
+
+
 
 ## Wide Data {.build}
 

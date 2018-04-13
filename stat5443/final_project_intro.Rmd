@@ -3,6 +3,7 @@ title: "Project Ideas"
 author: "Jyotishka Datta"
 date: "April 9, 2018"
 output: ioslides_presentation
+fontsize: 10pt
 ---
 
 ```{r setup, include=FALSE}
@@ -22,10 +23,83 @@ knitr::opts_chunk$set(echo = FALSE, cache = TRUE)
   }
 </style>
 
+## Final Projects (Part 1 : Implementation)
 
-## Project Data-sets
+1.  Compare and contrast penalized regression and Bayesian shrinkage priors for large $p$, small $n$ data. 
+2.  Classification problem for large $p$, small $n$ data: compare interpretable methods (Lasso) and Random forests. 
 
-Two possible data-sets: 
+
+## Final Projects (Part 2: Lit Review)
+
+I'll point out a few interesting directions, but you can choose your own: 
+
+1. Network Inference (Graph partition / Stochastic Block Models etc.) 
+2. Efficient Inference for Bayesian Sparse Shrinkage Priors. 
+3. Optimization and $\ell_0$ regularization. 
+4. Topic Modeling - Latent Dirichlet Allocation. 
+
+## Rules - Part 1
+
+1.  Part 1 is a group project - students will form groups of 4 and submit to me (jd033@uark.edu) by 4/20/18. 
+2.  Each team must do at least one of classification or regression and compare a few different methods. 
+3.  Ideally you'd choose a different data-set than the one shown below, and choose 4 different methods to compare. 
+4.  Your reports will be due by May 10th, 2018. 
+
+
+## Rules - Part 2
+
+1.  Part 2 is an individual project - each of the students will submit their own report. You can discuss papers you have chosen but do not review the same paper. 
+
+2.  Each student must select at least one paper related to the topic and write at least a full page review but there is no upper bound.  
+
+3.  Ideally you'd write a review that is clear enough for your classmates to understand, focus on the broader perspectives: e.g. Why is this method important? How does it improve over the state-of-the-art methods? What are the limitations? Do the authors provide any implementation (e.g. R package / MCMC steps)? Is there any theoretical justification? 
+
+4.  Your literature review reports will be due by May 7th, 2018. 
+
+
+## Community Detection Resources 
+
+1. [Community detection and stochastic block models: recent developments](https://arxiv.org/pdf/1703.10146.pdf)
+2. [Original paper: Stochastic Block Models](http://www.stat.cmu.edu/~brian/780/bibliography/04%20Blockmodels/Holland%20-%201983%20-%20Stochastic%20blockmodels,%20first%20steps.pdf)
+3. [A. Clauset, M.E.J. Newman and C. Moore, - "Finding community structure in very large networks.", Physical Review E 70, 066111 (2004)](http://tuvalu.santafe.edu/~aaronc/courses/5352/fall2013/readings/Clauset_Newman_Moore_04_FindingCommunityStructureInVeryLargeNetworks.pdf).
+
+
+## Efficient Bayesian Inference 
+
+1.  [Fast sampling with Gaussian scale mixture priors in high-dimensional regression, Chakrabarty, Bhattacharya, Mallick](https://academic.oup.com/biomet/article/103/4/985/2447851)
+2.  [GPU-accelerated Gibbs sampling, Terenin, Dong, Draper](https://arxiv.org/ftp/arxiv/papers/1608/1608.04329.pdf)
+3.  [Comment: A brief survey of the current state of play for Bayesian computation in data science at big-data scale](https://arxiv.org/pdf/1712.00849.pdf)
+
+
+## Optimization and $\ell_0$ regularization 
+
+1.  [An Algorithmic Approach to Linear Regression - Bertsimas and King](https://pubsonline.informs.org/doi/pdf/10.1287/opre.2015.1436)
+2.  [Best Subset Selection Via A Modern Optimization Lens, Bertsimas and Mazumder](https://projecteuclid.org/download/pdfview_1/euclid.aos/1458245736)
+3.  [A Primal Dual Active Set Algorithm For A Class Of Nonconvex Sparsity Optimization](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.740.9614&rep=rep1&type=pdf)
+
+
+## Topic Modeling - Latent Dirichlet Allocation 
+
+1.  [Latent Dirichlet Allocation - Blei, Ng, Jordan](http://www.jmlr.org/papers/volume3/blei03a/blei03a.pdf)
+2.  [Introduction to Latent Dirichlet Allocation](http://blog.echen.me/2011/08/22/introduction-to-latent-dirichlet-allocation/)
+3.  [LDA Tutorial](http://obphio.us/pdfs/lda_tutorial.pdf)
+
+
+## Other topics {.smaller}
+
+There are many, other interesting topics to be explored. Here are some papers on diverse topics that I read over the last few weeks, and liked: 
+
+1. [The xyz algorithm for fast interaction search in high-dimensional data](https://arxiv.org/pdf/1610.05108.pdf), Thanei, Meinhausen, Shah. 
+2. [Mendelian Randomization with Poor Instruments: a Bayesian Approach](https://arxiv.org/pdf/1608.02990.pdf), Berzuini et al. 
+3. [Finding Online Extremists in Social Networks](https://arxiv.org/pdf/1610.06242.pdf), Klausen et al. 
+4. [Lasso, fractional norm and structured sparse estimation using a Hadamard product parametrization](https://arxiv.org/pdf/1611.00040.pdf), Peter Hoff. 
+5. [A framework for probabilistic inferences from imperfect models](https://arxiv.org/pdf/1611.01241.pdf), Meng Li and David Dunson.
+6. [Posterior Graph Selection and Estimation Consistency for High-dimensional Bayesian DAG Models](https://arxiv.org/pdf/1611.01205.pdf) by    Xuan Cao, Kshitij Khare, Malay Ghosh.
+
+
+## Project 1: Data-sets
+
+I'll show you two data-sets, but there are many more: 
 
 1. Leukemia (Classification, Unsupervised Learning)
 2. HIV (Regression, Supervised Learning).
@@ -33,7 +107,16 @@ Two possible data-sets:
 4. You can use one of the methods taught in class or try new methods - it's upto you (and your team). 
 5. You need to present your work. 
 
-## Leukemia Data (Unsupervised)
+
+## Source of High-Dimensional Datasets 
+
+1.  [Data-sets from Patrick Breheny's course: High-Dimensional Data Analysis](http://myweb.uiowa.edu/pbreheny/7600/s16/data.html)
+2.  [UC Irvine Machine Learning Repository](https://archive.ics.uci.edu/ml/index.php)
+3.  [Kaggle Open Data-sets](https://www.kaggle.com/datasets)
+
+
+
+## Leukemia Data 
 
 - Leukemia Data, Golub et al. Science $1999$.
 - Matrix of gene expression levels for the 38 tumor mRNA samples, rows correspond to genes (3051 genes) and columns to mRNA samples.
@@ -62,18 +145,19 @@ dim(golub.gnames)
 golub.gnames[1:4, ]
 ```
 
-## Possible Inferential Goals
+## Inferential Goals 
 
 1. Visualize the data: e.g. compare the baseline expression values between two groups (ALL `golub.cl=0` vs AML `golub.cl=1`)
 2. Perform unsupervised classification / clustering and calculate accuracy. 
 3. Carry out Multiple testing. 
 4. Identify Genes that are differentially expressed in two classes: Classification with variable selection.
 5. Focus on new, efficient Methods e.g. K-NN, Logistic with $\ell_1$ penalty, Fisher's LDA or hierarchical clustering. 
-6. K-NN has been covered, I will teach the other methods in class next week. 
+6. K-NN has been covered, I will teach the other methods in class over the next weeks. 
 
 ## Supervised Learning for Leukemia Data
 
-1. If you want to try supervised classification with this data, the full data-set with $n = 72$ samples (38 training, 34 test) is available on the R bioconductor site. 
+1. Try supervised classification with this data, the full data-set with $n = 72$ samples (38 training, 34 test) is available on the R bioconductor site. 
+
 2. This site [https://github.com/ramhiser/datamicroarray/wiki/Golub-(1999)](https://github.com/ramhiser/datamicroarray/wiki/Golub-(1999)) has info regarding the full data-set and the paper. 
 
 
@@ -88,26 +172,109 @@ Full paper (if you're interested): [http://www.pnas.org/content/103/46/17355.ful
 ## HIV Data
 
 ```{r, echo = T, tidy = T, cache=T}
-setwd("C:/Users/Jyotishka/OneDrive/Documents/Course Notes/stat5443/R codes/datasets")
+setwd("C:/Users/Jyotishka Datta/OneDrive/Documents/Course Notes/stat5443/R codes/datasets")
 ## save the hiv.rda file somewhere that R can find and use that path
 load("hiv.rda")
 dim(hiv.train$x)
 dim(hiv.test$x)
 ```
 
-## Simple Lasso 
+## Lasso {.smaller}
 
-```{r, echo = F, warning = F, message = F, cache=T}
-library(glmnet)
-fit=glmnet(hiv.train$x,hiv.train$y, alpha = 1)
-plot(fit)
+```{r, echo = T, warning = F, message = F, cache=T, fig.asp = 0.5}
+require(glmnet)
+set.seed(1)
+cvfit <- cv.glmnet(hiv.train$x, hiv.train$y)
+fit <- cvfit$glmnet.fit
+plot(fit, xvar = "lambda")
 ```
+
+## Restricted X-axis 
+
+```{r, echo = T, warning = F, message = F, cache=T, fig.asp = 0.6}
+
+xlim <- log(c(fit$lambda[1], cvfit$lambda.min))
+plot(fit, xlim=xlim, xvar="lambda")
+```
+
+## Lasso {.smaller}
+
+```{r, echo = T, warning = F, message = F, cache=T, fig.asp = 0.5}
+plot(cvfit)
+```
+
+
+## MSE 
+
+```{r, echo = T}
+bestlam =cvfit$lambda.min
+lasso.pred=predict(fit, s = bestlam , newx = hiv.test$x)
+mean((lasso.pred - hiv.test$y)^2)
+```
+
+## Horseshoe 
+
+- Another option in `monomovn` package is "hs" or horseshoe. 
+- Horseshoe prior was proposed by Carvalho, Polson and Scott (2010) for sparse signal recovery. 
+- Horseshoe prior improves on the Laplace prior used for Bayesian Lasso when the underlying data is nearly-black. 
+- R package `horseshoe`, `monomvn`, `bayeslm` etc.
+
+
+## Horseshoe R package {.smaller}
+
+```{r, echo = T}
+library(horseshoe)
+hs.fit <- horseshoe(y = hiv.train$y, X = hiv.train$x, 
+                    method.tau = "truncatedCauchy", method.sigma = "Jeffreys",
+                    burn = 5000, nmc = 10000, thin = 2)
+```
+
+## Plot 
+
+ Plot estimated coefficients: predicted values against the observed data
+```{r, echo = T}
+plot(hs.fit$BetaHat)
+```
+
+
+## Variable Selection {.smaller}
+
+```{r, echo = T}
+hs.pred <- hiv.test$x%*%hs.fit$BetaHat
+(MSE = mean((hiv.test$y - hs.pred)^2))
+
+hs.ind <- HS.var.select(hs.fit, hiv.train$y, method = "interval") 
+cat("No of variables selected", sum(hs.ind), "\n")
+
+cat("Estimates for selected coefficients \n", hs.fit$BetaHat[hs.ind], "\n")
+
+cat("Which columns were selected?", which(hs.ind == 1))
+```
+
+
+## Credible Intervals {.smaller}
+
+The credible intervals are really wide here - which suggests a poor uncertainty quantification and possibly poor fit. 
+
+```{r, echo = T, message = F, warning= F}
+library(Hmisc)
+xYplot(Cbind(hs.fit$BetaHat, hs.fit$LeftCI, hs.fit$RightCI) ~ 1:length(hs.fit$BetaHat))
+```
+
+
+
+## Which one is correct? 
+
+-  In absence of "ground truth", it is hard to tell if horseshoe is over-penalizing or Lasso is severely under-penalizing. 
+-  That's why we choose methods based on a simulation study that we think accurately represents our reality (hard!)
+
+
 
 ## Inferential Goals 
 
 1. Apply different sparse regression (regularization/shrinkage/dimension reduction technique) on this data. 
 
-2. Compare between different methods? e.g. Would Elastic Net be a better fit than Lasso? How do you test? How about Bayesian methods or PC Regression?
+2. Compare between different methods? e.g. Would Elastic Net be a better fit than Lasso? Do Bayesian methods outperform frequentist methods? How do you test? How about Bayesian methods or PC Regression?
 
 3. Could try extensions: The next slide show histogram of $y_{tr}$ - would it be better if we change the response to binary from continuous and apply classification methods? 
 
@@ -143,11 +310,19 @@ plot(fit)
 plot(fit.bin)
 ```
 
-## A full-scale Bioinformatic Analysis 
+## Summary 
 
--  I will show a full scale data analysis. 
--  Assume that we are in a unsupervised setting, we only observe an $n \times p$ matrix $X$, no outcomes $y$. 
--  However, we know that the $n$ subjects belong to two different groups: disease/normal, type-a/type-b. 
+-  Response $y$ - discrete (0/1) or continuous. 
+-  Predictors $X$ - $n \times p$, $p \gg n$. 
+-  Compare different high-dimensiona methods. 
+-  There are many data-sets (e.g. `brca` data for last lab), and we can also simulate data-sets where the ground truth is known. 
+
+
+## Bioinformatic Analysis 
+
+-  I will show a typical Bioinformatics analysis involving multiple testing. 
+-  We observe an $n \times p$ matrix $X$.  
+-  We know that the $n$ subjects belong to two different groups: disease/normal, type-a/type-b. 
 -  I want to test which of the $p$ variables are different between the two groups? 
 
 ## Large Scale Testing
