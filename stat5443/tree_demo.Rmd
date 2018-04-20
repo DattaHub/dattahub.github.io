@@ -1,7 +1,7 @@
 ---
 title: "Tree-based methods"
 author: "Jyotishka Datta"
-date: "April 12, 2017"
+date: "April 12, 2018"
 output: ioslides_presentation
 ---
 
@@ -69,12 +69,13 @@ plot(tree.carseats)
 text(tree.carseats,pretty=0)
 ```
 
-## Plot tree 
+## Plot tree {.smaller}
 
-The most important indicator of Sales appears to be shelving location.
+Shelving location is the most important predictor here. 
+
 ```{r, echo = T}
 plot(tree.carseats)
-text(tree.carseats,pretty=1, cex = 0.5)
+text(tree.carseats,pretty=1, cex = 0.65)
 ```
 
 ## Tree output 
@@ -118,13 +119,51 @@ results.
  - The function `cv.tree()` performs cross-validation in order to
 determine the optimal level of tree complexity; **cost complexity pruning** is used in order to select a sequence of trees for consideration. 
 
-## Pruning (continued)
+
+## Recap (Classification Losses) {.smaller}
+
+1.  The 0-1 loss or misclassification error rate: 
+$$
+\sum_{m = 1}^{|T|} \sum_{x_i \in R_m} 1(y_i \neq y_{R_m})
+$$
+
+2.  Cross-entropy (measures the 'purity' of a leaf)
+
+$$
+- \sum_{m = 1}^{|T|} q_m \sum_{k=1}^{K} \hat{p}_{mk} \log(\hat{p}_{mk})
+$$
+
+where $\hat{p}_{mk}$ is the proportion of class $k$ within $R_m$, and $q_m$ is
+the proportion of samples in $R_m$.
+
+-  Use cross-entropy for growing the tree, while using the misclassification rate when pruning the tree.
+
+
+
+## Pruning (continued) 
 
  -  We use the argument `FUN=prune.misclass` in order to indicate that we want the *classification error rate* to guide the cross-validation and pruning process, rather than the default for the `cv.tree()` function, which is deviance.
 
- - The `cv.tree()` function reports the number of terminal nodes of each tree considered (size) as well as the corresponding error rate and the value of the cost-complexity parameter used (`k` corresponds to our $\alpha$)
- 
+- The `cv.tree()` function reports 
+1.  the number of terminal nodes of each tree considered (size),
+2.  the corresponding error rate, and 
+3.  the value of the cost-complexity parameter used (`k` corresponds to our $\alpha$)
+
+
+## Cost-complexity pruning 
+
+-  Cost-complexity pruning is similar to regularization idea. You put a penalty for the size of the tree - larger trees are penalized more. 
+
+$$
+\text{minimize}
+\sum_{m = 1}^{|T|} \sum_{x_i \in R_m} 1(y_i \neq y_{R_m}) + \alpha |T|
+$$
+
+-  Just like regularized methods, $\alpha$ is a tuning parameter - we can choose a suitable value by cross-validation. 
+
+
 ## Using `cv.tree()` {.smaller}
+
 
 ```{r, echo = T}
 set.seed(3)
@@ -133,6 +172,7 @@ names(cv.carseats)
 cv.carseats
 ```
  
+
 ## Output explanation 
 
  -  Note that, despite the name, `dev` corresponds to the cross-validation error rate in this instance. 
@@ -146,6 +186,7 @@ par(mfrow=c(1,2))
 plot(cv.carseats$size,cv.carseats$dev,type="b")
 plot(cv.carseats$k,cv.carseats$dev,type="b")
 ```
+
 
 ## Prune the tree {.smaller}
 
@@ -170,15 +211,21 @@ Now precentage of correct prediction is `r (94+60)/200`.
 
 ## Different k
 
+-  You can choose a different `k`, e.g. $k = 15$. 
+
 ```{r}
 prune.carseats=prune.misclass(tree.carseats,best=15)
 tree.pred=predict(prune.carseats,Carseats.test,type="class")
 table(tree.pred,High.test)
 ```
 
-Percentage of correct predictions `r (86+62)/200` < `r (94+60)/200` (the best model by CV)
+-  Percentage of correct predictions will be lower: `r (86+62)/200` 
+
+-   Compare to the best model by CV:  `r (94+60)/200` 
+
 
 ## How does this compare to Logistic? {.smaller}
+
 
 ```{r}
 glm.fits=glm(High~.-Sales,Carseats,family=binomial,subset=train)
@@ -204,6 +251,14 @@ par(mfrow=c(1,2))
 plot(Carseats.test$ShelveLoc,glm.probs); abline(h=0.5)
 plot(Carseats.test$Price,glm.probs);abline(h=0.5)
 ```
+
+
+## Exercise (not HW)
+
+1.  Plot the ROC curve for both logistic and decision tree (with pruning). 
+2.  Also apply k-NN with CV and LDA on the same data-set and compare accuracies. 
+3.  Can you create an artificial data-set where decision tree will do better than logistic or LDA? 
+
 
 ## Linear Regression vs. Tree 
 
@@ -289,7 +344,9 @@ plot(yhat,car.test); abline(0,1)
 ```
 
 
-# Bagging and Random Forest 
+# Next: Bagging 
+
+## Bagging and Random Forest 
 
 Here we apply bagging and random forests to the Boston data, using the
 `randomForest` package in R.
