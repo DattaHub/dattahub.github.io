@@ -45,6 +45,8 @@ knitr::opts_chunk$set(cache=TRUE, warning = F, message = F)
 
 # Multidimensional Scaling
 
+Most of the following material is from tutorials on MDS available online, in particular, an excellent set of notes from ETH. 
+
 ## Basic Question: 
 
 How to represent any data in two dimensions?
@@ -57,6 +59,8 @@ How to represent any data in two dimensions?
 
 
 ## Which idea is better? 
+
+This is a nice analogy for visualization. Each method uncovers only partial truth. We should bear that in mind. 
 
 ```{r, echo = F, out.height = "400px", out.width = "600px"}
 knitr::include_graphics("elephant.jpg")
@@ -82,7 +86,7 @@ arrive at optimal low-dimensional configuration (p = 2 or 3)
 # Examples first - Classical MDS
 
   - Problem: Given Euclidean Distance between points, recover the position of the points. 
- - Example: Road distance between 21 european cities
+ - Example: Road distance between 21 european cities.
 
 ```{r}
 library(datasets); class(eurodist)
@@ -107,7 +111,7 @@ text(eurocmd, rownames(eurocmd), cex = 0.7)
 
 ## Do we recover? 
 
-```{r, echo = F, out.height = "400px", out.width = "600px"}
+```{r, echo = F, out.height = "300px", out.width = "400px"}
 knitr::include_graphics("euromap.jpg")
 ```
 
@@ -149,6 +153,22 @@ pol.mds
 plot(x[,1], x[,2], type = "n")
 text(x[,1], x[,2], labels = rownames(x), cex = 0.7)
 ```
+
+
+**Note that we can use the `ggrepel` package to reduce the amount of text overlap**
+
+
+```{R}
+pol.data <- data.frame(x)
+
+set.seed(42)
+ggplot(pol.data) +
+  geom_point(aes(X1,X2), color = 'red') +
+  geom_text_repel(aes(X1,X2, 
+                      label = rownames(pol.data))) +
+  theme_classic(base_size = 16)
+```
+
 
 ## Star plot {.smaller}
 
@@ -213,7 +233,7 @@ $$
 2.  Different distances for different index $q$: 
 
 
-#### Shape of different $\ell_p$ norms: 
+**Shape of different $\ell_p$ norms:** 
 
 ```{r, echo = F, out.height = "80px", out.width = "700px"}
 knitr::include_graphics("v4.jpg")
@@ -245,9 +265,6 @@ knitr::include_graphics("scale-1.jpg")
 ```
 
 
-
-## To scale or not to scale
-
 <div class="col2">
 ```{r, echo = F}
 dat <- data.frame(rbind(c("A",35,6.232),c("B",40,6.232),
@@ -261,8 +278,6 @@ knitr::include_graphics("scale-2.jpg")
 </div>
 
 Convert cm to feet: different subgroups emerge. 
-
-## To scale or not to scale {.smaller}
 
 <div class="col2">
 ```{r, echo = F}
@@ -291,10 +306,11 @@ kable(dat, align = 'ccc', padding = 0, booktabs = T)
 knitr::include_graphics("scale-4.jpg")
 ```
 
+**Without knowing what these objects are, it is difficult to make a choice**.
 
-## Context is important {.smaller}
+For example, here the 4 objects are 4 cities and $X$, $Y$ are the geo-codes (longitude, latitude) - so scaling them does not make sense.
 
-You need knowledge of the context. Scaling is not a good idea always. 
+In other words, you need knowledge of the context. Scaling is not a good idea always. 
 
 ```{r, echo = F, fig.align='center'}
 dat <- data.frame(rbind(c("Palermo",13.3,38.0),c("Venice",12.4,45.4),
@@ -344,7 +360,7 @@ $$
  - Can be diagonalised: $B = V \Lambda V^T$. 
  - $\Lambda$ is diagonal matrix with eigenvalues $\lambda_1 > \lambda_2 > \cdots > \lambda_n$ 
  - Some eignevalues are zero, drop them. $B = V_1 \Lambda_1 V_1^T$.
- - Take "square-root" $X = V_1 \Lambda_1^{-1/2}$.
+ - Take "square-root" $X = V_1 \Lambda_1^{1/2}$. 
  
 ## Classical MDS 
 
@@ -434,9 +450,6 @@ knitr::include_graphics("non-metric-1.jpg")
 knitr::include_graphics("non-metric-2.jpg")
 ```
 
-
-## Example for Intuition 
-
 ```{r, echo = F}
 knitr::include_graphics("non-metric-3.jpg")
 ```
@@ -465,9 +478,6 @@ knitr::include_graphics("non-metric-3.jpg")
 same terminal nodes more often than dissimilar ones. 
 -   We can use the proximity measure to identify structure. 
 
-
-## Random Forest and MDS 
-
 ```{r, warning = F, message = F}
 library(randomForest)
 ind <- sample(2,nrow(iris),replace=TRUE,prob=c(0.7,0.3))
@@ -476,8 +486,6 @@ testData <- iris[ind==2,]
 iris_rf <- randomForest(Species~.,data=trainData,ntree=100,proximity=TRUE)
 table(predict(iris_rf),trainData$Species)
 ```
-
-## Plot the Random Forest 
 
 ```{r}
 plot(iris_rf)
@@ -512,7 +520,7 @@ iris.mds <- cmdscale(1 - iris.rf$proximity, eig=TRUE)
 round(importance(iris.rf), 2)
 ```
 
-## Plot the variables {.smaller}
+## Plot the variables 
 
 ```{r}
 op <- par(pty="s")
@@ -539,24 +547,7 @@ voting.mds <- cmdscale(voting, eig=TRUE)
 names(voting.mds)
 ```
 
-## Plot - Metric
-
-```{r, echo = T, eval = F}
-demind <- grep("(D)",colnames(voting))
-col <- rep("red",15)
-col[demind] <- "blue"
-
-plot(voting.mds$points[,1], voting.mds$points[,2],
-     type = "n", xlab = "Coordinate 1", ylab = "Coordinate 2",
-     xlim = range(voting.mds$points[,1])*1.2)
-text(voting.mds$points[,1], voting.mds$points[,2], 
-     labels = colnames(voting), cex = 0.7, col = col)
-```
-
-
-## Plot - Metric
-
-```{r, echo = F, eval = T}
+```{r, echo = T, eval = T}
 demind <- grep("(D)",colnames(voting))
 col <- rep("red",15)
 col[demind] <- "blue"
@@ -575,25 +566,7 @@ text(voting.mds$points[,1], voting.mds$points[,2],
 voting_mds <- isoMDS(voting)
 ```
 
-## Plot 
-
-
-```{r, echo = T, eval = F}
-demind <- grep("(D)",colnames(voting))
-col <- rep("red",15)
-col[demind] <- "blue"
-
-plot(voting_mds$points[,1], voting_mds$points[,2],
-     type = "n", xlab = "Coordinate 1", ylab = "Coordinate 2",
-     xlim = range(voting_mds$points[,1])*1.2)
-text(voting_mds$points[,1], voting_mds$points[,2], 
-     labels = colnames(voting), col = col)
-```
-
-
-## Plot 
-
-```{r, echo = F, eval = T}
+```{r, echo = T, eval = T}
 demind <- grep("(D)",colnames(voting))
 col <- rep("red",15)
 col[demind] <- "blue"
@@ -606,7 +579,7 @@ text(voting_mds$points[,1], voting_mds$points[,2],
 ```
 
 
-## Use `ggrepel` fo better plots 
+**Use `ggrepel` fo better plots**
 
 ```{r, echo = T, eval = F}
 library(ggplot2)
