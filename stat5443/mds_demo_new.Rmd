@@ -1,0 +1,661 @@
+---
+title: "Multidimensional Scaling"
+author: "Jyotishka Datta"
+date: "April 27, 2018"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    number_sections: true
+fontsize: 12pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache=TRUE, warning = F, message = F)
+```
+
+<style>
+  .col2 {
+    columns: 2 200px;         /* number of columns and width in pixels*/
+    -webkit-columns: 2 200px; /* chrome, safari */
+    -moz-columns: 2 200px;    /* firefox */
+  }
+  .col3 {
+    columns: 3 100px;
+    -webkit-columns: 3 100px;
+    -moz-columns: 3 100px;
+  }
+</style>
+
+<style>
+.column-left{
+  float: left;
+  width: 40%;
+  text-align: left;
+}
+.column-right{
+  float: right;
+  width: 60%;
+  text-align: right;
+}
+</style>
+
+
+# Multidimensional Scaling
+
+## Basic Question: 
+
+How to represent any data in two dimensions?
+
+ 1.  Projection (onto a lower dimensional plane)
+ 
+ 2.  Squeeze data onto a table: close points stay close. 
+
+-  Both ideas yield sensible visualization - but show a different aspect of the data. 
+
+
+## Which idea is better? 
+
+```{r, echo = F, out.height = "400px", out.width = "600px"}
+knitr::include_graphics("elephant.jpg")
+```
+
+## Idea of MDS 
+
+ -  Represent high-dimensional point cloud in few (usually 2) dimensions keeping distances between points similar.
+ -  Useful tool in visualizing any big data-set, specially for clustering purposes. 
+ -  Is a popular exploratory tool. Used before any inferential procedure. 
+ 
+
+## Goal of MDS 
+
+ - Given pairwise dissimilarities, reconstruct a map that preserves distances.
+ -  From any dissimilarity (no need to be a metric)
+ -  Reconstructed map has coordinates $\mathbf{x}_i = (x_{i1}, x_{i2})$ and the
+natural distance $\Vert x_i - x_j \Vert^2$.
+ - MDS is a family of different algorithms, each designed to
+arrive at optimal low-dimensional configuration (p = 2 or 3)
+ - Includes: Classical MDS, Metric MDS and Non-metric MDS. 
+ 
+# Examples first - Classical MDS
+
+  - Problem: Given Euclidean Distance between points, recover the position of the points. 
+ - Example: Road distance between 21 european cities
+
+```{r}
+library(datasets); class(eurodist)
+```
+
+```{}
+                Athens Barcelona Brussels Calais Cherbourg Cologne
+Barcelona         3313                                            
+Brussels          2963      1318                                  
+Calais            3175      1326      204                         
+Cherbourg         3339      1294      583    460                  
+Cologne           2762      1498      206    409       785  
+```
+
+## First Try MDS
+
+```{r}
+eurocmd <- cmdscale(eurodist)
+plot(eurocmd, type = "n")
+text(eurocmd, rownames(eurocmd), cex = 0.7)
+```
+
+## Do we recover? 
+
+```{r, echo = F, out.height = "400px", out.width = "600px"}
+knitr::include_graphics("euromap.jpg")
+```
+
+- Can identify points up to shift, reflection and rotation. 
+
+## Flip Axes 
+
+```{r}
+plot(eurocmd[,1], -eurocmd[,2], type = "n", asp = 1)
+text(eurocmd[,1], -eurocmd[,2], rownames(eurocmd), cex = 0.7)
+```
+
+- Can identify points up to shift, reflection and rotation.
+
+## Another Example {.smaller}
+
+ - Air pollution in US Cities 
+```{r}
+data("USairpollution", package = "HSAUR2")
+summary(USairpollution)
+dat <- USairpollution # less typing
+```
+ - Some variables have larger range - need to standardise. 
+
+## Try MDS at 2-D {.smaller}
+
+```{r}
+xs <- apply(dat, 2, function(x) (x - min(x))/(diff(range(x))))
+poldist <- dist(xs)
+pol.mds <- cmdscale(poldist, k = 2, eig = TRUE)
+x <- pol.mds$points
+pol.mds
+```
+
+
+## Plot the 2-D map 
+
+```{r}
+plot(x[,1], x[,2], type = "n")
+text(x[,1], x[,2], labels = rownames(x), cex = 0.7)
+```
+
+## Star plot {.smaller}
+
+```{r}
+stars(xs, draw.segments = TRUE, key.loc = c(15,2))
+```
+
+- Jacksonville and New Orleans have similar profile. 
+ 
+
+# Thoery of MDS 
+
+ - Classical MDS: Euclidean distance between $n$ objects in $p$ dimensions. 
+ - Output: Position of points upto rotation, reflection, shift. 
+ - Two steps: 
+ 1.  Compute inner product matrix $B = X X^T$ from distances.
+ 2.  Compute positions from $B$.
+
+
+## Distance  
+ 
+ -  Distance, dissimilarity and similarity (or proximity) are defined for any pair of objects in any space. 
+ -  In mathematics, a distance function (that gives a distance between two objects) is also called metric, satisfying: 
+ 
+ 
+$$
+ d(x,y) \ge 0 \\
+ d(x,y) = 0 \text{ iff } x = y \\
+ d(x,y) = d(y,x) \\
+ d(x,z) \le d(x,y) + d(y,z) 
+$$
+
+## Examples 
+
+
+1.  Euclidean Distance: 
+$$
+d_{i,j} = \sqrt{(x_{i1}-x_{j1})^2 + \ldots + (x_{ip}- x_{jp})^2}
+$$
+
+2.  Manhattan distance:
+$$
+d_{i,j} = \lvert x_{i1} -x_{j1} \rvert + \ldots \lvert x_{ip}-x_{jp} \rvert 
+$$
+3. Maximum distance: 
+
+$$
+d_{i,j} = \sum_{k=1}^{p} |x_{ik} - x_{jk}|_{\infty} = max_{k=1}^{p} |x_{ik} - x_{jk} |
+$$
+
+
+
+## Intuition for Minkowski distance 
+
+**Minkowski distance**: 
+
+$$
+d_{i,j} = \{ \sum_{k=1}^{p} \sum_{k=1}^{p} |x_{ik} - x_{jk}|^q \}^{1/q}
+$$
+
+1.  Points on the line have equal distance from the center. 
+2.  Different distances for different index $q$: 
+
+
+#### Shape of different $\ell_p$ norms: 
+
+```{r, echo = F, out.height = "80px", out.width = "700px"}
+knitr::include_graphics("v4.jpg")
+```
+
+
+## Distance metrics in practice
+
+
+1.  Euclidean Distance: By far most common Our intuitive notion of distanc.
+
+2. Manhattan Distance: Sometimes seen
+
+3. Rest: Very rare
+
+
+
+## To scale or not to scale
+
+4 persons data on age and height. 
+
+```{r, echo = F}
+dat <- data.frame(rbind(c("A",35,190),c("B",40,190),
+                        c("C",35,160),c("D",40,160)))
+colnames(dat) <- c("Person", "Age [years]", "Height [cm]")
+library(knitr)
+kable(dat)
+knitr::include_graphics("scale-1.jpg")
+```
+
+
+
+## To scale or not to scale
+
+<div class="col2">
+```{r, echo = F}
+dat <- data.frame(rbind(c("A",35,6.232),c("B",40,6.232),
+                        c("C",35,5.248),c("D",40,5.248)))
+colnames(dat) <- c("Person", "Age [years]", "Height [ft]")
+library(knitr)
+kable(dat)
+
+knitr::include_graphics("scale-2.jpg")
+```
+</div>
+
+Convert cm to feet: different subgroups emerge. 
+
+## To scale or not to scale {.smaller}
+
+<div class="col2">
+```{r, echo = F}
+dat <- data.frame(rbind(c("A",-0.87, 0.87),c("B",0.87, 0.87),
+                        c("C",-0.87,-0.87),c("D",0.87,-0.87)))
+colnames(dat) <- c("Person", "Age [years]", "Height [cm]")
+library(knitr)
+kable(dat, align = 'ccc', padding = 0, booktabs = T)
+knitr::include_graphics("scale-3.jpg")
+```
+</div>
+
+Now all data-points are scaled : no subgroups.
+
+
+## Context is important {.smaller}
+
+Which of the two representations make sense? 
+
+```{r, echo = F, fig.align='center'}
+dat <- data.frame(rbind(c("A",13.3,38.0),c("B",12.4,45.4),
+                        c("C",-122.7,45.6),c("D",-122.4,37.7)))
+colnames(dat) <- c("Object", "X1", "X2")
+kable(dat, align = 'ccc', padding = 0, booktabs = T)
+
+knitr::include_graphics("scale-4.jpg")
+```
+
+
+## Context is important {.smaller}
+
+You need knowledge of the context. Scaling is not a good idea always. 
+
+```{r, echo = F, fig.align='center'}
+dat <- data.frame(rbind(c("Palermo",13.3,38.0),c("Venice",12.4,45.4),
+                        c("Portland",-122.7,45.6),c("San Francisco",-122.4,37.7)))
+colnames(dat) <- c("Object", "Longitude", "Latitude")
+kable(dat, align = 'ccc', padding = 0, booktabs = T)
+
+knitr::include_graphics("scale-4.jpg")
+```
+
+
+## Thoery of MDS 
+
+ - Given a dissimilarity matrix $D = (d_{ij})$, MDS seeks to find $x_1, \ldots, x_n \in \mathbb{R}^p$, such that: 
+$$
+d_{ij} \approx \Vert x_i - x_j \Vert^2 \text{ as close as possible}
+$$
+
+-  Oftentimes, for some large $p$, there exists a configuration $x_1, \ldots, x_n$ with exact distance match $d_{ij} = \Vert x_i - x_j \Vert^2$. 
+ -  In such a case $d$ is called a Euclidean distance.
+ -  There are, however, cases where the dissimilarity is distance, but
+there exists no configuration in any $p$ with perfect match. 
+ - Such a distance is called non-Euclidean distance.
+ 
+## Classical MDS: Thoery (continued)
+
+ - Suppose for now we have Euclidean distance matrix $D = (d_{ij})$
+ - We want to find $(x_1, \ldots, x_n)$ such that $d_{ij} = dist(x_i,x_j)$.
+ - Not unique solution: $x^* = x + c$. 
+ - Assume the observations are centered. 
+ 
+## Thoery - Step 1
+
+ - Find inner product matrix $B = X X^T$ instead of $X$. 
+ - Conenct to distance: $d_{ij}^2 = b_{ii}+b_{jj}-2b_{ij}$.
+ - Center points to avoid shift invariance. 
+ - Invert relationship: 
+$$
+b_{ij} = -1/2(d_{ij}^2 - d_{i.}^2 - d_{.j}^2 + d_{..}^2)
+$$
+  - "Doubly centered" distance. 
+  
+## Theory - Step 2
+
+ - Since $B = X X^T$, we need the square-root of $B$. 
+ - $B$ is symmetric and positive definite. 
+ - Can be diagonalised: $B = V \Lambda V^T$. 
+ - $\Lambda$ is diagonal matrix with eigenvalues $\lambda_1 > \lambda_2 > \cdots > \lambda_n$ 
+ - Some eignevalues are zero, drop them. $B = V_1 \Lambda_1 V_1^T$.
+ - Take "square-root" $X = V_1 \Lambda_1^{-1/2}$.
+ 
+## Classical MDS 
+
+ - Want a 2-D plot. 
+ - Keep only largest 2 eignevectors and eignevalues. 
+ - The resulting $X$ will be the low-dimensional representation we were looking for. 
+ - Same for 3-D. 
+ 
+## Classical MDS: Low-dim representation
+
+-  Goodness of fit (GOF) if we reduce to m dimensions:
+$$
+\text{GOF}_{m} = \frac{\sum_{i = 1}^{m} \lambda_i}{\sum_{i = 1}^{n} \lambda_i}
+$$
+
+-  We can choose $m$ dimensional representation if $\text{GOF}_{m} \ge 0.8$. 
+
+
+## Classical MDS: Pros and Cons
+
+Pros:
+
+-   Optimal for euclidean input data
+-   Still optimal, if $B$ has non-negative eigenvalues (pos. semidefinite)
+-   Very fast
+
+Cons: 
+-   No guarantees if $B$ has negative eigenvalues. 
+
+
+However, in practice, it is still used then. New measures for Goodness of fit:
+$$
+\text{GOF}_{m} = \frac{\sum_{i = 1}^{m} \vert \lambda_i \vert}{\sum_{i = 1}^{n} \vert \lambda_i \vert} \; \text{or} \; \text{GOF}_{m} = \frac{\sum_{i = 1}^{m} \Vert \lambda_i \Vert_{\infty}}{\sum_{i = 1}^{n} \Vert \lambda_i \Vert_{\infty}}
+$$
+-  These are used in the R function `cmdscale`. 
+
+
+## Non-metric MDS: Idea
+
+-  Sometimes, there is no strict metric on original point
+-   Example: how well do you like something? (1 - not at all, 10 - very much)
+
+Subject Teacher-1  Teacher-2  Teacher-3 
+------- ---------  ---------  ---------
+S1       1          5         10
+s2       2          6         9 
+S3       1          7         8
+------- ---------  --------- ---------
+
+-  Teacher 1 < Teacher 2 < Teacher 3 
+
+
+## Non-metric MDS 
+
+-  Absolute values are not that meaningful
+
+-  Ranking is important
+
+-  Non-metric MDS finds a low-dimensional representation, which respects the ranking of distances. 
+
+
+## Non-metric MDS : Theory 
+
+-  $\delta_{ij}$ is the true dissimilarity: $d_{ij}$ is the distance of representation. 
+
+-  Minimize Stress: 
+$$
+S = \frac{\sum_{i <j} (\theta(\delta_{ij}) - d_{ij})^2}{\sum_{i <j} d_{ij}^2}, \; \theta \text{ is an increasing function}.
+$$ 
+
+-  Optimize over "both" positions of points and $\theta$. 
+
+-  $\hat{d_{ij}} = \theta(\delta_{ij})$ is called "disparity".
+
+-  Solved numerically (isotonic regression); Classical MDS as starting value; 
+
+-   very time consuming
+
+
+## Example for Intuition 
+
+```{r, echo = F}
+knitr::include_graphics("non-metric-1.jpg")
+```
+
+```{r, echo = F}
+knitr::include_graphics("non-metric-2.jpg")
+```
+
+
+## Example for Intuition 
+
+```{r, echo = F}
+knitr::include_graphics("non-metric-3.jpg")
+```
+
+
+##  Non-metric MDS: Pros and Cons
+
+
++ Fulfills a clear objective without many assumptions (minimize STRESS)
+
++ Results don’t change with rescaling or monotonic variable transformation
++ Works even if you only have rank information
+
+
+- Slow in large problems
+- Usually only local (not global) optimum found
+- Only gets ranks of distances right
+
+
+# Random Forest and MDS 
+
+
+-   In absence of a distance measure, we can use random forest to get a proximity measure. 
+-   Proximity measure:  The $(i,j)$ element of the proximity matrix produced by `randomForest` is the fraction of trees in which elements $i$ and $j$ fall in the same terminal node. 
+-   The intuition is that **similar** observations should be in the
+same terminal nodes more often than dissimilar ones. 
+-   We can use the proximity measure to identify structure. 
+
+
+## Random Forest and MDS 
+
+```{r, warning = F, message = F}
+library(randomForest)
+ind <- sample(2,nrow(iris),replace=TRUE,prob=c(0.7,0.3))
+trainData <- iris[ind==1,]
+testData <- iris[ind==2,]
+iris_rf <- randomForest(Species~.,data=trainData,ntree=100,proximity=TRUE)
+table(predict(iris_rf),trainData$Species)
+```
+
+## Plot the Random Forest 
+
+```{r}
+plot(iris_rf)
+```
+
+
+## Variable Importance 
+
+```{r}
+varImpPlot(iris_rf)
+```
+
+
+## Prediction on new data 
+
+```{r}
+irisPred<-predict(iris_rf,newdata=testData)
+table(irisPred, testData$Species)
+```
+
+
+## MDS on the full Iris Data
+
+
+```{r}
+set.seed(71)
+iris.rf <- randomForest(Species ~ ., data=iris, importance=TRUE,
+                        proximity=TRUE)
+## Do MDS on 1 - proximity:
+iris.mds <- cmdscale(1 - iris.rf$proximity, eig=TRUE)
+## Look at variable importance:
+round(importance(iris.rf), 2)
+```
+
+## Plot the variables {.smaller}
+
+```{r}
+op <- par(pty="s")
+pairs(cbind(iris[,1:4], unlist(iris.mds$points)), cex=0.6, gap=0,
+      col=c("red", "green", "blue")[as.numeric(iris$Species)],
+      main="Iris Data: Predictors and MDS of Proximity Based on RandomForest")
+par(op)
+```
+
+# Voting Data 
+
+ - Look at the voting data. 
+ - Are Democrats close to each other, republicans?
+
+```{r}
+data("voting", package = "HSAUR")
+require("MASS")
+head(voting[,1:4], n = 4)
+```
+
+-   For metric MDS, use function `cmdscale`. 
+```{r}
+voting.mds <- cmdscale(voting, eig=TRUE)
+names(voting.mds)
+```
+
+## Plot - Metric
+
+```{r, echo = T, eval = F}
+demind <- grep("(D)",colnames(voting))
+col <- rep("red",15)
+col[demind] <- "blue"
+
+plot(voting.mds$points[,1], voting.mds$points[,2],
+     type = "n", xlab = "Coordinate 1", ylab = "Coordinate 2",
+     xlim = range(voting.mds$points[,1])*1.2)
+text(voting.mds$points[,1], voting.mds$points[,2], 
+     labels = colnames(voting), cex = 0.7, col = col)
+```
+
+
+## Plot - Metric
+
+```{r, echo = F, eval = T}
+demind <- grep("(D)",colnames(voting))
+col <- rep("red",15)
+col[demind] <- "blue"
+
+plot(voting.mds$points[,1], voting.mds$points[,2],
+     type = "n", xlab = "Coordinate 1", ylab = "Coordinate 2",
+     xlim = range(voting.mds$points[,1])*1.2)
+text(voting.mds$points[,1], voting.mds$points[,2], 
+     labels = colnames(voting), cex = 0.7, col = col)
+```
+
+
+## Solution - non-metric
+
+```{r}
+voting_mds <- isoMDS(voting)
+```
+
+## Plot 
+
+
+```{r, echo = T, eval = F}
+demind <- grep("(D)",colnames(voting))
+col <- rep("red",15)
+col[demind] <- "blue"
+
+plot(voting_mds$points[,1], voting_mds$points[,2],
+     type = "n", xlab = "Coordinate 1", ylab = "Coordinate 2",
+     xlim = range(voting_mds$points[,1])*1.2)
+text(voting_mds$points[,1], voting_mds$points[,2], 
+     labels = colnames(voting), col = col)
+```
+
+
+## Plot 
+
+```{r, echo = F, eval = T}
+demind <- grep("(D)",colnames(voting))
+col <- rep("red",15)
+col[demind] <- "blue"
+
+plot(voting_mds$points[,1], voting_mds$points[,2],
+     type = "n", xlab = "Coordinate 1", ylab = "Coordinate 2",
+     xlim = range(voting_mds$points[,1])*1.2)
+text(voting_mds$points[,1], voting_mds$points[,2], 
+     labels = colnames(voting), cex = 0.7, col = col)
+```
+
+
+## Use `ggrepel` fo better plots 
+
+```{r, echo = T, eval = F}
+library(ggplot2)
+library(ggrepel)
+
+voting.data <- data.frame(voting_mds$points)
+
+set.seed(42)
+ggplot(voting.data) +
+  geom_point(aes(X1,X2), color = 'red') +
+  geom_text_repel(aes(X1,X2, 
+                      label = rownames(voting.data))) +
+  theme_classic(base_size = 16)
+```
+
+
+## Use `ggrepel` fo better plots 
+
+```{r, echo = F, eval = T}
+library(ggplot2)
+library(ggrepel)
+
+voting.data <- data.frame(voting_mds$points)
+
+set.seed(42)
+ggplot(voting.data) +
+  geom_point(aes(X1,X2), color = 'red') +
+  geom_text_repel(aes(X1,X2, 
+                      label = rownames(voting.data))) +
+  theme_classic(base_size = 16)
+```
+
+
+## Main message 
+
+Classical MDS:
+
+
+-  Finds low-dim projection that respects distances 
+-  Optimal for euclidean distances 
+-  No clear guarantees for other distances 
+-  fast
+
+
+Non-metric MDS:
+
+-  Squeezes data points on table 
+-  respects only rankings of distances 
+-  (locally) solves clear objective 
+-   slow
+
+
