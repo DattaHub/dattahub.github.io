@@ -1,7 +1,7 @@
 ---
 title: "Wilcoxon and Quantiles"
 author: "Jyotishka Datta"
-date: "September 8, 2017"
+date: "September 7, 2018"
 output: ioslides_presentation
 ---
 
