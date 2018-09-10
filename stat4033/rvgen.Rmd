@@ -132,7 +132,7 @@ qqnorm(x)
 qqline(x)
 ```
 
-## Homework (will be added to HW 3)
+## Homework (will be added to HW 2)
 
 - Write a sampler to generate samples from the following density using the inverse transform.
 
