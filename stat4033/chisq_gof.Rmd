@@ -1,7 +1,7 @@
 ---
 title: "Chi-square Goodness of fit"
 author: "Jyotishka Datta"
-date: "September 15, 2017"
+date: "September 12, 2018"
 output: ioslides_presentation
 ---
 
@@ -52,7 +52,7 @@ Now suppose Professor Tipton thinks that the number of freshman and sophomores e
 
 $$
 H_0: p_1 = p_2 = 1/6, p_3 = p_4 = 1/3 \text{ vs. } \\
-H_1: \text{not all } p_i s \text{ are equal to the corresponding } p_{0i}s.
+H_1: \text{not all } p_i 's \text{ are equal to the corresponding } p_{0i}'s.
 $$
 
 ## R command 
