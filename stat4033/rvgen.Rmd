@@ -1,8 +1,11 @@
 ---
 title: "Random Variable Generation using Quantile Transformation"
 author: "Jyotishka Datta"
-date: "September 10, 2017"
-output: slidy_presentation
+date: "September 10, 2018"
+output: 
+  ioslides_presentation:
+    widescreen: true
+    smaller: true
 ---
 
 ```{r setup, include=FALSE}
@@ -11,23 +14,23 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## Inverse CDF Transformation
 
-- $X$ random variable, PDF of $X$ is $p(x)$: $X \sim p(x)$.
-- Cumulative density function CDF: $P(x) = \int_{-\infty}^{x} p(s) ds$
-- IF $P$ is invertible, $Y = P^{-1}(U)$ will have the same distribution as $X$.
+- $X$ random variable, PDF of $X$ is $f(x)$: $X \sim p(x)$.
+- Cumulative density function CDF: $F(x) = \int_{-\infty}^{x} p(s) ds$
+- IF $F$ is invertible, $Y = F^{-1}(U)$ will have the same distribution as $X$.
 - This is called Inverse CDF/ Quantile/ Probability-Integral transformation. 
 
 ## First Example: 
 
 - PDF of a logistic random variable. 
 $$
-p(x \mid \lambda) = \frac{\lambda e^{-\lambda x}}{\{1+e^{-\lambda x} \}^2}
+f(x \mid \lambda) = \frac{\lambda e^{-\lambda x}}{\{1+e^{-\lambda x} \}^2}
 $$
 - Hence the CDF can be written as: 
 $$
-P(x \mid \lambda) = \frac{1}{\{1+e^{-\lambda x} \}} 
+F(x \mid \lambda) = \frac{1}{\{1+e^{-\lambda x} \}} 
 $$
 - How do we generate samples from logistic? 
-- Generate $U \sim U[0,1]$, and apply $P^{-1}(U)$ as above. 
+- Generate $U \sim U[0,1]$, and apply $F^{-1}(U)$ as above. 
 
 ## First Example Continued 
 
@@ -63,6 +66,14 @@ fy=lamb*exp(-lamb*y)/((1.0+exp(-lamb*y))^2)
 hist(x, freq  = F)
 lines(y,fy, col = "red")
 ```
+
+## Second Example - Exponential 
+
+- PDF: $f(x) = \lambda e^{-\lambda x}, \; x \ge 0, \lambda > 0$.
+- CDF: $F(x) = 1 - e^{-\lambda x}, \; \lambda > 0$. 
+
+- Inverse Transformation: $F^{-1}(u) = -\frac{1}{\lambda}\log(1-u)$, $u \sim U(0,1)$. 
+
 
 ## Second Example - Exponential
 
@@ -111,7 +122,8 @@ x = c(x1,x2)
 hist(x,breaks = 30, freq = F)
 curve(dnorm,add=T)
 ```
-- Do you know another test for normality?
+
+- Do you know another visual test for normality?
 
 ## QQ plots 
 
@@ -120,7 +132,7 @@ qqnorm(x)
 qqline(x)
 ```
 
-## Lab Exercise 
+## Homework (will be added to HW 3)
 
 - Write a sampler to generate samples from the following density using the inverse transform.
 
@@ -129,36 +141,37 @@ p(x) = \frac{\alpha \beta^{\alpha}}{x^{\alpha + 1}} \text{for } x \ge \beta
 $$
 
 
-## Steps 
--  Take $\alpha = 5$, $\beta = 2$. 
--  First calculate the CDF $P(x)$
--  Then calculate the inverse $P^{-1}(x)$. 
--  Generate $U \sim \text{Unif}[0,1]$, apply $P^{-1}(U)$.
+<!-- ## Steps  -->
 
-## Solution 
+<!-- -  Take $\alpha = 5$, $\beta = 2$.  -->
+<!-- -  First calculate the CDF $P(x)$ -->
+<!-- -  Then calculate the inverse $P^{-1}(x)$.  -->
+<!-- -  Generate $U \sim \text{Unif}[0,1]$, apply $P^{-1}(U)$. -->
 
-```{r, echo = TRUE}
-Finv <- function(u){
-    x = B/((1-u)**(1/a))
-    return(x)
-}
+<!-- ## Solution  -->
 
-B = 2.0
-a = 5.0
-n = 10000
-u = runif(n)
-x = Finv(u)
-```
+<!-- ```{r, echo = TRUE} -->
+<!-- Finv <- function(u){ -->
+<!--     x = B/((1-u)**(1/a)) -->
+<!--     return(x) -->
+<!-- } -->
 
-## Plotting the solution 
+<!-- B = 2.0 -->
+<!-- a = 5.0 -->
+<!-- n = 10000 -->
+<!-- u = runif(n) -->
+<!-- x = Finv(u) -->
+<!-- ``` -->
 
-```{r, echo = T, fig.height=4}
-y = seq(B,20,0.1)
-fy = a*(B^a)/(y^(a+1))
-hist(x,breaks=100,freq=F)
-lines(y,fy)
-legend("topright",c("density","histogram"))
-```
+<!-- ## Plotting the solution  -->
+
+<!-- ```{r, echo = T, fig.height=4} -->
+<!-- y = seq(B,20,0.1) -->
+<!-- fy = a*(B^a)/(y^(a+1)) -->
+<!-- hist(x,breaks=100,freq=F) -->
+<!-- lines(y,fy) -->
+<!-- legend("topright",c("density","histogram")) -->
+<!-- ``` -->
 
 ## Generating from the Uniform disk 
 
@@ -167,56 +180,80 @@ $$
 p(x,y) = 1/\pi \text{ if } x^2 + y^2 \le 1 
 $$ 
 
-- Exercise! 
 
-## What does not work 
+
+## Naive Idea
+
+-  Generate $R \sim \text{Unif}[0,1]$ and $\theta \sim \text{Unif}[0,2\pi]$. 
+- Set: 
+
+$$
+X_1 = R \cos(\theta) \\
+X_2 = R \sin(\theta)
+$$
+- The naive idea does not work. 
+
+## Naive Idea in R
 
 ```{r, echo = TRUE, fig.align= 'center' ,fig.height = 5, fig.width= 5}
 R = runif(1e4,0,1)
-theta = 2*pi*runif(1e4,0,1)
+theta = 2*pi*runif(1e3,0,1)
 X = R*cos(theta);Y = R*sin(theta)
-plot(X,Y)
+plot(X,Y, pch = 20, col=rgb(1,0,0,0.2))
 ```
-- Concentrated in the center!
+- Thickly concentrated in the center !
+
 
 ## What works 
-- Exercise: Why does this work? Hint = Jacobian.
+
+-  Generate $R \sim \text{Unif}[0,1]$ and $\theta \sim \text{Unif}[0,2\pi]$. 
+- Set: 
+
+$$
+X_1 = \sqrt{R} \cos(\theta) \\
+X_2 = \sqrt{R} \sin(\theta)
+$$
+
+
+## Extra Credit: Why does this work? 
+
 ```{r, echo = TRUE, fig.align= 'center' ,fig.height = 5, fig.width= 5}
 X = sqrt(R)*cos(theta);Y = sqrt(R)*sin(theta)
-plot(X,Y)
+plot(X,Y,pch = 20, col=rgb(1,0,0,0.2))
 ```
 
-## Accept-Reject {.smaller}
- - Draw from unit cube in $\mathbb{R}^2$ and accept samples that fall inside the disc. 
- - Inefficient for higher dimensions.
+<!-- ## Accept-Reject {.smaller} -->
 
-```{r, echo = TRUE}
-arfunction <- function(n){
-  rvx = rep(0,n)
-  rvy = rep(0,n)
-  a = 0
-  for (i in 1:n){
-    x = runif(1,min = -1,max = 1)
-    y = runif(1,min = -1, max = 1)
-    if (x^2 + y^2 <= 1){
-      rvx[i] = x
-      rvy[i] = y 
-      a = a + 1
-    }
-  }
-  cat("Efficiency is ", a/n)  
-  plot(rvx,rvy)
-  title("Uniform on a disc")
-}
-```
+<!--  - Draw from unit cube in $\mathbb{R}^2$ and accept samples that fall inside the disc.  -->
+<!--  - Inefficient for higher dimensions. -->
 
-## Disc point picking 
+<!-- ```{r, echo = TRUE} -->
+<!-- arfunction <- function(n){ -->
+<!--   rvx = rep(0,n) -->
+<!--   rvy = rep(0,n) -->
+<!--   a = 0 -->
+<!--   for (i in 1:n){ -->
+<!--     x = runif(1,min = -1,max = 1) -->
+<!--     y = runif(1,min = -1, max = 1) -->
+<!--     if (x^2 + y^2 <= 1){ -->
+<!--       rvx[i] = x -->
+<!--       rvy[i] = y  -->
+<!--       a = a + 1 -->
+<!--     } -->
+<!--   } -->
+<!--   cat("Efficiency is ", a/n)   -->
+<!--   plot(rvx,rvy) -->
+<!--   title("Uniform on a disc") -->
+<!-- } -->
+<!-- ``` -->
 
-```{r, echo = TRUE, fig.align= 'center' ,fig.height = 5 , fig.width= 5}
-n = 5000
-arfunction(n)
-```
+<!-- ## Disc point picking  -->
 
- 
+<!-- ```{r, echo = TRUE, fig.align= 'center' ,fig.height = 5 , fig.width= 5} -->
+<!-- n = 5000 -->
+<!-- arfunction(n) -->
+<!-- ``` -->
+
+
 
 
