@@ -10,7 +10,7 @@
 
 
 
-  <meta name="date" content="2017-01-30" />
+  <meta name="date" content="2018-09-21" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -94,7 +94,7 @@
       <h1 data-config-title><!-- populated from slide_config.json --></h1>
       <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
       <p data-config-presenter><!-- populated from slide_config.json --></p>
-            <p style="margin-top: 6px; margin-left: -2px;">January 30, 2017</p>
+            <p style="margin-top: 6px; margin-left: -2px;">September 21, 2018</p>
           </hgroup>
   </slide>
 
@@ -140,7 +140,7 @@ dim(m)</pre>
 
 <pre class = 'prettyprint lang-r'>apply(m, 2, mean)</pre>
 
-<pre >## [1] -0.165136  2.224684  4.979640</pre>
+<pre >## [1] -0.06959675  2.20471963  4.93081531</pre>
 
 </article></slide><slide class=""><hgroup><h2>apply (contd.)</h2></hgroup><article  id="apply-contd.">
 
@@ -150,11 +150,11 @@ dim(m)</pre>
 
 <pre class = 'prettyprint lang-r'>apply(m, 1, mean)</pre>
 
-<pre >##  [1] 1.709301 2.679496 2.405604 2.418085 2.367721 2.240985 1.736483
-##  [8] 3.027484 1.458938 2.001021 2.263296 2.068013 1.962054 3.069366
-## [15] 2.003599 2.497102 2.683324 2.769806 2.197533 2.318419 2.569120
-## [22] 2.428683 3.082895 2.168518 1.618974 2.717272 2.295605 2.437214
-## [29] 2.952410 2.243553</pre>
+<pre >##  [1] 3.122706 1.867839 2.622329 3.263160 1.930000 2.429607 2.278498
+##  [8] 3.352178 2.346678 2.104584 2.281192 1.537102 1.592945 1.504417
+## [15] 2.594441 2.161014 1.841993 2.596635 2.607188 3.045947 1.933094
+## [22] 2.675230 2.966192 2.442753 2.247247 2.142100 2.055638 2.070515
+## [29] 2.551278 2.494883</pre>
 
 <ul>
 <li>Or, our own function: (how many negative numbers in each column?)</li>
@@ -162,7 +162,7 @@ dim(m)</pre>
 
 <pre class = 'prettyprint lang-r'>apply(m, 2, function(x) length(x[x&lt;0]))</pre>
 
-<pre >## [1] 18  0  0</pre>
+<pre >## [1] 13  0  0</pre>
 
 </article></slide><slide class=""><hgroup><h2>lapply and sapply</h2></hgroup><article  id="lapply-and-sapply">
 
@@ -224,12 +224,12 @@ system.time(for (i in 1:N) {
 })</pre>
 
 <pre >##    user  system elapsed 
-##   25.25   22.33   48.15</pre>
+##   24.50   22.61   50.32</pre>
 
 <pre class = 'prettyprint lang-r'>system.time(d$mean1 &lt;- apply(d, 1, mean))</pre>
 
 <pre >##    user  system elapsed 
-##    0.62    0.01    0.65</pre>
+##     0.6     0.0     0.6</pre>
 
 </article></slide><slide class=""><hgroup><h2>Functions</h2></hgroup><article  id="functions-1">
 
@@ -340,7 +340,7 @@ test(x) #prints 20</pre>
 <pre class = 'prettyprint lang-r'>system.time(for(i in 1:5000) x&lt;-mean(rnorm(1000)))</pre>
 
 <pre >##    user  system elapsed 
-##    0.44    0.00    0.44</pre>
+##    0.39    0.02    0.44</pre>
 
 <ul>
 <li>The other way to get system time is using proc.time() function.</li>
@@ -352,7 +352,7 @@ for(i in 1:5000) x&lt;-mean(rnorm(1000))
 proc.time()-now</pre>
 
 <pre >##    user  system elapsed 
-##    0.42    0.00    0.44</pre>
+##    0.40    0.00    0.44</pre>
 
 </article></slide><slide class=""><hgroup><h2>Vectorized arithmetic &gt; loops</h2></hgroup><article  id="vectorized-arithmetic-loops">
 
@@ -364,7 +364,7 @@ meanx&lt;-sum/1e7
 proc.time()-now</pre>
 
 <pre >##    user  system elapsed 
-##    0.48    0.00    0.53</pre>
+##    0.39    0.00    0.44</pre>
 
 <ul>
 <li>Use vectorized arithmetic instead of loops:</li>
@@ -373,7 +373,7 @@ proc.time()-now</pre>
 <pre class = 'prettyprint lang-r'>system.time(mean(x))</pre>
 
 <pre >##    user  system elapsed 
-##    0.03    0.00    0.03</pre>
+##    0.02    0.01    0.04</pre>
 
 </article></slide><slide class=""><hgroup><h2>Finer control</h2></hgroup><article  id="finer-control">
 
@@ -383,9 +383,9 @@ library(microbenchmark)
 microbenchmark(sqrt(x),x^(0.5))</pre>
 
 <pre >## Unit: microseconds
-##     expr     min       lq      mean   median       uq     max neval
-##  sqrt(x)  56.890  59.6560  73.49433  66.9640  82.7665 141.038   100
-##  x^(0.5) 421.532 449.7785 493.11279 483.5565 518.1240 891.654   100</pre>
+##     expr     min       lq     mean   median      uq      max neval
+##  sqrt(x)  64.396  66.7670 129.7510  71.5075  83.557 4328.689   100
+##  x^(0.5) 426.667 443.4575 496.9725 467.3590 499.359 1378.370   100</pre>
 
 </article></slide><slide class=""><hgroup><h2>Excercise 1</h2></hgroup><article  id="excercise-1">
 
@@ -418,7 +418,7 @@ y &lt;- rowSums(X) + rnorm(n)</pre>
 <pre class = 'prettyprint lang-r'>system.time(bHat1 &lt;- solve(t(X) %*% X) %*% t(X) %*% y)</pre>
 
 <pre >##    user  system elapsed 
-##    0.46    0.03    0.56</pre>
+##    0.36    0.04    0.41</pre>
 
 <ul>
 <li>Not so naive: use <code>crossprod</code>.</li>
@@ -427,7 +427,7 @@ y &lt;- rowSums(X) + rnorm(n)</pre>
 <pre class = 'prettyprint lang-r'>system.time(bHat2 &lt;- solve(crossprod(X), crossprod(X, y)))</pre>
 
 <pre >##    user  system elapsed 
-##    0.26    0.00    0.27</pre>
+##    0.19    0.00    0.19</pre>
 
 </article></slide><slide class=""><hgroup><h2>Knowledge of Linear Algebra helps</h2></hgroup><article  id="knowledge-of-linear-algebra-helps">
 
@@ -443,12 +443,12 @@ A = crossprod(A)
 ptm &lt;- proc.time(); B = solve(A); proc.time()-ptm</pre>
 
 <pre >##    user  system elapsed 
-##    0.89    0.00    0.89</pre>
+##    0.77    0.00    0.81</pre>
 
 <pre class = 'prettyprint lang-r'>ptm &lt;- proc.time(); B = chol2inv(A); proc.time()-ptm</pre>
 
 <pre >##    user  system elapsed 
-##    0.25    0.00    0.33</pre>
+##    0.14    0.00    0.15</pre>
 
 </article></slide><slide class=""><hgroup><h2>More advanced : Parallel</h2></hgroup><article  id="more-advanced-parallel">
 
