@@ -1,0 +1,45 @@
+---
+title: "List of Favourite Books"
+author: "Jyotishka D."
+date: "October 28, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## A List of Books 
+
+This is an unordered list of books that I have come to like immensely throughout my career as a Statistician and these are great books to build a foundation in Statistical theory and methodology. 
+
+I keep going back to them for references and I recommend all of them. My memory is not something that I am very proud of and I have surely omitted some of the truly wonderful books and I will update this list as I remember more. 
+
+Of course, I have kept most of the timeless classics like Feller volume 2 or Lehman's books or Jeffrey's original treatise outside this list. 
+
+
+1.   Bayesian Data Analysis, Gelman, Carlin, Stern, and Rubin (1995). This book has been a constant reference for many years. The new edition has a broader range and more topics. Website: [http://www.stat.columbia.edu/~gelman/book/](http://www.stat.columbia.edu/~gelman/book/).
+
+2.  Computational Statistics, James E. Gentle. There is also an 'Elements of Computational Statistics' and 'Matrix Algebra: Theoty. Computations and Applications for Statistics' by the same author. [https://www.springer.com/us/book/9780387981437](https://www.springer.com/us/book/9780387981437)
+
+3.  An Introduction to Statistical Learning with Applications in R - Gareth James, Daniela Witten, Trevor Hastie and Robert Tibshirani: Website: [http://www-bcf.usc.edu/~gareth/ISL/](http://www-bcf.usc.edu/~gareth/ISL/). I heavily rely on this book for teaching my Comp Stat course for its wonderful style of teaching and examples. 
+
+4.  If ISLR comes, can ESL be far behind? Here's the original classic by Hastie, Tibshirani, and Friedman. [https://web.stanford.edu/~hastie/ElemStatLearn/](https://web.stanford.edu/~hastie/ElemStatLearn/)
+
+5.  Asymptotic Theory of Statistics and Probability by Anirban Dasgupta. Prof. Dasgupta is my favourite teacher by a large margin and all his books are modern classics. Link: [https://www.springer.com/us/book/9780387759708](https://www.springer.com/us/book/9780387759708).
+
+6.  Theory of Statistics, by Mark J. Schervish [https://www.springer.com/us/book/9780387945460](https://www.springer.com/us/book/9780387945460).
+
+7.   Asymptotic Statistics- Aad van der Vaart [link](https://www.cambridge.org/core/books/asymptotic-statistics/A3C7DAD3F7E66A1FA60E9C8FE132EE1D). I read this book when I was an undergraduate student at ISI Kolkata and Aad van der Vaart is my hero. 
+
+8.   Large Scale Inference, Bradley Efron. [Link from Prof. Efron's website](https://statweb.stanford.edu/~ckirby/brad/LSI/monograph_CUP.pdf). I owe almost everything I know about multiple testing to this single book. 
+
+
+9.   An Introduction to Bayesian Analysis - Theory and Methods - Authors: Ghosh, Jayanta K., Delampady, Mohan, Samanta, Tapas [https://www.springer.com/us/book/9780387400846](https://www.springer.com/us/book/9780387400846). JKG was my PhD advisor and TS taught me the first course in Bayesian inference. I am a Bayesian because of them. 
+
+
+10. Bayesian Nonparametrics, Authors: Ghosh, J.K., Ramamoorthi, R.V.  [https://www.springer.com/us/book/9780387955377](https://www.springer.com/us/book/9780387955377). 15 years later, still the best book on BNP. 
+
+
+
+
