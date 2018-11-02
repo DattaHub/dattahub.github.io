@@ -1,0 +1,236 @@
+---
+title: 'Project Description: Genomic Data'
+author: "Jyotishka Datta"
+date: "November 2, 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache = TRUE)
+```
+
+## Final Project : Analysing Genomic Data 
+
+-  Possible Inferential Goals: 
+
+  1. Compare the baseline expression values between two groups using a  nonparametric test, e.g. Wilcoxon/Mann-Whitney test. 
+  2. We have $p$ genes: $p$ simultaneous tests for each of the variables. We need to correct for multiple testing. 
+
+
+## Large Scale Testing
+
+- Suppose for the $i^{th}$ variable $x_{i}$ the two group means are $\theta_{i,1}$ and $\theta_{i,2}$.
+$$
+H_{0i}: \theta_{i,1} = \theta_{i,2} \text{ vs. } H_{1i}: \theta_{i,1} \neq \theta_{i,2}
+$$
+- If $H_{0i}$ is true, the group means $\bar{x}_{i,1}$ and  $\bar{x}_{i,1}$ should be close. 
+- We can do an independent samples test for each of the $p$ variables.
+- It is not necessary to compare the means via a t-test. We can compare medians using Mann-Whitney / variations using a Siegel-Tukey or an omnibus test using two-sample Kolmogorov-Smirnon test. 
+
+## Example from T-cell lymphoma {.build}
+
+```{r,echo=TRUE, message=FALSE, warning=FALSE, cache=T}
+## required for gene expression data classification example
+require(ALL)
+data(ALL)
+dim(ALL)
+```
+
+## Simplifying features 
+
+We are going to use the first three features. 
+
+```{r, echo=TRUE}
+resp <- gsub("B[0-9]", "B", ALL$BT) 
+## B-cell tumors of type B, B1,B2, T, T1, T2 
+resp <- factor(gsub("T[0-9]", "T", resp))
+xmat <- t(exprs(ALL))
+mydata <- data.frame(y = resp,x1 = xmat[,1],x2=xmat[,2],x3=xmat[,3])
+head(mydata,n=3)
+```
+
+## Further Analysis 
+
+-  Let's look at the results of molecular biology testing for the 128 samples:
+
+```{r, echo = T}
+table(ALL$mol.biol)
+```
+
+- Not all levels are frequent ! 
+
+## Filter 
+
+Ignoring the samples which came back negative on this test (NEG), most have been classified as (BCR/ABL) or (ALL1/AF4).
+
+For the purposes of this example, we are only interested in these two subgroups, so we will create a filtered version of the dataset using this as a selection criteria:
+
+```{r, echo = T}
+eset <- ALL[, ALL$mol.biol %in% c("BCR/ABL", "ALL1/AF4")]
+dim(eset)
+```
+
+
+## How do we analyze this data?
+
+- We have the expression levels 12,625 genes for 47 samples. 
+- We also have a factor `ALL$mol.biol` that has two levels: BCR/ABL and ALL1/AF4. 
+- We can ask for which genes, the gene expression values differ between these two subgroups? 
+- Two sample tests !
+
+## Simple test 
+
+- One idea would be use a two sample t-test for equality of group mean for each of the 12,625 genes. 
+- The `mt.teststat` function from the `multtest` library does this for you. 
+
+```{r, echo = T, cache=T}
+require(multtest)
+all.mat = exprs(eset)
+all.cl <- factor(as.character(eset$mol.biol))
+teststat = mt.teststat(all.mat,all.cl,test="t")
+```
+
+- The two datasets `all.mat` and `all.cl` are all you need. 
+- `all.mat` has the gene expression values and `all.cl` gives the class labbels. 
+- mt.teststat {multtest}: **Package for computing test statistics for each row of a data frame**.
+
+## Why t-test? 
+
+- These functions provide a convenient way to compute test statistics, e.g., two-sample Welch t-statistics, **Wilcoxon statistics**, F-statistics, paired t-statistics, block F-statistics, for each row of a data frame.
+- Should we use a t-test or a different test? 
+- How do you know? 
+
+## Visualize {.small}
+
+```{r, echo = F}
+par(mfrow=c(1,2))
+qqnorm(teststat, ylim = c(-5,5))
+qqline(teststat)
+hist(teststat, breaks = 30, col = "red", freq = F, xlim = c(-5,5), ylim = c(0,0.5))
+curve(dnorm(x), lty = 2, lwd = 2, add=TRUE)
+curve(dnorm(x, mean = mean(teststat), sd = sd(teststat)), lty = 3, lwd = 2, add=TRUE)
+```
+
+- Histogram and N(0,1) density different on the tails - a few interesting genes?
+
+
+## Multiple Testing Issues 
+
+- We have a large number of tests: 12,625. If we use standard hypothesis testing at a 5% significance level, 5% of all tests will be falsely rejected (type 1 error) just by pure chance. 
+
+- We need some kind of multiplicity control. 
+
+- The most stringent is Bonferroni: Divide each $\alpha$ by the total number of tests $p = 12,625$. 
+
+## Bonferroni 
+
+- Bonferroni's correction controls for the familywise error rate (FWER) instead of each $\alpha$. 
+$$
+FWER = P(\text{at least one false rejection}) \le \alpha 
+$$
+
+- Bonferroni leads to a stringent test, since $\alpha/p$ could be very small if we are carrying out a large number of $p$ tests simultaneously. 
+- In R, we can apply the `p.adjust` function for this task. 
+
+- `p.adjust` also has other useful methods such as "Benjamini-Hochberg False Discovery Rate control procedure".
+
+## Bonferroni 
+
+```{r, echo = T}
+rawp = 2 * (1 - pnorm(abs(teststat)))
+selected  <- p.adjust(rawp, method = "bonferroni") <0.05
+esetSel <- eset [selected, ]
+sum(selected)
+```
+
+- Bonferroni's correction leads to rejection of `r sum(selected)
+` tests - these genes significantly differ between two groups
+
+
+## Bonferroni 
+
+- $M$ hypothesis tests: $H_{0m}$ vs. $H_{1m}$ for $m = 1, \ldots, M$. 
+- Let $p_1, \ldots, p_M$ be the p-values for these $M$ tests. 
+- In our case $M = p$ (no. of genes)
+- Bonferroni method: 
+$$
+\text{Reject null hypothesis } H_{0m} \text{ if } p_m \le \frac{\alpha}{M}
+$$
+
+- Outcome: The probability of falsely rejecting any null hypothesis is less than or equal to $\alpha$. 
+
+## Benjamini-Hochberg {.smaller}
+
+- Let $M_0$ be the number of null hypotheses that are true, $M_0 = M - M_1$. 
+
+|           |$H_0$ acc |	$H_0$ rej | Total |
+|-----------|----------|------------|-------|
+|$H_0$ true |	U        | V          | $M_0$ |
+|$H_0$ false|	T        | S          | $M_1$ |
+|Total      |	M-R      | R          | $M$   |
+
+Define the false discovery proportion (FDP): 
+$$
+FDP = \begin{cases} 
+V/R \text{ if } R > 0 \\
+0 \text { otherwise}
+\end{cases}
+$$
+
+## Benjamini-Hochberg {.smaller}
+
+- $M$ hypothesis tests We order the p-values in increasing order.
+$p_{(1)} \le \ldots \le p_{(M)}$. 
+- *Benjamini-Hochberg Method* 
+    1.  For a given $\alpha$ find the largest $k$ such that
+$$
+p_{(k)} \le k \frac{\alpha}{M}
+$$
+    2.  Then reject all $H_{0m}$ for $m = 1, \ldots, k$.
+-  *Theorem* : 
+$$
+FDR = E(FDP) \le \frac{M_0}{M}\alpha \le \alpha
+$$
+-  *Outcome*: For a given significance level $\alpha$, the Benjamini Hochberg method bounds the false discovery rate.
+
+## Benjamini-Hochberg
+
+```{r, echo = T}
+rawp = 2 * (1 - pnorm(abs(teststat)))
+selected  <- p.adjust(rawp, method = "BH") <0.05
+esetSel <- eset [selected, ]
+sum(selected)
+```
+
+- Benjamini-Hochberg method leads to rejection of `r sum(selected)
+` tests - less stringent than Bonferroni. 
+
+## Nonparametric test
+
+-  We can use the `mt.teststat` function from the `multtest' package as shown above  but choose a different test other than `t` test. 
+-  Since we know how to do any nonparametric test covered in class for two independent samples, we can use them on each gene and calculate P-values for each gene, using a for loop. 
+
+```{r, echo = T}
+dim(all.mat)
+dim(all.cl)
+str(all.cl)
+```
+
+A simple two-sample nonparametric test for the first row, i.e. one single gene is shown below: 
+
+```{r, echo = T}
+all.mat.af4 = all.mat[,all.cl=='ALL1/AF4']
+all.mat.abl = all.mat[,all.cl=='BCR/ABL']
+
+wilcox.test(all.mat.af4[1,],all.mat.abl[1,])
+```
+
+## Main task 
+
+-  You need to perform this test for all the 12,625 rows, get P-values for each of them and then apply multiple testing correction as shown above. 
+-  Perform at least two different tests and both Bonferroni and Benjamini-Hochberg corrections. 
+-  Write your conclusions clearly. 
+
+## Help 
+
+-  If you get stuck with any of the steps, please let me know at jd033@uark.edu. 
