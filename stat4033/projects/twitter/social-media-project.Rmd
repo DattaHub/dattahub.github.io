@@ -1,9 +1,10 @@
 ---
 title: "Twitter Data Analysis"
 author: "Jyotishka Datta"
-date: "August 31, 2017"
+date: "11/01/2018"
 output: 
   pdf_document:
+      latex_engine: xelatex
       toc: true
       number_sections: true
       fig_width: 5
@@ -177,7 +178,7 @@ library(tm)
 
 - The following figure is a barplot of the most frequent words in the last 3,200 tweets on President Trump's timeline. 
 
-```{r, eval = T, echo = F, message=FALSE, fig_align = 'center'}
+```{r, eval = T, echo = F, message=FALSE}
 term.freq <- rowSums(as.matrix(tdm))
 term.freq <- subset(term.freq, term.freq >= 200)
 df <- data.frame(term = names(term.freq), freq = term.freq)
@@ -190,7 +191,7 @@ ggplot(df, aes(x = reorder(term, -freq), y=freq)) + geom_bar(stat="identity") +
 - Wordcloud gives a prettier picture to look at (of course with the same story).
 
 
-```{r, echo = F, eval = T, fig.align = 'center', warning=FALSE}
+```{r, echo = F, eval = T, warning=FALSE}
 m <- as.matrix(tdm)
 # calculate the frequency of words and sort it by frequency
 word.freq <- sort(rowSums(m), decreasing = T)
@@ -208,7 +209,7 @@ wordcloud(words = names(word.freq), freq = word.freq, min.freq = 3,
 - One might be interested in looking at keywords associated with certain words of interest such as "game": 
 
 ```{r}
-# which words are associated with 'human'?
+# which words are associated with 'game'?
 findAssocs(tdm, "game", 0.2)
 ```
 
@@ -218,16 +219,22 @@ findAssocs(tdm, "game", 0.2)
 - How are the sentiments associated with the extracted tweets. As the following table shows, they might be more positive than negative! 
 
 ```{r, echo = T, message=FALSE}
-library(sentiment)
-sentiments <- sentiment(tweets.df$text)
+# library(sentiment)
+# sentiments <- sentiment(tweets.df$text)
+# table(sentiments$polarity)
+library(SentimentAnalysis)
+sentiments <- analyzeSentiment(tweets.df$text)
+sentiments$polarity <-convertToDirection(sentiments$SentimentQDAP)
 table(sentiments$polarity)
+
 ```
 
 - We can also plot them by time to see how the sentiments have changed over time. This type of analysis is very commonly done with political candidates to estimate/predict their popularity and see what contributes to it. 
 
 
-```{r, echo = T, message = F, fig_align: 'center'}
+```{r, echo = T, message = F}
 # sentiment plot
+
 sentiments$score <- 0
 sentiments$score[sentiments$polarity == "positive"] <- 1
 sentiments$score[sentiments$polarity == "negative"] <- -1
