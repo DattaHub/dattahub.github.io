@@ -1,7 +1,7 @@
 ---
 title: "Chi-square test for association"
 author: "Jyotishka Datta"
-date: "November 7, 2016"
+date: "November 9, 2018"
 output: ioslides_presentation
 ---
 
@@ -401,27 +401,32 @@ odds_2 = \frac{P( Z = cold | Y = Vit-C)}{P(Z = no cold | Y = Vit-C)}
 $$
 
 
-## Odds ratio 
+## Odds ratio {.smaller}
 
 -  If odds equal to 1, "success" and "failure" are equally likely.
 -  If odds > 1, then "success" is more likely than "failure".
 -  If odds < 1, then "success" is less likely than "failure".
 
+- Let "C" = cold, "NC" = no cold, "Pl" = Placebo, "VitC" = Vitamin C.
+
 The odds ratio, is the ratio of odds1 and odds2: 
 $$
-odds ratio = \frac{P( Z = cold | Y = placebo) \times P(Z = no cold | Y = Vit-C)}{P(Z = no cold | Y = placebo) \times P( Z = cold | Y = Vit-C)}{P(Z = no cold | Y = Vit-C)}
+OR = \frac{P( Z = C | Y = Pl) \times P(Z = NC | Y = VitC)}{P(Z = NC | Y = Pl)\times P( Z = C | Y = VitC)}
 $$
 
+
 ## Calculation 
+
 - Generalize: 2x2 table with two variables Y and Z, both binary. 
 
-+---------------+-------------------+--------------------+
-|               | Z = 1             | Z = 2              |
-+===============+===============+========================+
-| Y = 1         | $n_{11},\pi_{11}$ | $n_{12},\pi_{12}$  |
-+---------------+---------------+------------------------+
-| Y = 2         | $n_{12},\pi_{12}$ | $n_{22},\pi_{22}$  |
-+---------------+-------------------+--------------------+
+
++---------------+---------------------+----------------------+
+|               | Z = 1               | Z = 2                |
++===============+=====================+======================+
+| Y = 1         | $n_{11}$,$\pi_{11}$ | $n_{12}$,$\pi_{12}$  |
++---------------+---------------+----------------------------+
+| Y = 2         | $n_{12}$,$\pi_{12}$ | $n_{22}$,$\pi_{22}$  |
++---------------+---------------------+----------------------+
 
 $$
 \theta = \mbox{Odds ratio} = \frac{\pi_{11}\pi_{22}}{\pi_{12}\pi_{21}}
@@ -484,7 +489,7 @@ mcnemar.test(sales.data , correct = FALSE)
 ## Exact McNemar's test
 
 ```{r, echo = TRUE, warning=FALSE, message=FALSE}
-#install.packages("exact2x2")
+# install.packages("exact2x2")
 library(exact2x2)
 mcnemar.exact(sales.data)
 ```
