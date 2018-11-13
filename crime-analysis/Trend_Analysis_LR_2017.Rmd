@@ -1,0 +1,238 @@
+---
+title: "Change-point Analysis : Little Rock 2015 Crime"
+author: "Jyotishka Datta"
+date: "February 28, 2018"
+output: 
+  pdf_document:
+      toc: false
+      number_sections: true
+fontsize: 12pt
+geometry: margin=1in
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = F, warning = F, cache= T)
+```
+
+# Little Rock 2017 Incidents Data
+
+## Background
+
+This is an exploratory analysis of a 2015 data-set that reports criminal incidents in Little rock resticted to aggravated assaults and homicides, with a few descriptive variables, such as incident type and address. 
+
+## Map of Incidents 
+
+First we plot the incidents on a map like a point process using the latitude and longitudes extracted by `ggmap`.
+
+```{r, echo = F, fig.width = 3, fig.height = 3, fig.align='center'}
+library(ggmap)
+setwd("C:/Users/jd033/Google Drive/LittleRock_2015_PredictionProjects/CrimeData/2017")
+crime.gc <- read.csv(file="2017_LR_Crime.csv",header=T,sep=",",na.strings='NULL')
+qmplot(LONGITUDE, LATITUDE, data = crime.gc, maptype = "toner-lite", color = I("red"))
+```
+
+We can look at the kernel density estimates of only aggravated assaults on the map as follows: 
+
+```{r, echo = F, fig.width = 3, fig.height = 3, fig.align='center', cache = T}
+library(dplyr)
+agg.gc <- crime.gc %>% filter(OFFENSE_DESCRIPTION == "AGGRAVATED ASSAULT")
+
+qmplot(LONGITUDE, LATITUDE, data = agg.gc,
+       geom = "blank", maptype = "toner-lite", legend = "right") + stat_density_2d(aes(fill = ..level..), geom = "polygon", alpha = .5, color = NA) +
+  scale_fill_gradient2("Agg Assault\n Propensity", low = "white", mid = "yellow", high = "red", midpoint = 60)
+```
+
+A natural question could be, does different incident types have different spatial concentration? It appears that Agg-assaults and homicides have a little different concentration zones. 
+
+```{r, echo = F, fig.align='center', fig.asp = 0.62, cache = T, strip.white = T,tidy=TRUE}
+## Re-coding to save space
+library(plyr)
+crime.gc$OFFENSE_DESCRIPTION <- plyr::revalue(crime.gc$OFFENSE_DESCRIPTION, 
+                                     c("MOTOR VEHICLE THEFT"="THEFT-MOTOR", 
+                                       "THEFT FROM MOTOR VEHICLE"= "THEFT-MOTOR",
+                                       "THEFT FROM BUILDING" = "OTHER-THEFT",
+                                       "THEFT OF MOTOR VEHICLE PARTS" = "THEFT-MOTOR",
+                                       "ALL OTHER LARCENY" = "OTHER-THEFT"))
+
+library(dplyr)
+violent.gc <- crime.gc %>%
+  filter(OFFENSE_DESCRIPTION %in% c("AGGRAVATED ASSAULT",
+                                    "BURGLARY/B&E",
+                                    "THEFT-MOTOR",
+                                    "OTHER-THEFT"))
+
+qmplot(LONGITUDE, LATITUDE, data = violent.gc,
+       geom = "blank", maptype = "toner-lite", legend = "right") + stat_density_2d(aes(fill = ..level..), geom = "polygon", alpha = .5, color = NA) +
+  scale_fill_gradient2("Violent Crimes\nPropensity", low = "white", mid = "yellow", high = "red", midpoint = 60)+
+  facet_wrap(~OFFENSE_DESCRIPTION)
+```
+
+
+# Trend Analysis for Weekly Counts
+We count the number of incidents for each Offense Description category for each week. The goal is to see if there is any trend in the weekly counts of aggravated assaults / homicides. As expected, there is no over-all increasing or decreasing trend but there might be small **local** change-points in the data. 
+
+
+```{r}
+library(lubridate)
+# str(crime.gc)
+crime.gc$INCIDENT_DATE <- as.character(crime.gc$INCIDENT_DATE)
+crime.gc$INCIDENT_DATE <- as.Date(crime.gc$INCIDENT_DATE,format="%m/%d/%Y")
+crime.gc$IncidentWeek <- lubridate::week(ymd(crime.gc$INCIDENT_DATE))
+library(dplyr)
+
+crime.ct <- crime.gc %>% group_by(OFFENSE_DESCRIPTION, IncidentWeek) %>%
+  dplyr::summarise(count = n()) 
+```
+
+```{r, echo = F, fig.align='center'}
+library(ggplot2)
+crime.plot <- ggplot(crime.ct, aes(x = IncidentWeek, y = count, group = OFFENSE_DESCRIPTION, colour = OFFENSE_DESCRIPTION))+
+  geom_line() +ylab("Incident Count")+
+  xlab("Weeks") + #+theme_bw()+
+  # theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+
+  #facet_grid(OffenseDes~.,scales="free_y")+
+  theme(legend.position="bottom")
+crime.plot <- crime.plot + theme(axis.title.y = element_text(size = rel(1), angle = 90))+
+  theme(axis.title.x = element_text(size = rel(1)))
+crime.plot<- crime.plot+ theme(axis.text = element_text(size = rel(1)))
+crime.plot <- crime.plot+theme(strip.text.x = element_text(size=12, face="bold"),strip.text.y = element_text(size=12, face="bold"))
+print(crime.plot)
+```
+
+## SELECTED TYPES 
+
+
+```{r}
+violent.ct <- crime.ct %>%
+  filter(OFFENSE_DESCRIPTION %in% c("AGGRAVATED ASSAULT",
+                                    "BURGLARY/B&E",
+                                    "THEFT-MOTOR",
+                                    "OTHER-THEFT"))
+
+library(ggplot2)
+crime.plot <- ggplot(violent.ct, aes(x = IncidentWeek, y = count, group = OFFENSE_DESCRIPTION, colour = OFFENSE_DESCRIPTION))+
+  geom_line() +ylab("Incident Count")+
+  xlab("Weeks") + #+theme_bw()+
+  # theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+
+  #facet_grid(OffenseDes~.,scales="free_y")+
+  theme(legend.position="bottom")
+crime.plot <- crime.plot + theme(axis.title.y = element_text(size = rel(1), angle = 90))+
+  theme(axis.title.x = element_text(size = rel(1)))
+crime.plot<- crime.plot+ theme(axis.text = element_text(size = rel(1)))
+crime.plot <- crime.plot+theme(strip.text.x = element_text(size=12, face="bold"),strip.text.y = element_text(size=12, face="bold"))
+print(crime.plot)
+```
+
+## Change-point Analysis (without covariates)
+
+Next, we perform a change-point test using the PELT (Pruned Exact Linear Timing) method by Killick et al. (2012). It is impossible to know if there should be any "true" change-points in 2015 data in the absence of any covariates like policy change or new law, but this can be treated as an preliminary exploratory analysis. 
+
+PELT is one instance of a series of popular changepoint detection methods that can identify points within a data-set where some statistical properties change. Specifically, if we have ordered data-points: $y_1, y_2, \ldots, y_n$, and $m$ change-points $\tau_1, \ldots,\tau_m$ that divide the data into $m+1$ partitions. The changepoint detection methods then seek to minimize a function:
+
+$$
+\sum_{i=1}^{m} C(y_{\tau_{i-1}+1:\tau_i})+ \text{pen}(n) f(m),
+$$
+where $C$ is a cost-function and $\text{pen}(n) \times f(m)$ is the penalty applied to prevent over-fitting. 
+Suppose we have 'IID' data-points $y_1, \ldots, y_n \sim f(y \mid \theta)$ for some unknown underlying parameter $\theta$. The PELT method uses the negative log-likelihood as the cost function:
+$$
+C(y_{(t+1):s}) = - \max_{\theta} \sum_{i=t+1}^{s} f(y_i \mid \theta)
+$$
+
+The penalty is chosed based on the inferential goal, e.g. $\text{pen}(n) = n \log(n)$ is the popular BIC penalty and $f(m) = m$ assumes that penalization is linear with the number of change-points. When $n$ is not too large, BIC favours a parsimonious model and can be shown to be model selection consistent. The number and location of change-points would depend on these choices as well. 
+
+
+```{R}
+library(changepoint)
+agg.ct <- crime.ct %>%filter(OFFENSE_DESCRIPTION == "AGGRAVATED ASSAULT")
+
+# results <- cpt.mean(agg.ct$count,penalty = "BIC", method="PELT")
+results <- cpt.mean(agg.ct$count,penalty="None",method="AMOC")
+cat("Location of change-points \n", cpts(results))
+```
+
+```{R, echo = F, fig.align = 'center',fig.width = 5, fig.asp = 0.6}
+# param.est(results)
+par(mfrow=c(1,1))
+plot(results,cpt.col="blue",xlab="Week",ylab="Incident Counts", main =  "Agg-Assault", cpt.width=4)
+```
+
+
+The difficult part is not yet done: which is investigating if these change-points are 'real', i.e. triggered by some external stimuli. For example, in May 2015, LRPD assigned an extra patrol [news link](https://www.arktimes.com/ArkansasBlog/archives/2015/05/04/city-steps-up-police-presence-in-centennial-park), which might be linked to temporary dip in agg-assault counts after week 20. Although, it is hard to make such associations without more detailed information / study.
+
+### District wise Analysis 
+
+```{r, echo = F, fig.width = 5, fig.asp = 0.7}
+library(dplyr)
+crime.dis <- violent.gc %>% group_by(OFFENSE_DESCRIPTION, LOCATION_DISTRICT) %>%
+  dplyr::summarise(ccount = n()) 
+
+ggplot(crime.dis, aes(x = reorder(LOCATION_DISTRICT , -ccount), y = ccount, group = OFFENSE_DESCRIPTION)) + 
+  geom_bar(stat="identity", position = position_stack(reverse = TRUE))+
+  coord_flip() + scale_x_discrete(breaks = unique(crime.dis$LOCATION_DISTRICT),
+                                  labels = unique(crime.dis$LOCATION_DISTRICT))+
+  facet_wrap(~OFFENSE_DESCRIPTION)
+```
+
+
+The figure above shows the distribution of district level incident counts. District 64 appears near the top. If we restrict ourselves to only a few districts with the highest number of agg-assault incidents (e.g. districts 52, 64, 81, and 54), do we see any temporal patterns? 
+
+```{r, echo = F}
+library(dplyr)
+
+agg.gc$INCIDENT_DATE <- as.character(agg.gc$INCIDENT_DATE)
+agg.gc$INCIDENT_DATE <- as.Date(agg.gc$INCIDENT_DATE,format="%m/%d/%Y")
+agg.gc$IncidentWeek <- lubridate::week(ymd(agg.gc$INCIDENT_DATE))
+
+agg.ct <- crime.gc %>% filter(LOCATION_DISTRICT %in% c(52,64,81,54)) %>% 
+  group_by(LOCATION_DISTRICT, IncidentWeek) %>% dplyr::summarise(count = n()) 
+
+library(ggplot2)
+crime.plot <- ggplot(agg.ct, aes(x = IncidentWeek, y = count, group = LOCATION_DISTRICT))+
+  geom_line() +ylab("Incident Count")+ geom_vline(xintercept = 33) +
+  xlab("Weeks") + #+theme_bw()+
+  # theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+
+  facet_grid(LOCATION_DISTRICT ~., scales="free")+
+  theme(legend.position="bottom")
+crime.plot <- crime.plot + theme(axis.title.y = element_text(size = rel(1), angle = 90))+
+  theme(axis.title.x = element_text(size = rel(1)))
+crime.plot<- crime.plot+ theme(axis.text = element_text(size = rel(1)))
+crime.plot <- crime.plot+theme(strip.text.x = element_text(size=12, face="bold"),strip.text.y = element_text(size=12, face="bold"))
+print(crime.plot)
+```
+
+
+## Most significant change-point
+
+The figure below shows the change-point analysis for each of these top districts in 2015, with a minor change in the method: we restrict (artificially) the number of change-points detected to at most 1 - to detect the most significant change-point of crime frequencies in these districts. We should note here that LRPD is specially interested in District 64 because of its high volume of crimes. 
+
+```{r, echo = F, fig.asp = 0.75}
+top.districts <- c(52,64,81,54)
+par(mfrow=c(2,2))
+for (i in 1:4){
+  dis.id <- top.districts[i]
+  crime.top <- crime.gc %>% filter(LOCATION_DISTRICT == dis.id, OFFENSE_DESCRIPTION =="AGGRAVATED ASSAULT") %>% group_by(LOCATION_DISTRICT, IncidentWeek) %>% dplyr::summarise(count = n()) 
+  results <- cpt.mean(crime.top$count,penalty="None",method="AMOC")
+  cat("The Location of change-point for district ", dis.id, "is week ", cpts(results), "\n")
+  plot(results, cpt.col="blue", lty=2, xlab="Week",ylab="Incident Counts", main =  paste("District",dis.id), cpt.width=4)
+}
+par(mfrow=c(1,1))
+```
+
+Finally, where are these districts?
+
+```{R, echo = F, fig.height = 3, fig.width = 4.5,fig.align = 'center'}
+library(dplyr)
+districts <- crime.gc %>% filter(LOCATION_DISTRICT %in% c(54,64,81,52))
+
+qmplot(LONGITUDE, LATITUDE, data = districts,
+       maptype = "toner-lite", geom = "blank", legend = "right", darken = 0.3) +   
+  stat_density_2d(aes(fill = ..level..), alpha = 0.2, geom = "polygon", color = NA) + 
+  scale_fill_gradient2("Homicide\n Propensity",low = "white", mid = "yellow", high = "red", midpoint = 60) + 
+  facet_wrap(~LOCATION_DISTRICT) 
+```
+
+# Reference: 
+
+1. PELT Algorithm: Killick R, Fearnhead P, Eckley IA (2012) **Optimal detection of changepoints with a linear computational cost**, __JASA__ 107(500), 1590-1598. 
+
