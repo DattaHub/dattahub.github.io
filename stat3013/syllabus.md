@@ -1,8 +1,8 @@
-## **STAT 3013 (Introduction to Probability)**
+# **STAT 3013 (Introduction to Probability)**
 
-## **Lecture: MWF: 9:40 AM – 10:30 AM (Agriculture Building 0115), Fall 2018**
+## **Lecture: MWF: 9:40 AM â€“ 10:30 AM (Agriculture Building 0115), Fall 2018**
 
-## **Office Hours: Monday: 10:30 – 11:30 AM, SCEN 219, or by email appointment.**
+## **Office Hours: Monday & Wednesday: 10:30 â€“ 11:30 AM, SCEN 219, or by email appointment.**
 
 ## **Instructor:** [**Dr. Jyotishka Datta**](https://you.uark.edu/jd033/)
 
@@ -14,11 +14,12 @@ Please use &quot;STAT 3013 + [Your query]&quot; on the subject line for me to ea
 
 A calculus-based introduction to probability. Discrete probability spaces and counting techniques, discrete and continuous probability distributions, random variables, random samples, law of large numbers, central limit theorem.
 
-**Note:** This is only a **tentative list of topics** – the instructor may add topics or change the length of time spent on any particular topic to accommodate this particular class of students.
+**Note:** This is only a **tentative list of topics** â€“ the instructor may add topics or change the length of time spent on any particular topic to accommodate this particular class of students.
 
 ## Detailed list of topics**
 
-(# The numbers denote the overall order in which the topics will be introduced in class.)
+(# The numbers denote the overall order in which the topics will be introduced in class.
+DGS: DeGroot--Schervish Chapter number. You can find the same topics in any other textbook as well.)
 
 1. **Introducing Probability** **[DGS: Chapter 1]**
 
@@ -32,7 +33,7 @@ A calculus-based introduction to probability. Discrete probability spaces and co
 
 1.5 Inclusion-Exclusion formula.
 
-**2. The Birthday Problem + Stirling&#39;s approximation\***
+**2. The Birthday Problem + Stirling's approximation\***
 
 **3. Conditional Probability and Independence** **[DGS: Chapter 2]**
 
@@ -46,7 +47,7 @@ A calculus-based introduction to probability. Discrete probability spaces and co
 
 **4. Integer valued and discrete random variables**
 
-**[DGS: Chapters 3.1-3.6, 4.1-4.3, 4.5- – Only the parts relevant to discrete random variables]**
+**[DGS: Chapters 3.1-3.6, 4.1-4.3, 4.5- â€“ Only the parts relevant to discrete random variables]**
 
 4.1 Mass function
 
@@ -70,11 +71,11 @@ A calculus-based introduction to probability. Discrete probability spaces and co
 
 **6. Standard Discrete distributions** **[DGS: Chapters 5.1-5.5, 5.9]**
 
-6.1 – 6.7 Discrete Uniform, Binomial, Negative Binomial, Geometric, Hypergeometric, Poisson, Poisson approximation to Binomial.
+6.1 â€“ 6.7 Discrete Uniform, Binomial, Negative Binomial, Geometric, Hypergeometric, Poisson, Poisson approximation to Binomial.
 
 **7. Continuous random variable.**
 
-**[DGS: Chapters 3.2-3.6, 3.9, 4.1-4.3, 4.5-4.7– Only the parts relevant to continuous random variables]**
+**[DGS: Chapters 3.2-3.6, 3.9, 4.1-4.3, 4.5-4.7â€“ Only the parts relevant to continuous random variables]**
 
 7.1 The density function and the CDF
 
@@ -90,15 +91,15 @@ A calculus-based introduction to probability. Discrete probability spaces and co
 
 **8. Special continuous distributions** **[DGS: Chapters 5.7-5.8, 5.10]**
 
-8.1 – 8.4: Uniform, Exponential, Gamma, Beta, Cauchy (as a special density)\*
+8.1 â€“ 8.4: Uniform, Exponential, Gamma, Beta, Cauchy (as a special density)\*
 
 **9. Normal distribution** **[DGS: Chapter: 5.6]**
 
-9.1 – 9.4 Definition, basic properties, normal tables, additional examples, log-normal density\* and sums of independent normal variables.
+9.1 â€“ 9.4 Definition, basic properties, normal tables, additional examples, log-normal density\* and sums of independent normal variables.
 
 **10. Normal approximations and the Central Limit Theorem** **[DGS: Chapters 6.1-6.3]**
 
-10.1 – 10.5 Motivating Example, CLT, Normal approximation to Binomial\*, Poisson\*, Gamma\*.
+10.1 â€“ 10.5 Motivating Example, CLT, Normal approximation to Binomial\*, Poisson\*, Gamma\*.
 
 **Grades:**
 
@@ -106,7 +107,7 @@ The grades are assigned by the following rule:
 
 | Homework (lowest grade will be dropped) | 25% | Grade | Percentage requirement |
 | --- | --- | --- | --- |
-| Midterm 1 | 20% | A | 90.00 – 100.00% |
+| Midterm 1 | 20% | A | 90.00 â€“ 100.00% |
 | Midterm 2 | 20% | B | 80.00-89.99% |
 | Final Exam | 30% | C | 70.00-79.99% |
 | Class participation | 5% | D | 60.00-69.99% |
@@ -138,7 +139,7 @@ A few other reference books that you can use:
 1. &quot;Fundamentals of Probability: A First Course&quot; by Anirban Dasgupta. ([http://www.springer.com/us/book/9781441957795](http://www.springer.com/us/book/9781441957795))
 2. A First Course in Probability: Sheldon Ross.
 3. Grinstead and Snell&#39;s Introduction to Probability (The Old Textbook, available at [https://math.dartmouth.edu/~prob/prob/prob.pdf](https://math.dartmouth.edu/~prob/prob/prob.pdf))
-4. Introduction to Probability Theory – Hoel, Port &amp; Stone.
+4. Introduction to Probability Theory â€“ Hoel, Port &amp; Stone.
 5. An Introduction to Probability Theory and Its Applications, William Feller (This is a classic Probability textbook).
 
 **Attendance:** Examples of absences that should be considered excusable include those resulting from the following: 1) illness of the student, 2) serious illness or death of a member of the student&#39;s immediate family or other family crisis, 3) University-sponsored activities for which the student&#39;s attendance is required by virtue of scholarship or leadership/participation responsibilities, 4) religious observances (see UA Religious Observances policy below), 5) jury duty or subpoena for court appearance, and 6) military duty. You are responsible to collect the course material that has been covered during your period of absence. If you miss any exam or quiz due to an excused absence, you are required to contact the instructor within 24 hours of joining the class to reschedule it.
