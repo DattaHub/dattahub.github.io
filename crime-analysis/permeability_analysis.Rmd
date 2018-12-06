@@ -1,0 +1,189 @@
+---
+title: "Permeability Analysis"
+author: "Jyotishka D."
+date: "December 6, 2018"
+output: 
+  pdf_document:
+      toc: true
+      number_sections: true
+fontsize: 10pt
+geometry: margin=1in
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = F, warning = F, cache = T)
+```
+
+# Reading and cleaning data 
+
+```{r}
+setwd("C:/Users/jd033/OneDrive/Documents/R/social")
+library(readstata13)
+dat <- read.dta13("Final Data - 155 Block Groups - 10-22-18.dta")
+nm <- colnames(dat)
+sel.dat <- dat[ ,!(nm %in% c("geoid1","geoid2","tract" ,"blockgroup","FID_1","geoid"))]
+(colnames(sel.dat))
+```
+
+# Correlation between selected variables 
+
+```{r, echo = F}
+sel.dat2 <- sel.dat[,(colnames(sel.dat) %in% c("pctforeign","pctpoverty","pctunemp",
+                                        "bisolation","hisolation",
+                                        "disadvantage",                         "intersections_avg", "totrobbery","totaggassault","tothomicide"))]
+cormat <- round(cor(sel.dat2),2)
+library(reshape2)
+melted_cormat <- melt(cormat)
+# Get lower triangle of the correlation matrix
+  get_lower_tri<-function(cormat){
+    cormat[upper.tri(cormat)] <- NA
+    return(cormat)
+  }
+  # Get upper triangle of the correlation matrix
+  get_upper_tri <- function(cormat){
+    cormat[lower.tri(cormat)]<- NA
+    return(cormat)
+  }
+## reorder function 
+reorder_cormat <- function(cormat){
+# Use correlation between variables as distance
+dd <- as.dist((1-cormat)/2)
+hc <- hclust(dd)
+cormat <-cormat[hc$order, hc$order]
+}
+# Reorder the correlation matrix
+# cormat <- reorder_cormat(cormat)
+upper_tri <- get_upper_tri(cormat)
+# Melt the correlation matrix
+melted_cormat <- melt(upper_tri, na.rm = TRUE)
+library(ggplot2)
+# Create a ggheatmap
+ggheatmap <- ggplot(melted_cormat, aes(Var2, Var1, fill = value))+
+ geom_tile(color = "white")+
+ scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+   midpoint = 0, limit = c(-1,1), space = "Lab", 
+    name="Pearson\nCorrelation") +
+  theme_minimal()+ # minimal theme
+ theme(axis.text.x = element_text(angle = 45, vjust = 1, 
+    size = 12, hjust = 1))+
+ coord_fixed()
+ggheatmap + 
+geom_text(aes(Var2, Var1, label = value), color = "black", size = 4) +
+theme(
+  axis.title.x = element_blank(),
+  axis.title.y = element_blank(),
+  panel.grid.major = element_blank(),
+  panel.border = element_blank(),
+  panel.background = element_blank(),
+  axis.ticks = element_blank(),
+  legend.justification = c(1, 0),
+  legend.position = c(0.6, 0.7),
+  legend.direction = "horizontal")+
+  guides(fill = guide_colorbar(barwidth = 7, barheight = 1,
+                title.position = "top", title.hjust = 0.5))
+```
+
+# Exploratory Analysis 
+
+## PCA
+
+Principal component with a few selected variables on the correlation matrix shown above.
+
+```{r}
+pca.crime <- princomp(scale(sel.dat2, scale = TRUE, center = TRUE), cor=TRUE)
+summary(pca.crime) # print variance accounted for 
+```
+
+```{r}
+loadings(pca.crime, cutoff = 0)
+PoV <- pca.crime$sdev^2/sum(pca.crime$sdev^2)
+par(mfrow=c(1,3))
+barplot(PoV, main="Prop Var Exp")
+plot(cumsum(PoV),type="l",main="Cum Prop of Var Exp")
+screeplot(pca.crime, type="line")
+```
+
+## Principal Component with only a few selected variables
+
+```{r, echo = F}
+# Calculate next the principal components.
+# pcs.crime<-predict(pca.crime)
+# # # Plot the first 2 PCs. 
+# # plot(pcs.crime[,1:2],type="n",xlab='1st PC',ylab='2nd PC') 
+# # text(pcs.crime[,1:2],row.names(sel.dat2))
+# 
+# # Qn: Which cities are most safe? Which are most crime-prone?
+# # How to interpret high/low values in the second PC?
+# # # library(devtools)
+# # # install_github('fawda123/ggord')
+# # library(ggord)
+# par(mfrow=c(1,1))
+# biplot(pca.crime, cex=c(0.3, 0.5),xlim=c(-0.2,0.2))
+# ggord(pca.crime)+scale_x_continuous(limits = c(-2, 2))
+library(ggbiplot)
+sel.dat2 = sel.dat2[complete.cases(sel.dat2),]
+data(sel.dat2)
+crime.pca <- prcomp(sel.dat2[,-1], scale. = TRUE)
+ggbiplot(crime.pca, obs.scale = 1, var.scale = 1,
+  ellipse = TRUE, circle = TRUE) +
+  scale_color_discrete(name = '') 
+```
+
+## Principal Component with all variables
+
+```{r, echo = F}
+sel.dat = sel.dat[complete.cases(sel.dat),]
+data(sel.dat)
+crime.pca <- prcomp(sel.dat[,-1], scale. = TRUE)
+ggbiplot(crime.pca, obs.scale = 1, var.scale = 1,
+  ellipse = TRUE, circle = TRUE) +
+  scale_color_discrete(name = '') 
+```
+
+
+# Factor Analysis
+
+Maximum Likelihood Factor Analysis entering raw data and extracting 3 factors, 
+with varimax rotation.
+
+```{r, echo = F, fig.asp = 0.5}
+fit <- factanal(sel.dat2, 3, rotation="varimax")
+print(fit, digits=2, cutoff=.3, sort=TRUE)
+# plot factor 1 by factor 2 
+# load <- fit$loadings[,1:2] 
+# plot(load,type="n",xlim = c(-0.4,1.2)) # set up plot 
+# text(load,labels=names(sel.dat2),cex=.9) # add variable names
+```
+
+
+# Model selection: Poisson regression with Elastic Net Penalty
+
+Poisson regression is used to model count data under the assumption of Poisson error, or otherwise nonnegative data where the mean and variance are proportional. We want to perform a variable selection, so we fit a penalized (or regularized) regression model with an Elastic Net $\ell_1$ penalty. We optimize the penalized log-lielihood:
+
+$$
+l(\beta \mid X, y) = \sum_{i=1}^{N}(y_i(\beta_0 + \beta'x_i)- e^{\beta_0 + \beta' x_i}) \\
+\min_{\beta_0, \beta} \frac{1}{N} l(\beta \mid X,y) + \lambda \{ (1-\alpha) \sum_{i=1}^{N} \beta_i^2/2 + \alpha \sum_{i=1}^{N} \lvert \beta_i \rvert \}
+$$
+
+The idea behind penalized regression is that the extra penalty term will put a constraint on the parameter vector $\beta$, that will penalize for large coefficients, and the optimized estimate of $\beta$ will be sparse, with many of the coefficients shrunk to zero. 
+
+This is helpful because it performs a model selection for us and makes the model more interpretable with fewer coefficients. 
+
+We fit the penalized Poisson regression with $y$ being the `totcrime` and $X$ being the set of all predictor variables, i.e. all columns minus `name` and the crime counts. 
+
+```{r}
+library(glmnet)
+x = as.matrix(sel.dat[,c(2:43)])
+x = scale(x, center = TRUE, scale = TRUE)
+y = sel.dat[,44] # y is totcrime
+
+fit = glmnet(x, y, family = "poisson")
+plot(fit)
+# coef(fit, s = 1)
+cvfit = cv.glmnet(x, y, family = "poisson")
+# opt.lam = c(cvfit$lambda.min, cvfit$lambda.1se)
+(beta.sel <- coef(cvfit, s = cvfit$lambda.min))
+```
+
+
