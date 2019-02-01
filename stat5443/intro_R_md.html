@@ -10,7 +10,7 @@
 
 
 
-  <meta name="date" content="2018-01-31" />
+  <meta name="date" content="2019-01-31" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -95,11 +95,11 @@
       <h1 data-config-title><!-- populated from slide_config.json --></h1>
       <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
       <p data-config-presenter><!-- populated from slide_config.json --></p>
-            <p style="margin-top: 6px; margin-left: -2px;">January 31, 2018</p>
+            <p style="margin-top: 6px; margin-left: -2px;">January 31, 2019</p>
           </hgroup>
   </slide>
 
-<slide class=''><hgroup><h2>apply, lapply, sapply, tapply</h2></hgroup><article  id="apply-lapply-sapply-tapply">
+<slide class=""><hgroup><h2>apply, lapply, sapply, tapply</h2></hgroup><article  id="apply-lapply-sapply-tapply">
 
 <ul>
 <li>You have some structured blob of data and you want to perform some operations by dimensions.</li>
@@ -114,9 +114,9 @@ dim(m)</pre>
 
 <pre class = 'prettyprint lang-r'>apply(m, 2, mean)</pre>
 
-<pre >## [1] -0.01042344  2.05554420  4.81932492</pre>
+<pre >## [1] 0.2108685 2.3107488 4.8607861</pre>
 
-</article></slide><slide class=''><hgroup><h2>apply (contd.)</h2></hgroup><article  id="apply-contd.">
+</article></slide><slide class=""><hgroup><h2>apply (contd.)</h2></hgroup><article  id="apply-contd.">
 
 <ul>
 <li>We can also calculate row-wise mean.</li>
@@ -124,11 +124,11 @@ dim(m)</pre>
 
 <pre class = 'prettyprint lang-r'>apply(m, 1, mean)</pre>
 
-<pre >##  [1] 2.087402 2.515050 1.779077 1.357123 2.251216 2.364160 1.873490
-##  [8] 2.647100 2.924179 2.002750 2.757865 2.253501 1.926392 2.203508
-## [15] 2.572504 1.631736 2.246127 2.396507 2.280130 1.631430 2.216593
-## [22] 3.541210 2.577440 1.438558 2.302298 2.713115 2.753437 2.157364
-## [29] 2.973669 2.269525</pre>
+<pre >##  [1] 2.287760 3.394192 2.408022 1.386353 1.968410 2.521643 1.995024
+##  [8] 2.225290 2.457494 2.669886 2.908644 2.130683 2.072538 3.372452
+## [15] 1.365837 2.541579 2.749764 1.788470 2.824171 2.683885 2.770058
+## [22] 2.179136 2.305619 2.108707 2.275107 2.731351 2.958783 2.571476
+## [29] 2.400346 3.771358</pre>
 
 <ul>
 <li>Or, our own function: (how many negative numbers in each column?)</li>
@@ -136,9 +136,9 @@ dim(m)</pre>
 
 <pre class = 'prettyprint lang-r'>apply(m, 2, function(x) length(x[x&lt;0]))</pre>
 
-<pre >## [1] 16  0  0</pre>
+<pre >## [1] 10  0  0</pre>
 
-</article></slide><slide class=''><hgroup><h2>lapply and sapply</h2></hgroup><article  id="lapply-and-sapply">
+</article></slide><slide class=""><hgroup><h2>lapply and sapply</h2></hgroup><article  id="lapply-and-sapply">
 
 <ul>
 <li><p>traversing over a set of data like a list or vector, and calling the specified function for each item.</p></li>
@@ -157,7 +157,7 @@ head(cap.state.name, n = 3)</pre>
 ## [[3]]
 ## [1] &quot;ARIZONA&quot;</pre>
 
-</article></slide><slide class=''><hgroup><h2>sapply</h2></hgroup><article  id="sapply">
+</article></slide><slide class=""><hgroup><h2>sapply</h2></hgroup><article  id="sapply">
 
 <ul>
 <li>Similar to lapply, but returns a simpler data structure: either a vector or array.</li>
@@ -172,7 +172,7 @@ head(cap.state.name, n = 3)</pre>
 <li>Why do we care? apply, sapply, lapply are easier to read and sometimes faster than traditional for loops.</li>
 </ul>
 
-</article></slide><slide class=''><hgroup><h2>Functions</h2></hgroup><article  id="functions">
+</article></slide><slide class=""><hgroup><h2>Functions</h2></hgroup><article  id="functions">
 
 <ul>
 <li>Functions are blocks of code that allows R to be modular and facilitate code reuse.</li>
@@ -188,7 +188,7 @@ head(cap.state.name, n = 3)</pre>
 <li>A function can also return any R primitive or object using the return(object) statement.</li>
 </ul>
 
-</article></slide><slide class=''><hgroup><h2>Functions</h2></hgroup><article  id="functions-1">
+</article></slide><slide class=""><hgroup><h2>Functions</h2></hgroup><article  id="functions-1">
 
 <ul>
 <li>Examples</li>
@@ -208,7 +208,7 @@ return(TRUE)
 return(FALSE)
 }</pre>
 
-</article></slide><slide class=''><hgroup><h2>Functions</h2></hgroup><article  id="functions-2">
+</article></slide><slide class=""><hgroup><h2>Functions</h2></hgroup><article  id="functions-2">
 
 <ul>
 <li><strong>Default arguments</strong></li>
@@ -227,7 +227,7 @@ return(FALSE)
 <pre class = 'prettyprint lang-r'>sort_vector(a_vector) # returns a_vector in ascending order
 sort_vector(a_vector, FALSE) # returns a vector in descending order</pre>
 
-</article></slide><slide class=''><hgroup><h2>Variable Scoping</h2></hgroup><article  id="variable-scoping">
+</article></slide><slide class=""><hgroup><h2>Variable Scoping</h2></hgroup><article  id="variable-scoping">
 
 <ul>
 <li>Variables that are bound to an R object outside a function are called global variables, and are accessible everywhere in an R program.</li>
@@ -242,7 +242,7 @@ test(); </pre>
 
 <pre >## 10</pre>
 
-</article></slide><slide class=''><hgroup><h2>Functions</h2></hgroup><article  id="functions-3">
+</article></slide><slide class=""><hgroup><h2>Functions</h2></hgroup><article  id="functions-3">
 
 <ul>
 <li>Variables bound inside a function are only accessible within that function. These are called local variables. Example:</li>
@@ -265,7 +265,7 @@ test() #prints 25</pre>
 <li><strong>Note that the local variable assignment takes precedence inside the function test over the global assignment</strong>.</li>
 </ul>
 
-</article></slide><slide class=''><hgroup><h2>Functions</h2></hgroup><article  id="functions-4">
+</article></slide><slide class=""><hgroup><h2>Functions</h2></hgroup><article  id="functions-4">
 
 <ul>
 <li>R functions have no side effects&#8211; they cannot change the value of global variables. Example:</li>
@@ -288,7 +288,7 @@ test(x) #prints 20</pre>
 <li><strong>Note that x is still bound to 10 outside of test()</strong>.</li>
 </ul>
 
-</article></slide><slide class=''><hgroup><h2>CPU Times</h2></hgroup><article  id="cpu-times">
+</article></slide><slide class=""><hgroup><h2>CPU Times</h2></hgroup><article  id="cpu-times">
 
 <pre class = 'prettyprint lang-r'>system.time(expr)</pre>
 
@@ -301,9 +301,9 @@ test(x) #prints 20</pre>
 <pre class = 'prettyprint lang-r'>system.time(for(i in 1:50) x&lt;-mean(rnorm(1000)))</pre>
 
 <pre >##    user  system elapsed 
-##    0.02    0.00    0.02</pre>
+##    0.01    0.00    0.02</pre>
 
-</article></slide><slide class=''><hgroup><h2><code>proc.time</code> function</h2></hgroup><article  id="proc.time-function">
+</article></slide><slide class=""><hgroup><h2><code>proc.time</code> function</h2></hgroup><article  id="proc.time-function">
 
 <ul>
 <li>The other way to get system time is using proc.time() function.</li>
@@ -315,9 +315,9 @@ for(i in 1:50) x&lt;-mean(rnorm(1000))
 proc.time()-now</pre>
 
 <pre >##    user  system elapsed 
-##    0.01    0.00    0.01</pre>
+##       0       0       0</pre>
 
-</article></slide><slide class=''><hgroup><h2>Calculating mean</h2></hgroup><article  id="calculating-mean">
+</article></slide><slide class=""><hgroup><h2>Calculating mean</h2></hgroup><article  id="calculating-mean">
 
 <pre class = 'prettyprint lang-r'>x&lt;-c(1:10000)
 sum&lt;-0
@@ -327,9 +327,9 @@ meanx&lt;-sum/10000
 proc.time()-now</pre>
 
 <pre >##    user  system elapsed 
-##    0.01    0.00    0.02</pre>
+##       0       0       0</pre>
 
-</article></slide><slide class=''><hgroup><h2>Avoid for loops</h2></hgroup><article  id="avoid-for-loops">
+</article></slide><slide class=""><hgroup><h2>Avoid for loops</h2></hgroup><article  id="avoid-for-loops">
 
 <ul>
 <li>Use vectorized arithmetic instead of loops:</li>
@@ -345,16 +345,16 @@ proc.time()-now</pre>
 <pre >##    user  system elapsed 
 ##       0       0       0</pre>
 
-</article></slide><slide class=''><hgroup><h2>Finer control</h2></hgroup><article  id="finer-control">
+</article></slide><slide class=""><hgroup><h2>Finer control</h2></hgroup><article  id="finer-control">
 
 <pre class = 'prettyprint lang-r'>#install.packages(&quot;microbenchmark&quot;)
 library(microbenchmark)
 microbenchmark(sqrt(x),x^(0.5))</pre>
 
 <pre >## Unit: microseconds
-##     expr     min       lq     mean   median      uq      max neval cld
-##  sqrt(x)  59.281  79.2920 126.0902  80.4250  82.502 2547.165   100  a 
-##  x^(0.5) 414.585 436.8625 442.2542 438.5615 440.261  559.199   100   b</pre></article></slide>
+##     expr     min       lq     mean  median      uq     max neval
+##  sqrt(x)  54.519  85.1355 101.9456  91.259 118.716 200.296   100
+##  x^(0.5) 395.851 429.6290 508.7756 467.753 536.295 906.665   100</pre></article></slide>
 
 
   <slide class="backdrop"></slide>
@@ -366,7 +366,7 @@ microbenchmark(sqrt(x),x^(0.5))</pre>
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

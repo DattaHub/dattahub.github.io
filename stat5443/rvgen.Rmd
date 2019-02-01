@@ -1,7 +1,7 @@
 ---
 title: "Random Variable Generation"
 author: "Jyotishka Datta"
-date: "February 5, 2018"
+date: "February 1, 2019"
 output: 
   ioslides_presentation:
     widescreen: true

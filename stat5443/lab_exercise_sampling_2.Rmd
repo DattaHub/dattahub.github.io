@@ -1,7 +1,7 @@
 ---
 title: "Lab Exercise Sampling 2"
 author: "Jyotishka Datta"
-date: "February 20, 2018"
+date: "February 1, 2019"
 output: 
   html_document:
          toc: true
