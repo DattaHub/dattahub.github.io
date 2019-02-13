@@ -1,0 +1,200 @@
+---
+title: "Markov Chains Demo"
+author: "Jyotishka Datta"
+date: "February 13, 2019"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Nice Markov Chains 
+
+Three properties: 
+
+-  Irreducibility
+-  Aperiodicity
+-  Positive Recurrence
+
+## Irreducibility 
+
+No matter where it starts, the chain has to reach any other state in a finite number of iterations with positive probability.
+
+## Apriodicity 
+
+-  **sojourn times**: time to get back to $i$, starting from state $i$. 
+-  For all states $i$, the set of all possible **sojourn times** can have no divisior bigger than $1$. [This is a technical condition, periodic chains are also nice, but aperioic chains are nicer !]
+-  Easiest example: hours of a clock. 
+
+## Positive Recurrence 
+
+(a)  For all states $i$, if the process starts at $i$, it will come back to $i$ with probability 1, and 
+(b)  The expected length of waiting time till the first return to $i$ is finite.
+
+Fact: Random walk on 1-D and 2-D are recurrent, but on 3-D is transient. 
+
+
+## Examples of Markov Chain (1)
+
+-  Discrete-time Markov chain with discrete-state space. 
+
+-  Imagine a particle that moves around on the integers $\{\ldots, -2,-1, 0, 1, 2, \ldots \}$, starting at 0. 
+-  Wherever it is at time $t$, say at integer $i$, it tosses a (three-sided) coin and moves to $i-1$ with probability $p_1$, stays at $i$ with probability $p_2$, and moves to $i + 1$ with probability $p_3$, for some $p_1, p_2, p_3$ with $p_1 + p_2 + p_3 = 1$. 
+-  These are called transition probabilities. 
+-  This is called a random walk and it's clearly a Markov Chain.
+
+## Unbounded random walk 
+
+-  The Unbounded random walk is irreducible and aperiodic, but it may not be positive recurrent. 
+-  It is true that it has positive probability of returning to its starting point, but because $S$ is unbounded, this probability may not be 1, and on average you have to wait forever for it to return. 
+-  We can fix this by **bounding** $S$ and keeping the same transition probabilities except for rejecting moves outside the state space, the chain now has all the nice properties.  
+
+## Bounded Random Walk 
+
+Simulate a bounded random walk with user-specified bound $K$, transition probabilities $p$, number of simulations `n.sim` and a seed for random number generator `seed' . 
+
+```{R, echo = T, cache = T}
+move <- function(k,p,theta){
+  
+  ## k: bound 
+  ## p: transition probability 
+  ## theta: sample path 
+  
+  repeat{
+    increment <- sample(x = c(-1,0,1),size=1,prob=p)
+    theta.next <-  theta + increment 
+    if(abs(theta.next)<=k){
+      return(theta.next)
+      break 
+    }
+  }
+}
+```
+
+## Bounded Random Walk 
+
+-  Here is the code for simulating random walk based on the function `move`.
+
+```{r, echo = T, cache = T}
+rw.sim <- function(k,p,theta.start,n.sim,seed){
+  
+  set.seed(seed)
+  theta <- rep(0,n.sim + 1)
+  theta[1] <- theta.start
+  for(i in 1:n.sim){
+    theta[i+1] <- move(k,p,theta[i])
+  }
+  return(theta)
+}
+```
+
+## Bounded Random Walk 
+
+```{r, echo = T}
+p <- c(1,1,1)/3 # Uniform probability 
+k <- 5 # Bounded random walk 
+theta.start <- 0 # Starting at origin 
+
+seed<- c(7656,87678) #try two different seeds
+```
+
+-  Try $n = 10$ 
+
+```{r, echo = T}
+theta1 <- rw.sim(k,p,theta.start,10,seed)
+table(theta1)
+```
+
+## Larger $n$ {.smaller}
+
+```{r, echo = T}
+theta2<- rw.sim(k,p,theta.start,500,seed); table(theta2)
+```
+
+```{r, echo = T}
+theta3 <- rw.sim(k,p,theta.start,1e3,seed); table(theta3)
+```
+
+```{r, echo = T}
+theta4 <- rw.sim(k,p,theta.start,1e4,seed); table(theta4)
+```
+
+## Convergence 
+
+-  You can see that the distribution of where the chain has visited is converging to something close to uniform on 
+$\{ -5, -4, . .. , 4, 5\}$, except for the effects of the boundaries.
+
+-  Letting $q_1$ denote the limiting probability of being in one of the 9 non-boundary states $(-4, -3, .. . , 3, 4)$ and $q_2$ be the long-run probability of being in one of the 2 boundary states $(-5, 5)$, on grounds of symmetry you can guess that $q_1$ and $q_2$ should satisfy: 
+
+$$
+9q_1 + 2q_2 = 1, \; \text{and } q_1 = \frac{3}{2}q_2
+$$
+
+## Convergence {.smaller}
+
+The solution to the above equations are: 
+$$
+(q_1, q_2) = (\frac{3}{31},\frac{2}{31}) = (0.096774, 0.064516)
+$$
+-  This matches with the relative frequencies: 
+```{R, echo = T}
+theta4 <- rw.sim(k,p,theta.start,1e5,seed); table(theta4)
+```
+
+## Empirical Estimates 
+
+-  We can empirically estimate these probabilities: 
+
+```{r, echo = T}
+(q_2<- sum(table(theta4)[c(1,11)])/(2*1e5))
+(q_1<- sum(table(theta4)[-c(1,11)])/(9*1e5))
+```
+
+-  This is the limiting (or Stationary) distribution. 
+-  Also, note that the limiting distribution does not depend on the initial values of the chain. 
+
+## Try at home 
+
+-  Try different choices of the transition probabilities $(p_1, p_2, p_3)$ and see if your empirical estimates are matching with the theroetical stationary distribution. 
+
+## Example 2 : AR process 
+
+-  Discrete-time Markov chain with continuous-state space: 
+-  $\theta^*_{t+1} \sim N(0.5 \times \theta^*_{t}, 1.0)$.
+-  This is called a first order auto-regressive process with lag-1 auto-correlation $0.5$.
+-  This is a Markov Chain, and it satisfies all three "nice" properties. 
+
+## R code for simulating AR process 
+
+```{R, echo = T, cache = T}
+ar1simulate <- function(len, init){
+  x = rep(0,len)
+  x[1] = init
+  for(t in 2:length(x)){
+    x[t] = 0.5*x[t-1]+rnorm(1)
+  }
+  return(x)
+}
+```
+
+## Plot the AR process
+
+```{r, echo = F, fig.asp= 0.8}
+x1 = ar1simulate(100,-5)
+x2 = ar1simulate(100,5)
+
+plot(seq_along(x1),x1,type="l",lty=1, ylim = c(-6,6), xlab = "Time", main = "AR(1)")
+lines(x2,lty=2)
+legend("topright",c("x_0 = -5", "x_0 = 5"),lty=c(1,2))
+```
+
+
+## Try at home 
+
+-  Prove that the stationary distribution of the AR process is: 
+
+$$
+		\theta^{(t)} \mid \theta^{(0)} \sim N(0, 1.33) \text{ as } t \to \infty
+$$
+
