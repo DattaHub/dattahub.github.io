@@ -1,7 +1,7 @@
 ---
-title: "Gibbs"
+title: "Gibbs Sampling"
 author: "Jyotishka Datta"
-date: "February 27, 2018"
+date: "February 22, 2019"
 output: ioslides_presentation
 ---
 
@@ -136,7 +136,7 @@ s = 4
 y = rnorm(100,m,s)
 nmc = 1000
 burn = 1000
-gibbs.fit <- normal_gibbs(y,niter = nmc+burn, mu0 = 0, sigma0 = 1)
+gibbs.fit <- normal_gibbs(y,niter = nmc+burn, mu0 = 2, sigma0 = 1)
 summary(gibbs.fit$mu[(burn+1):(burn+nmc)])
 summary(gibbs.fit$sigmasq[(burn+1):(burn+nmc)])
 ```
@@ -146,9 +146,9 @@ summary(gibbs.fit$sigmasq[(burn+1):(burn+nmc)])
 We plot the entire Markov chains for two different starting values for a small number of iterations to show how fast the two chains will become indistinguishable. 
 
 ```{R, echo = T, fig.asp = 0.6}
-plot(normal_gibbs(y,niter = 100, mu0 = 3, sigma0 = 1)$mu, type= "l", col = "red", 
-     main = "Trace", ylim = c(-4,4), ylab = "MC")
-lines(normal_gibbs(y,niter = 100, mu0 = -3, sigma0 = 1)$mu,col = "blue")
+plot(normal_gibbs(y,niter = 100, mu0 = 5, sigma0 = 1)$mu, type= "l", col = "red", 
+     main = "Trace", ylim = c(-2.5,5.5), ylab = "MC")
+lines(normal_gibbs(y,niter = 100, mu0 = -1, sigma0 = 1)$mu,col = "blue")
 ```
 
 
@@ -200,7 +200,7 @@ hist(normal_gibbs(y,niter = 2000, mu0 = 5, sigma0 = 1)$mu[1001:2000],breaks = 30
 $$
 \bar{h}_{M,N} = \frac{1}{N-M}\sum_{i=M+1}^{N}h(\theta^{(t)})
 $$
--  Determining $M$ is called MCMC diagnostics. 
+-  Determining the burn-in $M$ is a critical part of MCMC diagnostics. 
 
 ## MCMC Diagnostics 
 
@@ -208,7 +208,7 @@ $$
 -  Plot the time series for each quantity of interest. (Trace Plot)
 -  Plot the autocorrelation function. (ACF Plot)
 
-## Diagnostics 1 - Trace plot 
+## Diagnostics 1 - Trace plot {.build}
 
 1. The trace plot should have rapid up-and-down variation with no long-term trends or drifts. 
 2. If you split this plot into a few horizontal sections, the trace within any section would not look much different from the trace in any other section. 
@@ -230,7 +230,7 @@ plot(gibbs.fit$mu, type="l",main = "trace plot")
 plot(gibbs.fit$sigmasq,type="l")
 ```
 
-## Autocorrelation 
+## Autocorrelation {.build}
 
 1. High autocorrelation means high nse. Not desirable. 
 2. If autocorrelation is high then N samples are not giving you N pieces of information about your distribution but fewer than that. 
