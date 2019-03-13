@@ -1,0 +1,165 @@
+---
+title: "LR Spatial Analysis"
+author: "UA Research Team"
+date: "November 11, 2018"
+output: 
+  html_document:
+      toc: false
+      number_sections: true
+fontsize: 12pt
+geometry: margin=1in
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = F, warning = F, cache= T)
+```
+
+# Little Rock Child Maltreatment
+
+## Background
+
+This is an exploratory analysis of data-set that reports child maltreatment incidents in Little rock. 
+
+## Map of Incidents 
+
+First we plot the incidents on a map like a point process using the latitude and longitudes extracted by `ggmap`.
+
+```{r, echo = T}
+rm(list = ls())
+require(devtools)
+# devtools::install_github("dkahle/ggmap", ref = "tidyup")
+# devtools::install_github("thomasp85/patchwork")
+library(pacman)
+p_load("sf"             # Spatial data objects and methods
+       ,"mapview"        # Interactive Map Viewing
+       ,"ggmap"          # ggplot2 addon for base maps
+       ,"cowplot" 
+       ,"spatstat"       # KDE and other spatial functions
+       ,"raster"         # cell-based spatial operations
+       ,"tidyverse"      # data manipulation framework
+       ,"Hmisc"          # using cut2(  functions for ggplot legends
+       ,"fitdistrplus"   # Distribution fitting functions
+       ,"lubridate"      # Power tools for handling dates
+       ,"tidycensus" 
+       ,"lwgeom" 
+       ,"Hmisc" 
+       ,"hrbrthemes" 
+       ,"gridExtra" 
+       ,"spdep"          # KNN functions
+       ,"foreach" 
+       ,"doParallel" 
+       ,"corrplot" 
+       ,"ranger"         # randomforest implimentation      
+       ,"glmnet"         # for Ridge and Lasso Regression
+       ,"knitr"          # for kable table
+       ,"kableExtra" 
+       ,"FNN"            # KNN for CPS vs. NN plots
+       ,"groupdata2" 
+       ,"htmltools" 
+       ,"viridis" 
+       ,"viridisLite")
+```
+
+```{R, echo = T}
+setwd("~/Data/LR-Child")
+crime <- read.csv(file="LR-child-maltreatment.csv",header=T,sep=",",
+                  na.strings='NULL')
+attach(crime)
+
+crime$STR_NME <- crime$STR_NME %>% as.character %>% str_to_title 
+crime$CTY_NME <- crime$CTY_NME %>% as.character %>% str_to_title
+
+full_add <- paste(STR_NBR,STR_NME,STR_SFX_TYP_DESC, ",", 
+                        CTY_NME,",", "AR")
+head(full_add)
+```
+
+```{r, echo = T, eval = F}
+library(ggmap)
+register_google(key = "<your key here>")
+geocoded_latlon <- geocode(crime$full_add,output="latlon")
+geocoded_latlon %>% head()
+crime.gc <- cbind(crime, full_add,geocoded_latlon)
+write.csv(crime.gc, "LR-child-maltreatment-geocoded.csv")
+```
+
+## Different City Names 
+
+```{r, echo = T}
+setwd("~/Data/LR-Child")
+crime.gc <- read.csv(file="LR-child-maltreatment-geocoded.csv",header=T,
+                     sep=",",na.strings='NULL')
+
+tab = as.data.frame(table(crime.gc$CTY_NME))
+cat("Number of different city names", nrow(tab))
+
+tab = tab %>% filter(Freq > 5)
+
+ggplot(tab, aes(x = reorder(Var1, -Freq), y=Freq)) + geom_bar(stat="identity") +
+  xlab("City Names") + ylab("Count") + coord_flip() +
+  theme(axis.text=element_text(size=10))
+```
+
+It appears there are many different city names in this data -- what do they represent?
+
+For this report, we filter the city names by "Little Rock" and use Little Rock boundaries to filter out addresses that are outside LR. 
+
+```{r}
+crime.gc.lr = crime.gc %>% filter(CTY_NME %in% c("Little Rock"))%>% 
+  filter(lat >= 34.62606 & lat <= 34.82195) %>% 
+  filter(lon >= -92.52091 & lon <= -92.15494)
+
+nrow(crime.gc.lr)
+
+qmplot(lon, lat, data = crime.gc.lr, geom = "point", maptype = "toner-lite", darken = .5, color = I("red"), legend = "topleft") +
+  stat_density_2d(aes(fill = ..level..), geom = "polygon", alpha = .5, color = NA) +
+  scale_fill_gradient2("Propensity", low = "white", mid = "yellow", high = "red", midpoint = 60)
+```
+
+## Dates of Incidents
+
+```{r}
+library(lubridate)
+# str(crime.gc)
+crime.gc.lr$Incident.Date <- ifelse(as.character(crime.gc.lr$Incident.Date) == "",as.character(crime.gc.lr$Referral.Date),as.character(crime.gc.lr$Incident.Date))
+
+crime.gc.lr$Incident.Date <- as.Date(crime.gc.lr$Incident.Date, format = "%m/%d/%Y" )
+crime.gc.lr$IncidentYear <- lubridate::year(ymd(crime.gc.lr$Incident.Date))
+crime.gc.lr$IncidentWeek <- lubridate::week(ymd(crime.gc.lr$Incident.Date))
+
+
+library(dplyr)
+
+crime.yearly.ct <- crime.gc.lr %>% group_by(IncidentYear) %>%
+  dplyr::summarise(count = n()) 
+
+crime.weekly.ct <- crime.gc.lr %>% group_by(IncidentYear, IncidentWeek ) %>%
+  dplyr::summarise(count = n())
+
+```
+
+### Weekly Counts 
+
+The following figure shows the weekly incidence counts by years, and the data for 2018 stops at the exact same point where 2015 begins, the month of June. 
+
+```{R, echo = T}
+library(ggplot2)
+(crime.plot <- ggplot(crime.weekly.ct, aes(x = IncidentWeek, y = count, group = as.factor(IncidentYear), colour = as.factor(IncidentYear)))+
+  geom_bar(stat = "identity") +ylab("Incident Count")+
+  xlab("Weeks") +
+  facet_grid(IncidentYear~.,scales="free_y")+
+  theme(legend.position="right"))
+```
+
+
+### Yearly Counts 
+
+
+```{r}
+(crime.plot <- ggplot(crime.yearly.ct, aes(x = IncidentYear, y = count))+
+  geom_bar(stat="identity") +ylab("Incident Count")+
+  xlab("Years") +labs(title = "Yearly Counts") +
+  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+
+    theme(legend.position="right"))
+```
