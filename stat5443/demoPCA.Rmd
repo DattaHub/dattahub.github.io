@@ -1,12 +1,12 @@
 ---
 title: "PCA Demo"
 author: "Jyotishka Datta"
-date: "March 12, 2018"
+date: "March 12, 2019"
 output: ioslides_presentation
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = F, message = F)
 ```
 
 ## Source 
@@ -200,9 +200,7 @@ The variables are:
 
 The data are in the "city_crime.txt" file that I read next.
 ```{r, echo = T}
-setwd("C:/Users/Jyotishka Datta/OneDrive/Documents/Course Notes/stat5443/R codes")
-```
-```{R}
+setwd("C:/Users/jd033/OneDrive/Documents/Course Notes/stat5443/R codes")
 crime<-read.table("city_crime.txt")
 ```
 
@@ -366,7 +364,7 @@ legend("topright", col=c('red', 'blue', 'green')
 -  Do we see any clustering?
 
 ```{r, echo = F, fig.asp = 0.7}
-plot(dat.iris[,1:2], type='p', pch=15, col=col.code, xlab="PC1", ylab="PC2")
+plot(dat.iris[,1:2], type='p', pch=15, col=col.code, xlab="X1", ylab="X2")
 legend("topright"
      , col=c('red', 'blue', 'green')
      , legend = c('setosa', 'versicolor', 'virginica')
