@@ -1,0 +1,177 @@
+---
+title: "Project 2 Description"
+author: "Jyotishka Datta"
+date: "March 22, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+```
+
+## Project 2: Supervised Regression and Classification 
+
+The goal of the second project is to apply supervised learning to high-dimensional regression and classification problems. Our goal would be to compare a penalized regression approach (e.g. Lasso) with a Bayesian approach (either Bayesian Lasso or the horseshoe prior) for the same inferential task. 
+
+This project should have two parts: 
+
+1.  Understand how to handle sparse regression and classification problems. 
+2.  use a package for one method and implement another method using either MCMC or optimization on your own. 
+3.  Perform supervised learning with a real data-set. 
+
+I will discuss how a supervised sparse regression method like Lasso works in details in class, and talk about the improvements since Lasso. We will also do a bunch of simulation studies involving Lasso in our computer lab. 
+
+### Example 1: HIV Data (Supervised)
+
+A PNAS paper studied in-vitro drug resistance of $n = 1057$ HIV-1 isolates to protease and reverse transcriptase mutations. There are $p = 208$ (binary) mutation variables. The original paper compares 5 different regression methods: decision trees, neural networks, SVM regression, OLS and LASSO. 
+
+You can read the full paper (if you're interested): [http://www.pnas.org/content/103/46/17355.full](http://www.pnas.org/content/103/46/17355.full)
+
+Here our goal would be to understand how to apply Lasso on this data-set and what do the outputs mean: 
+
+The first step is to load the data-set. Because this is a supervised learning problem, we have a training data that is labelled and a spearate test data where we test the performance of our methods. 
+
+```{r, echo = T, tidy = T, cache=T}
+setwd("C:/Users/jd033/OneDrive/Documents/Course Notes/stat5443/R codes/datasets")
+## save the hiv.rda file somewhere that R can find and use that path
+load("hiv.rda")
+dim(hiv.train$x)
+dim(hiv.test$x)
+```
+
+### Lasso using `glmnet' package:
+
+The following snippet shows how to fit a Lasso regression model to the HIV data using the `glmnet` package. The `cv.glmnet` function performs a $k$-fold cross validation to choose the tuning parameter $\lambda$ for a user-supplied value of $k$, the default is $k = 10$. 
+
+```{r, echo = T, warning = F, message = F, cache=T, fig.asp = 0.5}
+require(glmnet)
+set.seed(1)
+cvfit <- cv.glmnet(hiv.train$x, hiv.train$y)
+fit <- cvfit$glmnet.fit
+```
+
+The solution path tells us how the coefficients enter (or leave) the model as we decrease (or increase) the penalty $\lambda$. The second plot shows the solution pat for a restricted X-axis. 
+
+```{r, echo = T, warning = F, message = F, cache=T, fig.asp = 0.6}
+plot(fit, xvar = "lambda")
+xlim <- log(c(fit$lambda[1], cvfit$lambda.min))
+plot(fit, xlim=xlim, xvar="lambda")
+```
+
+
+The next plot shows the mean squared error for Lasso plotted against $\lambda$ values used. The numbers on the top margin of the plot tells us the number of variables selected at that value of $\lambda$. 
+
+```{r, echo = T, warning = F, message = F, cache=T, fig.asp = 0.5}
+plot(cvfit)
+```
+
+### Variable selection by Lasso
+
+One of the main advantages of Lasso, as discussed in class, is that it can automatically shrink many coefficients to zero - resulting in a sparse model. 
+
+```{r}
+lasso.mod = glmnet(hiv.train$x, hiv.train$y,alpha = 1)
+bestlam = cvfit$lambda.min
+lasso.coef = predict(lasso.mod,type ="coefficients",s=bestlam)
+lasso_cv_est = lasso.coef[-1]
+lasso.ind <- ((lasso_cv_est!=0))
+```
+
+```{r, echo = T}
+cat("No of variables selected", sum(lasso.ind), "\n")
+cat("Estimates for selected coefficients \n", lasso_cv_est[lasso.ind], "\n")
+cat("Which columns were selected?", which(lasso.ind == 1))
+```
+
+The plot of estimated coefficients show the sparsity inducing property of Lasso:
+
+```{r}
+plot(lasso_cv_est, pch = 4, col = 4, xlab = "Indices", ylab = "Estimates")
+```
+
+The mean squred error can calculated as follows: 
+
+```{r, echo = T}
+lasso.pred=predict(fit, s = bestlam , newx = hiv.test$x)
+mean((lasso.pred - hiv.test$y)^2)
+```
+
+## Horseshoe 
+
+We have also talked briefly about Bayesian methods for handling sparse regression such as Bayesian Lasso and horseshoe in class. We will show here the horseshoe prior, proposed by Carvalho, Polson and Scott (2010) for sparse signal recovery. Horseshoe prior improves on the Laplace prior used for Bayesian Lasso when the underlying data is nearly-black. The horsehoe prior is given by the following hierachical model: 
+
+$$
+\begin{align}
+Y_i \mid \beta_i & \sim N(X\beta, \sigma^2I); \\
+\beta_i & \mid \lambda_i \sim N\left ( 0 , \lambda_i^2 \tau^2 \right ); \\
+\underbrace{\lambda_i^2}_{\text{local}} \mid \tau & \sim C^{+}(0, \tau), \underbrace{\tau}_{\text{global}} \sim C^{+}(0, \sigma) \; \; (\text{Heavy-tailed prior})
+\end{align}
+$$
+
+As we have seen before, here $\lambda_i$ term is called a local shrinkage parameter as it helps in tagging the signals, $\tau$ is called a global shrinkage parameter as it adjusts to the overall sparsity in the data. 
+
+There are several R packages for implementing horseshoe regression: such as  `horseshoe`, `monomvn`, `bayeslm` etc. We will demonstrate one of them below: 
+
+### Horseshoe R package {.smaller}
+
+Here we apply the monomvn package, with a truncated Cauchy prior on the global srinkage parameter $\tau$ and a Jeffreys' prior on the variance parameter $\sigma$. 
+
+```{r, echo = T}
+library(horseshoe)
+hs.fit <- horseshoe(y = hiv.train$y, X = hiv.train$x, 
+                    method.tau = "truncatedCauchy", method.sigma = "Jeffreys",
+                    burn = 5000, nmc = 10000, thin = 2)
+```
+
+First we plot the estimated coefficients - only a few are away from zero as expected. We plot the horseshoe and Lasso side-by-side to show how similar they are: 
+
+```{r, echo = T}
+par(mfrow=c(1,2))
+plot(hs.fit$BetaHat, main = "Horseshoe", ylab = "Estimates")
+plot(lasso_cv_est, main = "Lasso", ylab = "Estimates")
+```
+
+### Variable Selection 
+
+```{r, echo = T}
+hs.ind <- HS.var.select(hs.fit, hiv.train$y, method = "interval") 
+```
+
+```{r, echo = T}
+cat("No of variables selected", sum(hs.ind), "\n")
+cat("Estimates for selected coefficients \n", hs.fit$BetaHat[hs.ind], "\n")
+cat("Which columns were selected?", which(hs.ind == 1))
+```
+
+We can compare these numbers with Lasso's output above. Now answer these quesions by yourself. 
+
+1.  How many variables did Lasso and Horseshoe select? 
+2.  Which of the two methods leads to a sparser solution? 
+3.  Can you guess the reason? 
+
+Finally, the mean squarred error can be calcuated as follows: 
+
+```{r}
+hs.pred <- hiv.test$x%*%hs.fit$BetaHat
+(MSE = mean((hiv.test$y - hs.pred)^2))
+```
+
+Again, the same questions can be asked. 
+
+### Which method performs better? 
+
+-  In absence of "ground truth" about the predictors, it is hard to tell if horseshoe is over-penalizing or Lasso is severely under-penalizing. 
+-  That's why we choose methods based on a simulation study that we think accurately represents our reality (hard!)
+
+
+### Inferential Goals for this project 
+
+Now your goal would be to compare a few other popular regularization methods or Bayesian methods for this data and compare their performance. You will also need to implement either a regularization method or a Bayesian method on your own. 
+
+1.  Apply different sparse regression (regularization/shrinkage/dimension reduction technique) on this data. See table 1 and 2 of [Bhadra et al. (2019)](https://arxiv.org/pdf/1706.10179.pdf) for a list of popular regularization methods and Bayesian methods. All of them are for similar problems in sparse signal recovery. The same paper has a list of R packages for implementing Bayesian methods in Table 5. 
+
+2.  Implement the MCMC for one of the Bayesian methods, see e.g. modify the R code for Gibbs sampling for horseshoe prior at the end of this paper : [https://arxiv.org/abs/1010.5265](https://arxiv.org/abs/1010.5265)
+
+2. Compare between different methods? e.g. Would Elastic Net or MCP or Dantzig Selector be a better fit than Lasso? Do Bayesian methods outperform frequentist methods? How do you test? How about Bayesian methods or PC Regression?
+
+
