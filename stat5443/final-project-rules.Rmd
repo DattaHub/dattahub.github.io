@@ -1,7 +1,7 @@
 ---
 title: "Final Project Rules and Ideas"
 author: "Jyotishka Datta"
-date: "March 14, 2019"
+date: "March 22, 2019"
 output: 
   html_document:
     fontsize: 11pt
@@ -23,7 +23,7 @@ The litearure review part is meant for reading and understanding "recent" litear
 
 ### Rules - Part 1
 
-1.  Part 1 is a group project - students will form groups of 4 and submit to me (jd033@uark.edu) by the end of March 3/31/2019. 
+1.  Part 1 is a group project - students will form groups of 3 and submit to me (jd033@uark.edu) by the end of March 3/31/2019. 
 2.  Each team will be assigned one problem and a set of methods to compare. 
 3.  Ideally you'd choose a different data-set than the ones shown in class or labs and choose 4 different methods to compare. 
 4.  Your reports will be due by the final day of the class.  
