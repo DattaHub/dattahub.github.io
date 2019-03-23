@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 ```
 
-## Project 2: Supervised Regression and Classification 
+## Project 2: Supervised Learning: Sparse Regression 
 
 The goal of the second project is to apply supervised learning to high-dimensional regression and classification problems. Our goal would be to compare a penalized regression approach (e.g. Lasso) with a Bayesian approach (either Bayesian Lasso or the horseshoe prior) for the same inferential task. 
 
