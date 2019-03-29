@@ -1,0 +1,131 @@
+---
+title: "Heart failure data analysis in R"
+author: "Jyotishka Datta"
+date: "March 28, 2019"
+output: 
+  html_document:
+      toc: true
+      number_sections: true
+fontsize: 11pt
+geometry: margin=1in
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+
+opts_chunk$set(comment = NA,
+               prompt = FALSE,
+               cache = TRUE,
+               warning = FALSE,
+               message = FALSE)
+library(summarytools)
+st_options(plain.ascii = FALSE,      
+           style = "rmarkdown",      # This too
+           footnote = NA,             # Avoids footnotes which would clutter the results
+           subtitle.emphasis = FALSE  # This is a setting to experiment with - according to 
+           )                                     # the theme used, it might improve the headings'
+                                      # layout
+```
+
+# Background 
+
+## Data reading 
+
+```{r}
+rm(list=ls())
+setwd("C:/Users/jd033/OneDrive/Documents/R/Nursing")
+heart <- read.csv("Heart-failure-project-data.csv",sep=",",header=T)
+str(heart)
+```
+
+Before we analyze the data in R, we need to convert the data from a long format to a wide format. We also change the name of the first column from `patient ID` to `subject`.
+
+This is done as follows: 
+
+```{r}
+library(tidyverse)
+library(reshape2)
+colnames(heart)[1] <- "subject"
+heart.new <- heart[,c(1:3,5)]
+heart.wide <-  dcast(heart.new, subject + Group ~ Question, sum, value.var="Score")
+dim(heart.wide)
+```
+
+# Basic Descriptive Statistics
+
+## Descriptive Statistics for the "Pre" group
+
+```{r, results = 'asis'}
+library(summarytools)
+st_options(dfSummary.na.col = FALSE)
+
+attach(heart.wide)
+heart.wide.pre = heart.wide[Group == "Pre",]
+dfSummary(heart.wide.pre[,-1], plain.ascii = FALSE, style = "grid",           graph.magnif = 0.75, valid.col = FALSE, tmp.img.dir = "/tmp")
+```
+
+## Descriptive Statistics for the "Post" group
+
+```{r, results = 'asis'}
+attach(heart.wide)
+
+heart.wide.post = heart.wide[Group == "Post",]
+dfSummary(heart.wide.post[,-1], plain.ascii = FALSE, style = "grid",           graph.magnif = 0.75, valid.col = FALSE, tmp.img.dir = "/tmp")
+```
+
+
+# Analysis of Variance 
+
+## Calculating normalized score 
+
+One of the variable `Forget Meds` is coded in reverse order. We recode that here using the recode function in R. 
+
+```{r}
+cat("Before re-coding \n")
+(heart.wide$`Forget Meds`)
+heart.wide$`Forget Meds`<- recode(heart.wide$`Forget Meds`, `1` = 4, `2` = 3, `3`= 2, `4` = 1, `0` = 0)
+cat("After re-coding \n")
+(heart.wide$`Forget Meds`)
+heart.wide[is.na(heart.wide)] <- 0
+```
+
+## Normalized score calculation 
+
+The next step is calculating the normalized score for all section A items after adding them. 
+
+```{R}
+heart.wide$sec.A.score = with(heart.wide, Weigh+Swelling+Sick+Activity+Appointment+`Low Salt Diet`+
+       Exercise+`Forget Meds`+`Ask for  low Salt`+`Pill box`)
+Max.sec.A.score = 4*10
+Min.sec.A.score = 0
+(heart.wide$normalized.sec.A.score = (heart.wide$sec.A.score - Min.sec.A.score)/(Max.sec.A.score - Min.sec.A.score)*100)
+```
+
+### Box-plot 
+
+```{r, fig.asp = 0.6}
+p <- ggplot(heart.wide, aes(Group, normalized.sec.A.score))
+p + geom_boxplot() + geom_point()
+```
+
+The box plot shows the distribution of the normalized scores between the two groups and it seems there is a significant difference between the scores. 
+
+Now, we can test whether the normalized score was different between the **pre** and **post** groups using a one-way ANOVA as follows:
+
+```{r}
+fit <- lm(normalized.sec.A.score ~ Group, data = heart.wide)
+summary(fit)
+```
+
+**The P-value for the test of difference in mean normalized section A score between pre and post groups is 0.000491, which implies that there was a significant improvement of the test score in the post group.**
+
+
+# Next Steps 
+
+1.  We will repeat this for section B and section C. 
+2.  Which individual variables are important here? Exercise, Salt, Water, Forget Meds? 
+3.  What other visualization do we need? 
+
+
+

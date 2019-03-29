@@ -1,0 +1,1351 @@
+﻿Patient ID ,Question ,Score,Section ,Group 
+1,Weigh,1,A,Pre
+1,Weigh,3,A,Post
+1,Swelling,4,A,Pre
+1,Swelling,4,A,Post
+1,Sick,4,A,Pre
+1,Sick,4,A,Post
+1,Activity,3,A,Pre
+1,Activity,3,A,Post
+1,Appointment,4,A,Pre
+1,Appointment,4,A,Post
+1,Low Salt Diet,3,A,Pre
+1,Low Salt Diet,3,A,Post
+1,Exercise,2,A,Pre
+1,Exercise,2,A,Post
+1,Forget Meds,3,A,Pre
+1,Forget Meds,1,A,Post
+1,Ask for  low Salt,1,A,Pre
+1,Ask for  low Salt,1,A,Post
+1,Pill box,4,A,Pre
+1,Pill box,,A,Post
+1,Symptoms,4,B,Pre
+1,Symptoms,0,B,Post
+1,Recognize,3,B,Pre
+1,Recognize,,B,Post
+1,Reduce Na,3,B,Pre
+1,Reduce Na,3,B,Post
+1,Reduce H2O,3,B,Pre
+1,Reduce H2O,3,B,Post
+1,Inc Med,2,B,Pre
+1,Inc Med,3,B,Post
+1,Contact NP,1,B,Pre
+1,Contact NP,4,B,Post
+1,Remedy Eval,2,B,Pre
+1,Remedy Eval,0,B,Post
+1,Free fromSx,2,C,Pre
+1,Free fromSx,3,C,Post
+1,Follow Tx,2,C,Pre
+1,Follow Tx,3,C,Post
+1,Eval Sx,3,C,Pre
+1,Eval Sx,4,C,Post
+1,Rec change,3,C,Pre
+1,Rec change,3,C,Post
+1,Act on Sx,3,C,Pre
+1,Act on Sx,3,C,Post
+1,Eval Tx,4,C,Pre
+1,Eval Tx,4,C,Post
+2,Weigh,4,A,Pre
+2,Weigh,4,A,Post
+2,Swelling,4,A,Pre
+2,Swelling,4,A,Post
+2,Sick,4,A,Pre
+2,Sick,4,A,Post
+2,Activity,3,A,Pre
+2,Activity,4,A,Post
+2,Appointment,4,A,Pre
+2,Appointment,4,A,Post
+2,Low Salt Diet,2,A,Pre
+2,Low Salt Diet,3,A,Post
+2,Exercise30,1,A,Pre
+2,Exercise30,2,A,Post
+2,Forget Meds,1,A,Pre
+2,Forget Meds,1,A,Post
+2,Ask for  low Salt,1,A,Pre
+2,Ask for  low Salt,2,A,Post
+2,Pill box,4,A,Pre
+2,Pill box,4,A,Post
+2,Symptoms,1,B,Pre
+2,Symptoms,1,B,Post
+2,Recognize,0,B,Pre
+2,Recognize,3,B,Post
+2,Reduce Na,2,B,Pre
+2,Reduce Na,3,B,Post
+2,Reduce H2O,2,B,Pre
+2,Reduce H2O,3,B,Post
+,Inc Med,2,B,Pre
+2,Inc Med,3,B,Post
+2,Contact NP,2,B,Pre
+2,Contact NP,4,B,Post
+2,Remedy Eval,1,B,Pre
+2,Remedy Eval,3,B,Post
+2,Free fromSx,2,C,Pre
+2,Free fromSx,3,C,Post
+2,Follow Tx,2,C,Pre
+2,Follow Tx,3,C,Post
+2,Eval Sx,2,C,Pre
+2,Eval Sx,3,C,Post
+2,Rec change,2,C,Pre
+2,Rec change,3,C,Post
+2,Act on Sx,2,C,Pre
+2,Act on Sx,3,C,Post
+2,Eval Tx,2,C,Pre
+2,Eval Tx,3,C,Post
+3,Weigh,4,A,Pre
+3,Weigh,4,A,Post
+3,Swelling,4,A,Pre
+3,Swelling,4,A,Post
+3,Sick,3,A,Pre
+3,Sick,4,A,Post
+3,Activity,3,A,Pre
+3,Activity,4,A,Post
+3,Appointment,4,A,Pre
+3,Appointment,4,A,Post
+3,Low Salt Diet,2,A,Pre
+3,Low Salt Diet,3,A,Post
+3,Exercise30,2,A,Pre
+3,Exercise30,2,A,Post
+3,Forget Meds,1,A,Pre
+3,Forget Meds,1,A,Post
+3,Ask for  low Salt,1,A,Pre
+3,Ask for  low Salt,2,A,Post
+3,Pill box,1,A,Pre
+3,Pill box,4,A,Post
+3,Symptoms,0,B,Pre
+3,Symptoms,0,B,Post
+3,Recognize,0,B,Pre
+3,Recognize,0,B,Post
+3,Reduce Na,2,B,Pre
+3,Reduce Na,3,B,Post
+3,Reduce H2O,3,B,Pre
+3,Reduce H2O,3,B,Post
+3,Inc Med,4,B,Pre
+3,Inc Med,4,B,Post
+3,Contact NP,2,B,Pre
+3,Contact NP,4,B,Post
+3,Remedy Eval,0,B,Pre
+3,Remedy Eval,3,B,Post
+3,Free fromSx,2,C,Pre
+3,Free fromSx,3,C,Post
+3,Follow Tx,4,C,Pre
+3,Follow Tx,4,C,Post
+3,Eval Sx,3,C,Pre
+3,Eval Sx,4,C,Post
+3,Rec change,3,C,Pre
+3,Rec change,4,C,Post
+3,Act on Sx,4,C,Pre
+3,Act on Sx,4,C,Post
+3,Eval Tx,1,C,Pre
+3,Eval Tx,4,C,Post
+4,Weigh,1,A,Pre
+4,Weigh,4,A,Post
+4,Swelling,2,A,Pre
+4,Swelling,4,A,Post
+4,Sick,4,A,Pre
+4,Sick,4,A,Post
+4,Activity,2,A,Pre
+4,Activity,4,A,Post
+4,Appointment,4,A,Pre
+4,Appointment,4,A,Post
+4,Low Salt Diet,4,A,Pre
+4,Low Salt Diet,4,A,Post
+4,Exercise30,2,A,Pre
+4,Exercise30,4,A,Post
+4,Forget Meds,1,A,Pre
+4,Forget Meds,1,A,Post
+4,Ask for  low Salt,1,A,Pre
+4,Ask for  low Salt,1,A,Post
+4,Pill box,4,A,Pre
+4,Pill box,4,A,Post
+4,Symptoms,0,B,Pre
+4,Symptoms,0,B,Post
+4,Recognize,0,B,Pre
+4,Recognize,0,B,Post
+4,Reduce Na,4,B,Pre
+4,Reduce Na,4,B,Post
+4,Reduce H2O,3,B,Pre
+4,Reduce H2O,4,B,Post
+4,Inc Med,1,B,Pre
+4,Inc Med,4,B,Post
+4,Contact NP,2,B,Pre
+4,Contact NP,4,B,Post
+4,Remedy Eval,0,B,Pre
+4,Remedy Eval,0,B,Post
+4,Tx Helped,2,B,Pre
+4,Tx Helped,4,B,Post
+4,Free fromSx,2,C,Pre
+4,Free fromSx,4,C,Post
+4,Follow Tx,2,C,Pre
+4,Follow Tx,4,C,Post
+4,Eval Sx,2,C,Pre
+4,Eval Sx,4,C,Post
+4,Rec change,2,C,Pre
+4,Rec change,4,C,Post
+4,Act on Sx,2,C,Pre
+4,Act on Sx,4,C,Post
+4,Eval Tx,2,C,Pre
+4,Eval Tx,4,C,Post
+5,Weigh,2,A,Pre
+5,Weigh,4,A,Post
+5,Swelling,4,A,Pre
+5,Swelling,4,A,Post
+5,Sick,4,A,Pre
+5,Sick,4,A,Post
+5,Activity,1,A,Pre
+5,Activity,3,A,Post
+5,Appointment,4,A,Pre
+5,Appointment,4,A,Post
+5,Low Salt Diet,1,A,Pre
+5,Low Salt Diet,3,A,Post
+5,Exercise30,1,A,Pre
+5,Exercise30,2,A,Post
+5,Forget Meds,1,A,Pre
+5,Forget Meds,1,A,Post
+5,Ask for  low Salt,1,A,Pre
+5,Ask for  low Salt,2,A,Post
+5,Pill box,1,A,Pre
+5,Pill box,4,A,Post
+5,Symptoms,1,B,Pre
+5,Symptoms,0,B,Post
+5,Recognize,1,B,Pre
+5,Recognize,0,B,Post
+5,Reduce Na,2,B,Pre
+5,Reduce Na,3,B,Post
+5,Reduce H2O,2,B,Pre
+5,Reduce H2O,3,B,Post
+5,Inc Med,2,B,Pre
+5,Inc Med,3,B,Post
+5,Contact NP,2,B,Pre
+5,Contact NP,4,B,Post
+5,Remedy Eval,2,B,Pre
+5,Remedy Eval,3,B,Post
+5,Tx Helped,2,B,Pre
+5,Tx Helped,4,B,Post
+5,Free fromSx,2,C,Pre
+5,Free fromSx,4,C,Post
+5,Follow Tx,3,C,Pre
+5,Follow Tx,4,C,Post
+5,Eval Sx,3,C,Pre
+5,Eval Sx,4,C,Post
+5,Rec change,3,C,Pre
+5,Rec change,4,C,Post
+5,Act on Sx,3,C,Pre
+5,Act on Sx,4,C,Post
+5,Eval Tx,3,C,Pre
+5,Eval Tx,4,C,Post
+6,Weigh,1,A,Pre
+6,Weigh,3,A,Post
+6,Swelling,3,A,Pre
+6,Swelling,3,A,Post
+6,Sick,2,A,Pre
+6,Sick,3,A,Post
+6,Activity,2,A,Pre
+6,Activity,3,A,Post
+6,Appointment,1,A,Pre
+6,Appointment,3,A,Post
+6,Low Salt Diet,1,A,Pre
+6,Low Salt Diet,3,A,Post
+6,Exercise,1,A,Pre
+6,Exercise,2,A,Post
+6,Forget Meds,2,A,Pre
+6,Forget Meds,1,A,Post
+6,Ask for  low Salt,1,A,Pre
+6,Ask for  low Salt,2,A,Post
+6,Pill box,1,A,Pre
+6,Pill box,4,A,Post
+6,Symptoms,1,B,Pre
+6,Symptoms,1,B,Post
+6,Recognize,3,B,Pre
+6,Recognize,3,B,Post
+6,Reduce Na,2,B,Pre
+6,Reduce Na,3,B,Post
+6,Reduce H2O,2,B,Pre
+6,Reduce H2O,3,B,Post
+6,Inc Med,3,B,Pre
+6,Inc Med,3,B,Post
+6,Contact NP,2,B,Pre
+6,Contact NP,4,B,Post
+6,Remedy Eval,2,B,Pre
+6,Remedy Eval,3,B,Post
+6,Tx Helped,2,B,Pre
+6,Tx Helped,3,B,Post
+6,Free fromSx,2,C,Pre
+6,Free fromSx,3,C,Post
+6,Follow Tx,2,C,Pre
+6,Follow Tx,3,C,Post
+6,Eval Sx,2,C,Pre
+6,Eval Sx,3,C,Post
+6,Rec change,2,C,Pre
+6,Rec change,3,C,Post
+6,Act on Sx,2,C,Pre
+6,Act on Sx,3,C,Post
+6,Eval Tx,3,C,Pre
+6,Eval Tx,3,C,Post
+7,Weigh,2,A,Pre
+7,Weigh,4,A,Post
+7,Swelling,4,A,Pre
+7,Swelling,4,A,Post
+7,Sick,4,A,Pre
+7,Sick,4,A,Post
+7,Activity,3,A,Pre
+7,Activity,4,A,Post
+7,Appointment,4,A,Pre
+7,Appointment,4,A,Post
+7,Low Salt Diet,3,A,Pre
+7,Low Salt Diet,4,A,Post
+7,Exercise30,2,A,Pre
+7,Exercise30,3,A,Post
+7,Forget Meds,1,A,Pre
+7,Forget Meds,1,A,Post
+7,Ask for  low Salt,2,A,Pre
+7,Ask for  low Salt,4,A,Post
+7,Pill box,4,A,Pre
+7,Pill box,4,A,Post
+7,Symptoms,0,B,Pre
+7,Symptoms,0,B,Post
+7,Recognize,0,B,Pre
+7,Recognize,,B,Post
+7,Reduce Na,3,B,Pre
+7,Reduce Na,4,B,Post
+7,Reduce H2O,3,B,Pre
+7,Reduce H2O,4,B,Post
+7,Inc Med,3,B,Pre
+7,Inc Med,4,B,Post
+7,Contact NP,3,B,Pre
+7,Contact NP,4,B,Post
+7,Remedy Eval,3,B,Pre
+7,Remedy Eval,3,B,Post
+7,Tx Helped,2,B,Pre
+7,Tx Helped,3,B,Post
+7,Free fromSx,2,C,Pre
+7,Free fromSx,3,C,Post
+7,Follow Tx,2,C,Pre
+7,Follow Tx,3,C,Post
+7,Eval Sx,2,C,Pre
+7,Eval Sx,3,C,Post
+7,Rec change,2,C,Pre
+7,Rec change,3,C,Post
+7,Act on Sx,2,C,Pre
+7,Act on Sx,3,C,Post
+7,Eval Tx,2,C,Pre
+7,Eval Tx,3,C,Post
+8,Weigh,4,A,Pre
+8,Weigh,4,A,Post
+8,Swelling,4,A,Pre
+8,Swelling,4,A,Post
+8,Sick,1,A,Pre
+8,Sick,4,A,Post
+8,Activity,2,A,Pre
+8,Activity,3,A,Post
+8,Appointment,4,A,Pre
+8,Appointment,4,A,Post
+8,Low Salt Diet,4,A,Pre
+8,Low Salt Diet,3,A,Post
+8,Exercise30,1,A,Pre
+8,Exercise30,2,A,Post
+8,Forget Meds,1,A,Pre
+8,Forget Meds,1,A,Post
+8,Ask for  low Salt,1,A,Pre
+8,Ask for  low Salt,1,A,Post
+8,Pill box,4,A,Pre
+8,Pill box,4,A,Post
+8,Symptoms,1,B,Pre
+8,Symptoms,0,B,Post
+8,Recognize,0,B,Pre
+8,Recognize,0,B,Post
+8,Reduce Na,4,B,Pre
+8,Reduce Na,4,B,Post
+8,Reduce H2O,1,B,Pre
+8,Reduce H2O,4,B,Post
+8,Inc Med,1,B,Pre
+8,Inc Med,4,B,Post
+8,Contact NP,2,B,Pre
+8,Contact NP,4,B,Post
+8,Remedy Eval,1,B,Pre
+8,Remedy Eval,0,B,Post
+8,Free fromSx,3,C,Pre
+8,Free fromSx,4,C,Post
+8,Follow Tx,3,C,Pre
+8,Follow Tx,4,C,Post
+8,Eval Sx,3,C,Pre
+8,Eval Sx,4,C,Post
+8,Rec change,3,C,Pre
+8,Rec change,4,C,Post
+8,Act on Sx,3,C,Pre
+8,Act on Sx,4,C,Post
+8,Eval Tx,3,C,Pre
+8,Eval Tx,4,C,Post
+9,Weigh,2,A,Pre
+9,Weigh,4,A,Post
+9,Swelling,4,A,Pre
+9,Swelling,4,A,Post
+9,Sick,4,A,Pre
+9,Sick,4,A,Post
+9,Activity,2,A,Pre
+9,Activity,3,A,Post
+9,Appointment,4,A,Pre
+9,Appointment,4,A,Post
+9,Low Salt Diet,4,A,Pre
+9,Low Salt Diet,4,A,Post
+9,Exercise30,1,A,Pre
+9,Exercise30,2,A,Post
+9,Forget Meds,1,A,Pre
+9,Forget Meds,1,A,Post
+9,Ask for  low Salt,1,A,Pre
+9,Ask for  low Salt,1,A,Post
+9,Pill box,4,A,Pre
+9,Pill box,4,A,Post
+9,Symptoms,1,B,Pre
+9,Symptoms,0,B,Post
+9,Recognize,1,B,Pre
+9,Recognize,0,B,Post
+9,Reduce Na,3,B,Pre
+9,Reduce Na,4,B,Post
+9,Reduce H2O,3,B,Pre
+9,Reduce H2O,4,B,Post
+9,Inc Med,4,B,Pre
+9,Inc Med,2,B,Post
+9,Contact NP,1,B,Pre
+9,Contact NP,4,B,Post
+9,Remedy Eval,0,B,Pre
+9,Remedy Eval,0,B,Post
+9,Free fromSx,3,C,Pre
+9,Free fromSx,3,C,Post
+9,Follow Tx,3,C,Pre
+9,Follow Tx,4,C,Post
+9,Eval Sx,3,C,Pre
+9,Eval Sx,4,C,Post
+9,Rec change,3,C,Pre
+9,Rec change,4,C,Post
+9,Act on Sx,3,C,Pre
+9,Act on Sx,4,C,Post
+9,Eval Tx,3,C,Pre
+9,Eval Tx,4,C,Post
+,Weigh,2,A,Pre
+10,Weigh,3,A,Post
+10,Swelling,2,A,Pre
+10,Swelling,3,A,Post
+10,Sick,1,A,Pre
+10,Sick,3,A,Post
+10,Activity,1,A,Pre
+10,Activity,2,A,Post
+10,Appointment,1,A,Pre
+10,Appointment,3,A,Post
+10,Low Salt Diet,1,A,Pre
+10,Low Salt Diet,2,A,Post
+10,Exercise30,1,A,Pre
+10,Exercise30,2,A,Post
+10,Forget Meds,2,A,Pre
+10,Forget Meds,1,A,Post
+10,Ask for  low Salt,1,A,Pre
+10,Ask for  low Salt,1,A,Post
+10,Pill box,1,A,Pre
+10,Pill box,3,A,Post
+10,Symptoms,1,B,Pre
+10,Symptoms,1,B,Post
+10,Recognize,1,B,Pre
+10,Recognize,3,B,Post
+10,Reduce Na,1,B,Pre
+10,Reduce Na,3,B,Post
+10,Reduce H2O,1,B,Pre
+10,Reduce H2O,3,B,Post
+10,Inc Med,1,B,Pre
+10,Inc Med,3,B,Post
+10,Contact NP,1,B,Pre
+10,Contact NP,3,B,Post
+10,Remedy Eval,0,B,Pre
+10,Remedy Eval,3,B,Post
+10,Tx Helped,2,B,Pre
+10,Tx Helped,2,B,Post
+10,Free fromSx,2,C,Pre
+10,Free fromSx,2,C,Post
+10,Follow Tx,2,C,Pre
+10,Follow Tx,2,C,Post
+10,Eval Sx,2,C,Pre
+10,Eval Sx,3,C,Post
+10,Rec change,2,C,Pre
+10,Rec change,3,C,Post
+10,Act on Sx,2,C,Pre
+10,Act on Sx,3,C,Post
+10,Eval Tx,2,C,Pre
+10,Eval Tx,3,C,Post
+11,Weigh,4,A,Pre
+11,Weigh,4,A,Post
+11,Swelling,4,A,Pre
+11,Swelling,4,A,Post
+11,Sick,4,A,Pre
+11,Sick,4,A,Post
+11,Activity,4,A,Pre
+11,Activity,4,A,Post
+11,Appointment,4,A,Pre
+11,Appointment,4,A,Post
+11,Low Salt Diet,4,A,Pre
+11,Low Salt Diet,4,A,Post
+11,Exercise30,3,A,Pre
+11,Exercise30,4,A,Post
+11,Forget Meds,1,A,Pre
+11,Forget Meds,1,A,Post
+11,Ask for  low Salt,4,A,Pre
+11,Ask for  low Salt,4,A,Post
+11,Pill box,4,A,Pre
+11,Pill box,4,A,Post
+11,Symptoms,1,B,Pre
+11,Symptoms,1,B,Post
+11,Recognize,0,B,Pre
+11,Recognize,4,B,Post
+11,Reduce Na,4,B,Pre
+11,Reduce Na,3,B,Post
+11,Reduce H2O,3,B,Pre
+11,Reduce H2O,3,B,Post
+11,Inc Med,1,B,Pre
+11,Inc Med,4,B,Post
+11,Contact NP,1,B,Pre
+11,Contact NP,4,B,Post
+11,Remedy Eval,0,B,Pre
+11,Remedy Eval,3,B,Post
+11,Free fromSx,1,C,Pre
+11,Free fromSx,3,C,Post
+11,Follow Tx,3,C,Pre
+11,Follow Tx,4,C,Post
+11,Eval Sx,3,C,Pre
+11,Eval Sx,4,C,Post
+11,Rec change,3,C,Pre
+11,Rec change,4,C,Post
+11,Act on Sx,3,C,Pre
+11,Act on Sx,4,C,Post
+11,Eval Tx,3,C,Pre
+11,Eval Tx,4,C,Post
+12,Weigh,1,A,Pre
+12,Weigh,4,A,Post
+12,Swelling,1,A,Pre
+12,Swelling,4,A,Post
+12,Sick,1,A,Pre
+12,Sick,3,A,Post
+12,Activity,1,A,Pre
+12,Activity,2,A,Post
+12,Appointment,1,A,Pre
+12,Appointment,4,A,Post
+12,Low Salt Diet,1,A,Pre
+12,Low Salt Diet,3,A,Post
+12,Exercise30,1,A,Pre
+12,Exercise30,2,A,Post
+12,Forget Meds,3,A,Pre
+12,Forget Meds,1,A,Post
+12,Ask for  low Salt,1,A,Pre
+12,Ask for  low Salt,2,A,Post
+12,Pill box,1,A,Pre
+12,Pill box,4,A,Post
+12,Symptoms,1,B,Pre
+12,Symptoms,3,B,Post
+12,Recognize,0,B,Pre
+12,Recognize,3,B,Post
+12,Reduce Na,1,B,Pre
+12,Reduce Na,3,B,Post
+12,Reduce H2O,1,B,Pre
+12,Reduce H2O,3,B,Post
+12,Inc Med,1,B,Pre
+12,Inc Med,3,B,Post
+12,Contact NP,1,B,Pre
+12,Contact NP,4,B,Post
+12,Remedy Eval,0,B,Pre
+12,Remedy Eval,3,B,Post
+12,Free fromSx,1,C,Pre
+12,Free fromSx,2,C,Post
+12,Follow Tx,1,C,Pre
+12,Follow Tx,3,C,Post
+12,Eval Sx,1,C,Pre
+12,Eval Sx,3,C,Post
+12,Rec change,1,C,Pre
+12,Rec change,3,C,Post
+12,Act on Sx,1,C,Pre
+12,Act on Sx,3,C,Post
+12,Eval Tx,1,C,Pre
+12,Eval Tx,3,C,Post
+13,Weigh,3,A,Pre
+13,Weigh,4,A,Post
+13,Swelling,4,A,Pre
+13,Swelling,4,A,Post
+13,Sick,3,A,Pre
+13,Sick,3,A,Post
+13,Activity,3,A,Pre
+13,Activity,3,A,Post
+13,Appointment,3,A,Pre
+13,Appointment,4,A,Post
+13,Low Salt Diet,3,A,Pre
+13,Low Salt Diet,3,A,Post
+13,Exercise30,1,A,Pre
+13,Exercise30,2,A,Post
+13,Forget Meds,1,A,Pre
+13,Forget Meds,1,A,Post
+13,Ask for  low Salt,1,A,Pre
+13,Ask for  low Salt,2,A,Post
+13,Pill box,4,A,Pre
+13,Pill box,4,A,Post
+13,Symptoms,1,B,Pre
+13,Symptoms,1,B,Post
+13,Recognize,2,B,Pre
+13,Recognize,3,B,Post
+13,Reduce Na,2,B,Pre
+13,Reduce Na,3,B,Post
+13,Reduce H2O,2,B,Pre
+13,Reduce H2O,3,B,Post
+13,Inc Med,3,B,Pre
+13,Inc Med,3,B,Post
+13,Contact NP,3,B,Pre
+13,Contact NP,4,B,Post
+13,Remedy Eval,2,B,Pre
+13,Remedy Eval,3,B,Post
+13,Free fromSx,2,C,Pre
+13,Free fromSx,3,C,Post
+13,Follow Tx,3,C,Pre
+13,Follow Tx,4,C,Post
+13,Eval Sx,3,C,Pre
+13,Eval Sx,4,C,Post
+13,Rec change,3,C,Pre
+13,Rec change,4,C,Post
+13,Act on Sx,3,C,Pre
+13,Act on Sx,4,C,Post
+13,Eval Tx,3,C,Pre
+13,Eval Tx,4,C,Post
+14,Weigh,2,A,Pre
+14,Weigh,2,A,Post
+14,Swelling,2,A,Pre
+14,Swelling,2,A,Post
+14,Sick,3,A,Pre
+14,Sick,3,A,Post
+14,Activity,2,A,Pre
+14,Activity,2,A,Post
+14,Appointment,1,A,Pre
+14,Appointment,3,A,Post
+14,Low Salt Diet,1,A,Pre
+14,Low Salt Diet,2,A,Post
+14,Exercise30,1,A,Pre
+14,Exercise30,1,A,Post
+14,Forget Meds,1,A,Pre
+14,Forget Meds,1,A,Post
+14,Ask for  low Salt,1,A,Pre
+14,Ask for  low Salt,1,A,Post
+14,Pill box,1,A,Pre
+14,Pill box,1,A,Post
+14,Symptoms,0,B,Pre
+14,Symptoms,0,B,Post
+14,Recognize,,B,Pre
+14,Recognize,,B,Post
+14,Reduce Na,1,B,Pre
+14,Reduce Na,2,B,Post
+14,Reduce H2O,1,B,Pre
+14,Reduce H2O,2,B,Post
+14,Inc Med,1,B,Pre
+14,Inc Med,1,B,Post
+14,Contact NP,2,B,Pre
+14,Contact NP,3,B,Post
+14,Remedy Eval,0,B,Pre
+14,Remedy Eval,0,B,Post
+14,Tx Helped,2,B,Pre
+14,Tx Helped,2,B,Post
+14,Free fromSx,2,C,Pre
+14,Free fromSx,2,C,Post
+14,Follow Tx,2,C,Pre
+15,Follow Tx,2,C,Post
+15,Eval Sx,2,C,Pre
+15,Eval Sx,2,C,Post
+15,Rec change,2,C,Pre
+15,Rec change,2,C,Post
+15,Act on Sx,2,C,Pre
+15,Act on Sx,2,C,Post
+15,Eval Tx,2,C,Pre
+15,Eval Tx,2,C,Post
+15,Weigh,2,A,Pre
+15,Weigh,3,A,Post
+15,Swelling,4,A,Pre
+15,Swelling,4,A,Post
+15,Sick,4,A,Pre
+15,Sick,4,A,Post
+15,Activity,1,A,Pre
+15,Activity,3,A,Post
+15,Appointment,4,A,Pre
+15,Appointment,4,A,Post
+15,Low Salt Diet,2,A,Pre
+15,Low Salt Diet,3,A,Post
+15,Exercise30,1,A,Pre
+15,Exercise30,2,A,Post
+15,Forget Meds,2,A,Pre
+15,Forget Meds,1,A,Post
+15,Ask for  low Salt,1,A,Pre
+15,Ask for  low Salt,3,A,Post
+15,Pill box,4,A,Pre
+15,Pill box,4,A,Post
+15,Symptoms,1,B,Pre
+15,Symptoms,0,B,Post
+15,Recognize,0,B,Pre
+15,Recognize,0,B,Post
+15,Reduce Na,2,B,Pre
+15,Reduce Na,3,B,Post
+15,Reduce H2O,1,B,Pre
+15,Reduce H2O,3,B,Post
+15,Inc Med,1,B,Pre
+15,Inc Med,3,B,Post
+15,Contact NP,1,B,Pre
+15,Contact NP,4,B,Post
+15,Remedy Eval,1,B,Pre
+15,Remedy Eval,3,B,Post
+15,Free fromSx,2,C,Pre
+15,Free fromSx,3,C,Post
+15,Follow Tx,2,C,Pre
+15,Follow Tx,3,C,Post
+15,Eval Sx,2,C,Pre
+15,Eval Sx,3,C,Post
+15,Rec change,2,C,Pre
+15,Rec change,3,C,Post
+15,Act on Sx,2,C,Pre
+151,Act on Sx,3,C,Post
+15,Eval Tx,2,C,Pre
+15,Eval Tx,3,C,Post
+16,Weigh,2,A,Pre
+16,Weigh,3,A,Post
+16,Swelling,2,A,Pre
+16,Swelling,3,A,Post
+16,Sick,2,A,Pre
+16,Sick,3,A,Post
+16,Activity,3,A,Pre
+16,Activity,3,A,Post
+16,Appointment,4,A,Pre
+16,Appointment,4,A,Post
+16,Low Salt Diet,3,A,Pre
+16,Low Salt Diet,3,A,Post
+16,Exercise30,4,A,Pre
+16,Exercise30,4,A,Post
+16,Forget Meds,1,A,Pre
+16,Forget Meds,1,A,Post
+16,Ask for  low Salt,1,A,Pre
+16,Ask for  low Salt,2,A,Post
+16,Pill box,4,A,Pre
+16,Pill box,4,A,Post
+16,Symptoms,1,B,Pre
+16,Symptoms,0,B,Post
+16,Recognize,0,B,Pre
+16,Recognize,2,B,Post
+16,Reduce Na,2,B,Pre
+16,Reduce Na,2,B,Post
+16,Reduce H2O,2,B,Pre
+16,Reduce H2O,2,B,Post
+16,Inc Med,1,B,Pre
+16,Inc Med,1,B,Post
+16,Contact NP,3,B,Pre
+16,Contact NP,4,B,Post
+16,Remedy Eval,0,B,Pre
+16,Remedy Eval,0,B,Post
+16,Tx Helped,2,B,Pre
+16,Tx Helped,3,B,Post
+16,Free fromSx,3,C,Pre
+16,Free fromSx,3,C,Post
+16,Follow Tx,3,C,Pre
+16,Follow Tx,3,C,Post
+16,Eval Sx,3,C,Pre
+16,Eval Sx,3,C,Post
+16,Rec change,1,C,Pre
+16,Rec change,3,C,Post
+16,Act on Sx,2,C,Pre
+16,Act on Sx,3,C,Post
+16,Eval Tx,2,C,Pre
+16,Eval Tx,3,C,Post
+17,Weigh,1,A,Pre
+17,Weigh,3,A,Post
+17,Swelling,4,A,Pre
+17,Swelling,4,A,Post
+17,Sick,4,A,Pre
+17,Sick,4,A,Post
+17,Activity,1,A,Pre
+17,Activity,2,A,Post
+17,Appointment,2,A,Pre
+17,Appointment,3,A,Post
+17,Low Salt Diet,1,A,Pre
+17,Low Salt Diet,3,A,Post
+17,Exercise30,1,A,Pre
+17,Exercise30,2,A,Post
+17,Forget Meds,3,A,Pre
+17,Forget Meds,1,A,Post
+17,Ask for  low Salt,1,A,Pre
+17,Ask for  low Salt,1,A,Post
+17,Pill box,1,A,Pre
+17,Pill box,4,A,Post
+17,Symptoms,1,B,Pre
+17,Symptoms,0,B,Post
+17,Recognize,1,B,Pre
+17,Recognize,0,B,Post
+17,Reduce Na,2,B,Pre
+17,Reduce Na,3,B,Post
+17,Reduce H2O,2,B,Pre
+17,Reduce H2O,3,B,Post
+17,Inc Med,1,B,Pre
+17,Inc Med,3,B,Post
+17,Contact NP,1,B,Pre
+17,Contact NP,4,B,Post
+17,Remedy Eval,0,B,Pre
+17,Remedy Eval,0,B,Post
+17,Free fromSx,2,C,Pre
+17,Free fromSx,3,C,Post
+17,Follow Tx,2,C,Pre
+17,Follow Tx,3,C,Post
+17,Eval Sx,2,C,Pre
+17,Eval Sx,3,C,Post
+17,Rec change,2,C,Pre
+17,Rec change,3,C,Post
+17,Act on Sx,2,C,Pre
+17,Act on Sx,3,C,Post
+17,Eval Tx,1,C,Pre
+17,Eval Tx,3,C,Post
+18,Weigh,4,A,Pre
+18,Weigh,4,A,Post
+18,Swelling,4,A,Pre
+18,Swelling,4,A,Post
+18,Sick,2,A,Pre
+18,Sick,3,A,Post
+18,Activity,2,A,Pre
+18,Activity,2,A,Post
+18,Appointment,4,A,Pre
+18,Appointment,4,A,Post
+18,Low Salt Diet,2,A,Pre
+18,Low Salt Diet,3,A,Post
+18,Exercise30,1,A,Pre
+18,Exercise30,1,A,Post
+18,Forget Meds,1,A,Pre
+18,Forget Meds,1,A,Post
+18,Ask for  low Salt,1,A,Pre
+18,Ask for  low Salt,1,A,Post
+18,Pill box,4,A,Pre
+18,Pill box,4,A,Post
+18,Symptoms,1,B,Pre
+18,Symptoms,1,B,Post
+18,Recognize,2,B,Pre
+18,Recognize,3,B,Post
+18,Reduce Na,3,B,Pre
+18,Reduce Na,3,B,Post
+18,Reduce H2O,2,B,Pre
+18,Reduce H2O,3,B,Post
+18,Inc Med,3,B,Pre
+18,Inc Med,3,B,Post
+18,Contact NP,1,B,Pre
+18,Contact NP,3,B,Post
+18,Remedy Eval,0,B,Pre
+18,Remedy Eval,2,B,Post
+18,Tx Helped,1,B,Pre
+18,Tx Helped,2,B,Post
+18,Free fromSx,2,C,Pre
+18,Free fromSx,2,C,Post
+18,Follow Tx,2,C,Pre
+18,Follow Tx,3,C,Post
+18,Eval Sx,2,C,Pre
+18,Eval Sx,3,C,Post
+18,Rec change,2,C,Pre
+18,Rec change,3,C,Post
+18,Act on Sx,2,C,Pre
+18,Act on Sx,3,C,Post
+18,Eval Tx,2,C,Pre
+18,Eval Tx,3,C,Post
+19,Weigh,1,A,Pre
+19,Weigh,4,A,Post
+19,Swelling,1,A,Pre
+19,Swelling,3,A,Post
+19,Sick,1,A,Pre
+19,Sick,3,A,Post
+19,Activity,2,A,Pre
+19,Activity,3,A,Post
+19,Appointment,2,A,Pre
+19,Appointment,4,A,Post
+19,Low Salt Diet,1,A,Pre
+19,Low Salt Diet,3,A,Post
+19,Exercise30,1,A,Pre
+19,Exercise30,1,A,Post
+19,Forget Meds,1,A,Pre
+19,Forget Meds,1,A,Post
+19,Ask for  low Salt,1,A,Pre
+19,Ask for  low Salt,1,A,Post
+19,Pill box,4,A,Pre
+19,Pill box,4,A,Post
+19,Symptoms,1,B,Pre
+19,Symptoms,0,B,Post
+19,Recognize,0,B,Pre
+19,Recognize,0,B,Post
+19,Reduce Na,1,B,Pre
+19,Reduce Na,3,B,Post
+19,Reduce H2O,1,B,Pre
+19,Reduce H2O,3,B,Post
+19,Inc Med,1,B,Pre
+19,Inc Med,3,B,Post
+19,Contact NP,1,B,Pre
+19,Contact NP,3,B,Post
+19,Remedy Eval,0,B,Pre
+19,Remedy Eval,2,B,Post
+19,Free fromSx,2,C,Pre
+19,Free fromSx,2,C,Post
+19,Follow Tx,2,C,Pre
+19,Follow Tx,3,C,Post
+19,Eval Sx,2,C,Pre
+19,Eval Sx,3,C,Post
+19,Rec change,2,C,Pre
+19,Rec change,3,C,Post
+19,Act on Sx,2,C,Pre
+19,Act on Sx,3,C,Post
+19,Eval Tx,2,C,Pre
+19,Eval Tx,3,C,Post
+20,Weigh,1,A,Pre
+20,Weigh,3,A,Post
+20,Swelling,1,A,Pre
+20,Swelling,3,A,Post
+20,Sick,1,A,Pre
+20,Sick,2,A,Post
+20,Activity,1,A,Pre
+20,Activity,2,A,Post
+20,Appointment,1,A,Pre
+20,Appointment,4,A,Post
+20,Low Salt Diet,1,A,Pre
+20,Low Salt Diet,2,A,Post
+20,Exercise30,1,A,Pre
+20,Exercise30,2,A,Post
+20,Forget Meds,1,A,Pre
+20,Forget Meds,1,A,Post
+20,Ask for  low Salt,1,A,Pre
+20,Ask for  low Salt,,A,Post
+20,Pill box,2,A,Pre
+20,Pill box,4,A,Post
+20,Symptoms,1,B,Pre
+20,Symptoms,1,B,Post
+20,Recognize,0,B,Pre
+20,Recognize,2,B,Post
+20,Reduce Na,1,B,Pre
+20,Reduce Na,2,B,Post
+20,Reduce H2O,1,B,Pre
+20,Reduce H2O,2,B,Post
+20,Inc Med,1,B,Pre
+20,Inc Med,1,B,Post
+20,Contact NP,1,B,Pre
+20,Contact NP,3,B,Post
+20,Remedy Eval,0,B,Pre
+20,Remedy Eval,3,B,Post
+20,Free fromSx,1,C,Pre
+20,Free fromSx,2,C,Post
+20,Follow Tx,2,C,Pre
+20,Follow Tx,3,C,Post
+20,Eval Sx,2,C,Pre
+20,Eval Sx,3,C,Post
+20,Rec change,2,C,Pre
+20,Rec change,3,C,Post
+20,Act on Sx,1,C,Pre
+20,Act on Sx,3,C,Post
+20,Eval Tx,1,C,Pre
+20,Eval Tx,3,C,Post
+21,Weigh,1,A,Pre
+21,Weigh,3,A,Post
+21,Swelling,2,A,Pre
+21,Swelling,2,A,Post
+21,Sick,2,A,Pre
+21,Sick,2,A,Post
+21,Activity,1,A,Pre
+21,Activity,2,A,Post
+21,Appointment,3,A,Pre
+21,Appointment,2,A,Post
+21,Low Salt Diet,1,A,Pre
+21,Low Salt Diet,2,A,Post
+21,Exercise30,1,A,Pre
+21,Exercise30,1,A,Post
+21,Forget Meds,2,A,Pre
+21,Forget Meds,1,A,Post
+21,Ask for  low Salt,1,A,Pre
+21,Ask for  low Salt,1,A,Post
+21,Pill box,4,A,Pre
+21,Pill box,4,A,Post
+21,Symptoms,1,B,Pre
+21,Symptoms,1,B,Post
+21,Recognize,2,B,Pre
+21,Recognize,3,B,Post
+21,Reduce Na,1,B,Pre
+21,Reduce Na,3,B,Post
+21,Reduce H2O,1,B,Pre
+21,Reduce H2O,3,B,Post
+21,Inc Med,1,B,Pre
+21,Inc Med,3,B,Post
+21,Contact NP,1,B,Pre
+21,Contact NP,4,B,Post
+21,Remedy Eval,1,B,Pre
+21,Remedy Eval,3,B,Post
+21,Free fromSx,2,C,Pre
+21,Free fromSx,2,C,Post
+21,Follow Tx,2,C,Pre
+21,Follow Tx,3,C,Post
+21,Eval Sx,1,C,Pre
+21,Eval Sx,3,C,Post
+21,Rec change,1,C,Pre
+21,Rec change,3,C,Post
+21,Act on Sx,1,C,Pre
+21,Act on Sx,3,C,Post
+21,Eval Tx,1,C,Pre
+21,Eval Tx,3,C,Post
+22,Weigh,1,A,Pre
+22,Weigh,3,A,Post
+22,Swelling,1,A,Pre
+22,Swelling,3,A,Post
+22,Sick,1,A,Pre
+22,Sick,3,A,Post
+22,Activity,1,A,Pre
+22,Activity,3,A,Post
+22,Appointment,1,A,Pre
+22,Appointment,4,A,Post
+22,Low Salt Diet,1,A,Pre
+22,Low Salt Diet,3,A,Post
+22,Exercise30,1,A,Pre
+22,Exercise30,2,A,Post
+22,Forget Meds,2,A,Pre
+22,Forget Meds,1,A,Post
+22,Ask for  low Salt,1,A,Pre
+22,Ask for  low Salt,1,A,Post
+22,Pill box,1,A,Pre
+22,Pill box,4,A,Post
+22,Symptoms,0,B,Pre
+22,Symptoms,0,B,Post
+22,Recognize,0,B,Pre
+22,Recognize,0,B,Post
+22,Reduce Na,1,B,Pre
+22,Reduce Na,3,B,Post
+22,Reduce H2O,1,B,Pre
+22,Reduce H2O,3,B,Post
+22,Inc Med,1,B,Pre
+22,Inc Med,3,B,Post
+22,Contact NP,1,B,Pre
+22,Contact NP,3,B,Post
+22,Remedy Eval,0,B,Pre
+22,Remedy Eval,0,B,Post
+22,Free fromSx,2,C,Pre
+22,Free fromSx,3,C,Post
+22,Follow Tx,2,C,Pre
+22,Follow Tx,3,C,Post
+22,Eval Sx,2,C,Pre
+22,Eval Sx,3,C,Post
+22,Rec change,2,C,Pre
+22,Rec change,3,C,Post
+22,Act on Sx,2,C,Pre
+22,Act on Sx,3,C,Post
+22,Eval Tx,2,C,Pre
+22,Eval Tx,3,C,Post
+23,Weigh,1,A,Pre
+23,Weigh,4,A,Post
+23,Swelling,2,A,Pre
+23,Swelling,4,A,Post
+23,Sick,3,A,Pre
+23,Sick,4,A,Post
+23,Activity,3,A,Pre
+23,Activity,3,A,Post
+23,Appointment,4,A,Pre
+23,Appointment,4,A,Post
+23,Low Salt Diet,2,A,Pre
+23,Low Salt Diet,2,A,Post
+23,Exercise30,2,A,Pre
+23,Exercise30,2,A,Post
+23,Forget Meds,1,A,Pre
+23,Forget Meds,1,A,Post
+23,Ask for  low Salt,1,A,Pre
+23,Ask for  low Salt,1,A,Post
+23,Pill box,4,A,Pre
+23,Pill box,4,A,Post
+23,Symptoms,1,B,Pre
+23,Symptoms,1,B,Post
+23,Recognize,0,B,Pre
+23,Recognize,2,B,Post
+23,Reduce Na,2,B,Pre
+23,Reduce Na,2,B,Post
+23,Reduce H2O,1,B,Pre
+23,Reduce H2O,3,B,Post
+23,Inc Med,1,B,Pre
+23,Inc Med,3,B,Post
+23,Contact NP,3,B,Pre
+23,Contact NP,4,B,Post
+23,Remedy Eval,0,B,Pre
+23,Remedy Eval,3,B,Post
+23,Free fromSx,2,C,Pre
+23,Free fromSx,3,C,Post
+23,Follow Tx,2,C,Pre
+23,Follow Tx,3,C,Post
+23,Eval Sx,2,C,Pre
+23,Eval Sx,3,C,Post
+23,Rec change,2,C,Pre
+23,Rec change,3,C,Post
+23,Act on Sx,2,C,Pre
+23,Act on Sx,3,C,Post
+23,Eval Tx,2,C,Pre
+23,Eval Tx,3,C,Post
+24,Weigh,2,A,Pre
+24,Weigh,3,A,Post
+24,Swelling,2,A,Pre
+24,Swelling,3,A,Post
+24,Sick,2,A,Pre
+24,Sick,3,A,Post
+24,Activity,2,A,Pre
+24,Activity,4,A,Post
+24,Appointment,2,A,Pre
+24,Appointment,4,A,Post
+24,Low Salt Diet,2,A,Pre
+24,Low Salt Diet,3,A,Post
+24,Exercise30,2,A,Pre
+24,Exercise30,3,A,Post
+24,Forget Meds,2,A,Pre
+24,Forget Meds,1,A,Post
+24,Ask for  low Salt,2,A,Pre
+24,Ask for  low Salt,1,A,Post
+24,Pill box,2,A,Pre
+24,Pill box,4,A,Post
+24,Symptoms,1,B,Pre
+24,Symptoms,0,B,Post
+24,Recognize,0,B,Pre
+24,Recognize,3,B,Post
+24,Reduce Na,1,B,Pre
+24,Reduce Na,3,B,Post
+24,Reduce H2O,1,B,Pre
+24,Reduce H2O,3,B,Post
+24,Inc Med,1,B,Pre
+24,Inc Med,3,B,Post
+24,Contact NP,1,B,Pre
+24,Contact NP,4,B,Post
+24,Remedy Eval,0,B,Pre
+24,Remedy Eval,0,B,Post
+24,Free fromSx,2,C,Pre
+24,Free fromSx,3,C,Post
+24,Follow Tx,2,C,Pre
+24,Follow Tx,3,C,Post
+24,Eval Sx,2,C,Pre
+24,Eval Sx,3,C,Post
+24,Rec change,2,C,Pre
+24,Rec change,3,C,Post
+24,Act on Sx,2,C,Pre
+24,Act on Sx,3,C,Post
+24,Eval Tx,2,C,Pre
+24,Eval Tx,3,C,Post
+25,Weigh,1,A,Pre
+25,Weigh,2,A,Post
+25,Swelling,2,A,Pre
+25,Swelling,2,A,Post
+25,Sick,1,A,Pre
+25,Sick,2,A,Post
+25,Activity,1,A,Pre
+25,Activity,2,A,Post
+25,Appointment,1,A,Pre
+25,Appointment,3,A,Post
+25,Low Salt Diet,1,A,Pre
+25,Low Salt Diet,2,A,Post
+25,Exercise30,1,A,Pre
+25,Exercise30,1,A,Post
+25,Forget Meds,2,A,Pre
+25,Forget Meds,1,A,Post
+25,Ask for  low Salt,1,A,Pre
+25,Ask for  low Salt,1,A,Post
+25,Pill box,4,A,Pre
+25,Pill box,4,A,Post
+25,Symptoms,1,B,Pre
+25,Symptoms,1,B,Post
+25,Recognize,2,B,Pre
+25,Recognize,1,B,Post
+25,Reduce Na,1,B,Pre
+25,Reduce Na,2,B,Post
+25,Reduce H2O,1,B,Pre
+25,Reduce H2O,2,B,Post
+25,Inc Med,1,B,Pre
+25,Inc Med,2,B,Post
+25,Contact NP,2,B,Pre
+25,Contact NP,4,B,Post
+25,Remedy Eval,0,B,Pre
+25,Remedy Eval,2,B,Post
+25,Free fromSx,1,C,Pre
+25,Free fromSx,2,C,Post
+25,Follow Tx,1,C,Pre
+25,Follow Tx,2,C,Post
+25,Eval Sx,1,C,Pre
+25,Eval Sx,3,C,Post
+25,Rec change,1,C,Pre
+25,Rec change,3,C,Post
+25,Act on Sx,1,C,Pre
+25,Act on Sx,2,C,Post
+25,Eval Tx,1,C,Pre
+25,Eval Tx,2,C,Post
+26,Weigh,2,A,Pre
+26,Weigh,3,A,Post
+26,Swelling,2,A,Pre
+26,Swelling,3,A,Post
+26,Sick,2,A,Pre
+26,Sick,3,A,Post
+26,Activity,3,A,Pre
+26,Activity,3,A,Post
+26,Appointment,4,A,Pre
+26,Appointment,4,A,Post
+26,Low Salt Diet,2,A,Pre
+26,Low Salt Diet,2,A,Post
+26,Exercise30,3,A,Pre
+26,Exercise30,3,A,Post
+26,Forget Meds,1,A,Pre
+26,Forget Meds,1,A,Post
+26,Ask for  low Salt,1,A,Pre
+26,Ask for  low Salt,2,A,Post
+26,Pill box,4,A,Pre
+26,Pill box,4,A,Post
+26,Symptoms,1,B,Pre
+26,Symptoms,1,B,Post
+26,Recognize,1,B,Pre
+26,Recognize,2,B,Post
+26,Reduce Na,1,B,Pre
+26,Reduce Na,3,B,Post
+26,Reduce H2O,1,B,Pre
+26,Reduce H2O,3,B,Post
+26,Inc Med,1,B,Pre
+26,Inc Med,3,B,Post
+26,Contact NP,1,B,Pre
+26,Contact NP,4,B,Post
+26,Remedy Eval,0,B,Pre
+26,Remedy Eval,3,B,Post
+26,Free fromSx,2,C,Pre
+26,Free fromSx,3,C,Post
+26,Follow Tx,2,C,Pre
+26,Follow Tx,3,C,Post
+26,Eval Sx,2,C,Pre
+26,Eval Sx,3,C,Post
+26,Rec change,2,C,Pre
+26,Rec change,3,C,Post
+26,Act on Sx,2,C,Pre
+26,Act on Sx,3,C,Post
+26,Eval Tx,4,C,Pre
+26,Eval Tx,3,C,Post
+27,Weigh,2,A,Pre
+27,Weigh,4,A,Post
+27,Swelling,4,A,Pre
+27,Swelling,4,A,Post
+27,Sick,3,A,Pre
+27,Sick,4,A,Post
+27,Activity,3,A,Pre
+27,Activity,4,A,Post
+27,Appointment,4,A,Pre
+27,Appointment,4,A,Post
+27,Low Salt Diet,2,A,Pre
+27,Low Salt Diet,2,A,Post
+27,Exercise30,3,A,Pre
+27,Exercise30,3,A,Post
+27,Forget Meds,1,A,Pre
+27,Forget Meds,1,A,Post
+27,Ask for  low Salt,1,A,Pre
+27,Ask for  low Salt,3,A,Post
+27,Pill box,4,A,Pre
+27,Pill box,4,A,Post
+27,Symptoms,1,B,Pre
+27,Symptoms,1,B,Post
+27,Recognize,0,B,Pre
+27,Recognize,3,B,Post
+27,Reduce Na,1,B,Pre
+27,Reduce Na,4,B,Post
+27,Reduce H2O,1,B,Pre
+27,Reduce H2O,4,B,Post
+27,Inc Med,1,B,Pre
+27,Inc Med,4,B,Post
+27,Contact NP,1,B,Pre
+27,Contact NP,4,B,Post
+27,Remedy Eval,0,B,Pre
+27,Remedy Eval,3,B,Post
+27,Free fromSx,2,C,Pre
+27,Free fromSx,3,C,Post
+27,Follow Tx,2,C,Pre
+27,Follow Tx,3,C,Post
+27,Eval Sx,2,C,Pre
+27,Eval Sx,3,C,Post
+27,Rec change,2,C,Pre
+27,Rec change,3,C,Post
+27,Act on Sx,2,C,Pre
+27,Act on Sx,3,C,Post
+27,Eval Tx,2,C,Pre
+27,Eval Tx,3,C,Post
+28,Weigh,2,A,Pre
+28,Weigh,4,A,Post
+28,Swelling,4,A,Pre
+28,Swelling,4,A,Post
+28,Sick,3,A,Pre
+28,Sick,3,A,Post
+28,Activity,2,A,Pre
+28,Activity,3,A,Post
+28,Appointment,4,A,Pre
+28,Appointment,4,A,Post
+28,Low Salt Diet,4,A,Pre
+28,Low Salt Diet,4,A,Post
+28,Exercise30,3,A,Pre
+28,Exercise30,3,A,Post
+28,Forget Meds,4,A,Pre
+28,Forget Meds,1,A,Post
+28,Ask for  low Salt,1,A,Pre
+28,Ask for  low Salt,1,A,Post
+28,Pill box,4,A,Pre
+28,Pill box,4,A,Post
+28,Symptoms,1,B,Pre
+28,Symptoms,1,B,Post
+28,Recognize,2,B,Pre
+28,Recognize,3,B,Post
+28,Reduce Na,4,B,Pre
+28,Reduce Na,4,B,Post
+28,Reduce H2O,1,B,Pre
+28,Reduce H2O,4,B,Post
+28,Inc Med,1,B,Pre
+28,Inc Med,4,B,Post
+28,Contact NP,2,B,Pre
+28,Contact NP,4,B,Post
+28,Remedy Eval,0,B,Pre
+28,Remedy Eval,3,B,Post
+28,Free fromSx,2,C,Pre
+28,Free fromSx,3,C,Post
+28,Follow Tx,3,C,Pre
+28,Follow Tx,3,C,Post
+28,Eval Sx,3,C,Pre
+28,Eval Sx,3,C,Post
+28,Rec change,3,C,Pre
+28,Rec change,3,C,Post
+28,Act on Sx,3,C,Pre
+28,Act on Sx,3,C,Post
+28,Eval Tx,3,C,Pre
+28,Eval Tx,3,C,Post
+29,Weigh,2,A,Pre
+29,Weigh,4,A,Post
+29,Swelling,4,A,Pre
+29,Swelling,4,A,Post
+29,Sick,2,A,Pre
+29,Sick,3,A,Post
+29,Activity,2,A,Pre
+29,Activity,4,A,Post
+29,Appointment,4,A,Pre
+29,Appointment,4,A,Post
+29,Low Salt Diet,1,A,Pre
+29,Low Salt Diet,1,A,Post
+29,Exercise30,1,A,Pre
+29,Exercise30,1,A,Post
+29,Forget Meds,1,A,Pre
+29,Forget Meds,1,A,Post
+29,Ask for  low Salt,1,A,Pre
+29,Ask for  low Salt,2,A,Post
+29,Pill box,4,A,Pre
+29,Pill box,4,A,Post
+29,Symptoms,1,B,Pre
+29,Symptoms,1,B,Post
+29,Recognize,0,B,Pre
+29,Recognize,3,B,Post
+29,Reduce Na,1,B,Pre
+29,Reduce Na,4,B,Post
+29,Reduce H2O,1,B,Pre
+29,Reduce H2O,4,B,Post
+29,Inc Med,1,B,Pre
+29,Inc Med,4,B,Post
+29,Contact NP,1,B,Pre
+29,Contact NP,4,B,Post
+29,Remedy Eval,0,B,Pre
+29,Remedy Eval,4,B,Post
+29,Free fromSx,2,C,Pre
+29,Free fromSx,2,C,Post
+29,Follow Tx,2,C,Pre
+29,Follow Tx,4,C,Post
+29,Eval Sx,2,C,Pre
+29,Eval Sx,4,C,Post
+29,Rec change,2,C,Pre
+29,Rec change,4,C,Post
+29,Act on Sx,2,C,Pre
+29,Act on Sx,4,C,Post
+29,Eval Tx,2,C,Pre
+29,Eval Tx,4,C,Post
