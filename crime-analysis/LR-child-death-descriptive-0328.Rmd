@@ -35,7 +35,7 @@ st_css()                              # This is a must; without it, expect odd l
 
 # Little Rock Child Death
 
-This report was based on the child death data from Pulaski county between 2012-2015. This report shows the locations and a fitted spatial density map for the deaths reported in this time period and the descriptive statistics for the categorical predictors given in the dataset. 
+This report was based on the child death data from Pulaski county between 2012-2019. This report shows the locations and a fitted spatial density map for the deaths reported in this time period and the descriptive statistics for the categorical predictors given in the dataset. 
 Note that for almost all variables there are missing values (often reported as a blank cell or NA) and the descriptive tables also give an idea about their distribution. 
 
 ## Map of Incidents 
@@ -113,7 +113,7 @@ qmplot(lon, lat, data = cd.gc, geom = "point", maptype = "toner-lite", darken = 
 
 ### Yearly and weekly counts 
 
-The following two plots show the counts per year and per week-year for the data-set. Note that there 
+The stacked barplot below shows the death counts per year (distributed over the weeks).  
 
 ```{r, echo = F}
 library(lubridate)
@@ -128,10 +128,6 @@ crime.yearly.ct <- cd.gc%>% group_by(IncidentYear) %>%
 crime.weekly.ct <- cd.gc %>% group_by(IncidentYear, IncidentWeek ) %>%
   dplyr::summarise(count = n())
 ```
-
-### Yearly and Weekly Counts 
-
-The following figure shows the weekly incidence counts by years, and the data for 2018 stops at the exact same point where 2015 begins, the month of June. 
 
 ```{R, echo = F, fig.asp = 0.8}
 library(ggplot2)
