@@ -146,7 +146,7 @@ The following figure shows the weekly incidence counts by years, and the data fo
 ```{R, echo = T}
 library(ggplot2)
 (crime.plot <- ggplot(crime.weekly.ct, aes(x = IncidentWeek, y = count, group = as.factor(IncidentYear), colour = as.factor(IncidentYear)))+
-  geom_bar(stat = "identity") +ylab("Incident Count")+
+geom_line(stat = "identity")+geom_bar(alpha = 0.2,stat = "identity")+ylab("Incident Count")+
   xlab("Weeks") +
   facet_grid(IncidentYear~.,scales="free_y")+
   theme(legend.position="right"))
@@ -162,4 +162,45 @@ library(ggplot2)
   xlab("Years") +labs(title = "Yearly Counts") +
   theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+
     theme(legend.position="right"))
+```
+
+
+# Animated Map 
+
+This animation shows how the incidents moved over time. The first map shows the movements over month years and the second shows the movement over years from 2015 to 2018.  
+
+```{r}
+library(gganimate)
+
+crime.gc.lr$IncidentMonth <- zoo::as.yearmon(crime.gc.lr$Incident.Date,"%Y-%m")
+
+crime.ct.geo <- crime.gc.lr %>% filter(IncidentYear>2010) %>% group_by(lon, lat, IncidentMonth) %>% 
+  dplyr::summarise(count = n()) 
+
+littlerock <- qmplot(lon, lat, data = crime.ct.geo, maptype = "toner-lite", color = I("red"))
+
+littlerock <- littlerock +
+  geom_point(aes(x = lon, y = lat, size = count), 
+             data = crime.ct.geo, colour = 'purple', alpha = .7) + 
+  transition_states(as.Date(IncidentMonth), transition_length = 1, state_length = 1)+
+  ggtitle('Year: {frame_time}')+ transition_time(as.Date(IncidentMonth)) +
+  ease_aes('linear')
+
+animate(littlerock)
+```
+
+
+```{R}
+crime.ct.yr <- crime.gc.lr %>% filter(IncidentYear>2010) %>% group_by(lon, lat, IncidentYear) %>% 
+  dplyr::summarise(count = n()) 
+
+p <- qmplot(lon, lat, data = crime.ct.yr, maptype = "toner-lite", color = I("red"))
+
+p<- p + geom_point(aes(x = lon, y = lat, size = count),
+             data = crime.ct.yr, colour = 'purple', alpha = .7) +
+  labs(title = 'Week: {frame_time}', x = 'lon', y = 'lat') +
+  transition_time(IncidentYear) +
+  ease_aes('linear')
+
+animate(p, nframes = 4)
 ```
