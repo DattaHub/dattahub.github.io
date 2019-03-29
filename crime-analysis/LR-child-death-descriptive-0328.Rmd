@@ -146,9 +146,20 @@ library(ggplot2)
 
 ### Summary Statistics 
 
-These were generated using the R package `summarytools`. Please note that the tables report the proportion and count in each category for the 10 categorical predictors provided in the data-set. I have not yet measured any association or dependence structure in this data. 
+These were generated using the R package `summarytools`. Please note that the tables report the proportion and count in each category for the 10 categorical predictors provided in the data-set. There was a little bit of data cleaning, e.g. handling different labels ("F" and "Female" for Gender) and multiple values and multiple delimiters in preliminary accusation variable. 
 
-```{r, echo = F}
+I have not yet measured any association or dependence structure in this data. 
+
+```{r, echo = T}
+attach(cd.gc)
+get.first.name <- function(cell){ 
+  x<-unlist(str_split(as.character(cell), "\\;|,")) 
+  return(x[1]) 
+} 
+cd.gc$Allegation.Prelim.Cause = sapply(Allegation.Prelim.Cause,get.first.name)
+
+cd.gc$Gender = recode(cd.gc$Gender, F = "Female", M = "Male")
+
 library(summarytools)
 st_options(dfSummary.na.col = FALSE)
 dfSummary(cd.gc[,6:15], plain.ascii = FALSE, style = "grid", 
