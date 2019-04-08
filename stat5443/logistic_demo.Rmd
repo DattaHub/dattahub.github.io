@@ -1,7 +1,7 @@
 ---
 title: "Logistic Regression"
 author: "Jyotishka Datta"
-date: "April 13, 2018"
+date: "April 13, 2019"
 output: ioslides_presentation
 ---
 
@@ -267,7 +267,10 @@ $$
 
 ```{r,echo=TRUE, message=FALSE, warning=FALSE}
 ## required for gene expression data classification example
-require(ALL)
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+# BiocManager::install("ALL", version = "3.8")
+library(ALL)
 data(ALL)
 dim(ALL)
 ```
