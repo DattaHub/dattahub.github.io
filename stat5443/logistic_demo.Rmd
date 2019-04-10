@@ -249,7 +249,7 @@ display(fit)
 
 - Logistic regression model: 
 $$ 
-\eta_i = \frac{p_i}{1-p_i} = \alpha + \sum_{j=1}^{p} x_{ij}\beta_j 
+\eta_i = \log(\frac{p_i}{1-p_i}) = \alpha + \sum_{j=1}^{p} x_{ij}\beta_j 
 $$
 - The log-likelihood is 
 $$

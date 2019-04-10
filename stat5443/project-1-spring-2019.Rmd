@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This project develops a fully Bayes procedure for detecting a change-point in a time-course data where the underlying probability model for observation $y_i$ is characterized by a single location parameter, say $\theta_i$, i.e. you can write $$
 Y_i \stackrel{ind}{\sim} f(\theta_i), i = 1, \ldots, n. 
+
 $$
 The choice of $f$ depends on what model would suitably describe or fit to the data observed, e.g. Normal if continuous and light-tailed, a $t$ or Cauchy if continuous with heavy tails and a Poisson or negative binomial if your data consists of counts, like the example below. A typical change-point situation arises if 
 $$
@@ -66,6 +67,7 @@ plot(CoalDisast$Year, CoalDisast$Count, type = "l")
 
 One possible approach is the hierarchical model that was proposed in Carlin, Gelfand and Smith (1992). 
 Here we will develop a Gibbs sampling strategy for a fitting a Poisson process with a change point to a time series data.
+
 
 $$
 \begin{gather}
