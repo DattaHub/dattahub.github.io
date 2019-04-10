@@ -18,7 +18,8 @@ opts_chunk$set(comment = NA,
                prompt = FALSE,
                cache = TRUE,
                warning = FALSE,
-               message = FALSE)
+               message = FALSE,
+               fig.asp = 0.5)
 library(summarytools)
 st_options(plain.ascii = FALSE,      
            style = "rmarkdown",      # This too
@@ -105,7 +106,9 @@ The next step is calculating the normalized score for all section A items after 
 heart.wide$sec.A.score = with(heart.wide, Weigh+Swelling+Sick+Activity+Appointment+`Low Salt Diet`+
        Exercise+`Forget Meds`+`Ask for  low Salt`+`Pill box`)
 heart.wide$maintenance = (heart.wide$sec.A.score - 10)*3.33
-hist(heart.wide$maintenance)
+
+ggplot(heart.wide, aes(Group, maintenance))+ geom_boxplot() + geom_point() + labs(title = "Maintenance")
+
 fit <- lm(maintenance ~ Group, data = heart.wide)
 summary(fit)
 
@@ -122,7 +125,10 @@ summary(fit)
 heart.wide$sec.B.score = with(heart.wide, Symptoms + Recognize + `Reduce Na`+`Reduce H2O`
                               +`Inc Med`+`Contact NP`+ `Remedy Eval`)
 heart.wide$management = (heart.wide$sec.B.score-4)*5
-hist(heart.wide$management)
+
+p2 <- ggplot(heart.wide, aes(Group, management))
+p2 + geom_boxplot() + geom_point()+ labs(title = "Management")
+
 fit <- lm(management ~ Group, data = heart.wide)
 summary(fit)
 
@@ -139,24 +145,16 @@ summary(fit)
 ```{R}
 heart.wide$sec.C.score = with(heart.wide, `Free fromSx` + `Follow Tx`+ `Eval Sx` + `Rec change`+`Act on Sx`+`Eval Tx`)
 heart.wide$confidence = (heart.wide$sec.C.score - 6)*5.56
-hist(heart.wide$confidence)
+
+p3 <- ggplot(heart.wide, aes(Group, confidence))
+p3 + geom_boxplot() + geom_point()+ labs(title = "Confidence")
+
 fit <- lm(confidence ~ Group, data = heart.wide)
 summary(fit)
 ```
 
 **The P-value for the test of difference in mean normalized section C score (confidence) between pre and post groups is $1.92\times 10^{-5}$, which implies that there was a significant improvement of the test score in the post group.**
 
-## Box-plots 
 
-The box plots show the distribution of the normalized scores between the two groups and it seems there is a significant difference between the scores. 
-
-```{r, fig.asp = 0.6}
-p1 <- ggplot(heart.wide, aes(Group, maintenance))
-p1 + geom_boxplot() + geom_point() + labs(title = "Maintenance")
-p2 <- ggplot(heart.wide, aes(Group, management))
-p2 + geom_boxplot() + geom_point()+ labs(title = "Management")
-p3 <- ggplot(heart.wide, aes(Group, confidence))
-p3 + geom_boxplot() + geom_point()+ labs(title = "Confidence")
-```
 
 
