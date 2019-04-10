@@ -6,7 +6,7 @@ output:
   html_document:
       toc: true
       number_sections: true
-fontsize: 11pt
+fontsize: 12pt
 geometry: margin=1in
 urlcolor: blue
 ---
@@ -90,92 +90,73 @@ cat("After re-coding \n")
 heart.wide[is.na(heart.wide)] <- 0
 ```
 
-## Normalized score calculation 
-
-**These are formulas from page 22 of your paper**
+**Then we apply the following formuale from page 22 of your paper:**
 
 -  Maintenance (reverse code #8) :( sum of section A items -10) x 3.333
-
 -  Management (score only if patient has answered yes to trouble breathing or ankle swelling): (sum of section B items -4) x 5
-
 - Confidence: (sum of section C items -6) x 5.56
 
-## Pre-post comparison for Section A
+### Pre-post comparison for Section A
 
-The next step is calculating the normalized score for all section A items after adding them. We will follow the formulae given above.
+The next step is calculating the normalized score for all section A items after adding them. We will follow the formulae given above and then test whether the normalized scores were different between the **pre** and **post** groups using a one-way ANOVA. The R codes and the ANOVA tables are given below:
 
 
 ```{R}
 heart.wide$sec.A.score = with(heart.wide, Weigh+Swelling+Sick+Activity+Appointment+`Low Salt Diet`+
        Exercise+`Forget Meds`+`Ask for  low Salt`+`Pill box`)
+heart.wide$maintenance = (heart.wide$sec.A.score - 10)*3.33
+hist(heart.wide$maintenance)
+fit <- lm(maintenance ~ Group, data = heart.wide)
+summary(fit)
+
 # Max.sec.A.score = 4*10
 # Min.sec.A.score = 0
 # (heart.wide$normalized.sec.A.score = (heart.wide$sec.A.score - Min.sec.A.score)/(Max.sec.A.score - Min.sec.A.score)*100)
-
-(heart.wide$maintenance = (heart.wide$sec.A.score - 10)*3.33)
-```
-
-Now, we can test whether the normalized score was different between the **pre** and **post** groups using a one-way ANOVA as follows:
-
-```{r}
-fit <- lm(maintenance ~ Group, data = heart.wide)
-summary(fit)
 ```
 
 **The P-value for the test of difference in mean normalized section A score between pre and post groups is 0.000491, which implies that there was a significant improvement of the test score in the post group.**
 
-## Pre-post comparison for Section B 
+### Pre-post comparison for Section B 
 
 ```{R}
 heart.wide$sec.B.score = with(heart.wide, Symptoms + Recognize + `Reduce Na`+`Reduce H2O`
                               +`Inc Med`+`Contact NP`+ `Remedy Eval`)
-summary(heart.wide$sec.B.score)
+heart.wide$management = (heart.wide$sec.B.score-4)*5
+hist(heart.wide$management)
+fit <- lm(management ~ Group, data = heart.wide)
+summary(fit)
 
+## alternative normalization 
 # Max.sec.B.score = max(heart.wide$sec.B.score)
 # Min.sec.B.score = min(heart.wide$sec.B.score)
 # (heart.wide$normalized.sec.B.score = (heart.wide$sec.B.score - Min.sec.B.score)/(Max.sec.B.score - Min.sec.B.score))
-
-(heart.wide$management = (heart.wide$sec.B.score-4)*5)
-
-fit <- lm(management ~ Group, data = heart.wide)
-summary(fit)
 ```
 
+**The P-value for the test of difference in mean normalized section B score between pre and post groups is $6.3\times 10^{-9}$, which implies that there was a significant improvement of the test score in the post group.**
 
-## Pre-post comparison for Section C 
+### Pre-post comparison for Section C 
 
 ```{R}
 heart.wide$sec.C.score = with(heart.wide, `Free fromSx` + `Follow Tx`+ `Eval Sx` + `Rec change`+`Act on Sx`+`Eval Tx`)
-summary(heart.wide$sec.C.score)
-
-# Max.sec.C.score = max(heart.wide$sec.C.score)
-# Min.sec.C.score = min(heart.wide$sec.C.score)
-# (heart.wide$normalized.sec.C.score = (heart.wide$sec.C.score - Min.sec.C.score)/(Max.sec.C.score - Min.sec.C.score))
-
-(heart.wide$confidence = (heart.wide$sec.C.score - 6)*5.56)
-
+heart.wide$confidence = (heart.wide$sec.C.score - 6)*5.56
+hist(heart.wide$confidence)
 fit <- lm(confidence ~ Group, data = heart.wide)
 summary(fit)
-
 ```
 
+**The P-value for the test of difference in mean normalized section C score (confidence) between pre and post groups is $1.92\times 10^{-5}$, which implies that there was a significant improvement of the test score in the post group.**
 
-### Box-plots 
+## Box-plots 
+
+The box plots show the distribution of the normalized scores between the two groups and it seems there is a significant difference between the scores. 
 
 ```{r, fig.asp = 0.6}
 p1 <- ggplot(heart.wide, aes(Group, maintenance))
-p1 + geom_boxplot() + geom_point()
-```
-
-The box plot shows the distribution of the normalized scores between the two groups and it seems there is a significant difference between the scores. 
-
-```{r, fig.asp = 0.6}
+p1 + geom_boxplot() + geom_point() + labs(title = "Maintenance")
 p2 <- ggplot(heart.wide, aes(Group, management))
-p2 + geom_boxplot() + geom_point()
+p2 + geom_boxplot() + geom_point()+ labs(title = "Management")
+p3 <- ggplot(heart.wide, aes(Group, confidence))
+p3 + geom_boxplot() + geom_point()+ labs(title = "Confidence")
 ```
 
-```{r, fig.asp = 0.6}
-p3 <- ggplot(heart.wide, aes(Group, confidence))
-p3 + geom_boxplot() + geom_point()
-```
 

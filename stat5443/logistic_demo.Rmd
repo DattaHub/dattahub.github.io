@@ -184,7 +184,7 @@ mean(glm.pred==Direction.2005)
 
 - Generate data: $x_1$ is unrelated, $x_2$ perfectly separates $y$.
 
-```{r}
+```{r, echo = T}
 set.seed(123456)
 d <- data.frame(y  =  c(0,0,0,0,0, 1,1,1,1,1),
                 x1 = rnorm(10),
