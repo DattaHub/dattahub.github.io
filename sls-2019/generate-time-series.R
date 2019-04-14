@@ -10,7 +10,8 @@ for(t in 1:(T-1)){
 }
 par(mfrow=c(1,2))
 plot(x, type = "l")
-plot(acf(x, plot = F))
+acf_x = acf(x, lag.max = 30, plot = F)
+plot(acf_x, type ="l")
 par(mfrow=c(1,1))
 
 ## Simple HMM 

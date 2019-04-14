@@ -3,10 +3,15 @@ title: "Time Series Demo"
 author: "Jyotishka Datta"
 date: "April 14, 2019"
 output: 
-  ioslides_presentation:
-    incremental: true
-    widescreen: true
-    smaller: true
+  revealjs::revealjs_presentation:
+    theme: serif
+    highlight: pygments
+    center: false
+    transition: fade
+    self_contained: false
+    reveal_options:
+      slideNumber: true
+      previewLinks: true
 ---
 
 ```{r setup, include=FALSE}
@@ -40,6 +45,8 @@ par(mfrow=c(1,1))
 ```
 
 ## Different $\phi$ 
+
+Autocorrelation at lag $k$: $\gamma(k) = \phi^k$, one can see ``oscillatory" behaviour consistent with $\phi < 0$
 
 ```{r, echo = F, fig.height = 2.5, fig.width = 5}
 phiset = c(0.9,-0.9,0.3)
@@ -87,8 +94,9 @@ ggplot(df, aes(x = lag, y = values, group = phi))+
 ## Simple HMM 
 
 $$
-\begin{aligned} y_{t} &=x_{t}+\nu_{t} \\ x_{t} & \leftarrow AR(1 | \theta) \end{aligned}
+\begin{aligned} y_{t} &=x_{t}+\nu_{t} \\ x_{t} & \leftarrow AR(1 | \theta), \; \theta = (\phi, \nu) \end{aligned}
 $$
+The $\nu_t$ terms are the errors of measurement, or observation, that corrupt the signal $x_t$
 
 ```{r}
 phi = 0.1; nu = 1; T = 100
@@ -101,8 +109,7 @@ y = x + rnorm(T, 0, w)
 ```
 
 
-
-```{r, echo = F}
+```{r, echo = F, fig.asp = 0.6, fig.align='center'}
 phi = 0.9; nu = 1; T = 200
 x = numeric(T)
 for(t in 1:(T-1)){
@@ -117,6 +124,8 @@ legend("topleft",c("y","x"), lty = 1, lwd = c(1,2), col = c(1,4))
 
 ## Simple Stochastic Volatility {.smaller}
 
+Canonical SVM: 
+
 $$
 		\begin{align}
 		y_t & \sim N(0, \sigma_t^2) \\
@@ -124,12 +133,10 @@ $$
 		x_t & \sim AR(1 \mid \theta) \; \theta = (\phi, \nu). 
 		\end{align}
 $$
-**Equivalently**
 
--  $y_t^2 = \sigma_t^2 \kappa_t$, where $\kappa_t \sim \chi^2_1$. 
+-  Implies that conditional on $\mu, x_t$, $y_t^2 = \sigma_t^2 \kappa_t$, where $\kappa_t \sim \chi^2_1$. 
 -  Take $z_t = \log(y_t^2)/2 = \log(|y_t|)$. 
--  The $z_t$ are now the new __observed__ quantities. 
-
+-  The $z_t$ are now the new observed quantities. 
 
 $$
 		\begin{align}
