@@ -1,0 +1,106 @@
+---
+title: "Time Series Demo"
+author: "Jyotishka Datta"
+date: "April 14, 2019"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache = TRUE)
+rm(list = ls())
+set.seed(123)
+```
+
+
+## Simulate AR(1) process
+
+```{r, echo = T}
+phi = 0.9; nu = 1; T = 500
+x = numeric(T)
+for(t in 1:(T-1)){
+  x[t+1] = phi*x[t]+rnorm(1,0,nu)
+}
+```
+
+```{r, fig.asp = 0.6}
+par(mfrow=c(1,2))
+plot(x, type = "l")
+acf_x = acf(x, lag.max = 30, plot = F)
+plot(acf_x, type ="l")
+par(mfrow=c(1,1))
+```
+
+## Simple HMM 
+
+$$
+\begin{aligned} y_{t} &=x_{t}+\nu_{t} \\ x_{t} & \leftarrow AR(1 | \theta) \end{aligned}
+$$
+
+```{r}
+phi = 0.1; nu = 1; T = 100
+x = numeric(T)
+for(t in 1:(T-1)){
+  x[t+1] = phi*x[t]+rnorm(1,0,nu)
+}
+w = 2
+y = x + rnorm(T, 0, w)
+```
+
+
+
+```{r, echo = F}
+phi = 0.9; nu = 1; T = 200
+x = numeric(T)
+for(t in 1:(T-1)){
+  x[t+1] = phi*x[t]+rnorm(1,0,nu)
+}
+w = 2
+y = x + rnorm(T, 0, w)
+plot(y, type = "l", main = "HMM")
+lines(x, col = "blue", lwd = 2)
+legend("topleft",c("y","x"), lty = 1, lwd = c(1,2), col = c(1,4))
+```
+
+## Simple Stochastic Volatility {.smaller}
+
+$$
+		\begin{align}
+		y_t & \sim N(0, \sigma_t^2) \\
+		\sigma_t & \sim \exp(\mu + x_t) \\
+		x_t & \sim AR(1 \mid \theta) \; \theta = (\phi, \nu). 
+		\end{align}
+$$
+**Equivalently**
+
+-  $y_t^2 = \sigma_t^2 \kappa_t$, where $\kappa_t \sim \chi^2_1$. 
+-  Take $z_t = \log(y_t^2)/2 = \log(|y_t|)$. 
+-  The $z_t$ are now the new __observed__ quantities. 
+
+
+$$
+		\begin{align}
+		z_t & = \mu + x_t + \nu_t, \quad \text{where} \; \nu_t = \log(\kappa_t)/2\\
+		x_t & \sim AR(1 \mid \theta); \; \theta = (\phi, \nu)
+		\end{align}
+$$
+
+
+
+## Stochastic Volatility Path {.smaller}
+
+```{R, echo = T}
+mu = 2; 
+sigma_t = exp(mu + x)
+y = rnorm(T, 0, sigma_t)
+```
+
+```{r, echo =F}
+
+par(mfrow=c(1,2))
+plot(y, type ="l", main = "y")
+plot(x, type ="l", col = 2, lwd = 2, main = "SVM")
+lines(log(y^2)/2, col = 4, lwd = 2)
+legend("topleft",c("log(|y|)","x"), lty = 1, lwd = c(2,2), col = c(2,4))
+par(mfrow=c(1,1))
+```
+
