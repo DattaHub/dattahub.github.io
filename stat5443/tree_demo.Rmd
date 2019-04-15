@@ -1,7 +1,7 @@
 ---
 title: "Tree-based methods"
 author: "Jyotishka Datta"
-date: "April 12, 2018"
+date: "April 12, 2019"
 output: ioslides_presentation
 ---
 
@@ -434,10 +434,10 @@ mean((yhat.bag-boston.test)^2)
 set.seed(1)
 rf.boston=randomForest(medv~.,data=Boston,subset=train,mtry=6,importance=TRUE)
 yhat.rf = predict(rf.boston,newdata=Boston[-train,])
-mean((yhat.rf-boston.test)^2)
-````
+(mse.rf <- mean((yhat.rf-boston.test)^2))
+```
 
-The test set MSE is 11.31: this indicates that random forests yielded an
+The test set MSE is `r mse.rf`: this indicates that random forests yielded an
 improvement over bagging in this case.
 
 

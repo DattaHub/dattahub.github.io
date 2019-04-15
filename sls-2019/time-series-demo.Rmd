@@ -5,7 +5,7 @@ date: "April 14, 2019"
 output: 
   revealjs::revealjs_presentation:
     theme: serif
-    highlight: pygments
+    highlight: haddock
     center: false
     transition: fade
     self_contained: false
@@ -19,6 +19,16 @@ knitr::opts_chunk$set(echo = FALSE, cache = TRUE, message = F, warning = F)
 rm(list = ls())
 set.seed(123)
 ```
+
+# Simulating Time Series 
+
+This demo will show a few examples of simulated time series data before we explore the stan model fitting techniques. 
+
+Here we will: 
+
+1. Fix the values of parameters for AR or latent AR processes. 
+2. Simulate sample paths or trajectories of the time series $x_t$, $y_t$. 
+3. Look at the structure of the series. 
 
 
 ## Simulate AR(1) process
@@ -164,4 +174,55 @@ lines(log(y^2)/2, col = 4, lwd = 2)
 legend("topleft",c("log(|y|)","x"), lty = 1, lwd = c(2,2), col = c(2,4))
 par(mfrow=c(1,1))
 ```
+
+
+## $\log(|y_t|)$ distribution
+
+```{r, echo =F}
+hist(log(abs(y)), breaks = 25, freq = F, col = rgb(1,0,0,0.2), main ="log(|y|)")
+abline(v = 0, col = "blue")
+lines(density(log(abs(y))))
+```
+
+
+## Stan Demo: Examples 
+
+1.  (Toy example) Mean-only Normal Shocks. 
+2.  Simple AR model (stochastic unit roots)
+3.  Stochastic volatility models. 
+
+Data-sets, R and Stan Codes are available here: [https://github.com/DattaHub/sls-2019](https://github.com/DattaHub/sls-2019)
+
+This presentation is available here (source codes are in sls-2019 repo):
+[http://dattahub.github.io/sls-2019/time-series-demo.html#1](http://dattahub.github.io/sls-2019/time-series-demo.html#1)
+
+Stan examples are taken from this Stan tutorial for time series: 
+[http://tharte.github.io/mbt/mbt.html](http://tharte.github.io/mbt/mbt.html)
+
+
+
+## Example 1
+
+-  We'll fit a mean-only Normal "shocks" model.  
+
+-  The data-set we'll use is the "B.2-PHAR" tab on the excel file "Time Series and Forecasting Appendix B Tables". (You don't need to open this file for fitting the model.)
+
+-  The R code "fitting-normal-mean-only-stan.R" will read the data-set and fit the Stan model in "normal-mean-only.stan". 
+
+- The stan code "mean-only_normal_predict_new_generated_quantities.stan" is an example of using the "generated quantities" block.
+
+- Let us look at this stan code carefully to understand the basic functional features. 
+
+
+## Example 2 and 3
+
+-  We will use the data on US consumption and income. 
+-  The R code for reading the data is "read-us-data-income.R". The same R code also calculates the residuals for regression of In
+-  The Stan codes for the two models are :
+   1.  "stur.stan".
+   2.  "stochvol.stan"
+-  The R code for fitting the two models on the same data-set is 
+"analyse-us-income-stur-stochvol.R"
+
+
 

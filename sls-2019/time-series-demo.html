@@ -19,35 +19,30 @@ table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
 table.sourceCode { width: 100%; line-height: 100%; }
 td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
 td.sourceCode { padding-left: 5px; }
-code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code > span.dt { color: #902000; } /* DataType */
-code > span.dv { color: #40a070; } /* DecVal */
-code > span.bn { color: #40a070; } /* BaseN */
-code > span.fl { color: #40a070; } /* Float */
-code > span.ch { color: #4070a0; } /* Char */
-code > span.st { color: #4070a0; } /* String */
-code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code > span.ot { color: #007020; } /* Other */
-code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code > span.fu { color: #06287e; } /* Function */
+code > span.kw { color: #0000ff; } /* Keyword */
+code > span.ch { color: #008080; } /* Char */
+code > span.st { color: #008080; } /* String */
+code > span.co { color: #008000; } /* Comment */
+code > span.ot { color: #ff4000; } /* Other */
+code > span.al { color: #ff0000; } /* Alert */
 code > span.er { color: #ff0000; font-weight: bold; } /* Error */
-code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-code > span.cn { color: #880000; } /* Constant */
-code > span.sc { color: #4070a0; } /* SpecialChar */
-code > span.vs { color: #4070a0; } /* VerbatimString */
-code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.wa { color: #008000; font-weight: bold; } /* Warning */
+code > span.cn { } /* Constant */
+code > span.sc { color: #008080; } /* SpecialChar */
+code > span.vs { color: #008080; } /* VerbatimString */
+code > span.ss { color: #008080; } /* SpecialString */
 code > span.im { } /* Import */
-code > span.va { color: #19177c; } /* Variable */
-code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code > span.op { color: #666666; } /* Operator */
+code > span.va { } /* Variable */
+code > span.cf { color: #0000ff; } /* ControlFlow */
+code > span.op { } /* Operator */
 code > span.bu { } /* BuiltIn */
 code > span.ex { } /* Extension */
-code > span.pp { color: #bc7a00; } /* Preprocessor */
-code > span.at { color: #7d9029; } /* Attribute */
-code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code > span.pp { color: #ff4000; } /* Preprocessor */
+code > span.do { color: #008000; } /* Documentation */
+code > span.an { color: #008000; } /* Annotation */
+code > span.cv { color: #008000; } /* CommentVar */
+code > span.at { } /* Attribute */
+code > span.in { color: #008000; } /* Information */
 </style>
 
 <link rel="stylesheet" href="time-series-demo_files/reveal.js-3.3.0.1/css/theme/serif.css" id="theme">
@@ -492,7 +487,7 @@ document.getElementsByTagName('head')[0].appendChild(style);
     <h3 class="date">April 14, 2019</h3>
 </section>
 
-<section id="simulate-ar1-process" class="slide level2">
+<section><section id="simulating-time-series" class="titleslide slide level1"><h1>Simulating Time Series</h1></section><section id="simulate-ar1-process" class="slide level2">
 <h2>Simulate AR(1) process</h2>
 <p><span class="math display">\[
 x_{t} = \phi x_{t-1} + \epsilon_t, \; \epsilon_t \sim N(0, \nu)
@@ -503,20 +498,17 @@ x =<span class="st"> </span><span class="kw">numeric</span>(T)
   x[t<span class="op">+</span><span class="dv">1</span>] =<span class="st"> </span>phi<span class="op">*</span>x[t]<span class="op">+</span><span class="kw">rnorm</span>(<span class="dv">1</span>,<span class="dv">0</span>,nu)
 }</code></pre></div>
 <p><img src="time-series-demo_files/figure-revealjs/unnamed-chunk-2-1.png" width="768" /></p>
-</section>
-<section id="different-phi" class="slide level2">
+</section><section id="different-phi" class="slide level2">
 <h2>Different <span class="math inline">\(\phi\)</span></h2>
 <p>Autocorrelation at lag <span class="math inline">\(k\)</span>: <span class="math inline">\(\gamma(k) = \phi^k\)</span>, one can see ``oscillatory&quot; behaviour consistent with <span class="math inline">\(\phi &lt; 0\)</span></p>
 <p><img src="time-series-demo_files/figure-revealjs/unnamed-chunk-3-1.gif" /></p>
-</section>
-<section id="simple-hmm" class="slide level2">
+</section><section id="simple-hmm" class="slide level2">
 <h2>Simple HMM</h2>
 <p><span class="math display">\[
 \begin{aligned} y_{t} &amp;=x_{t}+\nu_{t} \\ x_{t} &amp; \leftarrow AR(1 | \theta), \; \theta = (\phi, \nu) \end{aligned}
 \]</span> The <span class="math inline">\(\nu_t\)</span> terms are the errors of measurement, or observation, that corrupt the signal <span class="math inline">\(x_t\)</span></p>
 <p><img src="time-series-demo_files/figure-revealjs/unnamed-chunk-5-1.png" width="768" style="display: block; margin: auto;" /></p>
-</section>
-<section id="simple-stochastic-volatility" class="slide level2 smaller">
+</section><section id="simple-stochastic-volatility" class="slide level2 smaller">
 <h2>Simple Stochastic Volatility</h2>
 <p>Canonical SVM:</p>
 <p><span class="math display">\[
@@ -537,11 +529,46 @@ x =<span class="st"> </span><span class="kw">numeric</span>(T)
         x_t &amp; \sim AR(1 \mid \theta); \; \theta = (\phi, \nu)
         \end{align}
 \]</span></p>
-</section>
-<section id="stochastic-volatility-path" class="slide level2 smaller">
+</section><section id="stochastic-volatility-path" class="slide level2 smaller">
 <h2>Stochastic Volatility Path</h2>
 <p><img src="time-series-demo_files/figure-revealjs/unnamed-chunk-7-1.png" width="768" /></p>
-</section>
+</section><section id="logy_t-distribution" class="slide level2">
+<h2><span class="math inline">\(\log(|y_t|)\)</span> distribution</h2>
+<p><img src="time-series-demo_files/figure-revealjs/unnamed-chunk-8-1.png" width="768" /></p>
+</section><section id="stan-demo-examples" class="slide level2">
+<h2>Stan Demo: Examples</h2>
+<ol type="1">
+<li>(Toy example) Mean-only Normal Shocks.</li>
+<li>Simple AR model (stochastic unit roots)</li>
+<li>Stochastic volatility models.</li>
+</ol>
+<p>Data-sets, R and Stan Codes are available here: <a href="https://github.com/DattaHub/sls-2019" class="uri">https://github.com/DattaHub/sls-2019</a></p>
+<p>This presentation is available here (source codes are in sls-2019 repo): <a href="http://dattahub.github.io/sls-2019/time-series-demo.html#1" class="uri">http://dattahub.github.io/sls-2019/time-series-demo.html#1</a></p>
+<p>Stan examples are taken from this Stan tutorial for time series: <a href="http://tharte.github.io/mbt/mbt.html" class="uri">http://tharte.github.io/mbt/mbt.html</a></p>
+</section><section id="example-1" class="slide level2">
+<h2>Example 1</h2>
+<ul>
+<li><p>We’ll fit a mean-only Normal “shocks” model.</p></li>
+<li><p>The data-set we’ll use is the “B.2-PHAR” tab on the excel file “Time Series and Forecasting Appendix B Tables”. (You don’t need to open this file for fitting the model.)</p></li>
+<li><p>The R code “fitting-normal-mean-only-stan.R” will read the data-set and fit the Stan model in “normal-mean-only.stan”.</p></li>
+<li><p>The stan code “mean-only_normal_predict_new_generated_quantities.stan” is an example of using the “generated quantities” block.</p></li>
+<li><p>Let us look at this stan code carefully to understand the basic functional features.</p></li>
+</ul>
+</section><section id="example-2-and-3" class="slide level2">
+<h2>Example 2 and 3</h2>
+<ul>
+<li>We will use the data on US consumption and income.</li>
+<li>The R code for reading the data is “read-us-data-income.R”. The same R code also calculates the residuals for regression of In</li>
+<li>The Stan codes for the two models are :</li>
+</ul>
+<ol type="1">
+<li>“stur.stan”.</li>
+<li>“stochvol.stan”</li>
+</ol>
+<ul>
+<li>The R code for fitting the two models on the same data-set is “analyse-us-income-stur-stochvol.R”</li>
+</ul>
+</section></section>
     </div>
   </div>
 
