@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="generator" content="pandoc">
   <meta name="author" content="Jyotishka Datta" />
-  <meta name="dcterms.date" content="2019-04-14" />
+  <meta name="dcterms.date" content="2019-04-17" />
   <title>Time Series Demo</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -484,10 +484,20 @@ document.getElementsByTagName('head')[0].appendChild(style);
 <section>
     <h1 class="title">Time Series Demo</h1>
     <h2 class="author">Jyotishka Datta</h2>
-    <h3 class="date">April 14, 2019</h3>
+    <h3 class="date">April 17, 2019</h3>
 </section>
 
-<section><section id="simulating-time-series" class="titleslide slide level1"><h1>Simulating Time Series</h1></section><section id="simulate-ar1-process" class="slide level2">
+<section id="simulating-time-series" class="slide level2">
+<h2>Simulating Time Series</h2>
+<p>This demo will show a few examples of simulated time series data before we explore the stan model fitting techniques.</p>
+<p>Here we will:</p>
+<ol type="1">
+<li>Fix the values of parameters for AR or latent AR processes.</li>
+<li>Simulate sample paths or trajectories of the time series <span class="math inline">\(x_t\)</span>, <span class="math inline">\(y_t\)</span>.</li>
+<li>Look at the structure of the series.</li>
+</ol>
+</section>
+<section id="simulate-ar1-process" class="slide level2">
 <h2>Simulate AR(1) process</h2>
 <p><span class="math display">\[
 x_{t} = \phi x_{t-1} + \epsilon_t, \; \epsilon_t \sim N(0, \nu)
@@ -498,17 +508,20 @@ x =<span class="st"> </span><span class="kw">numeric</span>(T)
   x[t<span class="op">+</span><span class="dv">1</span>] =<span class="st"> </span>phi<span class="op">*</span>x[t]<span class="op">+</span><span class="kw">rnorm</span>(<span class="dv">1</span>,<span class="dv">0</span>,nu)
 }</code></pre></div>
 <p><img src="time-series-demo_files/figure-revealjs/unnamed-chunk-2-1.png" width="768" /></p>
-</section><section id="different-phi" class="slide level2">
+</section>
+<section id="different-phi" class="slide level2">
 <h2>Different <span class="math inline">\(\phi\)</span></h2>
 <p>Autocorrelation at lag <span class="math inline">\(k\)</span>: <span class="math inline">\(\gamma(k) = \phi^k\)</span>, one can see ``oscillatory&quot; behaviour consistent with <span class="math inline">\(\phi &lt; 0\)</span></p>
 <p><img src="time-series-demo_files/figure-revealjs/unnamed-chunk-3-1.gif" /></p>
-</section><section id="simple-hmm" class="slide level2">
+</section>
+<section id="simple-hmm" class="slide level2">
 <h2>Simple HMM</h2>
 <p><span class="math display">\[
 \begin{aligned} y_{t} &amp;=x_{t}+\nu_{t} \\ x_{t} &amp; \leftarrow AR(1 | \theta), \; \theta = (\phi, \nu) \end{aligned}
 \]</span> The <span class="math inline">\(\nu_t\)</span> terms are the errors of measurement, or observation, that corrupt the signal <span class="math inline">\(x_t\)</span></p>
 <p><img src="time-series-demo_files/figure-revealjs/unnamed-chunk-5-1.png" width="768" style="display: block; margin: auto;" /></p>
-</section><section id="simple-stochastic-volatility" class="slide level2 smaller">
+</section>
+<section id="simple-stochastic-volatility" class="slide level2 smaller">
 <h2>Simple Stochastic Volatility</h2>
 <p>Canonical SVM:</p>
 <p><span class="math display">\[
@@ -529,13 +542,16 @@ x =<span class="st"> </span><span class="kw">numeric</span>(T)
         x_t &amp; \sim AR(1 \mid \theta); \; \theta = (\phi, \nu)
         \end{align}
 \]</span></p>
-</section><section id="stochastic-volatility-path" class="slide level2 smaller">
+</section>
+<section id="stochastic-volatility-path" class="slide level2 smaller">
 <h2>Stochastic Volatility Path</h2>
 <p><img src="time-series-demo_files/figure-revealjs/unnamed-chunk-7-1.png" width="768" /></p>
-</section><section id="logy_t-distribution" class="slide level2">
+</section>
+<section id="logy_t-distribution" class="slide level2">
 <h2><span class="math inline">\(\log(|y_t|)\)</span> distribution</h2>
 <p><img src="time-series-demo_files/figure-revealjs/unnamed-chunk-8-1.png" width="768" /></p>
-</section><section id="stan-demo-examples" class="slide level2">
+</section>
+<section id="stan-demo-examples" class="slide level2">
 <h2>Stan Demo: Examples</h2>
 <ol type="1">
 <li>(Toy example) Mean-only Normal Shocks.</li>
@@ -545,7 +561,8 @@ x =<span class="st"> </span><span class="kw">numeric</span>(T)
 <p>Data-sets, R and Stan Codes are available here: <a href="https://github.com/DattaHub/sls-2019" class="uri">https://github.com/DattaHub/sls-2019</a></p>
 <p>This presentation is available here (source codes are in sls-2019 repo): <a href="http://dattahub.github.io/sls-2019/time-series-demo.html#1" class="uri">http://dattahub.github.io/sls-2019/time-series-demo.html#1</a></p>
 <p>Stan examples are taken from this Stan tutorial for time series: <a href="http://tharte.github.io/mbt/mbt.html" class="uri">http://tharte.github.io/mbt/mbt.html</a></p>
-</section><section id="example-1" class="slide level2">
+</section>
+<section id="example-1" class="slide level2">
 <h2>Example 1</h2>
 <ul>
 <li><p>We’ll fit a mean-only Normal “shocks” model.</p></li>
@@ -554,7 +571,8 @@ x =<span class="st"> </span><span class="kw">numeric</span>(T)
 <li><p>The stan code “mean-only_normal_predict_new_generated_quantities.stan” is an example of using the “generated quantities” block.</p></li>
 <li><p>Let us look at this stan code carefully to understand the basic functional features.</p></li>
 </ul>
-</section><section id="example-2-and-3" class="slide level2">
+</section>
+<section id="example-2-and-3" class="slide level2">
 <h2>Example 2 and 3</h2>
 <ul>
 <li>We will use the data on US consumption and income.</li>
@@ -568,7 +586,7 @@ x =<span class="st"> </span><span class="kw">numeric</span>(T)
 <ul>
 <li>The R code for fitting the two models on the same data-set is “analyse-us-income-stur-stochvol.R”</li>
 </ul>
-</section></section>
+</section>
     </div>
   </div>
 
