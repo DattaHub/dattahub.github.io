@@ -1,7 +1,7 @@
 ---
 title: "SVM R Demo"
 author: "Jyotishka Datta"
-date: "April 26, 2017"
+date: "April 26, 2019"
 output: ioslides_presentation
 ---
 

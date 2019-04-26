@@ -1,7 +1,7 @@
 ---
 title: "Multidimensional Scaling"
 author: "Jyotishka Datta"
-date: "April 19, 2017"
+date: "April 26, 2019"
 output: ioslides_presentation
 ---
 
@@ -30,6 +30,8 @@ knitr::include_graphics("elephant.jpg")
  -  Represent high-dimensional point cloud in few (usually 2) dimensions keeping distances between points similar.
  -  Useful tool in visualizing any big data-set, specially for clustering purposes. 
  -  Is a popular exploratory tool. Used before any inferential procedure. 
+ 
+
 ## Goal of MDS 
 
  - Given pairwise dissimilarities, reconstruct a map that preserves distances.
@@ -183,7 +185,6 @@ $$
  - Keep only largest 2 eignevectors and eignevalues. 
  - The resulting $X$ will be the low-dimensional representation we were looking for. 
  - Same for 3-D. 
- - 
 
 ## Random Forest and MDS 
 
@@ -254,7 +255,7 @@ pairs(cbind(iris[,1:4], iris.mds$points), cex=0.6, gap=0,
 par(op)
 ```
 
-## Lab Exercise 1
+## Example {.smaller}
 
  - Look at the voting data. 
  - Are Democrats close to each other, republicans?
@@ -262,6 +263,7 @@ par(op)
 ```{r}
 data("voting", package = "HSAUR")
 require("MASS")
+colnames(voting)
 ```
 
 ## Solution - Metric
@@ -281,13 +283,13 @@ text(voting.mds$points[,1], voting.mds$points[,2],
      labels = colnames(voting))
 ```
 
-## Solution - non-metric
+## Non-metric
 
 ```{r}
 voting_mds <- isoMDS(voting)
 ```
 
-## Solution 
+## Plot
 
 ```{r}
 plot(voting_mds$points[,1], voting_mds$points[,2],
