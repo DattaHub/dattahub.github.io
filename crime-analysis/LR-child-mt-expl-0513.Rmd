@@ -1,0 +1,303 @@
+---
+title: "LR: Basic Statistics and Heatmap"
+author: "UA Research Team"
+date: "May 14, 2019"
+output: 
+  html_document:
+      toc: true
+      number_sections: true
+fontsize: 12pt
+geometry: margin=1in
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(comment = NA,
+               prompt = FALSE,
+               cache = TRUE,
+               warning = FALSE,
+               message = FALSE)
+```
+
+# Little Rock Child Maltreatment
+
+## Background
+
+This is an exploratory analysis of data-set that reports child maltreatment incidents in Little rock. 
+
+## Map of Incidents 
+
+First we plot the incidents on a map like a point process using the latitude and longitudes extracted by `ggmap`.
+
+```{r, echo = T}
+rm(list = ls())
+require(devtools)
+# devtools::install_github("dkahle/ggmap", ref = "tidyup")
+# devtools::install_github("thomasp85/patchwork")
+library(pacman)
+p_load("sf"             # Spatial data objects and methods
+       ,"mapview"        # Interactive Map Viewing
+       ,"ggmap"          # ggplot2 addon for base maps
+       ,"cowplot" 
+       ,"spatstat"       # KDE and other spatial functions
+       ,"raster"         # cell-based spatial operations
+       ,"tidyverse"      # data manipulation framework
+       ,"Hmisc"          # using cut2(  functions for ggplot legends
+       ,"fitdistrplus"   # Distribution fitting functions
+       ,"lubridate"      # Power tools for handling dates
+       ,"tidycensus" 
+       ,"lwgeom" 
+       ,"Hmisc" 
+       ,"hrbrthemes" 
+       ,"gridExtra" 
+       ,"spdep"          # KNN functions
+       ,"foreach" 
+       ,"doParallel" 
+       ,"corrplot" 
+       ,"ranger"         # randomforest implimentation      
+       ,"glmnet"         # for Ridge and Lasso Regression
+       ,"knitr"          # for kable table
+       ,"kableExtra" 
+       ,"FNN"            # KNN for CPS vs. NN plots
+       ,"groupdata2" 
+       ,"htmltools" 
+       ,"viridis" 
+       ,"viridisLite")
+```
+
+```{R, echo = T}
+# rm(list = ls())
+setwd("~/Data/LR-Child")
+crime <- read.csv(file="child-mt-accepted.csv", header=T,sep=",",
+                  na.strings='NULL')
+attach(crime)
+
+crime$STR_NME <- crime$STR_NME %>% as.character %>% str_to_title 
+crime$CTY_NME <- crime$CTY_NME %>% as.character %>% str_to_title
+
+full_add <- paste(STR_NBR,STR_NME,STR_SFX_TYP_DESC, ",", 
+                        CTY_NME,",", "AR")
+head(full_add)
+```
+
+```{r, echo = T, eval = F}
+library(ggmap)
+register_google(key = "<your key here>")
+geocoded_latlon <- geocode(crime$full_add,output="latlon")
+geocoded_latlon %>% head()
+crime.gc <- cbind(crime, full_add,geocoded_latlon)
+write.csv(crime.gc, "LR-child-mt-accepted-geocoded.csv")
+```
+
+## Different City Names 
+
+```{r, echo = T}
+setwd("~/Data/LR-Child")
+crime.gc.read <- read.csv(file="LR-child-mt-accepted-geocoded.csv",
+                     header=T, sep=",")
+
+tab = as.data.frame(table(crime.gc.read$CTY_NME))
+cat("Number of different city names", nrow(tab))
+
+tab = tab %>% filter(Freq > 50)
+
+ggplot(tab, aes(x = reorder(Var1, -Freq), y=Freq)) + geom_bar(stat="identity") +
+  xlab("City Names") + ylab("Count") + coord_flip() +
+  theme(axis.text=element_text(size=10))
+```
+
+It appears there are many different city names in this data -- what do they represent?
+
+For this report, we filter the city names by "Little Rock" and use Little Rock boundaries to filter out addresses that are outside LR. 
+
+```{r}
+crime.gc.lr = crime.gc.read %>% filter(CTY_NME == "Little Rock")%>% 
+  filter(lat >= 34.62606 & lat <= 34.82195) %>% 
+  filter(lon >= -92.52091 & lon <= -92.15494)
+
+nrow(crime.gc.lr)
+
+qmplot(lon, lat, data = crime.gc.lr)
+
+qmplot(lon, lat, data = crime.gc.lr, geom = "point", maptype = "toner-lite", darken = .5, color = I("red"), legend = "topleft") +
+  stat_density_2d(aes(fill = ..level..), geom = "polygon", alpha = .5, color = NA) +
+  scale_fill_gradient2("Propensity", low = "white", mid = "yellow", high = "red", midpoint = 60)
+```
+
+## Dates of Incidents
+
+```{r}
+library(lubridate)
+# str(crime.gc)
+crime.gc.lr$Incident.Date <- ifelse(as.character(crime.gc.lr$Incident.Date) == "",as.character(crime.gc.lr$Referral.Date),as.character(crime.gc.lr$Incident.Date))
+
+crime.gc.lr$Incident.Date <- as.Date(crime.gc.lr$Incident.Date, format = "%m/%d/%Y" )
+crime.gc.lr$IncidentYear <- lubridate::year(ymd(crime.gc.lr$Incident.Date))
+crime.gc.lr$IncidentWeek <- lubridate::week(ymd(crime.gc.lr$Incident.Date))
+
+
+library(dplyr)
+
+crime.yearly.ct <- crime.gc.lr %>% filter(IncidentYear>=2015) %>% group_by(IncidentYear) %>% dplyr::summarise(count = n()) 
+
+crime.weekly.ct <- crime.gc.lr %>% filter(IncidentYear>=2015) %>% group_by(IncidentYear, IncidentWeek ) %>%
+  dplyr::summarise(count = n())
+
+```
+
+### Weekly Counts 
+
+The following figure shows the weekly incidence counts by years, and the data for 2018 stops at the exact same point where 2015 begins, the month of June. 
+
+```{R, echo = T}
+library(ggplot2)
+(crime.plot <- ggplot(crime.weekly.ct, aes(x = IncidentWeek, y = count, group = as.factor(IncidentYear), colour = as.factor(IncidentYear)))+
+geom_line(stat = "identity")+geom_bar(alpha = 0.2,stat = "identity")+ylab("Incident Count")+
+  xlab("Weeks") +
+  facet_grid(IncidentYear~.,scales="free_y")+
+  theme(legend.position="right"))
+```
+
+
+### Yearly Counts 
+
+
+```{r}
+(crime.plot <- ggplot(crime.yearly.ct, aes(x = IncidentYear, y = count))+
+  geom_bar(stat="identity") +ylab("Incident Count")+
+  xlab("Years") +labs(title = "Yearly Counts") +
+  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+
+    theme(legend.position="right"))
+```
+
+
+# Animated Map 
+
+This animation shows how the incidents moved over time - the animation shows the points on the map of LR over years from 2015 to 2018.  
+
+
+```{R}
+library(gganimate)
+crime.ct.yr <- crime.gc.lr %>% filter(IncidentYear>=2015) %>% group_by(lon, lat, IncidentYear) %>% 
+  dplyr::summarise(count = n()) 
+
+p <- qmplot(lon, lat, data = crime.ct.yr, maptype = "toner-lite", color = I("red"))
+
+p<- p + geom_point(aes(x = lon, y = lat, size = count),
+             data = crime.ct.yr, colour = 'purple', alpha = .7) +
+  labs(title = 'Year: {frame_time}', x = 'lon', y = 'lat') +
+  transition_time(IncidentYear) 
+
+animate(p, fps = 1, nframes = 4)
+```
+
+
+# Frequent Itemset Mining 
+
+Frequent Pattern Mining: Frequent Itemset Mining: 
+    - Applications: Market Basket Analysis / Click stream Analysis / Web Link Analysis. 
+    
+- Frequent Item Set Mining is a method for market basket analysis.
+
+- It aims at finding regularities in the shopping behavior of customers
+of supermarkets, mail-order companies, on-line shops etc.
+
+- More specifically: __Find sets of products that are frequently bought together__.
+
+- Possible applications of found frequent item sets:
+
+    *  Improve arrangement of products in shelves, on a catalog's pages etc.
+    *  Support cross-selling (suggestion of other products), product bundling.
+    *  Fraud detection, technical dependence analysis etc.
+    
+- Often found patterns are expressed as association rules, for example: If a customer buys **bread and wine**, then she/he will probably also buy **cheese**.
+    
+## Market Basket Analysis (Motivation) 
+
+-  Building blocks problem shares some similarity with market basket analysis: 
+
+    1. mutual exclusivity
+    2. sparsity 
+
+- **Mutual exclusivity**: redundant to buy both multiple items of the same type but in the general population will buy from this category. 
+      - e.g. one customer is not likely to buy both Coke and Pepsi but a majority of the general population of soda drinkers rely on brown soda, 
+      - {Coke, Pepsi} is the building block for the soda requirement.
+      
+
+## Notations 
+
+Formally, our goal here is to identify "building blocks" for child maltreatment from the binary incidence variable, observed as an $m \times n$ sparse binary matrix, where $m,n$ denote the number of observations and number of different allegations/events respectively. The idea here is to think of this data as a transaction data, where each sample represent a transaction and each gene an item. In the language of `itemset mining', we have an item set $I$ and a trasaction set $D$, and each transaction in $D$ contains a subset of the items in $I$. In our case, each subject might have 1's on a subset of the list of columns. 
+
+First, we define some preliminaries: a *rule* $ X \Rightarrow Y$ implies $X, Y \in I$ and $X \cap Y = \phi$, where $X$ is called RHS or 'antecedent', and 'Y' is called 'consequent'. The support $supp(X)$ of a itemset (think, gene-set) $X$ is defined as the proportion of transactions (think, samples) in the data set which contain the itemset. The confidence of a rule is defined $conf(X \Rightarrow Y ) = supp(X \cup Y )/supp(X)$, and mimics the conditional probability $P(Y | X)$. A third interest measure *lift* is defined as $lift(X \Rightarrow Y) = supp(X \cup Y )/(supp(X)\times supp(Y))$, which gives deviation of the support of the rule $X \Rightarrow Y$ from the support expected under independence - i.e. higher lift means higher association. 
+
+An **association rules** is a rule that surpasses a user-specified **minimum support** and **minimum confidence** threshold, and to select the interesting association rules we impose further filter the rules (or rank them) by an additional interest measure - e.g. lift. There are other measures of interest such as Chi-square measure, conviction and leverage but we will skip them for the sake of simplicity. 
+
+### R packages 
+
+Now, we use two R-packages *arules* and *arulesViz* to find a few "interesting" association rules (building blocks) and plot them. We first load the packages and create the data-sets from the raw data.
+
+### Item Frequency Plot 
+
+To see which items are important in the data set we can use the `itemFrequencyPlot`. To reduce the number of items, we only plot the item frequency for items with a support greater than 5% (using the parameter support). For better readability of the labels, we reduce the
+label size with the parameter `cex.names`.
+
+
+```{r}
+library(arules)
+library(arulesViz)
+crime.lr <- as(as.matrix(crime.gc.lr[,10:130]),"transactions")
+itemFrequencyPlot(crime.lr, support = 0.05)
+```
+
+## Association rules using the Apriori algorithm
+
+Next, we call the function apriori() to find all rules (the default association type for apriori()) with a minimum support of 1% and a confidence of 0.5. The summary() function gives an overview of the association rules found using this function. 
+
+```{r}
+rules <- apriori(crime.lr, parameter = list(support = 0.06, confidence = 0.9, 
+                                         minlen = 1))
+summary(rules)
+kable(inspect(head(sort(rules, by ="lift"),20)),digits=4)
+```
+
+### Filtering Interesting Association Rules 
+
+One way of identifying the interesting association rules is to look at association rules with known "interesting" genes, and study their association strengths or measures of interest, such as, lift, confidence, support etc. 
+
+```{r}
+interestMeasure(rules, c("support", "chiSquare", "confidence", "coverage",               "lift"),crime.lr)
+```
+
+## Visualization 
+
+Here we show a few plots to understand these rules better. 
+
+### Graph-based Visulization 
+
+**Recall that for a rule $X \Rightarrow Y$, X is called antecedent and Y is called consequent**
+
+This shows the rules (or itemsets) as a graph with items as labeled vertices, and rules (or itemsets) represented as vertices connected to items using arrows. For rules, the LHS items are connected with arrows pointing to the vertex representing the rule and the RHS has an arrow pointing to the item.
+
+```{r}
+plot(rules, method="graph", engine = "htmlwidget")
+```
+
+### Scatterplot of the rules
+
+We can also do a basic scatterplot of the rules mined earlier by the `apriori()` function by their support (x-axis) and confidence (y-axis) and the shading of the points (rules) increases with their lift. The interesting rules should have high support, high confidence and high lift. 
+
+```{r, echo=TRUE}
+plot(rules, measure=c("support", "lift"), shading="confidence")
+```
+
+
+### Matrix based Visualizations
+
+The _Matrix-based visualization_ techniques organize the antecedent and consequent itemsets on the x and y-axes, respectively. A selected interest measure is displayed at the intersection of the antecedent and consequent of a given rule. If no rule is available for a antecedent/consequent combination the intersection area is left blank. 
+
+Next, we plot the filtered rules using the matrix visualization. The color shading of the sqaures represent the interest measure, lift. The plot doesn't display the long labels on the axis but prints out the antecedent and consequent on the terminal. The last argument is needed to create a tidy figure by putting rules with similar lift together. 
+
+```{r, echo = TRUE}
+plot(rules, method="matrix", measure="lift", control=list(reorder="support/confidence"))
+```
