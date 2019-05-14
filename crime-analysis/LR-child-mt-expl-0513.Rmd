@@ -227,9 +227,9 @@ of supermarkets, mail-order companies, on-line shops etc.
 
 ## Notations 
 
-Formally, our goal here is to identify "building blocks" for child maltreatment from the binary incidence variable, observed as an $m \times n$ sparse binary matrix, where $m,n$ denote the number of observations and number of different allegations/events respectively. The idea here is to think of this data as a transaction data, where each sample represent a transaction and each gene an item. In the language of `itemset mining', we have an item set $I$ and a trasaction set $D$, and each transaction in $D$ contains a subset of the items in $I$. In our case, each subject might have 1's on a subset of the list of columns. 
+Formally, our goal here is to identify "building blocks" for child maltreatment from the binary incidence variable, observed as an $m \times n$ sparse binary matrix, where $m,n$ denote the number of observations and number of different allegations/events respectively. The idea here is to think of this data as a transaction data, where each sample represent a transaction and each cause an item. In the language of `itemset mining', we have an item set $I$ and a trasaction set $D$, and each transaction in $D$ contains a subset of the items in $I$. In our case, each subject might have 1's on a subset of the list of columns. 
 
-First, we define some preliminaries: a *rule* $ X \Rightarrow Y$ implies $X, Y \in I$ and $X \cap Y = \phi$, where $X$ is called RHS or 'antecedent', and 'Y' is called 'consequent'. The support $supp(X)$ of a itemset (think, gene-set) $X$ is defined as the proportion of transactions (think, samples) in the data set which contain the itemset. The confidence of a rule is defined $conf(X \Rightarrow Y ) = supp(X \cup Y )/supp(X)$, and mimics the conditional probability $P(Y | X)$. A third interest measure *lift* is defined as $lift(X \Rightarrow Y) = supp(X \cup Y )/(supp(X)\times supp(Y))$, which gives deviation of the support of the rule $X \Rightarrow Y$ from the support expected under independence - i.e. higher lift means higher association. 
+First, we define some preliminaries: a *rule* $ X \Rightarrow Y$ implies $X, Y \in I$ and $X \cap Y = \phi$, where $X$ is called RHS or 'antecedent', and 'Y' is called 'consequent'. The support $supp(X)$ of a itemset $X$ is defined as the proportion of transactions in the data set which contain the itemset. The confidence of a rule is defined $conf(X \Rightarrow Y ) = supp(X \cup Y )/supp(X)$, and mimics the conditional probability $P(Y | X)$. A third interest measure *lift* is defined as $lift(X \Rightarrow Y) = supp(X \cup Y )/(supp(X)\times supp(Y))$, which gives deviation of the support of the rule $X \Rightarrow Y$ from the support expected under independence - i.e. higher lift means higher association. 
 
 An **association rules** is a rule that surpasses a user-specified **minimum support** and **minimum confidence** threshold, and to select the interesting association rules we impose further filter the rules (or rank them) by an additional interest measure - e.g. lift. There are other measures of interest such as Chi-square measure, conviction and leverage but we will skip them for the sake of simplicity. 
 
@@ -263,7 +263,7 @@ kable(inspect(head(sort(rules, by ="lift"),20)),digits=4)
 
 ### Filtering Interesting Association Rules 
 
-One way of identifying the interesting association rules is to look at association rules with known "interesting" genes, and study their association strengths or measures of interest, such as, lift, confidence, support etc. 
+One way of identifying the interesting association rules is to look at most common association rules and study their association strengths or measures of interest, such as, lift, confidence, support etc. 
 
 ```{r}
 interestMeasure(rules, c("support", "chiSquare", "confidence", "coverage",               "lift"),crime.lr)
