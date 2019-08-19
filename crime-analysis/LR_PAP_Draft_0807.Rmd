@@ -385,11 +385,11 @@ nonwhite_aggregate_table
 
 ## Comparing meta-model predictions to Kernel Density
   
-  Perhaps the strongest method for assessing the usefulness of a predictive model is to compare its predictive power to that of the current resource allocation strategy. Although no equivalent decision making tool exists in Richmond, we can compare our model to another common spatial targeting algorithm - Kernel Density Estimation (KDE). 
+Perhaps the strongest method for assessing the usefulness of a predictive model is to compare its predictive power to that of the current resource allocation strategy. Here we compare our model to another common spatial targeting algorithm - Kernel Density Estimation (KDE). 
   
-  KDE is a simple spatial interpolation technique that calculates 'predicted risk' by taking a weighted local density of maltreatment events. No risk/protective factors are used and no measures of statistical significance can be calculated. To compare between the meta-model predictions and KDE, predictions from both are divided into five risk categories for the purposes of comparison. We then overlay held out maltreatment events that were not used to fit the original model, and calculate the percent of observed maltreatment events that fall into each predicted risk category. 
+KDE is a simple spatial interpolation technique that calculates 'predicted risk' by taking a weighted local density of maltreatment events. No risk/protective factors are used and no measures of statistical significance can be calculated. To compare between the meta-model predictions and KDE, predictions from both are divided into five risk categories for the purposes of comparison. We then overlay held out maltreatment events that were not used to fit the original model, and calculate the percent of observed maltreatment events that fall into each predicted risk category. 
   
-  Figure 1.5 maps the comparison. The KDE clearly picks up the main areas of recorded events, but also interpolates high predictions for maltreatment in the areas between and beyond. The meta-model is far more targeted. 
+Figure 1.5 maps the comparison. The KDE clearly picks up the main areas of recorded events, but also interpolates high predictions for maltreatment in the areas between and beyond. The meta-model is far more targeted. 
   
 ```{r include = TRUE, fig.width=10}
 cowplot::plot_grid(REALTIVE_SENSITIVITY_KDE, REALTIVE_SENSITIVITY_PREDICTIONS, align = "h")
@@ -433,7 +433,7 @@ for(i in seq_along(grid_seq)){
     mutate(value = ifelse(is.na(value),0,value))
   
   net_intersect_i <- st_intersects(lr_tract, net_agg_i) 
-  # extract Richmonds net cells based on intersect ID
+  # extract Little Rocks net cells based on intersect ID
   net_littlerock_i <- net_agg_i[unique(unlist(net_intersect_i)),]
   
   net_littlerock_i$class <- Hmisc::cut2(net_littlerock_i$value, g = 9)
@@ -930,7 +930,7 @@ CPS_KDE_BY_YEAR_plot <- ggplot() + #ggmap(cps_base_map) +
             aes(x,y,fill = as.factor(ntile(value,brks)), 
                 group = !!as.name(variable)), alpha=0.8) +
   scale_fill_viridis_d(name = variable) +
-  labs(title = "CPS accepted in Richmond, VA by year",
+  labs(title = "CPS accepted in Little Rock, VA by year",
        caption = "Figure 5.2") +
   facet_wrap(vars(!!as.name(variable))) +
   mapTheme() +
@@ -1052,7 +1052,7 @@ for(i in seq_along(grid_seq)){
     mutate(value = ifelse(is.na(value),0,value))
   
   net_intersect_i <- st_intersects(lr_tract, net_agg_i) 
-  # extract Richmonds net cells based on intersect ID
+  # extract Little Rocks net cells based on intersect ID
   net_littlerock_i <- net_agg_i[unique(unlist(net_intersect_i)),]
   
   net_littlerock_i$class <- Hmisc::cut2(net_littlerock_i$value, g = 9)
