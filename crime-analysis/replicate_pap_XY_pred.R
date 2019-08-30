@@ -2223,7 +2223,7 @@ povRatePredPlot <- ggplot(pov_pop_fishnet_pred, aes(x=povRate, y=pred)) +
 
 povRatePredPlot
 
-CORR_between_poverty_pred <- corr(pov_pop_fishnet_pred$povRate, pov_pop_fishnet_pred$pred)
+CORR_between_poverty_pred <- cor(pov_pop_fishnet_pred$povRate, pov_pop_fishnet_pred$pred)
 
 ## Line 2338: removals / risk over prediction map 
 #7.3 - map of risk categoeries with removals overlayed
@@ -2300,7 +2300,9 @@ moranTest_MAE <- moran.mc(neighborhood_metric_MAE$MAE, spatialWeights, nsim = 99
 
 moranTest_MAE
 
-save.image("full_results_line_2642_0827.RData")
+# save.image("full_results_line_2642_0827.RData")
+
+# load("full_results_line_2642_0827.RData")
 
 ## Line 2642: ```{r childFatality}
 
@@ -2310,16 +2312,18 @@ save.image("full_results_line_2642_0827.RData")
 #   st_as_sf(coords = c("X", "Y"), crs = 102747, agr = "constant") %>% 
 #   filter(ChildFatality == "Y")
 
-deaths <- var_list[["CPS_Accepted"]]
+deaths <- var_list[["CPS_Accepted"]] %>% filter(Death == 1)
 
-fatalitiesMap <- ggmap(cps_base_map) +
+fatalitiesMap <- ggplot() +
   geom_sf(data=ll(predMap), aes(fill=factor(pred_bin_class)), inherit.aes = FALSE, alpha = 0.8, color = NA) +
-  geom_sf(data=ll(deaths),aes(colour="ChildFatality"),colour="red", inherit.aes = FALSE, size = 1.5) +
+  geom_sf(data=ll(deaths),aes(colour="ChildFatality"),colour="red", inherit.aes = FALSE, size = 2) +
   scale_fill_viridis_d(name = "Risk\nCategory") +
   labs(title="Predicted risk levels and child fatalities",
        subtitle="Fatalities in red",
        caption = "Figure 2.6") +
   mapTheme()
+
+fatalitiesMap
 
 fatalitiesPlot <- deaths %>%
   mutate(counter=1) %>%
@@ -2340,5 +2344,9 @@ fatalitiesPlot <- deaths %>%
        y="Percent of Child Fatalities",
        title= "Percent of child fatalities by risk category") +
   plotTheme()
+
+fatalitiesPlot
+
+save(deaths, fatalitiesMap, fatalitiesPlot, file = "child_fatality_data_plot_0829.RData")
 
 

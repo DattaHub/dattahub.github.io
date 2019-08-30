@@ -430,7 +430,7 @@ popPerRiskPlot
     
 Figure 2.2 maps the weighted poverty rate by fishnet grid cell. How does the distribution of poverty relate to maltreatment events? 
       
-```{r include = TRUE, fig.align="center",}
+```{r include = TRUE, fig.align="center"}
 povertyRateMap
 ```
     
@@ -440,10 +440,14 @@ Figure 2.3 illustrates the relationship between poverty rate and predicted maltr
 povRatePredPlot
 ```
 
-## NEXT: Maltreatment risk and child fatalities
+## Maltreatment risk and child fatalities
 
-Figure 2.4(?) maps locations of child fatalities over the predicted maltreatment risk categories. The associated bar plot shows the majority of child fatalities are occurring in the highest risk categories.
+Figure 2.6 maps locations of child fatalities over the predicted maltreatment risk categories. The associated bar plot shows the majority of child fatalities are occurring in the highest risk categories.
 
+```{r include = TRUE, fig.width=14, fig.height=7}
+load("child_fatality_data_plot_0829.RData")
+cowplot::plot_grid(fatalitiesMap, fatalitiesPlot, align = "hv", axis = "lrbt")
+```
 
 
 ## Supplementary Material
