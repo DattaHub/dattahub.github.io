@@ -1,7 +1,7 @@
 ---
 title: "Wilson Disease Data Analysis"
-author: "Jyotishka Datta <br> University of Arkansas"
-date: "March 28, 2019"
+author: "Jyotishka Datta <br> Department of Mathematical Sciences <br> University of Arkansas"
+date: "September 7, 2019"
 output: 
   html_document:
       toc: true
@@ -27,7 +27,7 @@ st_options(plain.ascii = FALSE,
                                       # layout
 ```
 
-```{r, echo=FALSE}
+```{r themes, echo=FALSE}
 st_css()                              # This is a must; without it, expect odd layout,
 ```  
 
@@ -46,7 +46,7 @@ First, we report the basic descriptive statistics for the numerical variables.
 Note that some of the covariates are ordinal in nature, they are not reported on Table 1.
 
 
-```{r, echo = F}
+```{r descriptives, echo = F}
 rm(list = ls())
 setwd("C:/Users/jd033/OneDrive/Documents/Jija/Wilson")
 
@@ -82,7 +82,7 @@ Figure 1 shows the scatter plot as well as the correlation between the numerical
 2.  Scatter plots with a fitted line.
 3.  The value of correlation. 
 
-```{r, echo = F, fig.height = 3.5, fig.cap= "Correlation Chart"}
+```{r corrplots, echo = F, fig.height = 3.5, fig.cap= "Correlation Chart"}
 dfnum = df %>% select(AgeAtDx, CERU, FABScore, MMSE)
 chart.Correlation(dfnum, histogram=TRUE, pch=19)
 ```
@@ -92,7 +92,7 @@ chart.Correlation(dfnum, histogram=TRUE, pch=19)
 
 Here we show the association between the factors in our data, measured by the Chi-square p-value as well as the Cramer's V. We split the association matrix into two halves for the sake of presentation, with 'Common Mutation' being the common variable on both the plots. The first figure suggests strong association between different clinical variables but not so much with Common Mutation, and the second figure suggests some association of Common Mutation with Parkinsons, Dystonia, Depression and Gait. 
 
-```{r, echo = FALSE, fig.height = 3, fig.cap = "Association measures: chi-square and Cramer's V. Part 1"}
+```{r assoc_measures_1, echo = FALSE, fig.height = 3, fig.cap = "Association measures: chi-square and Cramer's V. Part 1"}
 library(lsr)
 
 # function to get chi square p value and Cramers V
@@ -124,7 +124,7 @@ df_res %>%
 ```
 
 
-```{r, echo = FALSE, fig.height = 3, fig.cap = "Association measures: chi-square and Cramer's V. Part 2"}
+```{r assoc_measures_2, echo = FALSE, fig.height = 3, fig.cap = "Association measures: chi-square and Cramer's V. Part 2"}
 dford2 = df %>% select(PYRSIGN, PSYCH, PARKIN, GAIT, DYST, DEPR, ComMutn)
 
 # create unique combinations of column names
@@ -149,7 +149,7 @@ df_res %>%
 Figure 4-7 show how the four numerical variables viz. Age at diagnosis, Ceruloplasmin, MMSE (cognitive scale), and Fab scores. It seems from these box-plots that the differences for these variables between different levels of Common mutation are not significant, indicated by the substantial overlap of the probability regions. 
 
 
-```{r, echo = F, fig.height = 3, fig.cap = "Boxplots for subgroup analysis: Age & Ceruloplasmin"}
+```{r boxplots_1, echo = F, fig.height = 3, fig.cap = "Boxplots for subgroup analysis: Age & Ceruloplasmin"}
 cols <- rainbow(2, s = 0.5)
 par(mfrow = c(1,2))
 boxplot(AgeAtDx ~ ComMutn, data = df,
@@ -163,7 +163,7 @@ legend("topright", inset=c(-0.5,0), fill = cols, legend = c(0,1), horiz = F)
 par(mfrow = c(1,1))
 ```
 
-```{r, echo = F, fig.height = 3, fig.cap = "Boxplots for subgroup analysis: MMSE" }
+```{r boxplots_2, echo = F, fig.height = 3, fig.cap = "Boxplots for subgroup analysis: MMSE" }
 par(mfrow = c(1,2))
 boxplot(MMSE ~ ComMutn, data = df,
         col = cols,
@@ -177,6 +177,66 @@ par(mfrow = c(1,1))
 ```
 
 # Methods 
+
+We want to fit a logistic regression model for explaining Common Mutation as a function of the available predictors. A logistic regression fits the log-odds of the probabilities as a linear function of the predictors, i.e. 
+
+$$ 
+\eta_i = \log(\frac{p_i}{1-p_i}) = \alpha + \sum_{j=1}^{p} x_{ij}\beta_j , \; i = 1, \ldots, n,
+$$
+
+where the $x_{ij}$ is the i-th observation for the j-th predictor. 
+
+The usual regression approach would run into a problem here as we have a low-rank data. Here $n =  52$, but the number of predictors is more than the number of columns in our data frame, as each ordinal factor has to be recoded into a baseline category, and one predictor for each different level. 
+
+The solution to this is to use a penalized regression such as the Elastic net. The elastic net regression minimizes the penalized log-likelihood 
+
+$$
+S = -l(y,\beta) + P_{\lambda,\alpha}(\beta),
+$$
+
+where $l(y,\beta)$ is the log-likelihood and $P_{\lambda,\alpha}(\beta)$ is the penalty term. For the logistic regression the log-likelihood is given by:
+
+$$
+l(y,\beta) = \sum_{i=1}^{n} y_i \log(p_i) +\sum_{i=1}^{n}(1-y_i)\log(1-p_i)
+$$
+
+and the Elastic net penalty term is given by:
+
+$$
+P_{\lambda,\alpha}(\beta) = \lambda \left \{ \frac{(1-\alpha)}{2} {\lVert \beta \rVert}_2^2 + \alpha {\lVert \beta \rVert}_1^2 \right \}
+$$
+
+We can use the same R package 'glmnet'. Change family = "gaussian" to family="binomial". 
+
+
+```{r glmnet, echo = F, fig.height = 3, fig.cap = "Elastic Net with Binomial Likelihood"}
+library(glmnetUtils)
+cv.fit = cv.glmnet(ComMutn ~ AgeAtDx+ MMSE+ CERU + MRI_HI + COGNITION+ DEPR+ PSYCH+ DYST+
+               TRMR+ CHOR+ PARKIN+ SPEECH+ SWALLOW +
+                 SALVN+ GAIT+ KFRING+ SEIZURE+ PYRSIGN+
+                 STEREO+ FABScore, family = "binomial", alpha = 0.5,
+         data = df)
+plot(cv.fit)
+```
+
+The plot shows the deviance (a goodness-of-fit statistic) as a function of the tuning parameter $\lambda$, and the number of variables in the model (top margin of the plot). *It shows that at the optimal value, Elastic net selects no variables at all, or in other words, fits the null model.*
+
+Since our goal is to understand the relative importance of predictors in explaining common mutation, we can look at a smaller value of $\lambda$ (we take $\lambda = 0.1$ here) on the coefficient path, and see which predictors come out on the top. This will not be a powerful predictive model but can give us some insgights into their relationships. 
+
+
+```{r coefplot, echo = F, fig.height = 3, fig.cap = "Coefficients for Penalized Logistic Regression"}
+library(coefplot)
+coefplot(cv.fit, lambda=0.1, sort='magnitude')
+```
+
+
+
+
+
+
+
+
+
 
 
 
