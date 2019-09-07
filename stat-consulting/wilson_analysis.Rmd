@@ -1,0 +1,182 @@
+---
+title: "Wilson Disease Data Analysis"
+author: "Jyotishka Datta <br> University of Arkansas"
+date: "March 28, 2019"
+output: 
+  html_document:
+      toc: true
+      number_sections: true
+      toc_float: true
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(results = 'asis',      # This is essential (can also be set at the chunk-level)
+               comment = NA,
+               prompt = FALSE,
+               cache = TRUE,
+               warning = FALSE,
+               message = FALSE)
+library(summarytools)
+st_options(plain.ascii = FALSE,      
+           style = "rmarkdown",      # This too
+           footnote = NA,             # Avoids footnotes which would clutter the results
+           subtitle.emphasis = FALSE  # This is a setting to experiment with - according to 
+           )                                     # the theme used, it might improve the headings'
+                                      # layout
+```
+
+```{r, echo=FALSE}
+st_css()                              # This is a must; without it, expect odd layout,
+```  
+
+```{r packages, echo = FALSE}
+library(pacman)
+p_load(tidyverse, summarytools, ggplot2, knitr)
+library("PerformanceAnalytics")
+```
+
+
+# Background
+
+## Simple Descriptive Statistics 
+
+First, we report the basic descriptive statistics for the numerical variables.  
+Note that some of the covariates are ordinal in nature, they are not reported on Table 1.
+
+
+```{r, echo = F}
+rm(list = ls())
+setwd("C:/Users/jd033/OneDrive/Documents/Jija/Wilson")
+
+data = read.csv(file = "rawdata.csv", header = T, sep = ",")
+
+library(tidyverse)
+
+df = as.data.frame(data)
+
+df = df %>% select(-SN, -Name, - Muttaion)
+
+# names(df)
+
+df = df %>% select(AgeAtDx, Sex, MMSE, CERU, MRI_HI, LFT, CBC, ComMutn,
+                   COGNITION, DEPR, PSYCH, DYST, TRMR, CHOR, PARKIN, SPEECH, SWALLOW,
+                   SALVN, GAIT, KFRING, SEIZURE, PYRSIGN, STEREO, FABScore)
+
+df = df %>% mutate_at(c("MRI_HI", "DEPR", "PSYCH", "DYST", "TRMR", 
+                        "CHOR", "PARKIN", "SPEECH", "SWALLOW",
+                   "SALVN", "GAIT", "KFRING"),as.ordered)
+
+df = df %>% mutate_at(c("COGNITION","SEIZURE","PYRSIGN","STEREO","ComMutn"), as.factor)
+
+library(summarytools)
+descr(df,stats = c("mean", "sd", "min", "max"), transpose = TRUE, style = "rmarkdown")
+```
+
+## Correlation 
+
+Figure 1 shows the scatter plot as well as the correlation between the numerical variables. In particular, it shows: 
+
+1.  The distributions for each variable. 
+2.  Scatter plots with a fitted line.
+3.  The value of correlation. 
+
+```{r, echo = F, fig.height = 3.5, fig.cap= "Correlation Chart"}
+dfnum = df %>% select(AgeAtDx, CERU, FABScore, MMSE)
+chart.Correlation(dfnum, histogram=TRUE, pch=19)
+```
+
+
+## Association between factors 
+
+Here we show the association between the factors in our data, measured by the Chi-square p-value as well as the Cramer's V. We split the association matrix into two halves for the sake of presentation, with 'Common Mutation' being the common variable on both the plots. The first figure suggests strong association between different clinical variables but not so much with Common Mutation, and the second figure suggests some association of Common Mutation with Parkinsons, Dystonia, Depression and Gait. 
+
+```{r, echo = FALSE, fig.height = 3, fig.cap = "Association measures: chi-square and Cramer's V. Part 1"}
+library(lsr)
+
+# function to get chi square p value and Cramers V
+f = function(x,y) {
+  tbl = df %>% select(x,y) %>% table()
+  chisq_pval = round(chisq.test(tbl)$p.value, 4)
+  cramV = round(cramersV(tbl), 4) 
+  data.frame(x, y, chisq_pval, cramV) }
+
+# dford = df %>% select(-AgeAtDx, -CERU, -FABScore,
+#                       -MMSE, -Sex, -LFT, - CHOR, - ComMutn, - MRI_HI)
+
+dford = df %>% select(TRMR, SWALLOW, STEREO, SPEECH, SEIZURE, SALVN, ComMutn)
+
+# create unique combinations of column names
+# sorting will help getting a better plot (upper triangular)
+df_comb = data.frame(t(combn(sort(names(dford)), 2)), stringsAsFactors = F)
+
+# apply function to each variable combination
+df_res = map2_df(df_comb$X1, df_comb$X2, f)
+
+# plot results
+df_res %>%
+  ggplot(aes(x,y,fill=chisq_pval))+
+  geom_tile()+
+  geom_text(aes(x,y,label=cramV))+
+  scale_fill_gradient(low="red", high="yellow")+
+  theme_classic()
+```
+
+
+```{r, echo = FALSE, fig.height = 3, fig.cap = "Association measures: chi-square and Cramer's V. Part 2"}
+dford2 = df %>% select(PYRSIGN, PSYCH, PARKIN, GAIT, DYST, DEPR, ComMutn)
+
+# create unique combinations of column names
+# sorting will help getting a better plot (upper triangular)
+df_comb = data.frame(t(combn(sort(names(dford2)), 2)), stringsAsFactors = F)
+
+# apply function to each variable combination
+df_res = map2_df(df_comb$X1, df_comb$X2, f)
+
+# plot results
+df_res %>%
+  ggplot(aes(x,y,fill=chisq_pval))+
+  geom_tile()+
+  geom_text(aes(x,y,label=cramV))+
+  scale_fill_gradient(low="red", high="yellow")+
+  theme_classic()
+```
+
+
+## Comparison across subgroups 
+
+Figure 4-7 show how the four numerical variables viz. Age at diagnosis, Ceruloplasmin, MMSE (cognitive scale), and Fab scores. It seems from these box-plots that the differences for these variables between different levels of Common mutation are not significant, indicated by the substantial overlap of the probability regions. 
+
+
+```{r, echo = F, fig.height = 3, fig.cap = "Boxplots for subgroup analysis: Age & Ceruloplasmin"}
+cols <- rainbow(2, s = 0.5)
+par(mfrow = c(1,2))
+boxplot(AgeAtDx ~ ComMutn, data = df,
+        col = cols,
+        xaxs = FALSE)
+legend("topright", inset=c(-0.5,0), fill = cols, legend = c(0,1), horiz = F)
+boxplot(CERU ~ ComMutn, data = df,
+        col = cols,
+        xaxs = FALSE)
+legend("topright", inset=c(-0.5,0), fill = cols, legend = c(0,1), horiz = F)
+par(mfrow = c(1,1))
+```
+
+```{r, echo = F, fig.height = 3, fig.cap = "Boxplots for subgroup analysis: MMSE" }
+par(mfrow = c(1,2))
+boxplot(MMSE ~ ComMutn, data = df,
+        col = cols,
+        xaxs = FALSE)
+legend("topright", inset=c(-0.5,0), fill = cols, legend = c(0,1), horiz = F)
+boxplot(FABScore ~ ComMutn, data = df,
+        col = cols,
+        xaxs = FALSE)
+legend("topright", inset=c(-0.5,0), fill = cols, legend = c(0,1), horiz = F)
+par(mfrow = c(1,1))
+```
+
+# Methods 
+
+
+
