@@ -178,6 +178,8 @@ par(mfrow = c(1,1))
 
 # Methods 
 
+## Penalized Logistic Regression
+
 We want to fit a logistic regression model for explaining Common Mutation as a function of the available predictors. A logistic regression fits the log-odds of the probabilities as a linear function of the predictors, i.e. 
 
 $$ 
@@ -229,8 +231,75 @@ library(coefplot)
 coefplot(cv.fit, lambda=0.1, sort='magnitude')
 ```
 
+## Prediction 
 
+Here we perform a supervised learning to predict common mutation, that is, divide the data into two equal halves - training and test, and then train the model on one half and perform prediction on the other. 
 
+```{R, echo = F, results = 'asis'}
+set.seed(1984)
+df = df %>% filter(ComMutn != "NA")
+
+train=sample(1:nrow(df), nrow(df)*0.5)
+dftrain = df[train,]
+dftest = df[-train,]
+
+# df[!complete.cases(df),]
+
+library(glmnetUtils)
+cv.fit = cv.glmnet(ComMutn ~ AgeAtDx+ MRI_HI + COGNITION+ DEPR+ PSYCH+ DYST+
+                     TRMR+ CHOR+ PARKIN+ SPEECH+ SWALLOW +
+                     SALVN+ GAIT+ KFRING+ SEIZURE+ PYRSIGN+
+                     STEREO+ FABScore, family = "binomial", alpha = 0.5,
+                     data = dftrain)
+
+glm.pred = predict(cv.fit, newdata = dftest, s = 0.1, type = "class")
+row.pred = as.numeric(row.names(glm.pred))
+y.test = dftest$ComMutn
+
+# # library(knitr)
+# cat("Misclassification Table \n")
+# table(glm.pred, y.test)
+# 
+# 
+# ftab = table(glm.pred, y.test)
+# library(stargazer)
+# stargazer(format(ftab, title = "Confusion Matrix", rownames = TRUE, quote=FALSE, justify="right"), type="html")
+# 
+misclass.prob = mean(glm.pred != y.test)
+cat("Misclassification Probability", misclass.prob)
+
+glm.prob = predict(cv.fit, newdata = dftest, s = 0.1, type = "response") %>% drop()
+glm.pred = predict(cv.fit, newdata = dftest, s = 0.1, type = "class") %>% as.numeric() %>% drop()
+# row.pred = as.numeric(row.names(glm.pred))
+y.test = dftest$ComMutn %>% as.numeric()
+
+error.data = rbind(data.frame(type="predicted probability", values = glm.prob),
+                   data.frame(type = "predicted value", values = glm.pred))
+
+error.data = cbind(error.data, x = 1:26)
+
+library(ggplot2)
+pred_plot <- ggplot(error.data, aes(y = values, group = type, x = x)) + 
+  geom_point(aes(color = type, shape = type)) + theme_bw()
+
+glm.prob = predict(cv.fit, newdata = dftest, s = 0.1, type = "response") %>% drop()
+glm.pred = predict(cv.fit, newdata = dftest, s = 0.1, type = "class") %>% as.numeric() %>% drop()
+# row.pred = as.numeric(row.names(glm.pred))
+y.test = dftest$ComMutn %>% as.numeric()
+
+error.data = rbind(data.frame(type = "predicted value", values = glm.pred),
+                   data.frame(type = "truth", values = y.test-1))
+
+error.data = cbind(error.data, x = 1:26)
+misclass_plot <- ggplot(error.data, aes(y = values, group = type, x = x)) + 
+  geom_point(aes(color = type, shape = type)) + theme_bw()
+
+library(patchwork)
+pred_plot / misclass_plot
+
+```
+
+The first panel on the figure shows the predicted probabilities and the actual prediction and the second shows the true labels vs the prediction. The misclassification probability is `r misclass.prob` (which is almost as bad as a random guess that has a misclassification probability of 0.5). From the second panel, it seems the prediction misses all the labels with true value "1", and vice versa, i.e. the predicted values with label "1" are incorrectly classified. This is not surprising since the elastic net model was not able to find any strongly correlated predictors. 
 
 
 
