@@ -1,7 +1,7 @@
 ---
 title: "Little Rock Child Maltreatment: <br>  Predictive Analysis"
 author: "UA Research Team"
-date: "August 27, 2019"
+date: "September 23, 2019"
 output: 
   html_document:
       toc: true
@@ -453,7 +453,7 @@ cowplot::plot_grid(fatalitiesMap, fatalitiesPlot, align = "hv", axis = "lrbt")
 
 The maltreatment predictions suggest where education, outreach, and prevention efforts should occur. What resources are available at these locations? We answer this question using some of the original protective factors data gathered for the predictive model. Stakeholders can replicate this approach on a more finite list of sites that could host these interventions. 
 
-We then calculate a relative measure of risk exposure for each DCFS facilities by drawing quarter mile buffers around each site and taking the mean count of predicted events. *Figure 2.5 plots these buffers and the relative measure of risk exposure. The table that follows lists the top 20 individual DCFS facilities sorted by type and mean predicted count.*
+We then calculate a relative measure of risk exposure for each DCFS facilities by drawing quarter mile buffers around each site and taking the mean count of predicted events. **Figure 2.5 plots these buffers and the relative measure of risk exposure. The table that follows lists the top 20 individual DCFS facilities sorted by type and mean predicted count.**
 
 
 ```{r include = TRUE, fig.width=10.5}
