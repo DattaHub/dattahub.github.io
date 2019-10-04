@@ -2439,17 +2439,19 @@ resourcehomes.buffers <-
   mapTheme())
 
 #find top 5 
-top_childcare <- childcare.buffers %>% 
+(top_childcare <- childcare.buffers %>% 
   bind_cols(childcare) %>%
-  group_by(IDCode) %>%
+  # group_by(Company) %>%
   top_n(n=5,wt=pred) %>%
   as.data.frame() %>%
   mutate(Mean_Predicted_Count = round(pred)) %>%
-  dplyr::select(IDCode, AddressLin,Mean_Predicted_Count) %>%
+  dplyr::select(Company, AddressLin,Mean_Predicted_Count) %>%
   rename(address = AddressLin) %>% 
-  arrange(IDCode,-Mean_Predicted_Count) %>%
+  arrange(-Mean_Predicted_Count) %>%
   kable() %>% 
-  kable_styling()
+  kable_styling())
+
+top_childcare
 
 top_resourcehomes <- resourcehomes.buffers %>% 
   bind_cols(resourcehomes) %>%
