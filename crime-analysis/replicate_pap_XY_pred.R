@@ -103,7 +103,6 @@ source('C:/Users/jd033/Box/Child Maltreatment/R-codes/FEA_CREATE_VARIABLES_LR_2.
 
 # load("full_results_line_1983_0718.RData")
 
-
 # rm(list = ls())
 
 setwd("C:/Users/jd033/Box/Child Maltreatment/R-codes/")
@@ -2241,6 +2240,7 @@ CORR_between_poverty_pred <- cor(pov_pop_fishnet_pred$povRate, pov_pop_fishnet_p
 ## Line 2491: #Gap #get neighborhoods
 ## Line 2513: #calculate number of protective centers within 
 ## Line 2523: #put demand and supply together and look at difference
+
 ## Line 2491-2591: #Gap Analysis 
 #### 1. Get statistical areas. 
 #### 2. create a dummy variable field for where risk category == 5
@@ -2393,5 +2393,76 @@ top_facilities <- dcfs.buffers %>%
   kable() %>% 
   kable_styling()
 
-save(dcfs_facilities, dcfs.buffers, facilitiesMap,top_facilities, file = "dcfs_facilities_plot_0925.RData")
+# save(dcfs_facilities, dcfs.buffers, facilitiesMap,top_facilities, file = "dcfs_facilities_plot_0925.RData")
 
+load("full_results_line_2709_0925.RData")
+load("dcfs_facilities_plot_0925.RData")
+
+### line 2710 - 2786: child care buffers. 
+### We have different datasets. 
+### This is the last chunk. 
+
+childcare <- var_list[["ChildCareServices"]]%>% 
+  .[st_union(predMap),]
+
+resourcehomes <- var_list[["NeighborhoodResourceCenters"]]%>% 
+  .[st_union(predMap),]
+
+childcare.buffers <-
+  st_centroid(predMap) %>%
+  aggregate(st_buffer(childcare,1320),FUN=mean)
+
+resourcehomes.buffers <-
+  st_centroid(predMap) %>%
+  aggregate(st_buffer(resourcehomes,1320),FUN=mean) 
+
+#map average predicted event by quarter mile buffer
+(childcareMap <- ggplot() +
+  geom_sf(data=ll(st_union(predMap)), inherit.aes = FALSE, alpha = 0.8, color = "black") +
+  geom_sf(data=ll(childcare.buffers), aes(fill=pred), inherit.aes = FALSE) +
+  scale_fill_viridis_c(name = "Mean\npredicted\ncount") +
+  labs(title = "Mean predicted count by quarter mile buffer",
+       subtitle = "Child care services",
+       caption = "Figure 2.6") +
+  guides(fill = guide_colourbar(reverse = TRUE)) +
+  mapTheme())
+
+(resourcehomeMap <- ggplot() +
+  geom_sf(data=ll(st_union(predMap)), inherit.aes = FALSE, alpha = 0.8, color = "black") +
+  geom_sf(data=ll(resourcehomes.buffers), aes(fill=pred), inherit.aes = FALSE) +
+  scale_fill_viridis_c(name = "Mean\npredicted\ncount",
+                       labels = round) +
+  labs(title = "Mean predicted count by quarter mile buffer",
+       subtitle = "Neighborhood Resource Centers",
+       caption = "Figure 2.7") +
+  guides(fill = guide_colourbar(reverse = TRUE)) +
+  mapTheme())
+
+#find top 5 
+top_childcare <- childcare.buffers %>% 
+  bind_cols(childcare) %>%
+  group_by(IDCode) %>%
+  top_n(n=5,wt=pred) %>%
+  as.data.frame() %>%
+  mutate(Mean_Predicted_Count = round(pred)) %>%
+  dplyr::select(IDCode, AddressLin,Mean_Predicted_Count) %>%
+  rename(address = AddressLin) %>% 
+  arrange(IDCode,-Mean_Predicted_Count) %>%
+  kable() %>% 
+  kable_styling()
+
+top_resourcehomes <- resourcehomes.buffers %>% 
+  bind_cols(resourcehomes) %>%
+  # group_by(Type) %>%
+  top_n(n=5,wt=pred) %>%
+  as.data.frame() %>%
+  mutate(Mean_Predicted_Count = round(pred)) %>%
+  dplyr::select(Facility,Address,Mean_Predicted_Count) %>%
+  rename(Name = Facility) %>% 
+  arrange(-Mean_Predicted_Count) %>%
+  kable() %>% 
+  kable_styling()
+
+save(childcare, resourcehomes, childcareMap, resourcehomeMap, top_childcare, top_resourcehomes, file = "protective_facilities_plot_1003.RData")
+
+save.image("full_results_line_2786_end_1003.RData")

@@ -1,7 +1,7 @@
 ---
 title: "Little Rock Child Maltreatment: <br>  Predictive Analysis"
 author: "UA Research Team"
-date: "September 23, 2019"
+date: "October 3, 2019"
 output: 
   html_document:
       toc: true
@@ -469,6 +469,34 @@ top_facilities
 
 This process can be repeated for a specific list of sites, e.g. we can calculate relative measure of risk exposure for Child Care Centers. 
 
+## Assign risk scores to protective land uses (childcare and resource centers)
+
+**Figure 2.6 plots the relative measure of risk exposure for quarter mile buffers around child care centers.**
+
+
+```{r include = TRUE, fig.width=10.5}
+load("protective_facilities_plot_1003.RData")
+childcareMap
+```
+
+The following table lists the 5 most optimally located childcare facilities based on mean predicted count of maltreatment events within a quarter mile.
+
+```{r include = TRUE}
+top_childcare
+```
+
+**Figure 2.7 plots the relative measure of risk exposure for quarter mile buffers around neighbourhood resource centers.**
+
+
+```{r include = TRUE, fig.width=10.5}
+resourcehomeMap
+```
+
+The following table lists the five most optimally located neighbourhood resource centers based on mean predicted count of maltreatment events within a quarter mile.
+
+```{r include = TRUE}
+top_resourcehomes
+```
 
 ## Supplementary Material
 
