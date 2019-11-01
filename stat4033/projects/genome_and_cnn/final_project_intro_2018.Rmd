@@ -1,7 +1,7 @@
 ---
 title: "Project Ideas"
 author: "Jyotishka Datta"
-date: "October 10, 2018"
+date: "October 31, 2019"
 output: 
   ioslides_presentation:
     toc: true
@@ -57,20 +57,19 @@ Possible Data Sets and Problems
 
 ```{r, echo = T, eval = F}
 ## try http:// if https:// URLs are not supported
-source("https://bioconductor.org/biocLite.R")
-biocLite("ALL")
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("ALL")
 ```
 
 2. 'multtest' package. 
 ```{r, echo = T, eval = F}
-source("https://bioconductor.org/biocLite.R")
-biocLite("multtest")
+BiocManager::install("multtest")
 ```
 
 3. (Optional) `Limma' package
 ```{r, echo = T, eval = F}
-source("https://bioconductor.org/biocLite.R")
-biocLite("limma")
+BiocManager::install("limma")
 ```
 
 

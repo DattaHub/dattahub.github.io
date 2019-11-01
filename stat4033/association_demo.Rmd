@@ -1,7 +1,7 @@
 ---
 title: "Tests for trends and association"
 author: "Jyotishka Datta"
-date: "November 3, 2017"
+date: "November 1, 2019"
 output: ioslides_presentation
 ---
 
@@ -147,7 +147,8 @@ $$
 Kendall's tau is related to Pearson's product-moment correlation coefficient as: 
 $$
 \tau = \frac{2}{\pi} \arcsin(\rho)
-$$.
+$$
+
 ```{r}
 x = seq(0,1,length.out = 100)
 tau = 2/pi*asin(x)
@@ -157,7 +158,7 @@ lines(x,x,col="red")
 
 ## Kendall's tau 
 
-```{r,echo=T}
+```{r,echo=T} 
 cor(cars$speed,cars$dist,method="kendall")
 cor(log(cars$speed),log(cars$dist),method="kendall")
 cor((cars$speed)^2,(cars$dist)^2,method="kendall")
