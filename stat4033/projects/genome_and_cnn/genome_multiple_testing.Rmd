@@ -1,15 +1,24 @@
 ---
-title: 'Project Description: Genomic Data'
+title: 'Project Description: Genomic Data Analysis'
 author: "Jyotishka Datta"
-date: "November 2, 2018"
+date: "November 9, 2019"
 output: pdf_document
+fontsize: 11 pt
+geometry: margin = 1in
+urlcolor: blue
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, cache = TRUE)
 ```
 
-## Final Project : Analysing Genomic Data 
+## Final Project : Analyzing Genomic Data 
+
+1. This intro will show you how to read the two data-sets and get basic summary. It will also suggest some of the analysis that you can perform.
+2. You can use one of the methods taught in class (or try new methods - it's upto you (and your team)). 
+3. You do not need to present your work. Only submit a well-written report. 
+
+## Final Project Goals:
 
 -  Possible Inferential Goals: 
 
@@ -129,12 +138,10 @@ $$
 FWER = P(\text{at least one false rejection}) \le \alpha 
 $$
 
-- Bonferroni leads to a stringent test, since $\alpha/p$ could be very small if we are carrying out a large number of $p$ tests simultaneously. 
+- Bonferroni leads to a stringent test, since $\alpha/M$ could be very small if we are carrying out a large number of $M$ tests simultaneously. 
 - In R, we can apply the `p.adjust` function for this task. 
 
 - `p.adjust` also has other useful methods such as "Benjamini-Hochberg False Discovery Rate control procedure".
-
-## Bonferroni 
 
 ```{r, echo = T}
 rawp = 2 * (1 - pnorm(abs(teststat)))
@@ -147,7 +154,7 @@ sum(selected)
 ` tests - these genes significantly differ between two groups
 
 
-## Bonferroni 
+### Bonferroni Procedure
 
 - $M$ hypothesis tests: $H_{0m}$ vs. $H_{1m}$ for $m = 1, \ldots, M$. 
 - Let $p_1, \ldots, p_M$ be the p-values for these $M$ tests. 
@@ -159,7 +166,9 @@ $$
 
 - Outcome: The probability of falsely rejecting any null hypothesis is less than or equal to $\alpha$. 
 
-## Benjamini-Hochberg {.smaller}
+## Benjamini-Hochberg 
+
+The Benjamini and Hochberg procedure for multiple testing offers an alternative to the Bonferroni's FWER control procedure, that offers a less stringent testing mechanism for high-dimensional data. The main idea is that instead of controlling the familywise error rate, i.e. the probability of at least one false rejection, we control the average proportion of false discoveries, also called false discovery rate or FDR. It turns out that the Benjamini-Hochberg method is less stringent and has many attractive properties for high-dimensional data and often recognized as a state-of-the-art procedure for multiple testing. We describe the testing procedure below. 
 
 - Let $M_0$ be the number of null hypotheses that are true, $M_0 = M - M_1$. 
 
@@ -177,7 +186,7 @@ V/R \text{ if } R > 0 \\
 \end{cases}
 $$
 
-## Benjamini-Hochberg {.smaller}
+### Benjamini-Hochberg procedure
 
 - $M$ hypothesis tests We order the p-values in increasing order.
 $p_{(1)} \le \ldots \le p_{(M)}$. 
@@ -193,7 +202,7 @@ FDR = E(FDP) \le \frac{M_0}{M}\alpha \le \alpha
 $$
 -  *Outcome*: For a given significance level $\alpha$, the Benjamini Hochberg method bounds the false discovery rate.
 
-## Benjamini-Hochberg
+### Benjamini-Hochberg in R
 
 ```{r, echo = T}
 rawp = 2 * (1 - pnorm(abs(teststat)))
@@ -205,9 +214,19 @@ sum(selected)
 - Benjamini-Hochberg method leads to rejection of `r sum(selected)
 ` tests - less stringent than Bonferroni. 
 
+## Literature for Multiple Testing
+
+-  The original paper by Benjamini & Hochberg is here: [Benjamini & Hochberg (1995).](http://engr.case.edu/ray_soumya/mlrg/controlling_fdr_benjamini95.pdf).
+
+-  Manual for the R package `multtest`: [multtest manual.](https://www.bioconductor.org/packages/release/bioc/manuals/multtest/man/multtest.pdf)
+
+- For more details about large scale inference including multiple testing, an excellent reference is Prof. Bradley Efron's monograph on this subject. You can download the pdf copy of the book from Prof. Efron's webpage here: 
+[Large Scale Inference - Efron (2010)](https://statweb.stanford.edu/~ckirby/brad/LSI/monograph_CUP.pdf). The first 4 chapters are pertinent for this project and the whole book is a very nice read if you want to learn about large scale inferences. 
+
+
 ## Nonparametric test
 
--  We can use the `mt.teststat` function from the `multtest' package as shown above  but choose a different test other than `t` test. 
+-  We can use the `mt.teststat` function from the `multtest` package as shown above  but choose a different test other than the Student's `t` test. 
 -  Since we know how to do any nonparametric test covered in class for two independent samples, we can use them on each gene and calculate P-values for each gene, using a for loop. 
 
 ```{r, echo = T}
@@ -225,11 +244,20 @@ all.mat.abl = all.mat[,all.cl=='BCR/ABL']
 wilcox.test(all.mat.af4[1,],all.mat.abl[1,])
 ```
 
-## Main task 
+## Goal 1: Multiple Testing
 
 -  You need to perform this test for all the 12,625 rows, get P-values for each of them and then apply multiple testing correction as shown above. 
--  Perform at least two different tests and both Bonferroni and Benjamini-Hochberg corrections. 
--  Write your conclusions clearly. 
+-  Perform at least two different tests and two different multiplicity corrections, e.g. Bonferroni and Benjamini-Hochberg corrections. 
+
+
+## Goal 2: Dependence?
+
+-  The Benjamini--Hochberg procedure assumes that the P-values (and the underlying test statistics) are independent of each other. This is not true in real life, and as a result the outcomes of Benjamini-Hochberg often tend to be anti-conservative. Benjamini & Yekutieli (2001) proposed a modification for the BH procedure that takes dependence into account. You can apply their approach by simply changing `method = BH` to `method = BY` in your `p.adjust` function. 
+
+- Your goal would be investigate whether there is a strong dependence in your data (i.e. dependence between genes), and whether applying BY instead of BH changes your conclusion. 
+
+-  Write your conclusions clearly. Submit your R codes along with your report. 
+
 
 ## Help 
 
