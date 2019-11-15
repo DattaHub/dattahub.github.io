@@ -1,7 +1,7 @@
 ---
 title: "Bootstrap"
 author: "Jyotishka Datta"
-date: "November 12, 2018"
+date: "November 15, 2019"
 output: ioslides_presentation
 ---
 ```{r setup, include=FALSE}
