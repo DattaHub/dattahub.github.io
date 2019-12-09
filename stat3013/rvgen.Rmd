@@ -1,0 +1,292 @@
+---
+title: "Random Variable Generation"
+author: "Jyotishka Datta"
+date: "February 1, 2019"
+output: 
+  ioslides_presentation:
+    widescreen: true
+    smaller: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+## Inverse CDF Transformation
+
+- $X$ random variable, PDF of $X$ is $f(x)$: $X \sim f(x)$.
+- Cumulative density function CDF: $F(x) = \int_{-\infty}^{x} f(s) ds$
+- IF $F$ is invertible, $Y = F^{-1}(U)$ will have the same distribution as $X$.
+- This is called Inverse CDF/ Quantile transformation. 
+
+## First Example: Logistic
+
+- PDF of a logistic random variable. 
+$$
+f(x \mid \lambda) = \frac{\lambda e^{-\lambda x}}{\{1+e^{-\lambda x} \}^2}
+$$
+- Hence the CDF can be written as: 
+$$
+F(x \mid \lambda) = \frac{1}{\{1+e^{-\lambda x} \}} 
+$$
+
+## Inverse CDF method
+
+- How do we generate samples from logistic? 
+- Generate $U \sim U[0,1]$, and apply $F^{-1}(U)$ as above. 
+
+## Logistic Distribution
+
+```{r, echo = TRUE,message = FALSE, warning = FALSE}
+set.seed(123)
+logistic_rvgen <- function(lamb,n=1){
+    # Recall the signature for runif(n,high,low)
+    u=runif(n)
+    x=-log((1/u)-1)/lamb
+    return(x)
+}
+```
+
+## Visualize the samples
+
+- Generate 10000 random draws from the logistic distribution and plot their histogram
+
+```{r, echo = TRUE, fig.height = 4}
+lamb=0.1
+n=10000
+x=logistic_rvgen(lamb, n)
+hist(x)
+lines(density(x))
+```
+
+## Visual Verification
+
+- We can verify that we are correct by drawing the density along with the histogram. 
+
+```{r, echo = TRUE, fig.height=3}
+y=seq(-50,50,0.5)
+fy=lamb*exp(-lamb*y)/((1.0+exp(-lamb*y))^2)
+hist(x, freq  = F)
+lines(y,fy, col = "red")
+```
+
+## Second Example - Exponential
+
+```{r, echo = TRUE, fig.height=4}
+n = 1e3
+lambda = 2
+U = runif(n)
+X = - 1/lambda*log(U)
+hist(X, breaks = 30, freq=F)
+```
+
+## Visual Verification
+
+- We can verify that we are correct by drawing the density along with the histogram. 
+
+```{r, echo = TRUE, fig.height=4}
+Y=seq(0,50,0.5)
+fy=lambda*exp(-lambda*Y)
+hist(X, breaks = 30, freq  = F)
+lines(Y,fy, col = "red")
+```
+
+## Generating Standard Normal Variables 
+
+-  The density of a standard Normal distribution is: 
+$$
+f(x) = \frac{1}{\sqrt{2\pi}} \exp(-x^2/2)
+$$
+
+-  The CDF $\Phi(x)$ is not invertible. 
+-  We cannot apply Inverse-CDF directly. 
+
+## Observation 
+
+If $X_1, X_2$ are standard Normal random variables. Let $(R, \theta)$ be the polar coordinates of the pair $(X_1,X_2)$. It can be shown (HW 2) that:
+$$
+R^2 = X_1^2 + X_2^2 \sim \chi^2_{2 \text{ d.f.}} \\
+\theta \sim \text{Unif}[0, 2 \pi]
+$$
+
+- Chi-square with 2 d.f. $\chi^2_{2 \text{ d.f.}}$ is basically Exponential distribution with $\lambda = 1/2$, $Exp(1/2)$. 
+
+- We know how to draw from Exponential. 
+
+## Box-Mueller Transformation
+
+- We generate two normal random variable $X_1$ and $X_2$ by: 
+$$
+U_1, U_2 \sim Unif[0,1] \\
+X_1 = \sqrt{-2 \log(U_1)}cos(2 \pi U_2)\\ 
+X_2 = \sqrt{-2 \log(U_1)}sin(2 \pi U_2)
+$$
+
+## In R 
+
+```{r, echo = TRUE}
+u1 = runif(n)
+u2 = runif(n)
+x1 = sqrt(-2*log(u1))*cos(2*pi*u2)
+x2 = sqrt(-2*log(u1))*sin(2*pi*u2)
+x = c(x1,x2)
+```
+
+## Visual Verification {.smaller}
+
+```{r, echo = TRUE}
+hist(x,breaks = 30, freq = F)
+curve(dnorm,add=T)
+```
+
+- Do you know another test for normality?? 
+
+## Visual: QQ plots 
+
+```{r, echo = TRUE}
+qqnorm(x)
+qqline(x)
+```
+
+## Statistical: Kolmogorov-Smirnov Test 
+
+Kolmogorov-Smirnov Test: 
+$$
+H_0: F = F_0 \; ( \text{fully specified CDF}) \; \text{vs.} \; H_1: F \neq F_0 
+$$
+
+
+```{r, echo = T}
+ks.test(x,pnorm)
+```
+
+-  Stat 4033: "If $F_0$ is not fully specified, `ks.test` does not work." But we won't run into that here. 
+
+
+## Generating from the Uniform disk 
+
+- We want to generate samples from the Uniform disk in $\mathbb{R}^2$.
+
+$$
+p(x,y) = 1/\pi \text{ if } x^2 + y^2 \le 1 
+$$ 
+
+- Exercise! 
+
+## Naive Idea
+
+-  Generate $R \sim \text{Unif}[0,1]$ and $\theta \sim \text{Unif}[0,2\pi]$. 
+- Set: 
+
+$$
+X_1 = R \cos(\theta) \\
+X_2 = R \sin(\theta)
+$$
+- The naive idea does not work. 
+
+## Naive Idea in R
+
+```{r, echo = TRUE, fig.align= 'center' ,fig.height = 5, fig.width= 5}
+R = runif(1e4,0,1)
+theta = 2*pi*runif(1e3,0,1)
+X = R*cos(theta);Y = R*sin(theta)
+plot(X,Y, pch = 20, col=rgb(1,0,0,0.2))
+```
+- Thickly concentrated in the center !
+
+
+## What works 
+
+-  Generate $R \sim \text{Unif}[0,1]$ and $\theta \sim \text{Unif}[0,2\pi]$. 
+- Set: 
+
+$$
+X_1 = \sqrt{R} \cos(\theta) \\
+X_2 = \sqrt{R} \sin(\theta)
+$$
+
+
+## Exercise: Why does this work? 
+
+```{r, echo = TRUE, fig.align= 'center' ,fig.height = 5, fig.width= 5}
+X = sqrt(R)*cos(theta);Y = sqrt(R)*sin(theta)
+plot(X,Y,pch = 20, col=rgb(1,0,0,0.2))
+```
+
+
+## Accept-Reject {.smaller}
+
+ - Draw from unit cube in $\mathbb{R}^2$ and accept samples that fall inside the disc. 
+ - Inefficient for higher dimensions.
+
+```{r, echo = TRUE}
+arfunction <- function(n){
+  rvx = rep(0,n)
+  rvy = rep(0,n)
+  a = 0
+  for (i in 1:n){
+    x = runif(1,min = -1,max = 1)
+    y = runif(1,min = -1, max = 1)
+    if (x^2 + y^2 <= 1){
+      rvx[i] = x
+      rvy[i] = y 
+      a = a + 1
+    }
+  }
+  cat("Efficiency is ", a/n)  
+  plot(rvx,rvy)
+  title("Uniform on a disc")
+}
+```
+
+## Disc point picking 
+
+```{r, echo = TRUE, fig.align= 'center' ,fig.height = 4 , fig.width= 4}
+n = 5000; arfunction(n)
+```
+
+## Exercise (Lab)
+
+- Write a sampler to generate samples from the following density using the inverse transform.
+
+$$
+p(x) = \frac{\alpha \beta^{\alpha}}{x^{\alpha + 1}} \text{for } x \ge \beta
+$$
+
+
+## Steps
+
+-  Take $\alpha = 5$, $\beta = 2$. 
+-  First calculate the CDF $F(x)$
+-  Then calculate the inverse $F^{-1}(x)$. 
+-  Generate $U \sim \text{Unif}[0,1]$, apply $F^{-1}(U)$.
+
+## Solution 
+
+```{r, echo = TRUE}
+Finv <- function(u){
+    x = B/((1-u)**(1/a))
+    return(x)
+}
+
+B = 2.0
+a = 5.0
+n = 10000
+u = runif(n)
+x = Finv(u)
+```
+
+## Visual Verification 
+
+```{r, echo = T, fig.height=4}
+y = seq(B,20,0.1)
+fy = a*(B^a)/(y^(a+1))
+hist(x,breaks=100,freq=F, col = rgb(0,0,1,0.5))
+lines(y,fy, col = "red")
+legend("topright",c("histogram","density"),col=c("blue","red"),lty = c(1,1))
+```
+
+
+ 
+
+
