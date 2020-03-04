@@ -235,8 +235,7 @@ $$
 ## Dirichlet-Multinomial 
 
 $$
-\text{Multinomial: } p(y_1, \ldots, y_k) \propto \pi_1^{y_1}\pi_2^{y_2}\cdots (1-\sum_{i=1}^{K-1}\pi_i)^{{n-\sum_{i=1}^{K-1}y_i}
-}
+\text{Multinomial: } p(y_1, \ldots, y_k) \propto \pi_1^{y_1}\pi_2^{y_2}\cdots (1-\sum_{i=1}^{K-1}\pi_i)^{n-\sum_{i=1}^{K-1}y_i}
 $$
 
 Dirichlet prior: 
