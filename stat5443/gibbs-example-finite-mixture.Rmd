@@ -1,0 +1,674 @@
+---
+title: "Gibbs examples"
+author: "Jyotishka Datta"
+date: "March 2, 2020"
+output: ioslides_presentation
+---
+
+<style>
+.reveal .slides section .slideContent ul li{
+    font-size: 62pt;
+    color: red;
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T, cache = T)
+```
+
+## Finite mixture model 
+
+As we have discussed before, in many situations the posterior is intractable, i.e. without any `nice' analytic closed form expression and the Markov Chain Monte Carlo ideas are very useful in those cases. 
+
+The first example we will see involves a finite mixture of Gaussians. 
+$$
+X_1, X_2, \ldots, X_n \stackrel{IID}{\sim} f(\cdot).
+$$
+where, 
+$$
+f(\cdot) = \sum_{k=1}^{K} \pi_k ~N(\cdot ; \mu_k, 1)
+$$
+
+## Parameters 
+
+Here $\pi_1, \pi_2, \ldots, \pi_K$ are probabilities that an observation will belong the $K$ clusters. 
+
+Obviously, $\pi_i \ge 0$ and $\sum_{i=1}^{K} \pi_i = 1$. 
+
+The parameters $\mu_k$, $k = 1, \ldots, K$ are the centers for each of the $K$ groups and they are also our parameter of interest. 
+
+## Example 
+
+These models are typically used in modeling multimodal data distributions, where the multiple modes might be due to some underlying grouping mechanism. 
+
+Here is a simple example, suppose there are two groups of individuals, about half of them with higher blood pressure and the other half of with very low b.p.. One way of modeling this would be as follows: 
+```{R}
+n <- 5000
+bp <- numeric(n)
+z <- numeric(n)
+for(i in 1:n) {
+  z.i <- rbinom(1,1,0.5)
+  if(z.i == 0) bp[i] <- rnorm(1, mean = 100, sd = 5)
+  else bp[i] <- rnorm(1, mean = 140, sd = 5)
+  z[i] = z.i
+}
+```
+
+
+## Bimodal distribution 
+
+```{r}
+hist(bp, freq = F)
+```
+
+
+## Bimodality 
+
+This is a clear bimodal distribution. 
+
+The individual components are still normal. 
+
+```{r, echo = F}
+hist(bp[z==1],freq=F,col=rgb(0,1,0,0.2), xlim=c(80,160),main="Histograms")
+hist(bp[z==0],freq=F, col = rgb(0,0.5,0.5,0.2), add=T)
+lines(density(bp),col="red")
+```
+
+
+## Example 2 
+
+Now suppose we look at the height distribution for a class of students, and suppose that the height of a randomly choses male is normally distributed 5'9" with s.d. 2.5 inches and the height of a randomly chosen female is $N(5'4", 2.5)$. However, the composition is 75-25. 
+
+```{R}
+n <- 5000
+heights <- numeric(n)
+z <- numeric(n)
+for(i in 1:n) {
+  z.i <- rbinom(1,1,0.75)
+  if(z.i == 0) heights[i] <- rnorm(1, mean = 69, sd = 2.5)
+  else heights[i] <- rnorm(1, mean = 64, sd = 2.5)
+  z[i] = z.i
+}
+```
+
+
+## Unimodal but not normal 
+
+Now we see that histogram is unimodal. Are heights normally distributed under this model? We plot the corresponding densities below:
+
+```{r, echo = F}
+hist(heights[z==1],freq=F,col=rgb(0,1,0,0.2), xlim=c(55,75),yli = c(0,0.25), main="Histograms")
+hist(heights[z==0],freq=F, col = rgb(0,0.5,0.5,0.2), add=T)
+lines(density(heights),col="red")
+```
+
+_ Here the individual components are normal but the population distribution is not (because it's not even symmetric). 
+
+
+## Mixture model 
+
+- Both these examples show draws from a mixture model that assumes each observation $X_i$ is drawn from one of the $K$ components. 
+
+
+-  Each $X_i$ is associated with a categorical variable $Z_i$ that indicates which component the obsrvation comes from. $Z_i$ can be called cluster or group indicator or if you thinnk of the groups as communities, then $Z_i$ is a community membership or labels. 
+
+- Often times, we are given the data without the labels, e.g. all the blood pressure values without the high/low label or all height data without the gender information. 
+
+- The goal is to develop an inference procedure that can learn these labels as well as the different means given the unlabelled data. 
+
+
+## Probability 
+
+First, by the law of total probability the marginal probability of $X$ is: 
+
+$$
+P(X_i = x) = \sum_{k=1}^{K}P(X_i = x \mid Z_i = k) P(Z_i = k) \\
+= \sum_{k=1}^{K} P(X_i = x \mid Z_i = k) \pi_k
+$$
+
+
+$\pi_i$: mixture weights. 
+$P(X_i = x \mid Z_i = k)$: mixture components. 
+
+The mixture components can be either discrete or continuous, and correspondingly we should have probability mass functions or probability density functions. 
+
+
+## Normal mixtures 
+
+In our examples, the groups had Normally distributed mixture components, so the marginal components are $\phi(x; \mu_k, \sigma_k)$ where $\phi(\cdot)$ is the Normal density function. 
+
+$$
+P(X_i = x) = \sum_{k=1}^{K} \phi(x; \mu_k, \sigma_k) ~ \pi_k \\
+= \sum_{k=1}^{K} \frac{1}{\sqrt{2 \pi}\sigma_k} e^{-\frac{(x-\mu_k)^2}{2\sigma_k^2}}~ \pi_k
+$$
+
+## Likelihood 
+
+If we observe samples $X_1, X_2, \ldots, X_n$ independently from this mixture, the complete likelihood for $\pi$ is:
+
+$$
+\begin{align}
+L(\pi) & = \prod_{i=1}^{n} P(X_i \mid \pi) \\
+& = \prod_{i=1}^{n} \sum_{k=1}^{K} P(X_i \mid Z_i = k) \pi_k \\
+& = \prod_{i=1}^n \sum_{k=1}^{K} \phi(x_i; \mu_k, \sigma_k) ~ \pi_k 
+\end{align}
+$$
+
+**Our goal is to estimate $\{\mu_k, \sigma_k, \pi_k, k = 1, \ldots, K\}$ given the observations $X_1, \ldots, X_n$.** 
+
+
+## Two strategies 
+
+- There are two popular ways of estimating the parameters: 
+1.  Expectation-Maximization algorithm (EM)
+2.  Posterior inference (Gibbs)
+
+- Both these approaches use the idea that we can introduce hidden/latent variables $Z_i$'s indicating the group membership, even when we don't know the $Z_i$'s. 
+
+-  We will now look at the Gibbs sampler but just give the intuition behind EM. 
+
+## Intuition 
+
+-  If we knew the indicators $Z_i$'s then we can easily estimate $\mu_k$ and $\sigma_k$'s. 
+-  We can simply gather the observations $X_i$ for which $Z_i = k$, and use those observations to estimate $\mu_k$ and $\sigma_k$. 
+-  On the other hand, $\pi_k$'s can be estimated from the proportion of points assigned to cluster $k$. 
+-  The EM tries to solve this by running a recursive procedure 
+   : Update the posterior probabilities $P(Z_i = k \mid X)$ given parameter values, and then update the parameter given these posterior probabilities later. 
+
+## EM 
+
+EM works because you can prove mathematically that the value of the log-likelihood will increase at each step. 
+
+More on EM algorithm later. 
+
+Now, let's go back to the other idea: Bayesian inference for mixture models. 
+
+
+## Gibbs sampling 
+
+We want to learn $\mu, \pi$ via $p(\mu, \pi \mid x)$. 
+We can use a Gibbs sampler but we have to `augment' the space to sample from $p(\mu, \pi, z \mid x)$, where $z$ is the latent group indicator. 
+
+Idea: 
+
+-  Sample $\mu$ from $p(\mu \mid x, z, \pi)$
+-  Sample $\pi$ from $p(\pi \mid x, z, \mu)$
+-  Sample $z$ from  $p(z \mid x, \mu, \pi)$ 
+
+- Here all these are easy to sample from. 
+
+- **Go to whiteboard**
+
+## Gaussian is conjugate to Gaussian mean
+
+$$
+X_1, X_2, \ldots, X_n \stackrel{IID}{\sim} N(\mu, \sigma^2) \\
+\mu \sim N(0, \tau^2)
+$$
+
+It follows that the posterior on $\mu$ would be another Gaussian: 
+$$
+\mu \mid X_1, \ldots, X_n \sim N(\hat{\mu}, \hat{\sigma}^2) \\
+\text{where } \hat{\mu} = \frac{n/\sigma^2}{n/\sigma^2+1/\tau^2} \bar{x}, \; \hat{\sigma}^2 = \frac{1}{n/\sigma^2+1/\tau^2}
+$$
+
+Clearly, as $n \to \infty$, $\hat{\mu} \to \bar{x}$, i.e. __the effect of the prior washes away by the data__. 
+
+## Dirichlet is conjugate to Multinomial
+
+This is the multivariate analog of the Beta-Binomial conjugacy property. 
+
+Recall:
+$$
+\text{Binomial Likelihood: } f(y \mid \pi) \propto \pi^{y} (1-\pi)^{(n-y)} \\
+\text{Beta Prior: } p(\pi) \propto \pi^{\alpha-1} (1-\pi)^{\beta-1}
+$$
+Posterior would be another Beta:
+
+$$
+\pi(\pi | y) \propto \pi^{y+\alpha-1} (1-\pi)^{n-y+\beta-1} \equiv \text{Beta}(y+\alpha, n-y+\beta)
+$$
+
+**Note** Beta prior with both parameters equal to 1 is a Uniform prior. 
+
+
+## Dirichlet-Multinomial 
+
+$$
+\text{Multinomial: } p(y_1, \ldots, y_k) \propto \pi_1^{y_1}\pi_2^{y_2}\cdots (1-\sum_{i=1}^{K-1}\pi_i)^{{n-\sum_{i=1}^{K-1}y_i}
+}
+$$
+
+Dirichlet prior: 
+
+$$
+\pi(\pi_1, \pi_2, \ldots, \pi_K) \propto \pi_1^{\alpha_1 - 1} \pi_2 ^{\alpha_2 - 1} \cdots (1-\sum_{i=1}^{K-1}\pi_i)^{\alpha_K - 1}
+$$
+Clearly, the posterior will be another Dirichlet with parameters:
+$\alpha_i' = y_i + \alpha_i$. 
+
+
+## Categorical and Multinomial 
+
+We assume that the cluster membership indicators are categorical variables, i.e. 
+$$
+P(Z_i = j) = \pi_j \; \forall j = 1, \ldots, K
+$$
+
+This is basically a Multinomial with $n = 1$. 
+
+Dirichlet is still conugate to this likelihood. 
+
+We will assume that the prior on $(\pi_1, \ldots, \pi_K)$ is a Dirichlet with all $\alpha_i = 1$. 
+
+(In some sense this is an extension of U(0,1) to $K$ dimensions)
+
+
+## Full conditional distributions 
+
+The standard Gibbs sampler should be: 
+
+- For each $i \in \{1, 2, \ldots, n\}$.
+    Sample $z_i \mid {\mu, z_{-i}, x}$.
+- For each $k \in \{ 1, 2, \ldots, K\}$
+    Sample $\mu_k \mid {\mu_{-k}, z, x}$.
+- For each $k \in \{ 1, 2, \ldots, K\}$
+    Sample $\pi_k \mid {\pi_{-k}, z, x}$.
+    
+However, the conditional independence structure in mixture model allows us to simply this a great deal. 
+
+
+## Conditional Independence I
+
+The first conditional independence relation is:
+$$
+p(z_i \mid {\mu, z_{-i}, x}) = p(z_i \mid {\mu, x_i})
+$$
+
+- Given $x, \mu$, $z_i$ does not depend on the other $z_j$'s or other $x_j$'s where $j \neq i$. 
+- This implies:
+$$
+\begin{align}
+p(z_i \mid \mu, x_i) & \propto p(z_i) \times p(x_i \mid \mu_{z_i}) \\
+& \propto \pi_k ~ p(x_i \mid \mu_k) \; \text{if} \; z_i = k, \; \forall k = 1, \ldots, K \\
+& \propto \pi_k ~ N(x_i; \; \mu_k, 1) \quad \forall k = 1, \ldots, K
+\end{align}
+$$
+
+- This is a categorical distribution where the probability of the $z_i = k$ is proportional to the likelihood of the $i^{th}$ data point under the $k^{th}$ cluster. 
+
+## Conditional independence II
+
+$$
+p(\mu_k \mid {\mu_{-k}, z, x}) = p(\mu_k \mid z, x)
+$$
+
+Given the data and the cluster indicators, the $k^{th}$ mean does not depend on the other mean parameters. 
+
+We can calculate the distribution intuitively.
+
+If we know the cluster assignments, what is the conditional distribution of $\mu_k$? It is simple a posterior Gaussian, conditional on the data
+that were assigned to the $k^{th}$ cluster.
+
+
+## Conditional Independence II 
+
+$$
+\mu_k \mid z, x \sim N(\hat{\mu_k}, \hat{\sigma}^2_k) \\
+\text{where } \hat{\mu_k} = \frac{n_k/\sigma^2}{n_k/\sigma^2+1/\tau^2} \bar{x}_k, \\
+1/\hat{\sigma}^2_k = n_k/\sigma^2+1/\tau^2 \\
+n_k = \sum_{i=1}^{n}1\{Z_i = k\} = \text{Size of the k-th cluster}
+$$
+
+
+## All together {.smaller}
+
+$$
+\begin{align}
+z_i \mid \mu, x_i & \sim \text{Cat}(\hat{\pi}_1, \ldots, \hat{\pi}_K) \\
+\text{where } & \hat{\pi}_k \propto \pi_k ~ N(x_i; \; \mu_k, 1) \quad \forall k = 1, 2, \ldots, K\\
+\mu_k \mid z, x & \sim N(\hat{\mu_k}, 1) \; \forall k = 1, 2, \ldots, K\\
+\pi_k \mid {z, x} & \sim \text{Dir}(1 + n_1, 1+n_2, \ldots, 1 + n_K)
+\end{align}
+$$
+
+We have all the full conditionals - we can write the Gibbs sampler ! 
+
+## Codes 
+
+Sampling from $p(z_i \mid \mu, x_i)$: Categorical distribution. 
+
+```{r}
+normalize = function(x){return(x/sum(x))}
+  
+#' @param x an n vector of data
+#' @param pi a k vector
+#' @param mu a k vector
+#' @return z samples from the posterior
+sample_z = function(x,pi,mu){
+    dmat = outer(mu,x,"-") # k by n matrix, d_kj =(mu_k - x_j)
+    p.z.given.x = as.vector(pi) * dnorm(dmat,0,1) 
+    p.z.given.x = apply(p.z.given.x,2,normalize) # normalize columns
+    z = rep(0, length(x))
+    for(i in 1:length(z)){
+      z[i] = sample(1:length(pi), size=1,prob=p.z.given.x[,i], 
+                    replace=TRUE)
+    }
+    return(z)
+  }
+```
+
+
+## Codes 
+
+Sample $p(\pi \mid z)$ from a Categorical. 
+
+```{r}
+ #' @param z an n vector of cluster allocations (1...k)
+  #' @param k the number of clusters
+  sample_pi = function(z,k){
+    counts = colSums(outer(z,1:k,FUN="=="))
+    pi = gtools::rdirichlet(1,counts+1)
+    return(pi)
+  }
+```
+
+
+## Codes {.smaller}
+
+Sample $\mu \mid x, z$ from Normal. 
+
+```{r}
+#' @param x an n vector of data
+  #' @param z an n vector of cluster allocations
+  #' @param k the number o clusters
+  #' @param prior.mean the prior mean for mu
+  #' @param prior.prec the prior precision for mu
+  sample_mu = function(x, z, k, prior){
+    df = data.frame(x=x,z=z)
+    mu = rep(0,k)
+    for(i in 1:k){
+      sample.size = sum(z==i)
+      sample.mean = ifelse(sample.size==0,0,mean(x[z==i]))
+      
+      post.prec = sample.size+prior$prec
+      post.mean = (prior$mean * prior$prec + sample.mean * sample.size)/post.prec
+      mu[i] = rnorm(1,post.mean,sqrt(1/post.prec))
+    }
+    return(mu)
+  }
+```
+
+
+## Gibbs sampler 
+
+
+```{r}
+gibbs = function(x,k,niter =1000,muprior = list(mean=0,prec=0.1)){
+    pi = rep(1/k,k) # initialize
+    mu = rnorm(k,0,10)
+    z = sample_z(x,pi,mu)
+    res = list(mu=matrix(nrow=niter, ncol=k), pi = matrix(nrow=niter,ncol=k), z = matrix(nrow=niter, ncol=length(x)))
+    res$mu[1,]=mu
+    res$pi[1,]=pi
+    res$z[1,]=z 
+    for(i in 2:niter){
+        pi = sample_pi(z,k)
+        mu = sample_mu(x,z,k,muprior)
+        z = sample_z(x,pi,mu)
+        res$mu[i,] = mu
+        res$pi[i,] = pi
+        res$z[i,] = z
+    }
+    return(res)
+  }
+```
+
+## Simulate data from model
+
+```{r}
+set.seed(33)
+
+# generate from mixture of normals
+#' @param n number of samples
+#' @param pi mixture proportions
+#' @param mu mixture means
+#' @param s mixture standard deviations
+rmix = function(n,pi,mu,s){
+  z = sample(1:length(pi),prob=pi,size=n,replace=TRUE)
+  x = rnorm(n,mu[z],s[z])
+  return(x)
+}
+```
+
+
+## Data distribution 
+
+Let the two mean parameters be $\mu_1 = -2$ and $\mu_2 = 2$ and $\sigma_1 = \sigma_2 = 1$ (known). 
+
+```{r}
+x = rmix(n=1000,pi=c(0.5,0.5),mu=c(-2,2),s=c(1,1))
+hist(x)
+```
+
+
+## Run the Gibbs sampler 
+
+```{r}
+res = gibbs(x,2)
+  plot(res$mu[,1],ylim=c(-4,4),type="l")
+  lines(res$mu[,2],col=2)
+```
+
+## Fewer observations 
+
+```{r}
+x = rmix(100,c(0.5,0.5),c(-2,2),c(1,1))
+  res2 = gibbs(x,2)
+  plot(res2$mu[,1],ylim=c(-4,4),type="l")
+  lines(res2$mu[,2],col=2)
+```
+
+
+## Fewer still 
+
+```{r}
+x = rmix(10,c(0.5,0.5),c(-2,2),c(1,1))
+  res3 = gibbs(x,2)
+  plot(res3$mu[,1],ylim=c(-4,4),type="l")
+  lines(res3$mu[,2],col=2)
+```
+
+## Quantiles 
+
+The true values were $\mu_1 = -2$ and $\mu_2 = 2$.
+
+```{r}
+quantile(res$mu[-(1:10),1],c(0.05,0.95))
+quantile(res$mu[-(1:10),2],c(0.05,0.95))
+```
+
+# First Project Idea 
+
+## Model change-points 
+
+Coal-mining disasters in the U.K. There is possibly a change-point in the counts:
+
+```{r, echo = F}
+"CoalDisast" <-
+structure(list(Year = as.integer(c(1851, 1852, 1853, 1854, 1855, 
+1856, 1857, 1858, 1859, 1860, 1861, 1862, 1863, 1864, 1865, 1866, 
+1867, 1868, 1869, 1870, 1871, 1872, 1873, 1874, 1875, 1876, 1877, 
+1878, 1879, 1880, 1881, 1882, 1883, 1884, 1885, 1886, 1887, 1888, 
+1889, 1890, 1891, 1892, 1893, 1894, 1895, 1896, 1897, 1898, 1899, 
+1900, 1901, 1902, 1903, 1904, 1905, 1906, 1907, 1908, 1909, 1910, 
+1911, 1912, 1913, 1914, 1915, 1916, 1917, 1918, 1919, 1920, 1921, 
+1922, 1923, 1924, 1925, 1926, 1927, 1928, 1929, 1930, 1931, 1932, 
+1933, 1934, 1935, 1936, 1937, 1938, 1939, 1940, 1941, 1942, 1943, 
+1944, 1945, 1946, 1947, 1948, 1949, 1950, 1951, 1952, 1953, 1954, 
+1955, 1956, 1957, 1958, 1959, 1960, 1961, 1962)), Count = c(4, 
+5, 4, 1, 0, 4, 3, 4, 0, 6, 3, 3, 4, 0, 2, 6, 3, 3, 5, 4, 5, 3, 
+1, 4, 4, 1, 5, 5, 3, 4, 2, 5, 2, 2, 3, 4, 2, 1, 3, 2, 2, 1, 1, 
+1, 1, 3, 0, 0, 1, 0, 1, 1, 0, 0, 3, 1, 0, 3, 2, 2, 0, 1, 1, 1, 
+0, 1, 0, 1, 0, 0, 0, 2, 1, 0, 0, 0, 1, 1, 0, 2, 3, 3, 1, 1, 2, 
+1, 1, 1, 1, 2, 4, 2, 0, 0, 0, 1, 4, 0, 0, 0, 1, 0, 0, 0, 0, 0, 
+1, 0, 0, 1, 0, 1)), .Names = c("Year", "Count"), row.names = c("1", 
+"2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", 
+"14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", 
+"25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", 
+"36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", 
+"47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", 
+"58", "59", "60", "61", "62", "63", "64", "65", "66", "67", "68", 
+"69", "70", "71", "72", "73", "74", "75", "76", "77", "78", "79", 
+"80", "81", "82", "83", "84", "85", "86", "87", "88", "89", "90", 
+"91", "92", "93", "94", "95", "96", "97", "98", "99", "100", 
+"101", "102", "103", "104", "105", "106", "107", "108", "109", 
+"110", "111", "112"), class = "data.frame")
+plot(CoalDisast$Year, CoalDisast$Count, type = "l")
+```
+
+
+
+## Hierarchical model 
+
+One possible approach is the hierarchical model that was proposed in Carlin, Gelfand and Smith (1992). 
+Here we will develop a Gibbs sampling strategy for a fitting a Poisson process with a change point to a time series data.
+
+$$
+\begin{gather}
+X_i \sim \text{Poisson}(\mu); \; i = 1, 2, \ldots, k, \\
+X_i \sim \text{Poisson}(\lambda); \; i = k+1, k+2, \ldots, m.
+\end{gather}
+$$
+
+
+Here $X_i$'s are the observations and the parameter of interest are $(\mu, \lambda, k)$.
+
+
+## Priors 
+
+Second stage: We specify the following independent priors on $(\mu, \lambda, k)$.
+
+$$
+\begin{gather*}
+k \sim \text{discrete uniform on} \; \{1, 2, \ldots, m\}, \; m = \text{sample size} \\
+\mu \sim \text{Gamma}(a_1, b_1) \\
+\lambda \sim \text{Gamma}(a_2, b_2),
+\end{gather*}
+$$
+
+where $a_1, a_2, b_1, b_2$ are fixed parameters chosen by the user. 
+
+
+## Challenges
+
+-  How do you write the Gibbs sampler for this hierarchical model?
+
+-  What are the drawbacks of this method?
+
+    1.  You have to know how many change-points are there. 
+    2.  Only applicable to count data. 
+    
+
+## Joint Posterior 
+
+$$
+\pi(\mu, \lambda, k \mid X) = f(X \mid \lambda, \mu, k) \pi(\mu) \pi(\lambda) \pi(k)
+$$
+Likelihood:
+
+$$
+\begin{align}
+f(X \mid \lambda, \mu, k) & = \prod_{i=1}^{k} f(x_i \mid \mu, k) \prod_{i=k+1}^{m} f(x_i \mid \lambda, k) \\
+& = \prod_{i=1}^{k} \frac{\mu^{x_i}e^{-\mu}}{x_i!} \prod_{i=k+1}^{m} \frac{\lambda^{x_i}e^{-\lambda}}{x_i!}
+\end{align}
+$$
+
+## Priors 
+
+Conjugate Priors: [Gamma is conjugate to Poisson]
+$$
+\pi(\mu) \propto \mu^{a_1-1}e^{-\mu b_1} \\
+\pi(\lambda) \propto \lambda^{a_2-1}e^{-\lambda b_2} \\
+$$
+Prior on $k$ is discrete Uniform $\{1, 2, \ldots, m\}$.
+$$
+\pi(k) = \frac{1}{m} \; \forall k = 1, 2, \ldots, m.
+$$
+
+## Posterior {.smaller}
+
+$$
+\begin{align}
+\pi(\mu, \lambda, k \mid X) & \propto \prod_{i=1}^{k} \frac{\mu^{x_i}e^{-\mu}}{x_i!} \prod_{i=k+1}^{m} \frac{\lambda^{x_i}e^{-\lambda}}{x_i!} \mu^{a_1-1}e^{-\mu b_1}\lambda^{a_2-1}e^{-\lambda b_2} \frac{1}{m} \\
+& \propto \mu^{a_1 + \sum_{i=1}^{k}x_i -1} e^{-\mu(k+b_1)} \lambda^{a_2 + \sum_{i=k+1}^{m}x_i -1} e^{-\mu(m-k+b_2)} 
+\end{align}
+$$
+
+-  The conditional distribution for both $\mu$ and $\lambda$ should be Gamma distributions with appropriate parameters. 
+
+-  The conditional on $k$ must be a Categorical with probabilities proportional to the product of terms involving $k$ in the last displayed equation.
+
+
+## Your goal 
+
+-  First write the full conditional distributions for each parameters, and implement the Gibbs sampler. 
+
+-  Then try to extend the model in either of the two directions mentioned before. (A) Extend for the unknown number of change points case, or (B) extend for the continuous case where the observed data points are continuous Normal variables, not Poisson. 
+
+- An example of Normal chnge-point data and some very recent references are given below.
+
+## Continuous change-point data 
+
+Example 1 in paper, from Frick, Munk, and Seiling (2014), p 516.
+
+```{r, echo = T, eval = F}
+n <- 497
+theta <- numeric(n)
+theta[1:138] <- -0.18
+theta[139:225] <- 0.08
+theta[226:242] <- 1.07
+theta[243:299] <- -0.53
+theta[300:308] <- 0.16
+theta[309:332] <- -0.69
+theta[333:n] <- -0.16
+n <- length(theta)
+sig2 = 0.04
+y <- theta + sqrt(sig2) * rnorm(n)
+plot(y, cex=0.5, col="gray")
+lines(theta)
+```
+
+
+## Continuous change-point data 
+
+Example 1 in paper, from Frick, Munk, and Seiling (2014), p 516.
+
+```{r, echo = F, eval = T}
+n <- 497
+theta <- numeric(n)
+theta[1:138] <- -0.18
+theta[139:225] <- 0.08
+theta[226:242] <- 1.07
+theta[243:299] <- -0.53
+theta[300:308] <- 0.16
+theta[309:332] <- -0.69
+theta[333:n] <- -0.16
+n <- length(theta)
+sig2 = 0.04
+y <- theta + sqrt(sig2) * rnorm(n)
+plot(y, cex=0.5, col="gray")
+lines(theta)
+```
+    
+## Recent work 
+
+**Asymptotically optimal empirical Bayes inference in a piecewise constant sequence model**
+
+Ryan Martin, Weining Shen
+
+Abstract:
+Inference on high-dimensional parameters in structured linear models is an important statistical problem. This paper focuses on the piecewise constant Gaussian sequence model, and we develop a new empirical Bayes solution that enjoys adaptive minimax posterior concentration rates and, thanks to the conjugate form of the empirical prior, relatively simple posterior computations.
+
+[https://arxiv.org/abs/1712.03848](https://arxiv.org/abs/1712.03848)
+
