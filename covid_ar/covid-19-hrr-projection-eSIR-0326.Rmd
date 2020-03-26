@@ -1,0 +1,387 @@
+---
+title: "COVID-19 Projections for AR"
+author: "UA Research Team"
+date: "March 26, 2020"
+output: 
+  html_document:
+      toc: true
+      number_sections: true
+      toc_float: true
+      toc_depth: 6
+      theme: united
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(comment = NA,
+               echo = FALSE,
+               prompt = FALSE,
+               cache = TRUE,
+               warning = FALSE,
+               message = FALSE,
+               root.dir = "C:/Users/jd033/Box/COVID")
+
+base_dir = "C:/Users/jd033/Box/COVID"
+setwd("C:/Users/jd033/Box/COVID")
+```
+
+
+```{r packages, message=FALSE, warning=FALSE, cache=T}
+if(T){
+  library("sf")            # Spatial data objects and methods
+  library("mapview")       # Interactive Map Viewing
+  library("ggmap")         # ggplot2 addon for base maps
+  library("cowplot")
+  library("spatstat")      # KDE and other spatial functions
+  library("raster")        # cell-based spatial operations
+  library("tidyverse")     # data manipulation framework
+  library("Hmisc")         # using cut2() functions for ggplot legends
+  library("fitdistrplus")  # Distribution fitting functions
+  library("lubridate")     # Power tools for handling dates
+  library("tidycensus")
+  library("lwgeom")
+  library("Hmisc")
+  library("hrbrthemes")
+  library("gridExtra")
+  library("patchwork")
+  library("spdep")         # KNN functions
+  library("foreach")
+  library("doParallel")
+  library("corrplot")
+  library("ranger")        # randomforest implimentation      
+  # library("glmnet")        # for Ridge and Lasso Regression
+  library("knitr")         # for kable table
+  library("kableExtra")
+  # library("FNN")           # KNN for CPS vs. NN plots
+  # library("groupdata2")
+  library("htmltools")
+  library("viridis")
+  library("viridisLite")
+  library(sjPlot)
+  library(sjlabelled)
+  library(sjmisc)
+  library(eSIR) 
+
+  library(RCurl)
+  library(glue)
+  library(DT)
+  library(plyr)
+  library(dplyr)
+  library(plotly)
+  library(janitor)
+  library(RColorBrewer)
+}
+```
+
+```{r themes}
+mapTheme <- function() {
+  theme(
+    plot.title = element_text(size = 14, family = "sans", face = "plain", hjust = 0),
+    plot.subtitle=element_text(size = 11, family = "sans", hjust = 0),
+    plot.caption=element_text(size = 10, family = "sans", face = "italic", hjust = 0),
+    axis.text = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line = element_blank(),
+    legend.title = element_text(size = 10, family = "sans"),
+    legend.text = element_text(size = 9, family = "sans"),
+    panel.border = element_blank()
+  )
+}
+
+plotTheme <- function() {
+  theme(
+    plot.title = element_text(size = 14, family = "sans", face = "plain", hjust = 0),
+    plot.subtitle=element_text(size = 11, family = "sans", hjust = 0),
+    plot.caption=element_text(size = 10, family = "sans", face = "italic", hjust = 0), 
+    axis.title.x = element_text(size = 10, family = "sans", face = "plain", hjust = 1, vjust = -0.5),
+    axis.title.y = element_text(size = 10, family = "sans", face = "plain", hjust = 1, vjust = 1),
+    axis.text = element_text(size = 7, family = "sans", face = "plain"),
+    panel.background = element_blank(),
+    panel.grid.minor = element_line(colour = "gray"),
+    panel.grid.major = element_line(colour = "gray"),
+    axis.ticks = element_blank(),
+    legend.title = element_text(size = 10, family = "sans"),
+    legend.text = element_text(size = 9, family = "sans"),
+    axis.line = element_blank()
+  )
+}
+```
+
+# Motivation
+
+## Modeling COVID-19 outbreak in AR 
+
+The main aim of this project is to analyze the dynamics of outbreak of novel coronavirus using a hierarchical epidemiological model to forecast the spread of infection and its impact on hospitalization across the state and hospital referral regions (HRR). This is a short report of our results so far. 
+
+```{r HRR_plot, fig.caption ="confirmed by HRR", out.width="60%"}
+
+img1_path <-  "HRR/HRR_confirmed_plot_0325.png"
+# Small fig.width
+include_graphics(img1_path)
+```
+
+
+## Spatial distribution of confirmed cases over county and HRR
+
+```{r county_plot, out.width="50%"}
+
+img1_path <-  "AR_results/plot_spatially-1.png"
+img2_path <-  "hrr_spatial_plot.png"
+# Small fig.width
+include_graphics(img1_path)
+include_graphics(img2_path)
+```
+
+<!-- ![Countywise Confirmed Cases](AR_results/plot_spatially-1.png) -->
+
+# eSIR model 
+
+## Description of eSIR 
+
+The standard SIR model [see 3] takes as input two time series of proportions of infected and removed cases, denoted by $Y_t^I$ and $Y_t^R$ at time t, respectively, where the removed part of the population is a sum of the recovered cases and deaths at time t. The standard SIR assumes a  constant rate for both transmission and removal which does not reflect reality where these rates are affected by government imposed isolation measures. We apply an extension to the standard SIR model (eSIR, see [1,2]) by letting a time-varying probability that a susceptible person meets an infected person or vice versa. The dynamic model is represented below: 
+
+```{r eSIR_formula, out.width="50%"}
+formula1_path <-  "AR_results/eSIR_model.png"
+# Small fig.width
+include_graphics(formula1_path)
+```
+
+Here $\theta_t^I$ and $\theta_t^R$ are the respective prevalence of infection and removal at time t, and expected proportions are equal to the prevalence of infection and the probability of removal at time t.
+
+Here $\pi(t)$ is called a transmission modifier as it modifies the probability of a susceptible person meeting an infected person. In particular, Suppose at a time t, $q^S(t)$ is is the chance of an at-risk person being in-home isolation, and $q^R(t)$ is the chance of an
+infected person being in-hospital quarantine, then, we will have:
+
+$$
+\pi(t) = (1- q^s(t))(1-q^R(t)) \in (0,1).
+$$
+
+Note that the above extended SIR model assumes primarily that *both population-level chance of being susceptible and population-level chance of being infected remain the same, but the chance of a susceptible person meeting with an infected person is reduced by $\pi(t)$*.
+
+For a real data analysis, $\pi(t)$, the transmission rate modifier needs to be specified according to isoloation measures taken in a given region. We can assume the following: 
+
+$$
+\pi(t) = \begin{cases}
+\pi_{01} & \text{ Before March 12, no isolation}\\
+\pi_{02} & \text{ March 12-19, in-person class stops}\\
+\pi_{03} & \text{ March 19 onwards, mandatory work-from-home at UA}
+\end{cases}
+$$
+
+Obviously, different values of $\pi_{0i}$ leads to different dynamic behaviours; we chose $\pi_{02} = 0.9$ and $\pi_{03} = 0.8$ as that produces good three-steps ahead forecasts. 
+
+<!-- ![eSIR model](AR_results/eSIR_model.png) -->
+
+
+# Results 
+
+## HRR-level forecasts
+
+State-level data from 01/22 to 03/23 pulled from USA facts and map them to the HRRs. The model forecasts the probability of infection and removal, over 200 days from the starting point (1/22), i.e. end date is Aug 10.  
+
+The forecasting plots of the prevalence of infected and removed compartments are given in Section 1.3 and in 2.1 (appendix). In each of these plots, the observed proprtions are denoted by the black dots left to the blue vertical line, which represents the last date of observations, or time $t_0$ (the current time up to which we have observed data). The two turning points are the green and purple vertical lines. The first turning point is where the daily increase of $P(I)$ starts decreasing, and the second turning point is where the $P(R)$ overtakes $P(I)$. The 95% credible interval of the predicted proportions of infected and removals are given by the salmon colored area. The relatively large area under these curves denote the large uncertainty in forecasting far ahead in time based on limited available data. The gray and red curves are the posterior mean and median curves for the prevalence of the infected $\theta_t^I$ in section 1.3, and prevalence of the removed $\theta_t^R$ in section 2.1. 
+
+## P(Infection) plots for each HRR
+
+```{r SIR_plot_2, out.width = "50%"}
+
+img16 <-  paste0("HRR/results",Sys.Date(),"/16/HRR_16_forecast.png")
+img18 <-  paste0("HRR/results",Sys.Date(),"/18/HRR_18_forecast.png")
+
+img19 <-  paste0("HRR/results",Sys.Date(),"/19/HRR_19_forecast.png")
+img21 <-  paste0("HRR/results",Sys.Date(),"/21/HRR_21_forecast.png")
+img22 <-  paste0("HRR/results",Sys.Date(),"/22/HRR_22_forecast.png")
+
+img270 <-  paste0("HRR/results",Sys.Date(),"/270/HRR_270_forecast.png")
+img379<-  paste0("HRR/results",Sys.Date(),"/379/HRR_379_forecast.png")
+
+# Small fig.width
+include_graphics(img16)
+include_graphics(img18)
+include_graphics(img19)
+include_graphics(img21)
+include_graphics(img22)
+include_graphics(img270)
+include_graphics(img379)
+```
+
+Next, we use a 14-day moving average of the probability of infection to account for the average length of stay for Covid-19 infected patients. Let us denote by $\bar{\theta_t^I}$ as the moving average of the prevalence of infected individuals $\hat{\theta}_t^I$, $t = 1, \ldots, 14$. The predicted value of number of affected individuals is going to be the number of susceptible times the prevalence of infected individuals, i.e. 
+
+$$
+\hat{N^I} = N \times \hat{\theta}_t^S \times \bar{\theta_t^I}.
+$$
+
+The upper credible limit and the mean are very different on the figures above, representing the uncertainty involved in forecasting with limited data. We show the estimated number of infected individuals where $\hat{\theta}_t^I$ is taken to be the posterior mean and the upper credible limit of the posterior distribution of $\theta_t^I$. The following table shows the maximum value of the expected number of infected and the date at which the maximum value is attained. 
+
+\begin{table}[htbp]
+  \centering
+    \caption{Worst case and Mean case Predictions from the eSIR model by each HRR}
+    \begin{tabular}{ccccc}
+    \hline
+    HRR   & max total worstcase & max day worstcase & max total meancase & max day meancase \\
+18    & 57536.28307 & 6/15/2020 & 14180.80451 & 7/5/2020 \\
+    \hline
+    19    & 58759.95802 & 4/26/2020 & 25783.99688 & 5/1/2020 \\
+    21    & 233456.3483 & 6/11/2020 & 54239.65189 & 7/13/2020 \\
+    270   & 94465.72005 & 6/5/2020 & 23845.66837 & 6/20/2020 \\
+    16    & 38276.83276 & 6/22/2020 & 9027.372793 & 7/5/2020 \\
+    22    & 140152.5921 & 6/25/2020 & 32558.63082 & 7/15/2020 \\
+    379   & 328059.5771 & 5/21/2020 & 93124.91168 & 6/1/2020 \\
+
+    \hline
+    \end{tabular}%
+  \label{tab:HRR}%
+\end{table}%
+
+## Capacity crossover points for the mean case 
+
+The next set of plots show the prevalence of infection with projected hospitalizations and ICU admissions. Our assumption is 1/5 of infected will be hospitalized and 1/5 of those hospitalized will need ICU facilities, based on the current HGHI proportions.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Dates when the projected hospitalization and ICU bed demands will cross the available hospital beds and ICU beds per HRR}
+    \begin{tabular}{|p{\dimexpr 0.2\linewidth-2\tabcolsep}p{\dimexpr 0.2\linewidth-2\tabcolsep}p{\dimexpr 0.2\linewidth-2\tabcolsep}p{\dimexpr 0.2\linewidth-2\tabcolsep}p{\dimexpr 0.2\linewidth-2\tabcolsep}|}
+    \hline
+    HRR   & mean case hospital cross date & mean case icu cross date & worst case hospital cross date & worst case icu cross date \\
+    \hline
+    18    & 5/4/2020 & 4/29/2020 & 4/23/2020 & 4/19/2020 \\
+    19    & 4/6/2020 & 4/3/2020 & 4/3/2020 & 4/3/2020 \\
+    21    & 5/11/2020 & 5/1/2020 & 4/28/2020 & 4/20/2020 \\
+    270   & 4/29/2020 & 4/25/2020 & 4/20/2020 & 4/16/2020 \\
+    16    & 5/11/2020 & 5/8/2020 & 4/28/2020 & 4/26/2020 \\
+    22    & 5/11/2020 & 5/2/2020 & 4/28/2020 & 4/20/2020 \\
+    379   & 4/21/2020 & 4/14/2020 & 4/13/2020 & 4/7/2020 \\
+    \hline
+    \end{tabular}%
+  \label{tab:cross}%
+\end{table}%
+
+
+```{r SIR_plot_comb_crossover_mean, out.width = "50%"}
+combrollmean16 <-  paste0("HRR/custom_plots/",Sys.Date(),"/16/HRR_16combined_plot_rolling_mean_with_capacity_mean.png")
+combrollmean18 <-  paste0("HRR/custom_plots/",Sys.Date(),"/18/HRR_18combined_plot_rolling_mean_with_capacity_mean.png")
+
+combrollmean19 <-  paste0("HRR/custom_plots/",Sys.Date(),"/19/HRR_19combined_plot_rolling_mean_with_capacity_mean.png")
+
+combrollmean21 <-  paste0("HRR/custom_plots/",Sys.Date(),"/21/HRR_21combined_plot_rolling_mean_with_capacity_mean.png")
+combrollmean22 <-  paste0("HRR/custom_plots/",Sys.Date(),"/22/HRR_22combined_plot_rolling_mean_with_capacity_mean.png")
+
+combrollmean270 <- paste0("HRR/custom_plots/",Sys.Date(),"/270/HRR_270combined_plot_rolling_mean_with_capacity_mean.png")
+
+combrollmean379<-  paste0("HRR/custom_plots/",Sys.Date(),"/379/HRR_379combined_plot_rolling_mean_with_capacity_mean.png")
+
+# Small fig.width
+include_graphics(combrollmean16)
+include_graphics(combrollmean18)
+include_graphics(combrollmean19)
+include_graphics(combrollmean21)
+include_graphics(combrollmean22)
+include_graphics(combrollmean270)
+include_graphics(combrollmean379)
+```
+
+
+## Capacity crossover points for the worst case 
+
+Same as before but worst case instead of mean. 
+
+```{r SIR_plot_comb_crossover_worst, eval = T, out.width = "50%"}
+setwd("C:/Users/jd033/Box/COVID")
+
+combrollmean16 <-  paste0("HRR/custom_plots/",Sys.Date(),"/16/HRR_16combined_plot_rolling_mean_with_capacity_worst.png")
+
+combrollmean18 <-  paste0("HRR/custom_plots/",Sys.Date(),"/18/HRR_18combined_plot_rolling_mean_with_capacity_worst.png")
+
+combrollmean19 <-  paste0("HRR/custom_plots/",Sys.Date(),"/19/HRR_19combined_plot_rolling_mean_with_capacity_worst.png")
+
+combrollmean21 <-  paste0("HRR/custom_plots/",Sys.Date(),"/21/HRR_21combined_plot_rolling_mean_with_capacity_worst.png")
+combrollmean22 <-  paste0("HRR/custom_plots/",Sys.Date(),"/22/HRR_22combined_plot_rolling_mean_with_capacity_worst.png")
+
+combrollmean270 <- paste0("HRR/custom_plots/",Sys.Date(),"/270/HRR_270combined_plot_rolling_mean_with_capacity_worst.png")
+
+combrollmean379<-  paste0("HRR/custom_plots/",Sys.Date(),"/379/HRR_379combined_plot_rolling_mean_with_capacity_worst.png")
+
+# Small fig.width
+include_graphics(combrollmean16)
+include_graphics(combrollmean18)
+include_graphics(combrollmean19)
+include_graphics(combrollmean21)
+include_graphics(combrollmean22)
+include_graphics(combrollmean270)
+include_graphics(combrollmean379)
+```
+
+## 14-days rolling mean for mean case and worst case
+
+These plots show how the mean and the worst case differ. 
+
+```{r SIR_plot_comb, out.width = "50%"}
+
+combrollmean16 <-  paste0("HRR/custom_plots/",Sys.Date(),"/16/HRR_16combined_plot_rolling_mean_infected.png")
+combrollmean18 <-  paste0("HRR/custom_plots/",Sys.Date(),"/18/HRR_18combined_plot_rolling_mean_infected.png")
+
+combrollmean19 <-  paste0("HRR/custom_plots/",Sys.Date(),"/19/HRR_19combined_plot_rolling_mean_infected.png")
+
+combrollmean21 <-  paste0("HRR/custom_plots/",Sys.Date(),"/21/HRR_21combined_plot_rolling_mean_infected.png")
+combrollmean22 <-  paste0("HRR/custom_plots/",Sys.Date(),"/22/HRR_22combined_plot_rolling_mean_infected.png")
+
+combrollmean270 <- paste0("HRR/custom_plots/",Sys.Date(),"/270/HRR_270combined_plot_rolling_mean_infected.png")
+
+combrollmean379<-  paste0("HRR/custom_plots/",Sys.Date(),"/379/HRR_379combined_plot_rolling_mean_infected.png")
+
+
+# Small fig.width
+include_graphics(combrollmean16)
+include_graphics(combrollmean18)
+include_graphics(combrollmean19)
+include_graphics(combrollmean21)
+include_graphics(combrollmean22)
+include_graphics(combrollmean270)
+include_graphics(combrollmean379)
+```
+
+
+# Appendix 
+
+## P(removal) plots for each HRR
+
+```{r SIR_plot_3, out.width = "50%"}
+
+img_R_16 <-  paste0("HRR/results",Sys.Date(),"/16/HRR_16_forecast.png")
+img_R_18 <-  paste0("HRR/results",Sys.Date(),"/18/HRR_18_forecast.png")
+
+img_R_19 <-  paste0("HRR/results",Sys.Date(),"/19/HRR_19_forecast.png")
+img_R_21 <-  paste0("HRR/results",Sys.Date(),"/21/HRR_21_forecast.png")
+img_R_22 <-  paste0("HRR/results",Sys.Date(),"/22/HRR_22_forecast.png")
+
+img_R_270 <-  paste0("HRR/results",Sys.Date(),"/270/HRR_270_forecast.png")
+img_R_379<-  paste0("HRR/results",Sys.Date(),"/379/HRR_379_forecast.png")
+
+# Small fig.width
+include_graphics(img_R_16)
+include_graphics(img_R_18)
+include_graphics(img_R_19)
+include_graphics(img_R_21)
+include_graphics(img_R_22)
+include_graphics(img_R_270)
+include_graphics(img_R_379)
+```
+
+## Parameter choices 
+
+The output is dependent on the parameter choices, viz. death_in_R, beta0, gamma0 and R0. Here's what they mean and what we can do about them. 
+
+-  `death_in_R`: the numeric value of average of cumulative deaths in the removed compartments. (I used 0 as right now we don't have info on this for AR, but can use values from other states and see what changes.)
+-  `beta0`: the hyperparameter $\beta_0$ of average transmission rate, the default is the one estimated from the SARS first-month outbreak (0.2586).
+-  `gamma0` : the hyperparameter $\gamma_0$ of average removed rate, the default is the one estimated from the SARS first-month outbreak (0.0821).
+-  R0: the hyperparameter of the mean reproduction number $R_0$. The default is thus the ratio of beta0/gamma0, which can be specified directly. (Our mean $R_0$ is 3.15). $R_0$ is highly important, and a different R0 would give different results.
+
+# References
+
+1. Song, P. X., Wang, L., Zhou, Y., He, J., Zhu, B., Wang, F., ... & Eisenberg, M. (2020). An epidemiological forecast model and software assessing interventions on COVID-19 epidemic in China. medRxiv. <https://www.medrxiv.org/content/medrxiv/early/2020/03/03/2020.02.29.20029421.full.pdf>
+
+2. Song Lab at UM. eSIR: Extended state-space SIR models, 2020. R package version 0.1.0.
+
+3. Dave Osthus, Kyle S Hickmann, Petrutia C Caragea, Dave Higdon, and Sara Y Del Valle. Forecasting seasonal in uenza with a state-space sir model. The Annals of Applied Statistics, 11(1):202, 2017.
+
