@@ -1,7 +1,7 @@
 ---
-title: "Elastic Net and Bayesian Sparse Regression"
+title: "Modern Regression 3 <br> Elastic Net and Bayesian Sparse Regression"
 author: "Jyotishka Datta"
-date: "April 9, 2018"
+date: "April 3, 2020"
 output: ioslides_presentation
 ---
 
