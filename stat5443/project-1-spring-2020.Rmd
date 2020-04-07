@@ -1,0 +1,231 @@
+---
+title: "Project 1 Description"
+author: "Jyotishka Datta"
+date: "March 22, 2020"
+output: 
+  html_document:
+      toc: true
+      number_sections: false
+      toc_float: true
+      theme: united
+fontsize: 12pt
+geometry: margin=1in
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# First project : modeling change-points
+
+This project develops a fully Bayes procedure for detecting a change-point in a time-course data where the underlying probability model for observation $y_i$ is characterized by a single location parameter, say $\theta_i$, i.e. you can write 
+
+$$
+Y_i \stackrel{ind}{\sim} f(\theta_i), i = 1, \ldots, n. 
+$$
+
+
+The choice of $f$ depends on what model would suitably describe or fit to the data observed, e.g. Normal if continuous and light-tailed, a $t$ or Cauchy if continuous with heavy tails and a Poisson or negative binomial if your data consists of counts, like the example below. A typical change-point situation arises if 
+$$
+\theta_i = \begin{cases} \mu, \; i = 1, \ldots, k, \\
+                         \lambda, \; i = k+1, \ldots, n
+            \end{cases}
+$$
+
+We first describe the data-set we are set to analyze. 
+
+## Modeling change-points 
+
+Coal-mining disasters in the U.K. There is possibly a change-point in the counts:
+
+```{r, echo = F}
+"CoalDisast" <-
+structure(list(Year = as.integer(c(1851, 1852, 1853, 1854, 1855, 
+1856, 1857, 1858, 1859, 1860, 1861, 1862, 1863, 1864, 1865, 1866, 
+1867, 1868, 1869, 1870, 1871, 1872, 1873, 1874, 1875, 1876, 1877, 
+1878, 1879, 1880, 1881, 1882, 1883, 1884, 1885, 1886, 1887, 1888, 
+1889, 1890, 1891, 1892, 1893, 1894, 1895, 1896, 1897, 1898, 1899, 
+1900, 1901, 1902, 1903, 1904, 1905, 1906, 1907, 1908, 1909, 1910, 
+1911, 1912, 1913, 1914, 1915, 1916, 1917, 1918, 1919, 1920, 1921, 
+1922, 1923, 1924, 1925, 1926, 1927, 1928, 1929, 1930, 1931, 1932, 
+1933, 1934, 1935, 1936, 1937, 1938, 1939, 1940, 1941, 1942, 1943, 
+1944, 1945, 1946, 1947, 1948, 1949, 1950, 1951, 1952, 1953, 1954, 
+1955, 1956, 1957, 1958, 1959, 1960, 1961, 1962)), Count = c(4, 
+5, 4, 1, 0, 4, 3, 4, 0, 6, 3, 3, 4, 0, 2, 6, 3, 3, 5, 4, 5, 3, 
+1, 4, 4, 1, 5, 5, 3, 4, 2, 5, 2, 2, 3, 4, 2, 1, 3, 2, 2, 1, 1, 
+1, 1, 3, 0, 0, 1, 0, 1, 1, 0, 0, 3, 1, 0, 3, 2, 2, 0, 1, 1, 1, 
+0, 1, 0, 1, 0, 0, 0, 2, 1, 0, 0, 0, 1, 1, 0, 2, 3, 3, 1, 1, 2, 
+1, 1, 1, 1, 2, 4, 2, 0, 0, 0, 1, 4, 0, 0, 0, 1, 0, 0, 0, 0, 0, 
+1, 0, 0, 1, 0, 1)), .Names = c("Year", "Count"), row.names = c("1", 
+"2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", 
+"14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", 
+"25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", 
+"36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", 
+"47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", 
+"58", "59", "60", "61", "62", "63", "64", "65", "66", "67", "68", 
+"69", "70", "71", "72", "73", "74", "75", "76", "77", "78", "79", 
+"80", "81", "82", "83", "84", "85", "86", "87", "88", "89", "90", 
+"91", "92", "93", "94", "95", "96", "97", "98", "99", "100", 
+"101", "102", "103", "104", "105", "106", "107", "108", "109", 
+"110", "111", "112"), class = "data.frame")
+plot(CoalDisast$Year, CoalDisast$Count, type = "l")
+```
+
+
+
+## Hierarchical model 
+
+One possible approach is the hierarchical model that was proposed in Carlin, Gelfand and Smith (1992). 
+Here we will develop a Gibbs sampling strategy for a fitting a Poisson process with a change point to a time series data.
+
+
+$$
+\begin{gather}
+X_i \sim \text{Poisson}(\mu); \; i = 1, 2, \ldots, k, \\
+X_i \sim \text{Poisson}(\lambda); \; i = k+1, k+2, \ldots, m.
+\end{gather}
+$$
+
+
+Here $X_i$'s are the observations and the parameter of interest are $(\mu, \lambda, k)$.
+
+
+## Priors 
+For a Bayesian modeling, we need suitable priors on the underlying parameters $\mu$, $\lambda$ and $k$. As we show below, often we take conjugate priors to simplify calculations. The conjugate prior for Poisson is Gamma as the functional forms are similar. 
+
+### Gamma is conjugate to Poisson:
+
+\[
+\text{Poisson likelihood: } X \mid \lambda \sim \text{Pois}(\lambda) \Rightarrow f(x \mid \lambda) = \frac{e^{-\lambda} \lambda^x}{x!} \\
+\text{Gamma prior: } \lambda \sim \text{Gamma}(\alpha, \beta) \Rightarrow  p(\lambda \mid \alpha, \beta) = \frac{\lambda^{\alpha-1} \beta^{\alpha} e^{-\beta \lambda}}{\Gamma(\alpha)} \\
+\text{Posterior: }
+[\lambda \mid x] \sim \text{Gamma}(x+\alpha, \beta + 1)
+\]
+
+In other words, putting a Gamma prior on the rate parameter of a Poisson likelihood will lead to a Gamma posterior. Now we are ready for the second stage: putting priors. We specify the following independent priors on $(\mu, \lambda, k)$.
+
+$$
+\begin{gather*}
+k \sim \text{discrete uniform on} \; \{1, 2, \ldots, m\}, \; m = \text{sample size} \\
+\mu \sim \text{Gamma}(a_1, b_1) \\
+\lambda \sim \text{Gamma}(a_2, b_2),
+\end{gather*}
+$$
+
+where $a_1, a_2, b_1, b_2$ are fixed parameters chosen by the user. 
+
+
+## Challenges
+
+-  How do you write the Gibbs sampler for this hierarchical model?
+
+-  What are the drawbacks of this method?
+
+    1.  You have to know how many change-points are there. 
+    2.  Only applicable to count data. 
+    
+
+## Joint Posterior 
+
+$$
+\pi(\mu, \lambda, k \mid X) = f(X \mid \lambda, \mu, k) \pi(\mu) \pi(\lambda) \pi(k)
+$$
+Likelihood:
+
+$$
+\begin{align}
+f(X \mid \lambda, \mu, k) & = \prod_{i=1}^{k} f(x_i \mid \mu, k) \prod_{i=k+1}^{m} f(x_i \mid \lambda, k) \\
+& = \prod_{i=1}^{k} \frac{\mu^{x_i}e^{-\mu}}{x_i!} \prod_{i=k+1}^{m} \frac{\lambda^{x_i}e^{-\lambda}}{x_i!}
+\end{align}
+$$
+
+### Conjugate Priors
+
+Conjugate Priors: [Gamma is conjugate to Poisson]
+$$
+\pi(\mu) \propto \mu^{a_1-1}e^{-\mu b_1} \\
+\pi(\lambda) \propto \lambda^{a_2-1}e^{-\lambda b_2} \\
+$$
+Prior on $k$ is discrete Uniform $\{1, 2, \ldots, m\}$.
+$$
+\pi(k) = \frac{1}{m} \; \forall k = 1, 2, \ldots, m.
+$$
+
+### Posterior 
+$$
+\begin{align}
+\pi(\mu, \lambda, k \mid X) & \propto \prod_{i=1}^{k} \frac{\mu^{x_i}e^{-\mu}}{x_i!} \prod_{i=k+1}^{m} \frac{\lambda^{x_i}e^{-\lambda}}{x_i!} \mu^{a_1-1}e^{-\mu b_1}\lambda^{a_2-1}e^{-\lambda b_2} \frac{1}{m} \\
+& \propto \mu^{a_1 + \sum_{i=1}^{k}x_i -1} e^{-\mu(k+b_1)} \lambda^{a_2 + \sum_{i=k+1}^{m}x_i -1} e^{-\mu(m-k+b_2)} 
+\end{align}
+$$
+
+-  The conditional distribution for both $\mu$ and $\lambda$ should be Gamma distributions with appropriate parameters. 
+
+-  The conditional on $k$ must be a Categorical with probabilities proportional to the product of terms involving $k$ in the last displayed equation.
+
+
+### Your goal 
+
+> First write the full conditional distributions for each parameters, and implement the Gibbs sampler. 
+
+> Then try to extend the model in either of the two directions mentioned before. (A) Extend for the unknown number of change points case, or (B) extend for the continuous case where the observed data points are continuous Normal variables, not Poisson. 
+
+**Your final report must have the following:** 
+
+1.  Full R code for the Gibbs sampler. 
+2.  All necessary diagnostic checks for convergence (trace-plot, autocorrelation and multiple chains if needed).
+3.  Visualization of the posterior quantities. 
+4.  Explanation of your results in plain English.
+
+
+An example of Normal chnge-point data and some very recent references are given below.
+
+### Continuous change-point data 
+
+Example 1 in paper, from Frick, Munk, and Seiling (2014), p 516.
+
+```{r, echo = T, eval = F}
+n <- 497
+theta <- numeric(n)
+theta[1:138] <- -0.18
+theta[139:225] <- 0.08
+theta[226:242] <- 1.07
+theta[243:299] <- -0.53
+theta[300:308] <- 0.16
+theta[309:332] <- -0.69
+theta[333:n] <- -0.16
+n <- length(theta)
+sig2 = 0.04
+y <- theta + sqrt(sig2) * rnorm(n)
+plot(y, cex=0.5, col="gray")
+lines(theta)
+```
+
+```{r, echo = F, eval = T}
+n <- 497
+theta <- numeric(n)
+theta[1:138] <- -0.18
+theta[139:225] <- 0.08
+theta[226:242] <- 1.07
+theta[243:299] <- -0.53
+theta[300:308] <- 0.16
+theta[309:332] <- -0.69
+theta[333:n] <- -0.16
+n <- length(theta)
+sig2 = 0.04
+y <- theta + sqrt(sig2) * rnorm(n)
+plot(y, cex=0.5, col="gray")
+lines(theta)
+```
+
+There is a great deal of work going on about detetcting change-points. Go to scholar.google.com and enter "changepoint detection" to find some recent papers in this area if you want to go beyond the simplest case shown here. Here is one of the nice papers that came out recently - it has a simple, elegant and yet powerful approach to handle change-point detection for a continuous problem. The R codes are also available on Dr. Martin's webpage. 
+    
+**Asymptotically optimal empirical Bayes inference in a piecewise constant sequence model**
+
+Ryan Martin, Weining Shen
+
+Abstract:
+Inference on high-dimensional parameters in structured linear models is an important statistical problem. This paper focuses on the piecewise constant Gaussian sequence model, and we develop a new empirical Bayes solution that enjoys adaptive minimax posterior concentration rates and, thanks to the conjugate form of the empirical prior, relatively simple posterior computations.
+
+[https://arxiv.org/abs/1712.03848](https://arxiv.org/abs/1712.03848)
