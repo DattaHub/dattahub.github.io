@@ -1,8 +1,15 @@
 ---
 title: "Syllabus and Tutorials (Stat 4033)"
 author: "Jyotishka Datta"
-date: "October 26, 2018"
-output: html_document
+date: "August 31, 2020"
+output: 
+  html_document:
+    css: "mystyle.css"
+    toc: true
+    toc_float: true
+nature:
+  highlightStyle: github
+highlightLines: true
 ---
 
 ```{r setup, include=FALSE}
@@ -13,7 +20,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 A better name for this topic is distribution-free Statistics, as we would like to call it. Here are some of the R tutorials in markdown format that I have written for this class. 
 
-Most of these examples were collected from various sources / books etc. and I have tried to give credits for each of them. However, if you notice something with a missing citation or you think should not be here, please let me know at jd033@uark.edu. 
+Most of these examples were collected from various sources / books etc. and I have tried to give credits for each of them. However, if you notice something with a missing citation or you think should not be here, please let me know at [jd033@uark.edu](mailto:jd033@uark.edu). 
 
 This website is for class purposes only. 
 
