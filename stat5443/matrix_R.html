@@ -3118,9 +3118,9 @@ slide:not(.current) .plotly.html-widget{
         <!-- The content of this hgroup is replaced programmatically through the slide_config.json. -->
     <hgroup class="auto-fadein">
       <h1 data-config-title><!-- populated from slide_config.json --></h1>
-      <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
+      
       <p data-config-presenter><!-- populated from slide_config.json --></p>
-            <p style="margin-top: 6px; margin-left: -2px;">February 2,2020</p>
+            <p style="margin-top: 6px; margin-left: -2px;">February 2,2020 (updated: 2020-09-04)</p>
           </hgroup>
   </slide>
 
@@ -3134,7 +3134,7 @@ slide:not(.current) .plotly.html-widget{
 <li>We need the R package &lsquo;Matrix&rsquo; and &lsquo;doParallel&rsquo;.</li>
 </ul>
 
-</article></slide><slide class=""><hgroup><h2>Matrices</h2></hgroup><article  id="matrices" class="smaller">
+</article></slide><slide class=""><hgroup><h2>Matrices</h2></hgroup><article  class="smaller" id="matrices">
 
 <ul>
 <li>To arrange values into a matrix, we use the <code>matrix()</code> function:</li>
@@ -3263,7 +3263,7 @@ Htri</pre>
 ## [2,]    0 0.3333333 0.2500000
 ## [3,]    0 0.0000000 0.2000000</pre>
 
-</article></slide><slide class=""><hgroup><h2>Multiplication</h2></hgroup><article  id="multiplication" class="smaller">
+</article></slide><slide class=""><hgroup><h2>Multiplication</h2></hgroup><article  class="smaller" id="multiplication">
 
 <ul>
 <li>Matrix multiplication in R is performed by the operator %*%. For example,</li>
@@ -3287,7 +3287,7 @@ A</pre>
 <li>Matrices must conform, i.e. multiplication must make sense !</li>
 </ul>
 
-</article></slide><slide class=""><hgroup><h2>Multiplication</h2></hgroup><article  id="multiplication-1" class="smaller">
+</article></slide><slide class=""><hgroup><h2>Multiplication</h2></hgroup><article  class="smaller" id="multiplication-1">
 
 <pre class = 'prettyprint lang-r'>A %*% B</pre>
 
@@ -3332,7 +3332,7 @@ A</pre>
 <li>A similar function, tcrossprod(), computes the matrix product \(AB^T\) whenever the product is well defined.</li>
 </ul>
 
-</article></slide><slide class=""><hgroup><h2>Exercise (Try at home)</h2></hgroup><article  id="exercise-try-at-home" class="smaller">
+</article></slide><slide class=""><hgroup><h2>Exercise (Try at home)</h2></hgroup><article  class="smaller" id="exercise-try-at-home">
 
 <ul>
 <li>Consider the matrix</li>
@@ -3487,7 +3487,7 @@ object.size(m1)</pre>
 <li>If you have access to clusters on the web, many many &ldquo;cores&rdquo;.</li>
 </ul>
 
-</article></slide><slide class=""><hgroup><h2>How do I know if I can apply these ideas?</h2></hgroup><article  id="how-do-i-know-if-i-can-apply-these-ideas" class="smaller">
+</article></slide><slide class=""><hgroup><h2>How do I know if I can apply these ideas?</h2></hgroup><article  class="smaller" id="how-do-i-know-if-i-can-apply-these-ideas">
 
 <ul>
 <li>Parallel processing works best when you have a task that has to be completed many times, but each repeat is independent.</li>
