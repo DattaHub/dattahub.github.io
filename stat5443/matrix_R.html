@@ -3120,7 +3120,7 @@ slide:not(.current) .plotly.html-widget{
       <h1 data-config-title><!-- populated from slide_config.json --></h1>
       
       <p data-config-presenter><!-- populated from slide_config.json --></p>
-            <p style="margin-top: 6px; margin-left: -2px;">February 2,2020 (updated: 2020-09-04)</p>
+            <p style="margin-top: 6px; margin-left: -2px;">February 2,2020 (updated: 2020-09-09)</p>
           </hgroup>
   </slide>
 
@@ -3508,7 +3508,25 @@ object.size(m1)</pre>
 </article></slide><slide class=""><hgroup><h2>Introduction to doParallel</h2></hgroup><article  id="introduction-to-doparallel">
 
 <ul>
-<li>We will first write a super simple R code to explain the mechanism of parallel processing using doParallel.</li>
+<li><p>We will first write a super simple R code to explain the mechanism of parallel processing using doParallel.</p></li>
+<li><p>Use <code>Sys.sleep()</code> function that &ldquo;suspends execution of R expressions for a specified time interval&rdquo;.</p></li>
+<li><p>First, sequential for-loop:</p></li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>ptm &lt;- proc.time()
+for(i in 1:4){
+  Sys.sleep(1)
+}
+proc.time() - ptm</pre>
+
+<pre >##    user  system elapsed 
+##       0       0       4</pre>
+
+</article></slide><slide class=""><hgroup><h2>Now let’s do it parallely</h2></hgroup><article  id="now-lets-do-it-parallely">
+
+<ul>
+<li><p>The main changes are &ldquo;foreach&rdquo; instead of &ldquo;for&rdquo; and a `%dopar%.</p></li>
+<li><p>You will also need to tell R how many processors you want to use - you can make this automatic by using <code>Sys.getenv()</code> function.</p></li>
 </ul>
 
 <pre class = 'prettyprint lang-r'>n = as.numeric(Sys.getenv(&quot;NUMBER_OF_PROCESSORS&quot;)) # on Windows
@@ -3516,29 +3534,26 @@ require(doParallel)
 cl &lt;- makeCluster(n)
 registerDoParallel(cl)
 ptm &lt;- proc.time()
-foreach(i=1:4) %dopar% {sqrt(i)}
+foreach(i=1:4) %dopar% {Sys.sleep(1)}
 proc.time()-ptm</pre>
 
 </article></slide><slide class=""><hgroup><h2>Output of the snippet</h2></hgroup><article  id="output-of-the-snippet">
 
 <ul>
 <li>Here is the output !</li>
+<li>Because my laptop has 4 cores, and I am doing this parallely, the wait time is just 1 second.</li>
 </ul>
 
-<pre >## [[1]]
-## [1] 1
-## 
-## [[2]]
-## [1] 1.414214
-## 
-## [[3]]
-## [1] 1.732051
-## 
-## [[4]]
-## [1] 2</pre>
+<pre class = 'prettyprint lang-r'>n = as.numeric(Sys.getenv(&quot;NUMBER_OF_PROCESSORS&quot;)) # on Windows
+require(doParallel)
+cl &lt;- makeCluster(n)
+registerDoParallel(cl)
+ptm &lt;- proc.time()
+res &lt;- foreach(i=1:4) %dopar% {Sys.sleep(1)}
+proc.time()-ptm</pre>
 
 <pre >##    user  system elapsed 
-##    0.00    0.00    0.07</pre>
+##    0.03    0.00    1.08</pre>
 
 </article></slide><slide class=""><hgroup><h2>Hello, world !</h2></hgroup><article  id="hello-world">
 
@@ -3583,7 +3598,7 @@ r &lt;- foreach(icount(trials), .combine=cbind) %dopar% {
 ptime</pre>
 
 <pre >##    user  system elapsed 
-##    4.63    2.11    9.53</pre>
+##    4.00    1.75    8.78</pre>
 
 </article></slide><slide class=""><hgroup><h2>Sequential counter-part</h2></hgroup><article  id="sequential-counter-part">
 
@@ -3597,7 +3612,7 @@ r &lt;- foreach(icount(trials), .combine=cbind) %do% {
 stime</pre>
 
 <pre >##    user  system elapsed 
-##   18.11    0.00   18.12</pre>
+##   20.04    0.03   20.18</pre>
 
 </article></slide><slide class=""><hgroup><h2>Exercise (Try at home)</h2></hgroup><article  id="exercise-try-at-home-1">
 

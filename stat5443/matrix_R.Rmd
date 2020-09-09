@@ -266,26 +266,47 @@ object.size(m2)
 
 - We will first write a super simple R code to explain the mechanism of parallel processing using doParallel. 
 
+- Use `Sys.sleep()` function that "suspends execution of R expressions for a specified time interval".
+
+- First, sequential for-loop:
+
+```{r, echo = TRUE}
+ptm <- proc.time()
+for(i in 1:4){
+  Sys.sleep(1)
+}
+proc.time() - ptm
+```
+
+## Now let's do it parallely
+
+- The main changes are "foreach" instead of "for" and a `%dopar%. 
+
+- You will also need to tell R how many processors you want to use - you can make this automatic by using `Sys.getenv()` function. 
+
 ```{r, echo = TRUE, eval = FALSE, warning=FALSE, message = FALSE, cache = TRUE}
 n = as.numeric(Sys.getenv("NUMBER_OF_PROCESSORS")) # on Windows
 require(doParallel)
 cl <- makeCluster(n)
 registerDoParallel(cl)
 ptm <- proc.time()
-foreach(i=1:4) %dopar% {sqrt(i)}
+foreach(i=1:4) %dopar% {Sys.sleep(1)}
 proc.time()-ptm
 ```
 
 
 ## Output of the snippet 
+
 - Here is the output !
-```{r, echo = FALSE, eval = TRUE, warning=FALSE, message = FALSE}
+- Because my laptop has 4 cores, and I am doing this parallely, the wait time is just 1 second. 
+
+```{r, echo = TRUE, eval = TRUE, warning=FALSE, message = FALSE}
 n = as.numeric(Sys.getenv("NUMBER_OF_PROCESSORS")) # on Windows
 require(doParallel)
 cl <- makeCluster(n)
 registerDoParallel(cl)
 ptm <- proc.time()
-foreach(i=1:4) %dopar% {sqrt(i)}
+res <- foreach(i=1:4) %dopar% {Sys.sleep(1)}
 proc.time()-ptm
 ```
 
