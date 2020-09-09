@@ -3429,6 +3429,258 @@ y &lt;- rowSums(X) + rnorm(n)</pre>
 
 </article></slide><slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>More advanced topics</h2></hgroup><article  id="more-advanced-topics">
 
+</article></slide><slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>Logics in R</h2></hgroup><article  id="logics-in-r">
+
+</article></slide><slide class=""><hgroup><h2>Logical (boolean) operations</h2></hgroup><article  id="logical-boolean-operations">
+
+<table class = 'rmdtable'>
+<tr class="header">
+<th align="left">Operator</th>
+<th align="left">Operation</th>
+<th align="left">Vectorized?</th>
+</tr>
+<tr class="odd">
+<td align="left"><code>x | y</code></td>
+<td align="left">or</td>
+<td align="left">Yes</td>
+</tr>
+<tr class="even">
+<td align="left"><code>x &amp; y</code></td>
+<td align="left">and</td>
+<td align="left">Yes</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>!x</code></td>
+<td align="left">not</td>
+<td align="left">Yes</td>
+</tr>
+<tr class="even">
+<td align="left"><code>x || y</code></td>
+<td align="left">or</td>
+<td align="left">No</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>x &amp;&amp; y</code></td>
+<td align="left">and</td>
+<td align="left">No</td>
+</tr>
+<tr class="even">
+<td align="left"><code>xor(x,y)</code></td>
+<td align="left">exclusive or</td>
+<td align="left">Yes</td>
+</tr>
+</table>
+
+</article></slide><slide class=""><hgroup><h2>Vectorized?</h2></hgroup><article  class="smaller" id="vectorized">
+
+<pre class = 'prettyprint lang-r'>x = c(TRUE,FALSE,TRUE)
+y = c(FALSE,TRUE,TRUE)</pre>
+
+<pre class = 'prettyprint lang-r'>  x | y</pre>
+
+<pre >## [1] TRUE TRUE TRUE</pre>
+
+<pre class = 'prettyprint lang-r'>  x || y</pre>
+
+<pre >## [1] TRUE</pre>
+
+<pre class = 'prettyprint lang-r'>  x &amp; y</pre>
+
+<pre >## [1] FALSE FALSE  TRUE</pre>
+
+<pre class = 'prettyprint lang-r'>  x &amp;&amp; y</pre>
+
+<pre >## [1] FALSE</pre>
+
+</article></slide><slide class=""><hgroup><h2>Length coercion</h2></hgroup><article  class="smaller" id="length-coercion">
+
+<pre class = 'prettyprint lang-r'>x = c(TRUE,FALSE,TRUE)
+y = c(TRUE)
+z = c(FALSE,TRUE)</pre>
+
+<pre class = 'prettyprint lang-r'>  x | y</pre>
+
+<pre >## [1] TRUE TRUE TRUE</pre>
+
+<pre class = 'prettyprint lang-r'>  y | z</pre>
+
+<pre >## [1] TRUE TRUE</pre>
+
+<pre class = 'prettyprint lang-r'>  x &amp; y</pre>
+
+<pre >## [1]  TRUE FALSE  TRUE</pre>
+
+<pre class = 'prettyprint lang-r'>  y &amp; z</pre>
+
+<pre >## [1] FALSE  TRUE</pre>
+
+</article></slide><slide class=""><hgroup><h2>Comparisons</h2></hgroup><article  id="comparisons">
+
+<table class = 'rmdtable'>
+<tr class="header">
+<th align="left">Operator</th>
+<th align="left">Comparison</th>
+<th align="left">Vectorized?</th>
+</tr>
+<tr class="odd">
+<td align="left"><code>x &lt; y</code></td>
+<td align="left">less than</td>
+<td align="left">Yes</td>
+</tr>
+<tr class="even">
+<td align="left"><code>x &gt; y</code></td>
+<td align="left">greater than</td>
+<td align="left">Yes</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>x &lt;= y</code></td>
+<td align="left">less than or equal to</td>
+<td align="left">Yes</td>
+</tr>
+<tr class="even">
+<td align="left"><code>x &gt;= y</code></td>
+<td align="left">greater than or equal to</td>
+<td align="left">Yes</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>x != y</code></td>
+<td align="left">not equal to</td>
+<td align="left">Yes</td>
+</tr>
+<tr class="even">
+<td align="left"><code>x == y</code></td>
+<td align="left">equal to</td>
+<td align="left">Yes</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>x %in% y</code></td>
+<td align="left">contains</td>
+<td align="left">Yes (for <code>x</code>)</td>
+</tr>
+</table>
+
+</article></slide><slide class=""><hgroup><h2>Comparisons: Length Coercion</h2></hgroup><article  class="smaller" id="comparisons-length-coercion">
+
+<pre class = 'prettyprint lang-r'>x = c(&quot;A&quot;,&quot;B&quot;,&quot;C&quot;)
+z = c(&quot;A&quot;)</pre>
+
+<pre class = 'prettyprint lang-r'>  x == z</pre>
+
+<pre >## [1]  TRUE FALSE FALSE</pre>
+
+<pre class = 'prettyprint lang-r'>  x != z</pre>
+
+<pre >## [1] FALSE  TRUE  TRUE</pre>
+
+<pre class = 'prettyprint lang-r'>  x %in% z</pre>
+
+<pre >## [1]  TRUE FALSE FALSE</pre>
+
+<pre class = 'prettyprint lang-r'>  z %in% x</pre>
+
+<pre >## [1] TRUE</pre>
+
+</article></slide><slide class=""><hgroup><h2>Careful with Conditionals</h2></hgroup><article  class="smaller" id="careful-with-conditionals">
+
+<p>Conditional execution is achieved via <code>if</code> statements.</p>
+
+<p><em>Note that <code>if</code> statements are <strong>not</strong> vectorized.</em></p>
+
+<pre class = 'prettyprint lang-r'>x = c(3,1)
+if (3 %in% x)
+  &quot;Here!&quot;</pre>
+
+<pre >## [1] &quot;Here!&quot;</pre>
+
+<pre class = 'prettyprint lang-r'>if (x &gt;= 2)
+  &quot;Now Here!&quot;</pre>
+
+<pre >## Warning in if (x &gt;= 2) &quot;Now Here!&quot;: the condition has length &gt; 1 and only the
+## first element will be used</pre>
+
+<pre >## [1] &quot;Now Here!&quot;</pre>
+
+</article></slide><slide class=""><hgroup><h2>Collapsing logical vectors</h2></hgroup><article  class="smaller" id="collapsing-logical-vectors">
+
+<p>There are a couple of helper functions for collapsing a logical vector down to a single value: <code>any</code>, <code>all</code></p>
+
+<pre class = 'prettyprint lang-r'>x = c(3,4)</pre>
+
+<pre class = 'prettyprint lang-r'>  any(x &gt;= 2)</pre>
+
+<pre >## [1] TRUE</pre>
+
+<pre class = 'prettyprint lang-r'>  all(x &gt;= 2)</pre>
+
+<pre >## [1] TRUE</pre>
+
+<pre class = 'prettyprint lang-r'>  if (any(x &gt;= 2))
+    print(&quot;Now There!&quot;)</pre>
+
+<pre >## [1] &quot;Now There!&quot;</pre>
+
+</article></slide><slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>Error Checking</h2></hgroup><article  id="error-checking">
+
+</article></slide><slide class=""><hgroup><h2><code>stop</code> and <code>stopifnot</code></h2></hgroup><article  id="stop-and-stopifnot">
+
+<p>Often we want to validate user input or function arguments - if our assumptions are not met then we often want to report the error and stop execution.</p>
+
+<pre class = 'prettyprint lang-r'>ok = FALSE
+if (!ok)
+  stop(&quot;Things are not ok.&quot;)</pre>
+
+<pre >## Error in eval(expr, envir, enclos): Things are not ok.</pre>
+
+<pre class = 'prettyprint lang-r'>stopifnot(ok)</pre>
+
+<pre >## Error: ok is not TRUE</pre>
+
+<p><em>Note - an error (like the one generated by <code>stop</code>) will prevent an RMarkdown document from compiling unless <code>error=TRUE</code> is set for that code block.</em></p>
+
+</article></slide><slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>More on functions</h2></hgroup><article  id="more-on-functions">
+
+</article></slide><slide class=""><hgroup><h2>Recap</h2></hgroup><article  id="recap">
+
+<ul>
+<li><p>The two parts of a function are the arguments (<code>formals</code>) and the code (<code>body</code>).</p></li>
+<li><p>It is also possible to give function arguments default values so that they don’t need to be provided every time the function is called.</p></li>
+<li><p>There are two approaches to returning values: explicit and implicit return values: <em>explicit</em> (using <code>return</code>) or <em>implicit</em> (last statement).</p></li>
+<li><p>Remember scope of a variable when using functions.</p></li>
+</ul>
+
+</article></slide><slide class=""><hgroup><h2>Lazy evaluation</h2></hgroup><article  id="lazy-evaluation">
+
+<p>Arguments to R functions are lazily evaluated - meaning they are not evaluated until they are used</p>
+
+<pre class = 'prettyprint lang-r'>f = function(x)
+{
+  cat(&quot;Hello world!\n&quot;)
+  x
+}
+
+f(stop())</pre>
+
+<pre >## Hello world!</pre>
+
+<pre >## Error in f(stop()):</pre>
+
+</article></slide><slide class=""><hgroup><h2>Everything is a function</h2></hgroup><article  id="everything-is-a-function">
+
+<pre class = 'prettyprint lang-r'>`+`</pre>
+
+<pre >## function (e1, e2)  .Primitive(&quot;+&quot;)</pre>
+
+<pre class = 'prettyprint lang-r'>typeof(`+`)</pre>
+
+<pre >## [1] &quot;builtin&quot;</pre>
+
+<pre class = 'prettyprint lang-r'>x = 4:1
+`+`(x,2)</pre>
+
+<pre >## [1] 6 5 4 3</pre>
+
+</article></slide><slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>More matrices</h2></hgroup><article  id="more-matrices">
+
 </article></slide><slide class=""><hgroup><h2>Inverting a matrix using Cholesky helps</h2></hgroup><article  id="inverting-a-matrix-using-cholesky-helps">
 
 <ul>
@@ -3442,12 +3694,12 @@ A = crossprod(A)
 ptm &lt;- proc.time(); B = solve(A); proc.time()-ptm</pre>
 
 <pre >##    user  system elapsed 
-##    0.70    0.00    0.73</pre>
+##    0.81    0.00    0.81</pre>
 
 <pre class = 'prettyprint lang-r'>ptm &lt;- proc.time(); B = chol2inv(A); proc.time()-ptm</pre>
 
 <pre >##    user  system elapsed 
-##    0.14    0.00    0.16</pre>
+##    0.24    0.01    0.25</pre>
 
 </article></slide><slide class=""><hgroup><h2>Storage of sparse matrices</h2></hgroup><article  id="storage-of-sparse-matrices">
 
@@ -3598,7 +3850,7 @@ r &lt;- foreach(icount(trials), .combine=cbind) %dopar% {
 ptime</pre>
 
 <pre >##    user  system elapsed 
-##    4.00    1.75    8.78</pre>
+##    4.39    1.98   10.03</pre>
 
 </article></slide><slide class=""><hgroup><h2>Sequential counter-part</h2></hgroup><article  id="sequential-counter-part">
 
@@ -3612,7 +3864,7 @@ r &lt;- foreach(icount(trials), .combine=cbind) %do% {
 stime</pre>
 
 <pre >##    user  system elapsed 
-##   20.04    0.03   20.18</pre>
+##   21.96    0.05   22.17</pre>
 
 </article></slide><slide class=""><hgroup><h2>Exercise (Try at home)</h2></hgroup><article  id="exercise-try-at-home-1">
 
