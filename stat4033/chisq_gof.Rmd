@@ -1,8 +1,12 @@
 ---
 title: "Chi-square Goodness of fit"
 author: "Jyotishka Datta"
-date: "September 12, 2018"
-output: ioslides_presentation
+date: "September 12, 2018 | updated on `r Sys.Date()`"
+output: 
+  ioslides_presentation:
+    logo: uarklogo.png
+    css: mystyle.css
+    smaller: true
 ---
 
 ```{r setup, include=FALSE}
