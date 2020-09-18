@@ -1,7 +1,7 @@
 ---
 title: "Lab Exercise Sampling"
 author: "Jyotishka Datta"
-date: "February 17, 2020"
+date: "`r Sys.Date()`"
 output: 
   html_document:
          toc: true
@@ -13,10 +13,10 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## Rules:
+<!-- ## Rules: -->
 
-1.  Email your answers to [stat5443.fall@gmail.com](stat5443.fall@gmail.com).
-2.  No late submissions. 
+<!-- 1.  Email your answers to [stat5443.fall@gmail.com](stat5443.fall@gmail.com). -->
+<!-- 2.  No late submissions.  -->
 
 
 ## Problem 1 
