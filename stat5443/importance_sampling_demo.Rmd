@@ -2,7 +2,7 @@
 title: "Importance Sampling"
 subtitle: "Examples"
 author: "Jyotishka Datta"
-date: "February 8, 2019"
+date: "Updated `r Sys.Date()`"
 output: ioslides_presentation
 ---
 
@@ -14,41 +14,8 @@ knitr::opts_chunk$set(echo = FALSE)
 
 Both the examples were taken from Jason Goldstick's R Lab Notes, available at [http://dept.stat.lsa.umich.edu/~jasoneg/Stat406/index.html](http://dept.stat.lsa.umich.edu/~jasoneg/Stat406/index.html). 
 
+
 ## Importance Sampling : Example 1
-
-Suppose you want to evaluate the integral: 
-
-$$
-\int_a^b h(x) dx = \int_{0}^{2\pi} \sin(x \cos(x)) dx 
-$$
-The simplest way is to generate $U_i \sim \text{Unif}(0,2\pi)$ and look at the sample mean $(b-a) \times h(U_i)$. 
-
-## Importance Sampling 
-
-$$
-\begin{align*}
-\int_a^b h(x) dx & = \int_{0}^{2\pi} \sin(x \cos(x)) dx \\
-& = \int_{0}^{2\pi} 2\pi \sin(x \cos(x)) \times \frac{1}{2\pi} dx \\
-& = E \left[ 2\pi\sin(Ucos(U)) \right]; \; U \sim \text{Unif}(0,2\pi)
-\end{align*}
-$$
-
-## R codes 
-
-```{r, echo = T}
-set.seed(123)
-U <-  runif(1e4, 0, 2*pi)
-Y <- 2*pi*sin(U*cos(U))
-(I <- mean(Y))
-```
-
-```{r, echo = TRUE}
-h <- function(u) sin(u*cos(u))
-integrate(h, 0,2*pi)$val
-```
-- They are very close ! 
-
-## Importance Sampling : Example 2
 
 Suppose you want to evaluate the integral: 
 
@@ -181,7 +148,7 @@ Y=w(X)*f(X)
 
 Same integral but the new error is 1/10th of the previous error. 
 
-## Example 3
+## Example 2
 
 The standard double exponential or Laplace density is given by: 
 
