@@ -1,7 +1,7 @@
 ---
 title: "Markov Chains Demo"
 author: "Jyotishka Datta"
-date: "February 13, 2019"
+date: "February 14, 2020 updated `r Sys.Date()`"
 output: ioslides_presentation
 ---
 
