@@ -1,0 +1,245 @@
+---
+title: "Homework 2 Solution Key"
+author: "Jyotishka Datta"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+         toc: true
+         theme: flatly
+         highlight: zenburn
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Problem 1
+
+### Problem 1.1
+
+We can use inverse transformation idea here. Note that the CDF is $F(x) = 1 - \cos(x)$, and the inverse is $F^{-1}(u) = \cos^{-1}(1-u)$. 
+
+```{r,out.width = '85%',fig.align = "center"}
+
+set.seed(26)
+x <- acos(runif(1e5,0,1))
+
+hist(x, breaks = 50, freq = F,
+     col = rgb(0,0,1,0.5),
+     main = "Sampled Random Variables vs PDF") 
+
+# Actual PDF of the desired distribution
+target <- function(x){sin(x)/
+    integrate(function(x) sin(x),0, pi/2)$value}
+# Adding the curve to the histogram of sampled random variables
+curve(target,lwd=3,add=T, col = 'green')
+legend("topleft",c("histogram","density"),col=c("blue","green"),lty = c(1,1))
+
+```
+
+### Problem 1.2
+
+A second method could be rejection sampling. We can choose a uniform density as the envelope, and also calculate the efficiency easily. 
+
+
+```{r}
+# Create the function rsin to generate the samples
+
+rsin.ar <- function(n){
+# Input: n = number of samples
+# Output: n samples from p(x)=sin(x), 0<x<pi/2
+#   uses accept/reject method with g(x)~Unif(0,pi/2)
+
+  # vector to hold answer
+  ans <- rep(0,n)
+
+  # index
+  i <- 1
+
+  # hold j to keep track of efficiency
+  j <- 0
+ 
+  # while loop to generate answer
+  while(i <= n){
+
+    # generate X~g(x) and U~Unif(0,1)
+    x <- runif(1,min=0,max=pi/2)
+    u <- runif(1)
+
+    # if x is good (u < p(x)/Mg(x)) keep it
+    if(u <= sin(x)){
+      ans[i] <- x
+      i <- i + 1
+    }else{
+      # track bad samples
+      j <- j + 1
+    }
+  }
+  # print the proportion of good samples, should be 1/M = 2/pi = 0.6366
+  print(paste0('Efficiency is ', n/(j+n)))
+
+  # return the answer
+  return(ans)
+}
+
+# Generate 1,000,000 samples
+y <- rsin.ar(1e6)
+
+hist(y, breaks=50, freq=FALSE, 
+     main="Sample vs true Density",col = rgb(0,0,1,0.5), xlab = "x")
+
+# Actual PDF of the desired distribution
+target <- function(x){sin(x)/
+    integrate(function(x) sin(x),0, pi/2)$value}
+
+# Adding the curve to the histogram of sampled random variables
+curve(target,lwd=3,add=T, col = 'green')
+
+legend("topleft",c("histogram","density"),col=c("blue","green"),lty = c(1,1))
+```
+
+
+## Problem 2
+
+The density given here is: 
+\[
+f(x) = \lambda x^{-\lambda-1}
+\]
+
+The CDF and inverse CDF would be:
+\[
+F(x) = 1 - x^{-\lambda}, \; F^{-1}(u) = (1-u)^{-\frac{1}{\lambda}}.
+\]
+
+This is in fact the Pareto density. See the wiki page: [https://en.wikipedia.org/wiki/Pareto_distribution](https://en.wikipedia.org/wiki/Pareto_distribution)
+
+```{R}
+rsimplepareto <- function(n, lambda = 3){
+  u = runif(n)
+  return((1/u^(1/lambda)))
+}
+
+hist(rsimplepareto(1e5, 3), breaks = 100, freq = F,
+     col = rgb(0,1,0,0.2),
+     main = "Sampled Random Variables vs PDF", xlim = c(0,30))
+
+# Adding the curve to the histogram of sampled random variables
+curve(3*x^(-4),lwd=2,add=T, col = 'magenta')
+legend("topright",c("histogram","density"),col=c("blue","green"),lty = c(1,1))
+```
+
+### Problem 2.2 
+
+To estimate $E(X^{2.5})$ simply generate a large sample from the target density and calculate 
+\[
+\widehat{E(X^{2.5})} = \frac{1}{N}\sum_{i=1}^{N}x_i^{2.5}
+\]
+
+where $x_i$'s are the samples from the target distribution. 
+
+```{r}
+x = rsimplepareto(1e5, 3)
+cat("Estimate of E(X^(2.5)) is ", mean(x^(2.5)))
+```
+
+
+## Problem 3
+
+This is exactly like the problem 1 we solved in the sampling lab but instead of $f(x) = \exp\{-x^6/10\}$ on $x \in (0, \infty)$, we have $f(x) = \exp\{-x^4/12\}$ but on the entire real line. Now, if we can get samples from $\exp\{-x^4/12\}$ on the positive half of real line, we can simply take random half of those samples, flip their signs and get samples from the density on the entire real line. 
+
+See the link: [http://dattahub.github.io/stat5443/lab_ex_sampling_2020_solutions.html](http://dattahub.github.io/stat5443/lab_ex_sampling_2020_solutions.html).
+
+
+
+```{r}
+#######################################################
+# Use inverse CDF to sample from \propto exp(-x^4/12) #
+#   this follows from work done in sampling lab 2     #
+#######################################################
+
+# parameters
+lambda <- 1/12
+alpha <- 1/4
+n <- 1e5
+
+# generate from y described in part 2
+y <- rgamma(n,shape=alpha,rate=lambda)
+
+# transform to x and convert some to negative
+x <- y**alpha
+
+# u will be 1 if runif <= 0.5 and 0 o.w.
+u <- as.numeric(runif(n) <= 0.5)
+
+# u will be -1 if runif <= 0.5 and 1 o.w.
+u <- 1-2*u
+
+# now x will be ~half positive and ~half negative
+x <- x*u
+
+# true density of x
+dens <- function(x) exp(-lambda*x^(1/alpha))/
+integrate(function(x) exp(-lambda*x^(1/alpha)),-Inf,Inf)$value
+
+# plot of samples x
+hist(x, freq=F)
+
+# true density curve of x
+curve(dens, add=T)
+```
+
+
+
+<!-- ## Problem 3 -->
+
+<!-- ### Problem 3.1 -->
+
+<!-- ```{r, echo = F, eval = F} -->
+<!-- ############################################## -->
+<!-- # Use inverse CDF to sample from             # -->
+<!-- #    (1+sqrt(t))/2sqrt(t) exp -(t/2+sqrt(t)) # -->
+<!-- ############################################## -->
+
+<!-- # set seed for repeatable results -->
+<!-- set.seed(2222019) -->
+
+<!-- # number of samples -->
+<!-- n <- 1e6 -->
+
+<!-- # genterate n runif(0,1) -->
+<!-- u <- runif(n) -->
+
+<!-- # y = inv CDF (u) -->
+<!-- y <- (sqrt(-2*log(u)+1)-1)^2 -->
+
+<!-- # true density of y -->
+<!-- dens <- function(y) (1+sqrt(y))/(2*sqrt(y))*exp(-(y/2+sqrt(y))) -->
+
+<!-- # plot of samples y -->
+<!-- hist(y, freq=F) -->
+
+<!-- # true density curve of y -->
+<!-- curve(dens, add=T) -->
+
+<!-- ############################# -->
+<!-- # E(log(Y))=1/N*sum(log(y)) # -->
+<!-- #   via Monte Carlo         # -->
+<!-- ############################# -->
+
+<!-- 1/n*sum(log(y)) -->
+
+<!-- ########################### -->
+<!-- # 99% CI from Monte Carlo # -->
+<!-- ########################### -->
+
+<!-- quantile(log(y),c(0.005,0.995)) -->
+
+<!-- # this matches the theoretical 99% CI -->
+<!-- # X~Exp(1) -->
+<!-- hi <- -log(0.005) -->
+<!-- lo <- -log(0.995) -->
+
+<!-- # Transform to log(Y) -->
+<!-- log((sqrt(2*c(lo,hi)+1)-1)^2) -->
+<!-- ``` -->
+
