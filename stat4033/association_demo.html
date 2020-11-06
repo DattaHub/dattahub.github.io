@@ -9,7 +9,7 @@
 
 
 
-  <meta name="date" content="2019-11-01" />
+  <meta name="date" content="2020-10-26" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1353,6 +1353,11 @@ slides > slide {
 opacity: 0;
 }
 @media print {
+
+@page {
+size: landscape;
+margin: 0;
+}
 
 slides slide {
 display: block !important;
@@ -3114,9 +3119,9 @@ slide:not(.current) .plotly.html-widget{
         <!-- The content of this hgroup is replaced programmatically through the slide_config.json. -->
     <hgroup class="auto-fadein">
       <h1 data-config-title><!-- populated from slide_config.json --></h1>
-      <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
+      
       <p data-config-presenter><!-- populated from slide_config.json --></p>
-            <p style="margin-top: 6px; margin-left: -2px;">November 1, 2019</p>
+            <p style="margin-top: 6px; margin-left: -2px;">2020-10-26</p>
           </hgroup>
   </slide>
 
@@ -3200,7 +3205,7 @@ title(main = &quot;cars data (logarithmic scales)&quot;)</pre>
 <li>Lots of hilarious examples in <a href='http://tylervigen.com/spurious-correlations' title=''>Spurious Correlations Webpage</a></li>
 </ol>
 
-</article></slide><slide class=""><hgroup><h2>Example</h2></hgroup><article  id="example">
+</article></slide><slide class=""><hgroup><h2>Example</h2></hgroup><article  class="smaller" id="example">
 
 <ul>
 <li>Here \(\rho_{X,Y} = 0\), but \(Y = X^2\), not independent, but not <strong>linearly dependent</strong>.</li>
@@ -3288,8 +3293,8 @@ cor(x,y,method=&quot;spearman&quot;)</pre>
 
 <pre class = 'prettyprint lang-r'>cor.test(cars$speed,cars$dist,method=&quot;spearman&quot;)</pre>
 
-<pre >## Warning in cor.test.default(cars$speed, cars$dist, method = &quot;spearman&quot;):
-## Cannot compute exact p-value with ties</pre>
+<pre >## Warning in cor.test.default(cars$speed, cars$dist, method = &quot;spearman&quot;): Cannot
+## compute exact p-value with ties</pre>
 
 <pre >## 
 ##  Spearman&#39;s rank correlation rho

@@ -1,7 +1,7 @@
 ---
 title: "Tests for trends and association"
 author: "Jyotishka Datta"
-date: "November 1, 2019"
+date: "`r Sys.Date()`"
 output: ioslides_presentation
 ---
 
@@ -69,7 +69,7 @@ cor.test(log(cars$speed),log(cars$dist))
 3. Lots of hilarious examples in 
 [Spurious Correlations Webpage](http://tylervigen.com/spurious-correlations)
 
-## Example 
+## Example {.smaller}
 
 - Here $\rho_{X,Y} = 0$, but $Y = X^2$, not independent, but not **linearly dependent**. 
 
