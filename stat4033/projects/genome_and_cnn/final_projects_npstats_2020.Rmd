@@ -43,6 +43,13 @@ Possible Data Sets and Problems
 2. You can use one of the methods taught in class (or try new methods - it's up to you (and your team)). 
 3. You do not need to present your work. Only submit a well-written report. 
 
+## Submission etc. 
+
+1. The final report should be at least 2 pages long but no upper limit. 
+2. The R codes used for the analysis and plot should be attached to the main report, either as a part of it or separately as Appendix.
+3. The report will be due by December 14, 2020, 5 pm central time.
+
+
 # Project 1: Multiple Nonparametric Testing: Gene Expression Data
 
 ## Project 1: Analysing Genomic Data 
@@ -55,15 +62,16 @@ Possible Data Sets and Problems
 
 ## Large Scale Testing
 
-- Suppose for the $i^{th}$ variable $x_{i}$ the two group means are $\theta_{i,1}$ and $\theta_{i,2}$.
+- Suppose for the $i^{th}$ variable $x_{i}$ the two group means are $\mu_{i,1}$ and $\mu_{i,2}$.
 $$
-H_{0i}: \theta_{i,1} = \theta_{i,2} \text{ vs. } H_{1i}: \theta_{i,1} \neq \theta_{i,2}
+H_{0i}: \mu_{i,1} = \mu_{i,2} \text{ vs. } H_{1i}: \mu_{i,1} \neq \mu_{i,2}
 $$
 - If $H_{0i}$ is true, the group means $\bar{x}_{i,1}$ and  $\bar{x}_{i,2}$ should be close. 
 - We can do an independent samples t-test for each of the $p$ variables.
 - **Multiplicity** !!
 
 ## Example with Simulated Data {.small}
+
 
 ```{r, echo = T}
 set.seed(123)
