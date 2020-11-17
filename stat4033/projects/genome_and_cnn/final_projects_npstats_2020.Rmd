@@ -33,8 +33,8 @@ Possible Data Sets and Problems
 
 | Data Sets         | Problem Description                         |
 |-------------------|---------------------------------------------|
-| Leukemia Data Set | Large-scale Simultaneous Hypothesis Testing |
-| Exit Poll Data    | Analyze Associations                        |
+| Prostate Cancer Data Set | Large-scale Simultaneous Hypothesis Testing |
+| Exit Poll Data  2016 and 2020  | Analyze Associations                        |
 
 
 ## Today 
@@ -59,7 +59,7 @@ Possible Data Sets and Problems
 $$
 H_{0i}: \theta_{i,1} = \theta_{i,2} \text{ vs. } H_{1i}: \theta_{i,1} \neq \theta_{i,2}
 $$
-- If $H_{0i}$ is true, the group means $\bar{x}_{i,1}$ and  $\bar{x}_{i,1}$ should be close. 
+- If $H_{0i}$ is true, the group means $\bar{x}_{i,1}$ and  $\bar{x}_{i,2}$ should be close. 
 - We can do an independent samples t-test for each of the $p$ variables.
 - **Multiplicity** !!
 
@@ -67,7 +67,7 @@ $$
 
 ```{r, echo = T}
 set.seed(123)
-n = 200 ; p1 = 0.1
+n = 1000 ; p1 = 0.05
 z1 = rnorm(n*p1, 2, 1); z2 = rnorm(n*(1-p1),0, 1)
 z = c(z1,z2)
 hist(z, freq = F, ylim = c(0,0.7)); curve(dnorm, add = T)
@@ -78,11 +78,13 @@ hist(z, freq = F, ylim = c(0,0.7)); curve(dnorm, add = T)
 Suppose, $H_0: \mu = 0$ vs. $H_1: \mu \ne 0$ (Simple $Z$-test)
 ```{r, echo = T}
 rawp = 2*(1 - pnorm(abs(z)))
-reject.indices <- (rawp < 0.05)
+reject.indices <- 1*(rawp < 0.05)
 sum(reject.indices)
 true.indices = c(rep(1, n*p1), rep(0, n*(1-p1)))
 
 (table(true.indices,reject.indices))
+
+cat("number of false discoveries", sum((true.indices==0)&(reject.indices==1)))
 ```
 
 ## False rejection 
