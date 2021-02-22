@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Basics of R</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Jyotishka Datta" />
+    <script src="logic_in_R_1_files/header-attrs/header-attrs.js"></script>
+    <link href="logic_in_R_1_files/remark-css/default.css" rel="stylesheet" />
+    <link href="logic_in_R_1_files/remark-css/default-fonts.css" rel="stylesheet" />
+    <link href="logic_in_R_1_files/font-awesome/css/all.css" rel="stylesheet" />
+    <link href="logic_in_R_1_files/font-awesome/css/v4-shims.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Basics of R
+### Jyotishka Datta
+### 2020/01/24 (updated: 2021-02-22)
+
+---
+
+
+
+
+---
+class: middle
+count: false
+
+# (Almost) Everything is a Vector
+
+---
+  
+## Types of vectors
+  
+  The fundamental building block of data in R are vectors (collections of related values, objects, other data structures, etc).
+
+&lt;br/&gt;
+  
+  R has two fundamental vector classes:
+  
+  * Vectors (atomic vectors) 
+
+- collections of values that are all of the *same* type (e.g. all logical values, all numbers, or all character strings).
+
+* Lists (generic vectors)
+
+- collections of *any* type of R object, even other lists (meaning they can have a hierarchical/tree-like structure).
+
+---
+  
+## Atomic Vectors
+  
+  R has six atomic vector types: 
+  
+|  typeof    |   mode    | storage.mode 
+|:-----------|:----------|:-------------
+| logical    | logical   | logical      
+| double     | numeric   | double       
+| integer    | numeric   | integer      
+| character  | character | character    
+| complex    | complex   | complex      
+| raw        | raw       | raw          
+
+&lt;br/&gt;
+  
+For now we'll mainly worry about the first type, we'll discuss the following three next time (last two almost never come up).
+
+---
+count: false
+
+# Conditionals
+
+---
+  
+  ## Logical (boolean) operations
+  
+|  Operator  |  Operation    |  Vectorized? 
+|:-----------|:--------------|:-------------
+| &lt;code&gt;x &amp;#124; y&lt;/code&gt;    |  or           |   Yes        
+| `x &amp; y`    |  and          |   Yes        
+| `!x`       |  not          |   Yes        
+| &lt;code&gt;x &amp;#124;&amp;#124; y&lt;/code&gt; |  or           |   No         
+| `x &amp;&amp; y`   |  and          |   No         
+|`xor(x,y)`  |  exclusive or |   Yes        
+
+
+---
+class: split-50
+
+## Vectorized?
+
+
+```r
+x = c(TRUE,FALSE,TRUE)
+y = c(FALSE,TRUE,TRUE)
+```
+
+.pull-left[
+
+```r
+  x | y
+```
+
+```
+## [1] TRUE TRUE TRUE
+```
+
+```r
+  x || y
+```
+
+```
+## [1] TRUE
+```
+]
+
+.pull-right[
+
+```r
+  x &amp; y
+```
+
+```
+## [1] FALSE FALSE  TRUE
+```
+
+```r
+  x &amp;&amp; y
+```
+
+```
+## [1] FALSE
+```
+]
+
+
+---
+class: split-50
+
+## Length coercion
+
+
+```r
+x = c(TRUE,FALSE,TRUE)
+y = c(TRUE)
+z = c(FALSE,TRUE)
+```
+
+.pull-left[
+
+```r
+  x | y
+```
+
+```
+## [1] TRUE TRUE TRUE
+```
+
+```r
+  y | z
+```
+
+```
+## [1] TRUE TRUE
+```
+]
+
+.pull-right[
+ 
+ ```r
+  x &amp; y
+ ```
+ 
+ ```
+ ## [1]  TRUE FALSE  TRUE
+ ```
+ 
+ ```r
+  y &amp; z
+ ```
+ 
+ ```
+ ## [1] FALSE  TRUE
+ ```
+]
+
+
+```r
+x | z
+```
+
+```
+## Warning in x | z: longer object length is not a multiple of shorter object
+## length
+```
+
+```
+## [1] TRUE TRUE TRUE
+```
+
+---
+  
+## Comparisons
+  
+ Operator  |  Comparison                |  Vectorized?
+:-----------|:---------------------------|:-----------------
+`x &lt; y`    |  less than                 |  Yes
+`x &gt; y`    |  greater than              |  Yes
+`x &lt;= y`   |  less than or equal to     |  Yes
+`x &gt;= y`   |  greater than or equal to  |  Yes
+`x != y`   |  not equal to              |  Yes
+`x == y`   |  equal to                  |  Yes
+`x %in% y` |  contains                  |  Yes (for `x`)
+
+
+---
+class: split-50
+
+## Comparisons
+
+
+```r
+x = c("A","B","C")
+z = c("A")
+```
+
+.pull-left[
+
+```r
+  x == z
+```
+
+```
+## [1]  TRUE FALSE FALSE
+```
+
+```r
+  x != z
+```
+
+```
+## [1] FALSE  TRUE  TRUE
+```
+
+```r
+  x &gt; z
+```
+
+```
+## [1] FALSE  TRUE  TRUE
+```
+]
+
+.pull-right[
+
+```r
+  x %in% z
+```
+
+```
+## [1]  TRUE FALSE FALSE
+```
+
+```r
+  z %in% x
+```
+
+```
+## [1] TRUE
+```
+]
+
+---
+  
+## Conditional Control Flow
+  
+Conditional execution of code blocks is achieved via `if` statements. 
+
+*Note that `if` statements are **not** vectorized.*
+  
+
+```r
+x = c(3,1)
+
+if (3 %in% x)
+  "Here!"
+```
+
+```
+## [1] "Here!"
+```
+
+```r
+if (x &gt;= 2)
+  "Now Here!"
+```
+
+```
+## Warning in if (x &gt;= 2) "Now Here!": the condition has length &gt; 1 and only the
+## first element will be used
+```
+
+```
+## [1] "Now Here!"
+```
+
+---
+class: split-50
+
+## Collapsing logical vectors
+
+There are a couple of helper functions for collapsing a logical vector down to a single value: `any`, `all`
+
+
+```r
+x = c(3,4)
+```
+
+.pull-left[
+
+```r
+  any(x &gt;= 2)
+```
+
+```
+## [1] TRUE
+```
+
+```r
+  all(x &gt;= 2)
+```
+
+```
+## [1] TRUE
+```
+]
+
+.pull-right[
+
+```r
+  !any(x &gt;= 2)
+```
+
+```
+## [1] FALSE
+```
+
+```r
+  if (any(x &gt;= 2))
+    print("Now There!")
+```
+
+```
+## [1] "Now There!"
+```
+]
+
+
+---
+  
+## Nesting Conditionals
+  
+
+```r
+x = 3
+if (x &lt; 0) {
+  "Negative"
+} else if (x &gt; 0) {
+  "Positive"
+} else {
+  "Zero"
+}
+```
+
+```
+## [1] "Positive"
+```
+
+
+```r
+x = 0
+if (x &lt; 0) {
+  "Negative"
+} else if (x &gt; 0) {
+  "Positive"
+} else {
+  "Zero"
+}
+```
+
+```
+## [1] "Zero"
+```
+
+---
+class: middle
+count: false
+
+# Error Checking
+
+---
+  
+## `stop` and `stopifnot`
+  
+Often we want to validate user input or function arguments - if our assumptions are not met then we often want to report the error and stop execution. 
+
+
+```r
+ok = FALSE
+if (!ok)
+  stop("Things are not ok.")
+```
+
+```
+## Error in eval(expr, envir, enclos): Things are not ok.
+```
+
+```r
+stopifnot(ok)
+```
+
+```
+## Error: ok is not TRUE
+```
+
+*Note - an error (like the one generated by `stop`) will prevent an RMarkdown document from compiling unless `error=TRUE` is set for that code block.*
+  
+---
+  
+## Style choices
+  
+
+```r
+# Do stuff
+if (condition_one) {
+  ##
+  ## Do stuff
+  ##
+} else if (condition_two) {
+  ##
+  ## Do other stuff
+  ##
+} else if (condition_error) {
+  stop("Condition error occured")
+}
+```
+
+---
+  
+## Style choices
+
+
+```r
+# Do stuff better
+if (condition_error) {
+  stop("Condition error occured")
+}
+
+if (condition_one) {
+  ##
+  ## Do stuff
+  ##
+} else if (condition_two) {
+  ##
+  ## Do other stuff
+  ##
+}
+```
+
+### Ultimately, it's subjective !
+
+---
+  
+## Exercise 1
+  
+  Write a set of conditional(s) that satisfies the following requirements,
+
+* If `x` is greater than 3 and `y` is less than or equal to 3 then print "Hello world!"
+
+* Otherwise if `x` is greater than 3 print "!dlrow olleH"
+
+* If `x` is less than or equal to 3 then print "Something else ..."
+
+* Stop execution if x is odd and y is even and report an error, don't print any of the text strings above.
+
+
+Test out your code by trying various values of `x` and `y`.
+
+
+---
+class: middle
+count: false
+
+# Loops
+
+---
+
+## `for` loops
+
+Simplest, and most common type of loop in R - given a vector iterate through the elements and evaluate the code block for each.
+
+
+
+```r
+for(x in 1:10)
+{
+  cat(x^2,"")
+}
+```
+
+```
+## 1 4 9 16 25 36 49 64 81 100
+```
+
+
+```r
+for(y in list(1:3, LETTERS[1:7], c(TRUE,FALSE)))
+{
+  cat(length(y),"")
+}
+```
+
+```
+## 3 7 2
+```
+
+---
+
+## `while` loops
+
+Repeat until the given condition is **not** met (i.e. evaluates to `FALSE`)
+
+
+```r
+i = 1
+res = rep(NA,10)
+
+while (i &lt;= 10) {
+  res[i] = i^2
+  i = i+1
+}
+
+res
+```
+
+```
+##  [1]   1   4   9  16  25  36  49  64  81 100
+```
+
+---
+
+## `repeat` loops
+
+Repeat until `break`
+
+
+```r
+i = 1
+res = rep(NA,10)
+
+repeat {
+  res[i] = i^2
+  i = i+1
+  if (i &gt; 10)
+    break
+}
+
+res
+```
+
+```
+##  [1]   1   4   9  16  25  36  49  64  81 100
+```
+
+---
+class: split-50
+
+## Special keywords - `break` and `next`
+
+These are special actions that only work *inside* of a loop
+
+* `break` - ends the current *loop* (inner-most)
+* `next` - ends the current *iteration*
+
+.pull-left[
+
+```r
+for(i in 1:10) {
+    if (i %% 2 == 0)
+        break
+    cat(i,"")
+}
+```
+
+```
+## 1
+```
+]
+
+.pull-right[
+
+```r
+for(i in 1:10) {
+    if (i %% 2 == 0)
+        next
+    cat(i,"")
+}
+```
+
+```
+## 1 3 5 7 9
+```
+]
+
+
+---
+class: split-50
+
+## Some helper functions
+
+Often we want to use a loop across the indexes of an object and not the elements themselves. There are several useful functions to help you do this: `:`, `length`, `seq`, `seq_along`, `seq_len`, etc.
+
+
+```r
+4:7
+```
+
+```
+## [1] 4 5 6 7
+```
+
+```r
+seq(4,7,by=1)
+```
+
+```
+## [1] 4 5 6 7
+```
+
+```r
+seq_along(4:7)
+```
+
+```
+## [1] 1 2 3 4
+```
+
+```r
+seq_len(length(4:7))
+```
+
+```
+## [1] 1 2 3 4
+```
+
+---
+
+## Exercise 2
+
+Below is the list of primes between 2 and 100:
+```
+2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 
+43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97
+```
+
+If you were given the vector `x = c(3, 4, 12, 19, 23, 48, 50, 61, 63, 78)`, write out the R code necessary to print only the values of `x` that are *not* prime (without using subsetting or the `%in%` operator). 
+
+Your code should use *nested* loops to iterate through the vector of primes and `x`.
+
+---
+class: middle
+count: false
+
+# Functions
+
+---
+
+## When to use functions
+
+The goal of a function should be to encapsulate a *small* *reusable* piece of code.
+
+* Name should make it clear what the function does (think in terms of simple verbs).
+
+* Functionality should be simple enough to be quickly understood.
+
+* The smaller and more modular the code the easier it will be to reuse elsewhere.
+
+* Better to change code in one location than code everywhere.
+
+---
+class: middle, bottom, segue
+
+
+## Next we will look at functions.
+
+---
+## Functions 
+
+- Functions are blocks of code that allows R to be modular and facilitate code reuse.
+- An R programmer can define their own functions as follows:
+
+```r
+function_name &lt;- function([arg1], [arg2], ...){
+#function code body
+}
+```
+- The function arguments are optional. Function arguments are the variables passed
+to the function, used by the function's code to perform calculations. A function can take no arguments.
+- A function can also return any R primitive or object using the return(object)
+statement.
+
+---
+## Examples 
+
+-  Examples of two different functions 
+
+
+```r
+# computes the mean of a vector of numbers
+mean &lt;- function(a_vector) {
+s &lt;- sum(a_vector)
+x &lt;- s/length(a_vector)
+}
+```
+
+
+```r
+# checks to see if a string s starts with letter x
+startsWith &lt;- function(x, s){
+if(x == substr(s, 0, 1){
+return(TRUE)
+}
+return(FALSE)
+}
+```
+
+---
+## Anatomy of a function
+
+-  **Default arguments**
+-  Function arguments can be assigned default values as follows:
+
+```r
+sort_vector &lt;- function(a_vector, ascending=TRUE){
+# sorting algorithm
+}
+```
+- When calling this function, the arguments given default values do not need to be specified. In this case, the defaults are used.
+- Example:
+
+```r
+sort_vector(a_vector) # returns a_vector in ascending order
+sort_vector(a_vector, FALSE) # returns a vector in descending order
+```
+
+---
+## "Scope" of a variable 
+
+-  Variable Scoping
+-  Variables that are bound to an R primitive or object outside a function are called global variables, and are accessible everywhere in an R program.
+-  Example:
+
+```r
+x &lt;- 5
+test &lt;- function() {
+cat(x + 5)
+}
+test(); 
+```
+
+```
+## 10
+```
+
+- Here 'x' is a "GLOBAL" variable - accessible from anywhere. 
+---
+
+## "Scope" (contd.)
+
+-  Variables bound inside a function are only accessible within that function. These are called local variables. Example:
+
+```r
+x &lt;- 10
+test &lt;- function() {
+x &lt;- 5
+cat(x + 20)
+}
+test() #prints 25
+```
+
+```
+## 25
+```
+
+```r
+cat(x + 20) #prints 30
+```
+
+```
+## 30
+```
+-  **Note that the local variable assignment takes precedence inside the function test over the global assignment**.
+---
+## Side effects 
+
+-  R functions have no side effects-- they cannot change the value of global variables. Example:
+
+```r
+x &lt;- 10
+test &lt;- function(z) {
+z &lt;- z + 10
+cat(z)
+}
+test(x) #prints 20
+```
+
+```
+## 20
+```
+
+```r
+cat(x) #prints 10
+```
+
+```
+## 10
+```
+-  **Note that x is still bound to 10 outside of test()**.
+
+---
+# Acknowledgments
+
+Above materials are derived in part from the following sources:
+  
+* Colin Rundell's slides. 
+* Hadley Wickham - [Advanced R](http://adv-r.had.co.nz/)
+* [R Language Definition](http://stat.ethz.ch/R-manual/R-devel/doc/manual/R-lang.html)
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create();
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
