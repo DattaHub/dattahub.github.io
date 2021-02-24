@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Multidimensional Scaling</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Jyotishka Datta" />
+    <script src="mds_demo_x_files/header-attrs/header-attrs.js"></script>
+    <link href="mds_demo_x_files/remark-css/default.css" rel="stylesheet" />
+    <link href="mds_demo_x_files/remark-css/default-fonts.css" rel="stylesheet" />
+    <link href="mds_demo_x_files/font-awesome/css/all.css" rel="stylesheet" />
+    <link href="mds_demo_x_files/font-awesome/css/v4-shims.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Multidimensional Scaling
+### Jyotishka Datta
+### 2020/01/24 (updated: 2021-02-24)
+
+---
+
+
+
+
+## Idea of MDS 
+
+ -  Represent high-dimensional point cloud in few (usually 2) dimensions keeping distances between points similar.
+ -  Useful tool in visualizing any big data-set, specially for clustering purposes. 
+ -  Is a popular exploratory tool. Used before any inferential procedure. 
+ 
+---
+## Goal of MDS 
+
+ - Given pairwise dissimilarities, reconstruct a map that preserves distances.
+ -  From any dissimilarity (no need to be a metric)
+ -  Reconstructed map has coordinates `\(\mathbf{x}_i = (x_{i1}, x_{i2})\)` and the
+natural distance `\(\Vert x_i - x_j \Vert^2\)`.
+ - MDS is a family of different algorithms, each designed to
+arrive at optimal low-dimensional configuration (p = 2 or 3)
+ - Includes: Classical MDS, Metric MDS and Non-metric MDS. 
+ 
+---
+## Examples first - Classical MDS
+
+  - Problem: Given Euclidean Distance between points, recover the position of the points. 
+ - Example: Road distance between 21 european cities
+
+
+```r
+library(datasets); class(eurodist)
+```
+
+```
+## [1] "dist"
+```
+
+```{}
+                Athens Barcelona Brussels Calais Cherbourg Cologne
+Barcelona         3313                                            
+Brussels          2963      1318                                  
+Calais            3175      1326      204                         
+Cherbourg         3339      1294      583    460                  
+Cologne           2762      1498      206    409       785  
+```
+
+
+---
+## First Try MDS
+
+
+```r
+eurocmd &lt;- cmdscale(eurodist)
+plot(eurocmd, type = "n")
+text(eurocmd, rownames(eurocmd))
+```
+
+![](mds_demo_x_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+
+
+---
+## Do we recover? 
+
+&lt;img src="euromap.jpg" width="600px" height="400px" /&gt;
+
+- Can identify points up to shift, reflection and rotation. 
+
+
+---
+## Flip Axes 
+
+
+```r
+plot(eurocmd[,1], -eurocmd[,2], type = "n", asp = 1)
+text(eurocmd[,1], -eurocmd[,2], rownames(eurocmd))
+```
+
+![](mds_demo_x_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
+
+- Can identify points up to shift, reflection and rotation.
+
+---
+## Another Example 
+
+ - Air pollution in US Cities 
+
+```r
+data("USairpollution", package = "HSAUR2")
+summary(USairpollution)
+```
+
+```
+##       SO2              temp            manu            popul       
+##  Min.   :  8.00   Min.   :43.50   Min.   :  35.0   Min.   :  71.0  
+##  1st Qu.: 13.00   1st Qu.:50.60   1st Qu.: 181.0   1st Qu.: 299.0  
+##  Median : 26.00   Median :54.60   Median : 347.0   Median : 515.0  
+##  Mean   : 30.05   Mean   :55.76   Mean   : 463.1   Mean   : 608.6  
+##  3rd Qu.: 35.00   3rd Qu.:59.30   3rd Qu.: 462.0   3rd Qu.: 717.0  
+##  Max.   :110.00   Max.   :75.50   Max.   :3344.0   Max.   :3369.0  
+##       wind            precip         predays     
+##  Min.   : 6.000   Min.   : 7.05   Min.   : 36.0  
+##  1st Qu.: 8.700   1st Qu.:30.96   1st Qu.:103.0  
+##  Median : 9.300   Median :38.74   Median :115.0  
+##  Mean   : 9.444   Mean   :36.77   Mean   :113.9  
+##  3rd Qu.:10.600   3rd Qu.:43.11   3rd Qu.:128.0  
+##  Max.   :12.700   Max.   :59.80   Max.   :166.0
+```
+ - Some variables have larger range - need to standardise. 
+
+---
+## Try MDS at 2-D 
+
+
+```r
+dat &lt;- USairpollution # less typing
+xs &lt;- scale(dat)
+(pol.mds &lt;- cmdscale(dist(xs), k = 2, eig = TRUE))
+```
+
+```
+## $points
+##                       [,1]        [,2]
+## Albany         -0.03386467 -0.89884070
+## Albuquerque    -1.79452779  2.72940259
+## Atlanta        -0.61099829 -0.63025982
+## Baltimore       0.79088751 -0.03447144
+## Buffalo         0.81715797 -1.54968000
+## Charleston     -0.99951059 -1.41323028
+## Chicago         7.23097079  2.02725781
+## Cincinnati     -0.43446500 -0.56506889
+## Cleveland       2.29405867 -0.92604347
+## Columbus       -0.09582927 -0.64420752
+## Dallas         -0.62321844  1.29560956
+## Denver         -0.54311446  1.94774644
+## Des Moines     -0.46515732  0.14701111
+## Detroit         1.96056556  0.48876478
+## Hartford        0.45472289 -1.08386981
+## Houston        -0.08771464  0.25974239
+## Indianapolis    0.24048944 -0.30539249
+## Jacksonville   -1.35912964 -0.92688238
+## Kansas City    -0.49310580  0.30723679
+## Little Rock    -1.69666795 -0.47650053
+## Louisville     -0.28298787 -0.60383807
+## Memphis        -0.91094064 -0.31768811
+## Miami          -1.69467532 -1.48949101
+## Milwaukee       0.84024079  0.10761447
+## Minneapolis     1.28252428 -0.04601865
+## Nashville      -0.94577820 -0.62683740
+## New Orleans    -1.63459305 -0.99466693
+## Norfolk        -0.51721437 -0.77275631
+## Omaha          -0.54151231  0.46560175
+## Philadelphia    3.21117211  0.78901743
+## Phoenix        -2.68264965  3.84368955
+## Pittsburgh      1.01083667 -1.08264483
+## Providence      1.41985841 -1.20519405
+## Richmond       -1.00121369 -0.48384569
+## Salt Lake City -0.88721623  1.42179971
+## San Francisco  -0.92744347  2.20979453
+## Seattle         0.51958416 -1.51203402
+## St. Louis       0.76870077  0.31198124
+## Washington     -0.04555952  0.05027326
+## Wichita        -0.84415913  0.81131118
+## Wilmington     -0.68852272 -0.62439221
+## 
+## $eig
+##  [1]  1.091248e+02  6.049339e+01  5.579892e+01  3.567965e+01  1.387115e+01
+##  [6]  4.011504e+00  1.020597e+00  1.163285e-14  5.195944e-15  4.928423e-15
+## [11]  4.822515e-15  3.666375e-15  2.978719e-15  2.644779e-15  2.283145e-15
+## [16]  1.532201e-15  9.964077e-16  6.906871e-16  6.566639e-16  6.358612e-16
+## [21]  1.704149e-16 -1.407236e-16 -3.408670e-16 -4.201168e-16 -1.206656e-15
+## [26] -1.219428e-15 -1.701933e-15 -1.995565e-15 -2.034042e-15 -2.086375e-15
+## [31] -2.352128e-15 -2.457719e-15 -2.902717e-15 -3.652021e-15 -5.264920e-15
+## [36] -5.438973e-15 -7.231596e-15 -7.465435e-15 -9.407171e-15 -1.018799e-14
+## [41] -1.217172e-14
+## 
+## $x
+## NULL
+## 
+## $ac
+## [1] 0
+## 
+## $GOF
+## [1] 0.6057792 0.6057792
+```
+
+
+---
+## Distance `\(\ne\)` Physical Distance
+
+![](mds_demo_x_files/figure-html/unnamed-chunk-8-1.png)&lt;!-- --&gt;
+
+- SLC and Dallas have similar pollution profile. Chicago is an outlier. 
+
+---
+class: split-50 
+
+## To scale or not to scale 
+4 persons data on age and height. 
+
+.pull-left[
+
+|Person |Age [years] |Height [cm] |
+|:------|:-----------|:-----------|
+|A      |35          |190         |
+|B      |40          |190         |
+|C      |35          |160         |
+|D      |40          |160         |
+]
+.pull-right[
+![](scale-1.jpg)&lt;!-- --&gt;
+]
+
+---
+class: split-50
+
+## To scale or not to scale 
+
+.pull-left[
+
+|Person |Age [years] |Height [ft] |
+|:------|:-----------|:-----------|
+|A      |35          |6.232       |
+|B      |40          |6.232       |
+|C      |35          |5.248       |
+|D      |40          |5.248       |
+]
+
+.pull-right[
+Convert cm to feet: different subgroups emerge. 
+![](scale-2.jpg)&lt;!-- --&gt;
+]
+
+
+---
+class: split-50
+
+## To scale or not to scale 
+
+.pull-left[
+
+|Person|Age [years]|Height [cm]|
+|:----:|:---------:|:---------:|
+|  A   |   -0.87   |   0.87    |
+|  B   |   0.87    |   0.87    |
+|  C   |   -0.87   |   -0.87   |
+|  D   |   0.87    |   -0.87   |
+]
+
+.pull-right[
+![](scale-3.jpg)&lt;!-- --&gt;
+]
+
+Now all data-points are scaled : no subgroups.
+
+---
+## Context is important 
+
+Which of the two representations make sense? 
+
+
+|Object|  X1  | X2 |
+|:----:|:----:|:--:|
+|  A   | 13.3 | 38 |
+|  B   | 12.4 |45.4|
+|  C   |-122.7|45.6|
+|  D   |-122.4|37.7|
+
+&lt;img src="scale-4.jpg" style="display: block; margin: auto;" /&gt;
+
+
+---
+## Context is important 
+
+You need knowledge of the context. Scaling is not a good idea always. 
+
+
+|   Object    |Longitude|Latitude|
+|:-----------:|:-------:|:------:|
+|   Palermo   |  13.3   |   38   |
+|   Venice    |  12.4   |  45.4  |
+|  Portland   | -122.7  |  45.6  |
+|San Francisco| -122.4  |  37.7  |
+
+&lt;img src="scale-4.jpg" style="display: block; margin: auto;" /&gt;
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create();
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

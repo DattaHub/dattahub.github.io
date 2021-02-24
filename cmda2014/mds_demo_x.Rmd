@@ -1,0 +1,220 @@
+---
+title: "Multidimensional Scaling"
+author: "Jyotishka Datta"
+date: "2020/01/24 (updated: `r Sys.Date()`)"
+output:
+  xaringan::moon_reader:
+  css: mystyle.css
+lib_dir: libs
+nature:
+  highlightStyle: github
+highlightLines: true
+countIncrementalSlides: false
+---
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+options(
+  htmltools.dir.version = FALSE, # for blogdown
+  width=80
+)
+
+# library(emo)
+htmltools::tagList(rmarkdown::html_dependency_font_awesome())
+```
+
+## Idea of MDS 
+
+ -  Represent high-dimensional point cloud in few (usually 2) dimensions keeping distances between points similar.
+ -  Useful tool in visualizing any big data-set, specially for clustering purposes. 
+ -  Is a popular exploratory tool. Used before any inferential procedure. 
+ 
+---
+## Goal of MDS 
+
+ - Given pairwise dissimilarities, reconstruct a map that preserves distances.
+ -  From any dissimilarity (no need to be a metric)
+ -  Reconstructed map has coordinates $\mathbf{x}_i = (x_{i1}, x_{i2})$ and the
+natural distance $\Vert x_i - x_j \Vert^2$.
+ - MDS is a family of different algorithms, each designed to
+arrive at optimal low-dimensional configuration (p = 2 or 3)
+ - Includes: Classical MDS, Metric MDS and Non-metric MDS. 
+ 
+---
+## Examples first - Classical MDS
+
+  - Problem: Given Euclidean Distance between points, recover the position of the points. 
+ - Example: Road distance between 21 european cities
+
+```{r}
+library(datasets); class(eurodist)
+```
+
+```{}
+                Athens Barcelona Brussels Calais Cherbourg Cologne
+Barcelona         3313                                            
+Brussels          2963      1318                                  
+Calais            3175      1326      204                         
+Cherbourg         3339      1294      583    460                  
+Cologne           2762      1498      206    409       785  
+```
+
+
+---
+## First Try MDS
+
+```{r}
+eurocmd <- cmdscale(eurodist)
+plot(eurocmd, type = "n")
+text(eurocmd, rownames(eurocmd))
+```
+
+
+---
+## Do we recover? 
+
+```{r, echo = F, out.height = "400px", out.width = "600px"}
+knitr::include_graphics("euromap.jpg")
+```
+
+- Can identify points up to shift, reflection and rotation. 
+
+
+---
+## Flip Axes 
+
+```{r}
+plot(eurocmd[,1], -eurocmd[,2], type = "n", asp = 1)
+text(eurocmd[,1], -eurocmd[,2], rownames(eurocmd))
+```
+
+- Can identify points up to shift, reflection and rotation.
+
+---
+## Another Example 
+
+ - Air pollution in US Cities 
+```{r}
+data("USairpollution", package = "HSAUR2")
+summary(USairpollution)
+```
+ - Some variables have larger range - need to standardise. 
+
+---
+## Try MDS at 2-D 
+
+```{r, echo = T}
+dat <- USairpollution # less typing
+xs <- scale(dat)
+(pol.mds <- cmdscale(dist(xs), k = 2, eig = TRUE))
+```
+
+
+---
+## Distance $\ne$ Physical Distance
+
+```{r, echo = F, fig.asp = 0.9}
+x <- pol.mds$points
+plot(x[,1], x[,2], type = "n")
+text(x[,1], x[,2], labels = rownames(x))
+```
+
+- SLC and Dallas have similar pollution profile. Chicago is an outlier. 
+
+---
+class: split-50 
+
+## To scale or not to scale 
+4 persons data on age and height. 
+
+.pull-left[
+```{r, echo = F}
+dat <- data.frame(rbind(c("A",35,190),c("B",40,190),
+                        c("C",35,160),c("D",40,160)))
+colnames(dat) <- c("Person", "Age [years]", "Height [cm]")
+library(knitr)
+kable(dat)
+```
+]
+.pull-right[
+```{r, echo = F}
+knitr::include_graphics("scale-1.jpg")
+```
+]
+
+---
+class: split-50
+
+## To scale or not to scale 
+
+.pull-left[
+```{r, echo = F}
+dat <- data.frame(rbind(c("A",35,6.232),c("B",40,6.232),
+                        c("C",35,5.248),c("D",40,5.248)))
+colnames(dat) <- c("Person", "Age [years]", "Height [ft]")
+library(knitr)
+kable(dat)
+```
+]
+
+.pull-right[
+Convert cm to feet: different subgroups emerge. 
+```{r, echo = F}
+knitr::include_graphics("scale-2.jpg")
+```
+]
+
+
+---
+class: split-50
+
+## To scale or not to scale 
+
+.pull-left[
+```{r, echo = F}
+dat <- data.frame(rbind(c("A",-0.87, 0.87),c("B",0.87, 0.87),
+                        c("C",-0.87,-0.87),c("D",0.87,-0.87)))
+colnames(dat) <- c("Person", "Age [years]", "Height [cm]")
+library(knitr)
+kable(dat, align = 'ccc', padding = 0, booktabs = T)
+```
+]
+
+.pull-right[
+```{r, echo = F}
+knitr::include_graphics("scale-3.jpg")
+```
+]
+
+Now all data-points are scaled : no subgroups.
+
+---
+## Context is important 
+
+Which of the two representations make sense? 
+
+```{r, echo = F, fig.align='center'}
+dat <- data.frame(rbind(c("A",13.3,38.0),c("B",12.4,45.4),
+                        c("C",-122.7,45.6),c("D",-122.4,37.7)))
+colnames(dat) <- c("Object", "X1", "X2")
+kable(dat, align = 'ccc', padding = 0, booktabs = T)
+
+knitr::include_graphics("scale-4.jpg")
+```
+
+
+---
+## Context is important 
+
+You need knowledge of the context. Scaling is not a good idea always. 
+
+```{r, echo = F, fig.align='center'}
+dat <- data.frame(rbind(c("Palermo",13.3,38.0),c("Venice",12.4,45.4),
+                        c("Portland",-122.7,45.6),c("San Francisco",-122.4,37.7)))
+colnames(dat) <- c("Object", "Longitude", "Latitude")
+kable(dat, align = 'ccc', padding = 0, booktabs = T)
+
+knitr::include_graphics("scale-4.jpg")
+```
+
+
+
