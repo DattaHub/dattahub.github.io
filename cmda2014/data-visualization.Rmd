@@ -22,7 +22,7 @@ options(
 htmltools::tagList(rmarkdown::html_dependency_font_awesome())
 ```
 
----
+
 class: middle
 count: false
 
@@ -60,7 +60,7 @@ Let's start with a **scatterplot**. A scatter plot provides a graphical view of 
 
 Let's make a scatterplot of birth weight by mother's age.
 
-```{r scatter-plot1, fig.align='center'}
+```{r scatter-plot1, fig.align='center', fig.asp = 0.8}
 plot(x = cats$age, y = cats$weight)
 ```
 
@@ -313,6 +313,35 @@ ggplot(dat) +
   theme(axis.text = element_text(angle = 45))
 ```
 
+
+---
+## Scatterplot (with colours)
+
+```{r, fig.asp = 0.6}
+ggplot(dat) +
+  geom_point(aes(x = artist, y = dataBoring, color = major)) +
+  ggtitle("Data Boring vs. Major") +
+  xlab("Major") + ylab("Data Boring") +
+  theme_minimal()
+```
+
+---
+## Exercise 
+
+Recreate the above plot but different facets for different majors using `facet_grid`
+
+
+---
+## Solution 
+
+```{r, fig.asp = 0.6}
+ggplot(dat) +
+  geom_point(aes(x = artist, y = dataBoring, color = major)) +
+  facet_grid(major ~.)+
+  ggtitle("Data Boring vs. Major") +
+  xlab("Major") + ylab("Data Boring") +
+  theme_bw()
+```
 
 
 ---
