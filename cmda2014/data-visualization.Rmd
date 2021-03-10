@@ -32,7 +32,7 @@ count: false
 
 ## Objectives 
 
-> ## Learning Objectives {.objectives}
+> ## Learning Objectives 
 >
 > * Grammar of graphics concepts (geoms, aesthetics)
 > * Advanced plots (scales, facets, themes)
