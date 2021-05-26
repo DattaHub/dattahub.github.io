@@ -1,0 +1,392 @@
+---
+title: "Efficiency tricks in R"
+author: "Jyotishka Datta"
+date: "2020/01/24 (updated: `r Sys.Date()`)"
+output:
+  xaringan::moon_reader:
+  css: mystyle.css
+lib_dir: libs
+nature:
+  highlightStyle: github
+  highlightLines: true
+  countIncrementalSlides: true
+---
+
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+options(
+  htmltools.dir.version = FALSE, # for blogdown
+  width=80
+)
+
+# library(emo)
+htmltools::tagList(rmarkdown::html_dependency_font_awesome())
+```
+
+class: middle
+count: false
+
+# (Apply) vs. (Loop)
+
+---
+
+## for loop
+
+```{R, echo = T}
+x = 36 
+for (x in seq(10)){
+  cat(x, "\t") # x is the iterator
+}
+```
+
+---
+
+## for loop 
+
+```{r, echo = T}
+for (x in seq(10)){
+  x = 3.9*x*(1-x)
+  cat(x, "\t")
+}
+```
+
+---
+
+## while loop 
+
+```{r, echo = T}
+a = 0 
+while(a<10){
+  a = a+1 ## unlike C, a++, a+=1 won't work in R
+  cat(a, "\t")
+}
+```
+
+---
+
+## apply, lapply, sapply, tapply 
+
+- You have some structured blob of data and you want to perform some operations by dimensions. 
+- e.g. calculate row-wise means or column-wise means 
+
+```{r, echo = TRUE}
+m <- matrix(data=cbind(rnorm(30, 0), rnorm(30, 2), rnorm(30, 5)), nrow=30, ncol=3)
+dim(m)
+apply(m, 2, mean)
+```
+
+---
+
+## apply (contd.)
+
+- We can also calculate row-wise mean. 
+
+```{r, echo = TRUE}
+apply(m, 1, mean)
+```
+- Or, our own function: (how many negative numbers in each column?)
+```{r, echo = TRUE}
+apply(m, 2, function(x) length(x[x<0]))
+```
+
+---
+
+## lapply and sapply 
+
+- traversing over a set of data like a list or vector, and calling the specified function for each item. 
+
+- Usage: lapply(alist, afunction) - applies afunction to all the elements of a list or vector, returns a list of
+the results. Example:
+
+```{r, echo = TRUE}
+cap.state.name <- lapply(state.name, toupper)
+head(cap.state.name, n = 3)
+```
+
+---
+
+## sapply 
+
+- Similar to lapply, but returns a simpler data structure: either a vector or array.
+
+```{r, echo = TRUE}
+sapply(1:3, function(x) x^2)
+```
+
+- Remember: lapply is a list apply, sapply is simple lapply. 
+- Why do we care? apply, sapply, lapply are easier to read and **sometimes** faster than traditional for loops.
+
+
+---
+class: inverse, middle, center
+
+# System time in R
+
+```{r, echo = TRUE, eval = FALSE}
+system.time(expr)
+```
+
+Return CPU times that "expr" used. A numeric vector of length 5 containing 
+the user cpu, system cpu, elapsed, subproc1, subproc2 times. The subproc 
+times are the user and system cpu time used by child processes (and so 
+are usually zero).
+
+
+---
+
+## System time in R
+
+```{R, echo = TRUE}
+system.time(Sys.sleep(2))
+```
+
+
+The other way to get system time is using `proc.time` function. `proc.time` determines how much time (in seconds) the currently running R process already consumed. For example:
+
+```{r, echo = TRUE}
+now<-proc.time()
+Sys.sleep(2)
+proc.time()-now
+```
+
+---
+
+# Vectorized Arithmetic
+
+---
+
+## Vectorized arithmetic is faster than loops
+
+```{r, echo = TRUE}
+x<-rnorm(1e7)
+sum<-0
+now<-proc.time()
+for(i in 1:1e7){sum<-sum+x[i]}
+meanx<-sum/1e7
+proc.time()-now
+```
+
+
+---
+
+## Use vectorized arithmetic instead of loops:
+
+```{r, echo = TRUE}
+system.time(mean(x))
+```
+
+---
+
+## Finer comparison
+
+```{r, echo = TRUE}
+x = seq(1:1e4)
+#install.packages("microbenchmark")
+library(microbenchmark)
+microbenchmark(sqrt(x),x^(0.5))
+```
+
+
+---
+
+## Excercise 1
+
+Here are two other ways to compute the square root of a vector. Which do you think will be fastest? Which will be slowest? Use microbenchmarking to test your answers.
+
+```{r, eval = F, echo = T}
+x^(1/2)
+exp(log(x)/2)
+```
+
+
+---
+
+## Time comparison: Ordinary Least Squares in Regression
+
+- Compare execution times for the different methods of solving the Least Squares problem when the number of observations is large.
+
+-  Let us start by making up our own random data: $n \times p$ design matrix $X$ and an $n \times 1$ response vector $y$. 
+-  Take $n = 5 \times 10^5$. 
+
+```{r, echo = TRUE, cache = TRUE}
+set.seed(123)
+n <- 5e5; p <- 20
+X <- matrix(rnorm(n * p, mean = 1 : p, sd = 10), nr = n, nc = p, byrow = TRUE)
+y <- rowSums(X) + rnorm(n)
+```
+
+
+---
+## OLS Solution 
+
+- The naive approach to solve the LS problem is to compute: 
+$\hat{\beta} = (X^T X)^{-1}X^T y$
+
+```{r, echo = TRUE, cache = TRUE}
+system.time(bHat1 <- solve(t(X) %*% X) %*% t(X) %*% y)
+```
+
+-  Not so naive: use `crossprod`.
+
+```{r, echo = TRUE, cache = TRUE}
+system.time(bHat2 <- solve(crossprod(X), crossprod(X, y)))
+```
+
+
+---
+
+## Knowledge of Linear Algebra helps
+
+- Inverting a matrix using Cholesky needs less time. 
+- A symmetric positive definite matrix can be factorized as: 
+$$
+A = L L^T
+$$
+
+```{r, echo = TRUE, cache = TRUE}
+p = 1000; A = array(rnorm(p*p), c(p,p))
+A = crossprod(A)
+ptm <- proc.time(); B = solve(A); proc.time()-ptm
+ptm <- proc.time(); B = chol2inv(A); proc.time()-ptm
+```
+
+---
+
+# Parallel
+
+---
+## More advanced : Parallel
+
+- If you have a task that has to be completed many times, but each repeat is independent, you should use parallel computing. 
+- For instance, if you are repreating a test, and in each case are using a new data-set, that is an easily parallelizable task.
+- A good rule of thumb is that if you can wrap your task in an apply function or one of its variants, it's a good option for parallelization. 
+- Parallel processing breaks up your task, splits it among **multiple** processors, and puts the components back together. 
+
+
+---
+
+## How do I know if I can apply these ideas? 
+
+- Parallel processing works best when you have a task that has to be completed many times, but each repeat is independent.
+- For instance, if you are repreating a simulation, and in each case are drawing new parameters from a distribution, that is an easily parallelizable task.
+- A good rule of thumb is that if you can wrap your task in an apply function or one of its variants, it's a good option for parallelization. 
+- In fact most implementations of parallel processing in R are versions of apply.
+
+---
+
+## What happens?
+
+- When you run a task in parallel, your computer "dispatches" each task to a CPU core. 
+- This dispatching adds computational overhead. 
+- So, it's usually best to try to minimize the number of dispatches. 
+- In most cases you are going to have a small number of computing cores relative to your tasks. A powerful laptop or desktop will have 2, 4, or 8 cores, and even the most powerful Amazon virtual machine has 88.
+
+
+---
+
+## Introduction to doParallel
+
+- We will first write a super simple R code to explain the mechanism of parallel processing using doParallel. 
+
+- As before, we use the `Sys.sleep()` function to put the system to sleep for 1 second but in parallel. 
+
+```{r, echo = TRUE, eval = FALSE, warning=FALSE, message = FALSE, cache = TRUE}
+n = as.numeric(Sys.getenv("NUMBER_OF_PROCESSORS")) # on Windows
+require(doParallel)
+cl <- makeCluster(n)
+registerDoParallel(cl)
+ptm <- proc.time()
+foreach(i=1:4) %dopar% {Sys.sleep(1)}
+proc.time()-ptm
+```
+
+- We can expect that the total time taken would be roughly 1 second. 
+
+
+---
+
+## Output of the snippet 
+- Here is the output !
+
+```{r, echo = FALSE, eval = TRUE, warning=FALSE, message = FALSE}
+n = as.numeric(Sys.getenv("NUMBER_OF_PROCESSORS")) # on Windows
+require(doParallel)
+cl <- makeCluster(n)
+registerDoParallel(cl)
+ptm <- proc.time()
+foreach(i=1:4) %dopar% {Sys.sleep(1)}
+proc.time()-ptm
+```
+
+- The `NULL` values are there because we are not returning anything to the list. 
+
+---
+
+## Hello, world !
+
+- This is our "Hello, world" program for parallel computing. 
+- It tests that everything is installed and set up properly, **but don't expect it to run faster than a sequential for loop, because it won't**! 
+-  With small tasks, the overhead of scheduling the task and returning the result
+can be greater than the time to execute the task itself, resulting in poor performance. 
+
+
+---
+## We will see a non-trivial example 
+
+- Non-trivial examples need sophisticated Statistical methods, and I haven't covered these yet. So don't worry at all if you don't understand any of it. I just want to show you an example of the advantage of using parallel processing. 
+
+- How long does it take to do 10,000 Bootstrap iterations using 2 cores?
+
+---
+## Bootstrapping GLM 
+
+```{r}
+x <- iris[which(iris[,5] != "setosa"), c(1,5)]
+str(x)
+```
+
+- Logistic Regression: predict species using sepal.length.
+- Want the distribution of parameter estimates.
+- Fit the model repeatedly (like 10k times) for observations randomly sampled with replacements.
+- Gives us Bootstrap distribution. 
+- Cover Bootstrap in greater details towards the end. 
+
+
+---
+## Bootstrap using parallel 
+
+```{r, echo = TRUE, cache = TRUE}
+x <- iris[which(iris[,5] != "setosa"), c(1,5)]
+trials <- 10000
+ptime <- system.time({
+r <- foreach(icount(trials), .combine=cbind) %dopar% {
+  ind <- sample(100, 100, replace=TRUE)
+  result1 <- glm(x[ind,2]~x[ind,1], family=binomial(logit))
+  coefficients(result1)
+}
+})
+ptime
+```
+
+---
+## Sequential counter-part 
+
+```{r, echo = TRUE, cache = TRUE}
+stime <- system.time({
+r <- foreach(icount(trials), .combine=cbind) %do% {
+  ind <- sample(100, 100, replace=TRUE)
+  result1 <- glm(x[ind,2]~x[ind,1], family=binomial(logit))
+  coefficients(result1)
+}
+})
+stime
+```
+
+---
+## Exercise (Try at home)
+
+-  Can you parallelise any of the divide-and-conquer algorithms you have learned in class? 
+
+
+
+

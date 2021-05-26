@@ -1,0 +1,19 @@
+/* Whole document: */
+body{
+  font-family: Palatino;
+  font-size: 11pt;
+}
+/* Headers */
+h1,h2,h3,h4,h5,h6{
+  font-size: 20pt;
+}
+.gdbar img {
+  width: 500px ;
+  height: 350px ;
+  margin: 8px 8px;
+}
+
+.gdbar {
+  width: 600px ;
+  height: 400px ;
+}
