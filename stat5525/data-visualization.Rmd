@@ -50,7 +50,7 @@ When we are working with large sets of numbers it can be useful to display that 
 We'll test a few of these out here on the `cats` data.
 
 ```{r import data, echo = TRUE}
-cats <- read.csv("herding-cats.csv")
+cats <- read.csv("data/herding-cats.csv")
 dim(cats)
 ```
 
@@ -280,7 +280,7 @@ ggplot(example_data) +
 ## Read the airline-safety data 
 
 ```{r class_data}
-dat <- read.table("airline-safety.csv", sep = ",", header = TRUE)
+dat <- read.table("data/airline-safety.csv", sep = ",", header = TRUE)
 ```
 
 ---
