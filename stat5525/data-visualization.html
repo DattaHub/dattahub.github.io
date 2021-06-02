@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Advanced Data Visualization</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Jyotishka Datta" />
+    <script src="data-visualization_files/header-attrs/header-attrs.js"></script>
+    <link href="data-visualization_files/remark-css/default.css" rel="stylesheet" />
+    <link href="data-visualization_files/remark-css/default-fonts.css" rel="stylesheet" />
+    <link href="data-visualization_files/font-awesome/css/all.css" rel="stylesheet" />
+    <link href="data-visualization_files/font-awesome/css/v4-shims.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Advanced Data Visualization
+### Jyotishka Datta
+### 2020/01/24 (updated: 2021-06-02)
+
+---
+
+
+
+
+
+class: middle
+count: false
+
+# ggplot: Grammar of Graphics 
+
+---
+
+## Objectives 
+
+&gt; ## Learning Objectives 
+&gt;
+&gt; * Grammar of graphics concepts (geoms, aesthetics)
+&gt; * Advanced plots (scales, facets, themes)
+&gt; * Writing images (and other things) to file
+
+---
+
+## Basic plots in R
+
+When we are working with large sets of numbers it can be useful to display that information graphically. R has a number of built-in tools for basic graph types such as hisotgrams, scatter plots, bar charts, boxplots and much [more](http://www.statmethods.net/graphs/).
+
+---
+## Dataset 
+
+We'll test a few of these out here on the `cats` data.
+
+
+```r
+cats &lt;- read.csv("herding-cats.csv")
+dim(cats)
+```
+
+```
+## [1] 400  10
+```
+
+---
+## Scatterplot
+Let's start with a **scatterplot**. A scatter plot provides a graphical view of the relationship between two sets of numbers.
+
+Let's make a scatterplot of birth weight by mother's age.
+
+
+```r
+plot(x = cats$age, y = cats$weight)
+```
+
+&lt;img src="data-visualization_files/figure-html/scatter-plot1-1.png" style="display: block; margin: auto;" /&gt;
+
+
+---
+## Scatterplot 
+
+Each point represents a row in our dataset. The value on the x-axis is the mother's age and the values on the y-axis correspond to the birth weight for the infant. 
+
+For any plot you can customize many features of your graphs (fonts, colors, axes, titles) through [graphic options](http://www.statmethods.net/advgraphs/parameters.html)
+
+
+---
+## Advanced figures (`ggplot2`)
+
+More recently, R users have moved away from base graphic options and towards a plotting package called `ggplot2` that adds a lot of functionality to the basic plots seen above. 
+
+The syntax is different but it’s extremely powerful and flexible. 
+
+We can start by re-creating some of the above plots but using ggplot functions to get a feel for the syntax.
+
+---
+## Install 
+
+
+```r
+install.packages("ggplot2")
+```
+
+Load the `ggplot2` package.
+
+
+```r
+library(ggplot2)
+```
+
+---
+## `ggplot` 
+
+The `ggplot()` function is used to initialize the basic graph structure, then we add to it. The basic idea is that you specify different parts of the plot, and add them together using the + operator.
+
+We will start with a blank plot and will find that you will get an error, because you need to add layers.
+
+
+```r
+ggplot(cats)
+```
+
+&lt;img src="data-visualization_files/figure-html/unnamed-chunk-2-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+## Layers 
+
+Geometric objects are the actual marks we put on a plot. Examples include:
+
+* points (geom_point, for scatter plots, dot plots, etc)
+* lines (geom_line, for time series, trend lines, etc)
+* boxplot (geom_boxplot, for, well, boxplots!)
+
+---
+## Example 
+
+A plot must have at least one geom; there is no upper limit. You can add a geom to a plot using the `+` operator.
+
+
+```r
+ggplot(cats) +
+    geom_point()
+```
+
+Each type of geom usually has a required set of aesthetics to be set, and usually accepts only a subset of all aesthetics
+
+–refer to the geom help pages to see what mappings each geom accepts. Aesthetic mappings are set with the `aes()` function. 
+---
+
+## Aesthetics 
+
+Examples include:
+
+* position (i.e., on the x and y axes)
+* color (“outside” color)
+* fill (“inside” color) shape (of points)
+* linetype
+* size
+
+---
+To start, we will add position for the x- and y-axis since geom_point requires mappings for x and y, all others are optional.
+
+
+```r
+ggplot(cats) +
+    geom_point(aes(x = age, y = weight),
+               color = "red",
+               alpha = 0.5,
+               shape = 1,
+               size = 3)
+```
+
+&lt;img src="data-visualization_files/figure-html/unnamed-chunk-4-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Scales
+
+Scales control the mapping between data and aesthetics.
+
+
+```r
+ggplot(cats) +
+    geom_point(aes(x = age, y = weight)) +
+    scale_x_continuous(name = "Age",
+                       breaks = c(1, 2, 3),
+                       limits = c(-5, 15)) +
+    scale_y_continuous("Weight", trans = "log") + 
+    ggtitle(label = "Scatterplot")
+```
+
+---
+
+## Scales
+
+Scales control the mapping between data and aesthetics.
+
+![](data-visualization_files/figure-html/unnamed-chunk-6-1.png)&lt;!-- --&gt;
+
+
+---
+## Themes
+
+The ggplot2 theme system handles non-data plot elements such as:
+
+* Axis labels
+* Plot background
+* Facet label backround
+* Legend appearance
+
+---
+## Themes 
+
+There are built-in themes we can use, or we can adjust specific elements. 
+
+We can add additional aesthetics by mapping them to other variables in our dataframe. 
+
+For example, the color of the boxplots will reflect low birth weight.
+
+
+```r
+ggplot(cats) +
+    geom_point(aes(x = age, y = weight)) +
+    theme_bw()
+```
+
+&lt;img src="data-visualization_files/figure-html/unnamed-chunk-7-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Facets
+
+Facets display subsets of the dataset in different panels.
+
+Let's use the `facet_grid` function to lay out panels in a grid. Each panel will have the same geometric objects.
+
+
+```r
+ggplot(cats) +
+    geom_point(aes(x = age, y = weight)) +
+    xlab("Mother's age") +
+    ylab("Birth weight") +
+    facet_grid(. ~ coat) +
+    theme_bw()
+```
+
+---
+
+## Facets 
+
+&lt;img src="data-visualization_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" /&gt;
+
+Here we have two panels one for each factor level of `coat`. The panels are layed out in columns because the expression `. ~ coat` 
+
+
+---
+
+## Writing figures to file
+
+There are two ways in which figures and plots can be output to a file (rather than simply displaying on screen).
+
+The first (and easiest) is to export directly from the RStudio ‘Plots’ panel, by clicking on Export when the image is plotted. This will give you the option of png or pdf and selecting the directory to which you wish to save it to.
+
+---
+## Writing figures to file (2)
+
+The second option is to use R functions in the console, allowing you the flexibility to specify parameters to dictate the size and resolution of the output image. Some of the more popular formats include `pdf()`, `png`, and `svg`.
+
+Initialize a plot that will be written directly to a file using `pdf`, `png` etc. Within the function you will need to specify a name for your image, and the with and height (optional). 
+
+Then create a plot using the usual functions in R. Finally, close the file using the `dev.off()` function. There are also `bmp`, `tiff`, and `jpeg` functions, though the `jpeg` function has proven less stable than the others.
+
+---
+## Let us try another example 
+
+
+```r
+ggplot(example_data) +
+  geom_boxplot(aes(x = cit, y =....) +
+  ggtitle(...) +
+  xlab(...) +
+  ylab(...) +
+  theme(panel.grid.major = element_line(...),
+          axis.text.x = element_text(...),
+          axis.title = element_text(...),
+          axis.text = element_text(...)
+```
+
+---
+
+## Read the airline-safety data 
+
+
+```r
+dat &lt;- read.table("airline-safety.csv", sep = ",", header = TRUE)
+```
+
+---
+
+## Boxplot 
+
+
+```r
+ggplot(dat) +
+  geom_boxplot(aes(x = airline, y = avail_seat_km_per_week)) +
+  ggtitle("Available seats vs Airline") +
+  xlab("Airline") + ylab("Available Seats") +
+  theme_minimal()
+```
+
+![](data-visualization_files/figure-html/unnamed-chunk-11-1.png)&lt;!-- --&gt;
+
+
+---
+## Boxplot
+
+Fix angles of X-axis texts? 
+
+Try the following: 
+
+
+```r
+ggplot(dat) +
+  geom_boxplot(aes(x = airline, y = avail_seat_km_per_week)) +
+  ggtitle("Available seats vs Airline") +
+  xlab("Airline") + ylab("Available Seats") +
+  theme_minimal()+
+  theme(axis.text = element_text(angle = 45, size = 5))
+```
+
+
+---
+## Scatterplot (with colours)
+
+
+```r
+ggplot(dat) +
+  geom_point(aes(y = fatalities_00_14, x = avail_seat_km_per_week)) +
+  ggtitle("Fatalities vs. Available seats") +
+  xlab("Available Seats") + ylab("Fatalities") + 
+  theme_minimal()+
+  theme(axis.text = element_text(angle = 45, size = 10))
+```
+
+![](data-visualization_files/figure-html/unnamed-chunk-13-1.png)&lt;!-- --&gt;
+
+---
+## Exercise 
+
+Recreate the above plot but add a straight line to it using `geom_smooth()`
+
+
+---
+## Solution 
+
+
+```r
+ggplot(dat) +
+  geom_point(aes(y = fatalities_00_14, x = avail_seat_km_per_week)) +
+  ggtitle("Fatalities vs. Available seats") +
+ xlab("Available Seats") + ylab("Fatalities") + 
+   geom_smooth(aes(y = fatalities_00_14, x =    avail_seat_km_per_week),method = "lm")+
+  theme_minimal()+
+  theme(axis.text = element_text(angle = 45, size = 10))
+```
+
+```
+## `geom_smooth()` using formula 'y ~ x'
+```
+
+![](data-visualization_files/figure-html/unnamed-chunk-14-1.png)&lt;!-- --&gt;
+
+---
+## Non-linear (later)
+
+
+```r
+ggplot(dat) +
+  geom_point(aes(y = fatalities_00_14, x = avail_seat_km_per_week)) +
+  ggtitle("Fatalities vs. Available seats") +
+ xlab("Available Seats") + ylab("Fatalities") + 
+   geom_smooth(aes(y = fatalities_00_14, x =    avail_seat_km_per_week),method = "lm", formula = y ~ splines::bs(x, 3))+
+  theme_minimal()+
+  theme(axis.text = element_text(angle = 45, size = 10))
+```
+
+![](data-visualization_files/figure-html/unnamed-chunk-15-1.png)&lt;!-- --&gt;
+
+
+---
+## Resources
+
+We have only scratched the surface here. There are many plotting features we haven't covered.
+
+plotting in Base R:
+
+* John Maindonald's [Using R for Data Analysis and Graphics PDF](https://cran.r-project.org/doc/contrib/usingR.pdf)
+
+ggplot2:
+
+* [ggplot reference site](http://docs.ggplot2.org/)
+* Winston Chang's excellent [Cookbook for R](http://www.cookbook-r.com)
+* [ggplot2: Elegant Graphics for Data Anaysis](http://www.amazon.com/ggplot2-Elegant-Graphics-Data-Analysis/dp/0387981403)
+
+Much of the material here was adpapted from [Introduction to R graphics with ggplot2 Tutorial at IQSS](http://tutorials.iq.harvard.edu/R/Rgraphics/Rgraphics.html).
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create();
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
