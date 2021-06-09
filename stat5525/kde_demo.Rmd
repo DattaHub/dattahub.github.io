@@ -1,0 +1,157 @@
+---
+title: "Kernel Density Estimation using R"
+author: "Jyotishka Datta"
+date: "`r Sys.Date()`"
+output: ioslides_presentation
+---
+  ```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Histograms 
+
+-  Histograms provide an idea about the data distribution. Defined as:
+
+$$
+\hat{f}(x) = \frac{ \text{No. of observations within } h \text{ of } x }{n \times 2h} \\
+$$
+or, 
+
+$$
+	\hat{f}(x) = \frac{1}{2nh} \sum_{i=1}^{n} I(|{X_i - x}| \le h).
+$$
+
+-  Narrow intervals (smaller h): histogram has a choppy appearance, large variance.
+ - Large intervals (larger h): histogram may lose the local feature, large bias.
+
+## R `hist()` {.smaller}
+
+- In base R's `hist()` method, you can use the `break` argument:
+
+-  `breaks` can be one of:
+
+1. a vector giving the breakpoints between histogram cells,
+2. a function to compute the vector of breakpoints,
+3. a single number giving the number of cells for the histogram,
+4. a character string naming an algorithm to compute the number of cells (see ‘Details’),
+5. a function to compute the number of cells.
+
+
+## Sampling distribution 
+
+- By default, number of breaks is calculated by using Sturges' formula. 
+
+```{r,echo = TRUE}
+data(mtcars)
+hist(mtcars$mpg)
+```
+
+## Colored Histogram with Different Number of Bins
+
+```{r,echo = TRUE}
+hist(mtcars$mpg, breaks=12, col="red")
+```
+
+## Different h 
+
+```{r, echo = T, eval = F}
+par(mfrow = c(2,2))
+hist(mtcars$mpg, breaks=2, col="red")
+hist(mtcars$mpg, breaks=8, col="red")
+hist(mtcars$mpg, breaks=12, col="red")
+hist(mtcars$mpg, breaks=20, col="red")
+par(mfrow = c(1,1))
+
+```
+
+## Different h 
+
+```{r, echo = F, eval = T}
+par(mfrow = c(2,2))
+hist(mtcars$mpg, breaks=2, col="red")
+hist(mtcars$mpg, breaks=8, col="red")
+hist(mtcars$mpg, breaks=12, col="red")
+hist(mtcars$mpg, breaks=20, col="red")
+par(mfrow = c(1,1))
+
+```
+
+## Kernel Density Estimation
+
+-  Drawback of histogram: density estimation is piecewise constant and thus unsmooth.
+-  Main idea of kernel density estimation: instead of counting number of observations within $h$ of $x$, we take a certain weighted average of data points near $x$ to estimate $f(x)$.
+  
+-  Kernel Density Estimate:
+
+$$
+	\hat{f}(x) = \frac{1}{2nh} \sum_{i=1}^{n} K(|{X_i - x}| \le h).
+$$
+where $K(\cdot)$ is a Kernel function. 
+
+- Choices: $h$ bandwidth and $K()$ the kernel.
+	
+
+## Kernel Density Plot
+
+```{r,echo = TRUE}
+d <- density(mtcars$mpg) # returns the density data 
+plot(d) # plots the results
+```
+
+## Kernel Density Plot with 1/3rd bandwith 
+
+```{r,echo = TRUE}
+d <- density(mtcars$mpg,adjust = 1/3) # returns the density data 
+plot(d) # plots the results
+```
+
+## Kernel Density Plot with 2x bandwith 
+
+```{r,echo = TRUE}
+d <- density(mtcars$mpg,adjust = 2) # returns the density data 
+plot(d) # plots the results
+```
+
+## Kernel Density Plot with a rectangular kernel
+
+```{r,echo = TRUE}
+d <- density(mtcars$mpg, kernel = "rectangular") # returns the density data 
+plot(d) # plots the results
+```
+
+## Kernel Density Plot with the Epanechnikov kernel
+
+```{r,echo = TRUE}
+d <- density(mtcars$mpg, kernel = "epanechnikov") # returns the density data 
+plot(d) # plots the results
+```
+
+## Faithful Geyser 
+
+```{r, echo = T}
+#take a look at the data set (the first 5 observations)
+faithful[1:5,]
+duration = faithful$eruptions
+n=length(duration)
+#estimate the density using histogram and kernel estimation
+```
+
+## Different Kernels 
+
+```{r, fig.asp =0.8}
+par(mfrow=c(2,2))
+#histogram
+out=hist(duration, nclass=15, prob=TRUE, main="Histogram, h=0.2")
+z = (out$breaks[-1] + out$breaks[-19])/2
+lines(out$density~z, col="blue")
+#kernel density estimation
+d1 = density(duration, kernel="gaussian", bw=0.2)
+plot(d1, main="Gaussian kernel, h=0.2")
+d2=density(duration, kernel="gaussian", bw=0.05)
+plot(d2, main="Gaussian kernel, h=0.05")
+d3=density(duration, kernel="triangular", bw=0.2)
+plot(d3,main="Triangular kernel, h=0.2")
+par(mfrow=c(1,1))
+```
+
+

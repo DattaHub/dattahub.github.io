@@ -39,6 +39,7 @@ select(cats, coat, cat_id, fixed) #maintains order
 
 ## Say we want to see the all the cats with black coats;
 
+cats$coat == "black"
 
 cats[cats$coat == "black", ] ## usual way
 
@@ -48,7 +49,7 @@ cats[cats$coat == "black", ] ## usual way
 filter(cats, coat == "black")
 
 # we don't have to use the `$` operator to tell `filter` 
-# where the `coat` column is; it's smart enough to fugure out
+# where the `coat` column is; it's smart enough to figure out
 
 
 ## ----Sorting by value --------------------------------------------------------------------
@@ -103,6 +104,7 @@ sort(round(sqrt(cats$age * 2), 3))
   sqrt() %>%
   round(3) %>%
   sort()
+
 
 ## think of the `%>%` as short-hand for "then"
 
@@ -188,4 +190,16 @@ cats %>%
 cats %>%
   group_by(coat) %>%
   mutate(centered_weight = weight - mean(weight))
+
+
+gapminder %>%
+  group_by(continent) %>%
+  summarize(mean_exp = mean(lifeExp))
+
+gapminder %>%
+  filter(year %in% c(1952,2007)) %>% 
+  group_by(continent) %>%
+  summarize_at(vars(lifeExp, gdpPercap), list(mean,median))
+
+
 
