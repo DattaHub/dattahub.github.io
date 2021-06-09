@@ -13,3 +13,9 @@ Data Analytics Summer Course: Stat 5525
 1. Efficiency considerations: https://dattahub.github.io/stat5525/efficienct_R.html (from last week, apologies for the weird typo in file name)
 2. Data Viz Using ggplot2: https://dattahub.github.io/stat5525/data-visualization.html (from last week)
 3. Using dplyr: https://dattahub.github.io/stat5525/05-dplyr.pdf
+
+### Week 3
+
+1. Kernel Density: https://dattahub.github.io/stat5525/kde_demo.html 
+2. Logistic demo: https://dattahub.github.io/stat5525/logistic_demo.html (from last week)
+
