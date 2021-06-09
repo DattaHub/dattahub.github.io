@@ -155,3 +155,31 @@ par(mfrow=c(1,1))
 ```
 
 
+## We can also use ggplot
+
+```{r, echo = T, fig.asp =0.4}
+library(ggplot2)
+ggplot(data = faithful, aes(x = eruptions)) + geom_density()
+```
+
+## Different bandwidth {.smaller}
+
+```{r, echo = T, fig.asp =0.4}
+library(patchwork)
+p1 <- ggplot(data = faithful, aes(x = eruptions)) + geom_density(adjust = 1/10) +
+  labs(title = "adjust = 1/10")+theme_bw()
+p2 <- ggplot(data = faithful, aes(x = eruptions)) + geom_density(adjust = 1/2) +
+  labs(title = "adjust = 1/2")+theme_bw()
+p1+p2
+```
+
+
+## Different Kernels {.smaller}
+
+```{r, echo = T, fig.asp =0.4}
+p1 <- ggplot(data = faithful, aes(x = eruptions)) + geom_density(kernel = "gaussian") +
+  labs(title = "Gaussian")+theme_bw()
+p2 <- ggplot(data = faithful, aes(x = eruptions)) + geom_density(kernel = "rectangular") +
+  labs(title = "Rectangular")+theme_bw()
+p1+p2
+```
