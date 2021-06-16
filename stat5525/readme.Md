@@ -19,3 +19,8 @@ Data Analytics Summer Course: Stat 5525
 1. Kernel Density: https://dattahub.github.io/stat5525/kde_demo.html 
 2. Logistic demo: https://dattahub.github.io/stat5525/logistic_demo.html (from last week)
 
+### Week 4
+
+1. Multiclass Logistic Regression : https://dattahub.github.io/stat5525/logistic_other.html 
+2. LDA, QDA & KNN: https://dattahub.github.io/stat5525/classification_demo.html#27 (from last week)
+
