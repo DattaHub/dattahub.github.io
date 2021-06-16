@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Deviance Explained</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Jyotishka Datta" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Deviance Explained
+## Logistic Regression
+### Jyotishka Datta
+### Virginia Tech
+### 2016/12/12 (updated: 2021-06-16)
+
+---
+
+
+
+
+
+
+## Example 
+
+
+```r
+options(contrasts = c("contr.treatment", "contr.poly"))
+ldose &lt;- rep(0:5, 2)
+numdead &lt;- c(1, 4, 9, 13, 18, 20, 0, 2, 6, 10, 12, 16)
+sex &lt;- factor(rep(c("M", "F"), c(6, 6)))
+SF &lt;- cbind(numdead, numalive = 20 - numdead)
+
+budworm.lg &lt;- glm(SF ~ sex*ldose, family = binomial)
+summary(budworm.lg, cor = F)
+```
+
+---
+## R output
+
+
+```
+## 
+## Call:
+## glm(formula = SF ~ sex * ldose, family = binomial)
+## 
+## Deviance Residuals: 
+##      Min        1Q    Median        3Q       Max  
+## -1.39849  -0.32094  -0.07592   0.38220   1.10375  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)  -2.9935     0.5527  -5.416 6.09e-08 ***
+## sexM          0.1750     0.7783   0.225    0.822    
+## ldose         0.9060     0.1671   5.422 5.89e-08 ***
+## sexM:ldose    0.3529     0.2700   1.307    0.191    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 124.8756  on 11  degrees of freedom
+## Residual deviance:   4.9937  on  8  degrees of freedom
+## AIC: 43.104
+## 
+## Number of Fisher Scoring iterations: 4
+```
+
+
+---
+## Deviances are stored in `summary` object
+
+
+```r
+summaryLog &lt;- summary(budworm.lg)
+# 'Residual deviance' is the deviance; 
+# 'Null deviance' is the null deviance
+
+(summaryLog$deviance)
+```
+
+```
+## [1] 4.993727
+```
+
+```r
+(summaryLog$null.deviance)
+```
+
+```
+## [1] 124.8756
+```
+
+-  Recall: Intuitively, if the null deviance is much larger than the fitted deviance, the predictors are important, if they are similar the predictors are noise. 
+
+
+---
+## Fit the null model to check
+
+
+```r
+# Null model - only intercept
+budworm.null &lt;- glm(SF ~ 1, family = binomial)
+summary(budworm.null, cor = F)
+```
+
+```
+## 
+## Call:
+## glm(formula = SF ~ 1, family = binomial)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -4.9833  -2.7215   0.1118   2.0401   5.5538  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept)  -0.1503     0.1295  -1.161    0.246
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 124.88  on 11  degrees of freedom
+## Residual deviance: 124.88  on 11  degrees of freedom
+## AIC: 156.99
+## 
+## Number of Fisher Scoring iterations: 3
+```
+
+---
+## Calculate `\(R^2\)`
+
+Recall:
+
+$$
+		R^2 = 1 - \frac{D}{D_0} = 1 - \frac{\text{deviance of fitted model to saturated}}{\text{deviance of null model to saturated}}.
+$$
+-  It is a quantity between `\(0\)` and `\(1\)`. 
+
+-  If the fit is perfect, then `\(D=0\)` and `\(R^2 = 1\)`, but if the predictors have no information about `\(Y\)`, then `\(D = D_0\)`, and `\(R^2 = 0\)`. 
+-  For the example at hand, 
+
+
+```r
+(R_sq = 1 - summaryLog$deviance / summaryLog$null.deviance)
+```
+
+```
+## [1] 0.9600104
+```
+-  Is the high value of `\(R^2\)` surprising or not? 
+
+---
+## Smarket data 
+
+
+```r
+glm.fits=glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume,data=Smarket,family=binomial)
+summary(glm.fits)
+```
+
+```
+## 
+## Call:
+## glm(formula = Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + 
+##     Volume, family = binomial, data = Smarket)
+## 
+## Deviance Residuals: 
+##    Min      1Q  Median      3Q     Max  
+## -1.446  -1.203   1.065   1.145   1.326  
+## 
+## Coefficients:
+##              Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept) -0.126000   0.240736  -0.523    0.601
+## Lag1        -0.073074   0.050167  -1.457    0.145
+## Lag2        -0.042301   0.050086  -0.845    0.398
+## Lag3         0.011085   0.049939   0.222    0.824
+## Lag4         0.009359   0.049974   0.187    0.851
+## Lag5         0.010313   0.049511   0.208    0.835
+## Volume       0.135441   0.158360   0.855    0.392
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 1731.2  on 1249  degrees of freedom
+## Residual deviance: 1727.6  on 1243  degrees of freedom
+## AIC: 1741.6
+## 
+## Number of Fisher Scoring iterations: 3
+```
+
+
+---
+## Smarket data 
+
+- Calculate the `\(R^2\)` for this fitted model. 
+
+
+```r
+summarySmarket &lt;- summary(glm.fits)
+(R_sq = 1 - summarySmarket$deviance / summarySmarket$null.deviance)
+```
+
+```
+## [1] 0.002074126
+```
+-  Now, what does this say about the quality of fit? 
+
+-  How do you connect this with the `\(p\)`-values? 
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
