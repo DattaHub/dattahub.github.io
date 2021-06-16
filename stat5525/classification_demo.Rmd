@@ -16,14 +16,13 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## The Stock Market Data 
 
-We will begin by examining some numerical and graphical summaries of
-the `Smarket` data, which is part of the `ISLR` library. 
+We will begin by examining some numerical and graphical summaries of the `Smarket` data, which is part of the `ISLR` library. 
 
-This data set consists of percentage returns for the S & P 500 stock index over 1, 250 days, from the beginning of 2001 until the end of 2005. 
+This data set consists of percentage returns for the S & P 500 stock index over 1,250 days, from the beginning of 2001 until the end of 2005. 
+
 For each date, we have recorded the percentage returns for each of the five previous trading days, `Lag1` through `Lag5`. 
 
-We have also recorded `Volume` (the number of shares traded on the previous day, in billions), `Today` (the percentage return on the date
-in question) and `Direction` (whether the market was `Up` or `Down` on  this date).
+We have also recorded `Volume` (the number of shares traded on the previous day, in billions), `Today` (the percentage return on the date in question) and `Direction` (whether the market was `Up` or `Down` on  this date).
 
 
 ## Smarket 
@@ -122,7 +121,7 @@ contrasts(Direction)
 
 ## Predictions
 
-_  Must convert these predicted probabilities into class labels, `Up` or `Down`. 
+- Must convert these predicted probabilities into class labels, `Up` or `Down`. 
 
 -  Can create a vector of class predictions based on whether the predicted probability of a market increase is greater than or less than 0.5.
 
@@ -242,6 +241,21 @@ fit <- bayesglm(y ~ x1 + x2, data=d, family="binomial")
 display(fit)
 ```
 
+
+# Discriminant Analysis
+
+## Recall the `Smarket` data 
+
+- Consists of percentage returns for the S & P 500 stock index over 1250 days, from the beginning of 2001 until the end of 2005. 
+
+- For each date, we have recorded the percentage returns for each of the five previous trading days, `Lag1` through `Lag5`. 
+
+- We have also recorded `Volume` (the number of shares traded on the previous day, in billions), `Today` (the percentage return on the date in question) and `Direction` (whether the market was `Up` or `Down` on  this date).
+
+- *Training Data: Before 2005*, *Test data: after 2005*.
+
+- Note that, this is _not_ the best way to split: can you suggest something else? (Open question!)
+
 ## Linear Discriminant Analysis {.smaller}
 
 ```{r, echo = T, eval = F}
@@ -249,7 +263,6 @@ library (MASS)
 lda.fit=lda(Direction ~ Lag1+Lag2 ,data=Smarket ,subset =train)
 lda.fit
 ```
-
 
 ## Linear Discriminant Analysis {.smaller}
 
@@ -334,6 +347,7 @@ mean(qda.class == Direction.2005)
 
 Interestingly, with a QDA, our correct classification rate goes up to `r 100*mean(qda.class == Direction.2005)`%, which is impressive. 
 
+# K nearest neighbours
 
 ## K-nearest neighbours 
 

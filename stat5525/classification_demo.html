@@ -170,7 +170,7 @@ slide:not(.current) .plotly.html-widget{
       <h1 data-config-title><!-- populated from slide_config.json --></h1>
       
       <p data-config-presenter><!-- populated from slide_config.json --></p>
-            <p style="margin-top: 6px; margin-left: -2px;">April 13, 2018, updated 2021-06-15</p>
+            <p style="margin-top: 6px; margin-left: -2px;">April 13, 2018, updated 2021-06-16</p>
           </hgroup>
   </slide>
 
@@ -178,7 +178,9 @@ slide:not(.current) .plotly.html-widget{
 
 <p>We will begin by examining some numerical and graphical summaries of the <code>Smarket</code> data, which is part of the <code>ISLR</code> library.</p>
 
-<p>This data set consists of percentage returns for the S &amp; P 500 stock index over 1, 250 days, from the beginning of 2001 until the end of 2005. For each date, we have recorded the percentage returns for each of the five previous trading days, <code>Lag1</code> through <code>Lag5</code>.</p>
+<p>This data set consists of percentage returns for the S &amp; P 500 stock index over 1,250 days, from the beginning of 2001 until the end of 2005.</p>
+
+<p>For each date, we have recorded the percentage returns for each of the five previous trading days, <code>Lag1</code> through <code>Lag5</code>.</p>
 
 <p>We have also recorded <code>Volume</code> (the number of shares traded on the previous day, in billions), <code>Today</code> (the percentage return on the date in question) and <code>Direction</code> (whether the market was <code>Up</code> or <code>Down</code> on this date).</p>
 
@@ -364,10 +366,9 @@ glm.probs[1:10]</pre>
 
 </article></slide><slide class=""><hgroup><h2>Predictions</h2></hgroup><article  class="smaller " id="predictions">
 
-<p>_ Must convert these predicted probabilities into class labels, <code>Up</code> or <code>Down</code>.</p>
-
 <ul>
-<li>Can create a vector of class predictions based on whether the predicted probability of a market increase is greater than or less than 0.5.</li>
+<li><p>Must convert these predicted probabilities into class labels, <code>Up</code> or <code>Down</code>.</p></li>
+<li><p>Can create a vector of class predictions based on whether the predicted probability of a market increase is greater than or less than 0.5.</p></li>
 </ul>
 
 <pre >##         Direction
@@ -524,6 +525,17 @@ display(fit)</pre>
 ## n = 10, k = 3
 ## residual deviance = 1.4, null deviance = 13.9 (difference = 12.4)</pre>
 
+</article></slide><slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>Discriminant Analysis</h2></hgroup><article  class="smaller " id="discriminant-analysis">
+
+</article></slide><slide class=""><hgroup><h2>Recall the <code>Smarket</code> data</h2></hgroup><article  class="smaller " id="recall-the-smarket-data">
+
+<ul>
+<li><p>Consists of percentage returns for the S &amp; P 500 stock index over 1250 days, from the beginning of 2001 until the end of 2005.</p></li>
+<li><p>For each date, we have recorded the percentage returns for each of the five previous trading days, <code>Lag1</code> through <code>Lag5</code>.</p></li>
+<li><p>We have also recorded <code>Volume</code> (the number of shares traded on the previous day, in billions), <code>Today</code> (the percentage return on the date in question) and <code>Direction</code> (whether the market was <code>Up</code> or <code>Down</code> on this date).</p></li>
+<li><p><em>Training Data: Before 2005</em>, <em>Test data: after 2005</em>.</p></li>
+</ul>
+
 </article></slide><slide class=""><hgroup><h2>Linear Discriminant Analysis</h2></hgroup><article  class="smaller smaller" id="linear-discriminant-analysis">
 
 <pre class = 'prettyprint lang-r'>library (MASS)
@@ -629,7 +641,9 @@ qda.fit</pre>
 
 <p>Interestingly, with a QDA, our correct classification rate goes up to 59.9206349%, which is impressive.</p>
 
-</article></slide><slide class=""><hgroup><h2>K-nearest neighbours</h2></hgroup><article  class="smaller " id="k-nearest-neighbours">
+</article></slide><slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>K nearest neighbours</h2></hgroup><article  class="smaller " id="k-nearest-neighbours">
+
+</article></slide><slide class=""><hgroup><h2>K-nearest neighbours</h2></hgroup><article  class="smaller " id="k-nearest-neighbours-1">
 
 <ul>
 <li><p>We will now perform KNN using the <code>knn()</code> function, which is part of the <code>class</code> library.</p></li>
