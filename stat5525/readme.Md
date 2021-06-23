@@ -29,5 +29,7 @@ Data Analytics Summer Course: Stat 5525
 
 1. Cross-validation: https://dattahub.github.io/stat5525/crossvalidation.html 
 2. Bootstrap : https://dattahub.github.io/stat5525/bootstrap_demo.html 
+3. https://dattahub.github.io/stat5525/final-project-description.html#1 (final project description)
+4. https://dattahub.github.io/stat5525/final-project-proposal.html#1 
 
 
