@@ -1,0 +1,106 @@
+---
+title: "Final Project Description <br> Stat 5525"
+author: "Jyotishka Datta"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    fontsize: 11pt
+    theme: united
+    toc: true
+    toc_depth: 6
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+*Dr Ortega-Villa and I have agreed to combine the course final projects for our 2 classes. She has given you excellent directions for selecting a project of interest to you and the deliverables for the assignment. Here I am adding some additional requirements to fulfill the project requirement for 5525*.
+
+
+# Overview
+
+
+This document describes the rules for the final class project. The goal of the final class project is to implement some of the computational tools you have learned in this class. This includes everything that you have learned in this class, e.g. modern regression and classification tasks for wide data, where the number of variables will exceed the number of observations in the data-set. 
+
+It should be an in-depth data analysis of a question that interests you. This question may come from one of your other courses, your research interests, your future career interests, etc.
+
+You can work in teams of two if you prefer. 
+
+## Grading scheme
+
+The project consists of two-components:
+
+-  project proposal (5% of your final grade).
+
+- project presentations on the last day of class. 20 minutes maximum per student, all students required to attend everyone's presentations. This portion will represent 20% of
+your final grade.
+
+
+# Data 
+
+## Sources of data: 
+
+There are many sources of data on the Internet. Government agencies are some of the best sources.
+But be resourceful. It is better to find a data set from a process that interests you. **Do not reuse datasets used in examples/homework/ in class, or built-in datasets in R.**
+
+- `library(datasets)` in R.  
+-  TIDYTUESDAY datasets: (I love this) https://github.com/rfordatascience/tidytuesday#datasets
+-  FiveThirtyEight datasets: (a little contextual reading might be required) https://github.com/fivethirtyeight/data
+-  UCI ML repository (good source for high-dimensional data) https://archive.ics.uci.edu/ml/index.php 
+
+
+<!-- # Implementation and Analysis -->
+
+
+<!-- 1.  Sparse Regression: Compare and contrast penalized regression and Bayesian shrinkage priors for large $p$, small $n$ data. -->
+<!-- 2.  High-dimensional Classification problem for large $p$, small $n$ data: compare between different methods: e.g. Logistic regression with $\ell_1$ penalty.  -->
+
+<!-- ## Rules  -->
+
+<!-- 1.  This is a mini-research project - each student will choose one of the above problems and one data-set to analyze. If you want to work on a different problem/data-set, that is fine too, but you will need my prior approval.  -->
+
+<!-- 2.  Ideally you'd choose a different data-set than the ones shown in class or labs and choose at least two methods to compare.  -->
+
+<!-- 3.  Your prese will be due by the final day of the class.   -->
+
+# Final Project Deliverables 
+
+-  The deliverable for your final project is a presentation.
+
+-  Project Presentation will be due on the last day of the class.  You must upload your presentation to Canvas by 7:30 pm on the due date. 
+
+-  All students must attend everyone's presentation.
+
+
+
+# Minimum requirements for the project 
+
+Here are the minimum requirements for this part of the assignment, which if completed successfully will earn you full credit for the 5525 project. Approach this from the point of view of building the best predictive model for your particular project. You may combine your work into 1 project but make sure you can satisfy the requirements of both assignments.
+
+### For this assignment:
+
+-  Set aside a test data set per standard practice. You may use either 80-20 or 90-10 proportions. The larger proportion of the data is the "all training data" we have referred to in class.
+
+-  Pick 3 alternative models to evaluate. Explain why these 3 alternatives were of interest to you.
+
+-  Using k-fold cross-validation (KFCV) and the training data evaluate the 3 alternatives with regard to a suitable criterion, e.g. MSE or misclassification error. Discuss whether the KFCV suggests that one model is superior to the other. Illustrate the discussion with visuals similar to what we have used in class. 
+
+-  Next, fit the 3 models using the "all training data" and evaluate their performance on the held out test data. Specifically perform 500 iterations of KFCV and plot the boxplots of the 500 estimates of "error" for both training and test data. You should have 4 box plots, 2 each for the 2 models.
+
+-  Discuss the box plots: do the median values and the variation in estimates of "error" suggest any real difference between the models?
+
+-  Finally, discuss and compare what you have learned using this approach to evaluating models compared to what you have learned in Advanced Regression.
+
+- Submit your results as an R-markdown. You will also present your analysis on the last day of class for peer review. 
+
+
+
+# Remarks
+
+Per Dr. Ortega-Villa's assignment you will deliver your presentation and deliverables  to her as specified and she will grade you on them. I will listen in on your presentation. In a separate presentation on the last day of our class you will present your analysis on my portion of the assignment and I will grade you on it. Dr. Ortega-Villa is welcome to join us, of course.
+
+If there are any logistic complications in scheduling presentations we will work those out.
+
+
+

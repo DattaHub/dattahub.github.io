@@ -1,0 +1,66 @@
+---
+title: "Final Project Proposal Description <br> Stat 5525"
+author: "Jyotishka Datta"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    fontsize: 11pt
+    theme: united
+    toc: true
+    toc_depth: 6
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Overview
+
+
+This document describes the rules for the final class project and the literature review paper. The goal of the final class project is to implement some of the computational tools you have learned in this class. This includes everything that you have learned in this class, e.g. modern regression and classification tasks for wide data, where the number of variables will exceed the number of observations in the data-set. 
+
+It should be an in-depth data analysis of a question that interests you. This question may come from one of your other courses, your research interests, your future career interests, etc.
+
+You can work in teams of two if you prefer. 
+
+
+# Data 
+
+## Sources of data: 
+
+There are many sources of data on the Internet. Government agencies are some of the best sources.
+But be resourceful. It is better to find a data set from a process that interests you. **Do not reuse datasets used in examples/homework/ in class, or built-in datasets in R.**
+
+- `library(datasets)` in R.  
+-  TIDYTUESDAY datasets: (I love this) https://github.com/rfordatascience/tidytuesday#datasets
+-  FiveThirtyEight datasets: (a little contextual reading might be required) https://github.com/fivethirtyeight/data
+-  UCI ML repository (good source for high-dimensional data) https://archive.ics.uci.edu/ml/index.php 
+
+
+<!-- # Implementation and Analysis -->
+
+
+<!-- 1.  Sparse Regression: Compare and contrast penalized regression and Bayesian shrinkage priors for large $p$, small $n$ data. -->
+<!-- 2.  High-dimensional Classification problem for large $p$, small $n$ data: compare between different methods: e.g. Logistic regression with $\ell_1$ penalty.  -->
+
+<!-- ## Rules  -->
+
+<!-- 1.  This is a mini-research project - each student will choose one of the above problems and one data-set to analyze. If you want to work on a different problem/data-set, that is fine too, but you will need my prior approval.  -->
+
+<!-- 2.  Ideally you'd choose a different data-set than the ones shown in class or labs and choose at least two methods to compare.  -->
+
+<!-- 3.  Your prese will be due by the final day of the class.   -->
+
+# Deliverable for the Proposal
+
+This is the first deliverable for this project. Please submit this proposal of about one or two pages in length which must include:
+
+-  Objective of your study: What do you want to learn?
+-  Summary of your data:
+   -  where and how the data were obtained, if your data is publicly available provide the URL or the reference so that someone else can find your data source.
+   - brief description of the variables of your dataset with a clear determination of which will be your response, and which your explanatory variables.
+
+
+## Please let me know if you have any questions or doubts!
