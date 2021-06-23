@@ -25,3 +25,9 @@ Data Analytics Summer Course: Stat 5525
 2. Multiclass Logistic Regression : https://dattahub.github.io/stat5525/logistic_other.html 
 3. LDA, QDA & KNN: https://dattahub.github.io/stat5525/classification_demo.html#27 (# denotes page) 
 
+### Week 5
+
+1. Cross-validation: https://dattahub.github.io/stat5525/crossvalidation.html 
+2. Bootstrap : https://dattahub.github.io/stat5525/bootstrap_demo.html 
+
+
