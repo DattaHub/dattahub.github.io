@@ -1,0 +1,392 @@
+---
+title: "Modern Regression"
+author: "Jyotishka Datta"
+date: "April 4, 2019"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Source 
+
+The R codes for the baseball example and the data are taken from the ISLR book by James, Witten, Hastie and Tibshirani. 
+
+This is a low-dimensional example, which means $p < n$. We will see how LASSO and Ridge compares with OLS on this data-set. 
+
+We will see a high-dimensional example after this. Of course, there isn't a unique OLS for high-dimensional data. 
+
+## Baseball data
+
+Major League Baseball Data from the 1986 and 1987 seasons.
+
+```{R, echo = T}
+library(ISLR)
+#fix(Hitters)
+names(Hitters)
+dim(Hitters)
+```
+
+## Remove NA's
+
+Salary is missing for some players. The `na.omit()` function
+removes all of the rows that have missing values in any variable.
+
+```{R, echo = T}
+sum(is.na(Hitters$Salary))
+Hitters=na.omit(Hitters)
+dim(Hitters)
+```
+
+## Ridge Regression 
+
+-  Ridge, Lasso, Elastic Net are all based on R package `glmnet`.
+- Elastic Net Penalty: 
+$$
+P_{\lambda,\alpha}(\beta) = \lambda \left \{ \frac{(1-\alpha)}{2} {\lVert \beta \rVert}_2^2 + \alpha {\lVert \beta \rVert}_1^2 \right \}
+$$
+
+- $\alpha = 0$ is Ridge, $\alpha = 1$ is Lasso, anything in between ($0 < \alpha < 1$ is called Elastic Net.
+
+- $\lambda = 0$ is ordinary least squares. 
+
+- 'Elastic Net' is a mix of Lasso and Ridge - it works better when the predictor variables are 'grouped'.
+
+-  All the three methods can be fit using the `glmnet` package. 
+
+
+## R commands 
+
+```{r, echo = T, warning=FALSE, message=FALSE}
+x=model.matrix(Salary~.,Hitters)[,-1]
+y=Hitters$Salary
+dim(x)
+length(y)
+```
+
+## Fitting Ridge
+
+- We'll specify $\alpha = 0$ and calculate the ridge solution for $100$ different values of $\lambda$, chosen by us. 
+
+```{r, echo = T, warning=FALSE, message=FALSE}
+library(glmnet)
+grid=10^seq(10,-2,length=100)
+ridge.mod=glmnet(x,y,alpha=0,lambda=grid)
+dim(coef(ridge.mod))
+```
+
+
+##  Dependence on $\lambda$ {.smaller}
+
+When $\lambda$ = `r ridge.mod$lambda[10]` : 
+
+```{r, echo = T}
+ridge.mod$lambda[10]
+coef(ridge.mod)[,10]
+sqrt(sum(coef(ridge.mod)[-1,10]^2))
+```
+
+## Dependence on $\lambda$ {.smaller}
+
+When $\lambda$ = `r ridge.mod$lambda[50]` : 
+
+```{r, echo = T}
+ridge.mod$lambda[50]
+coef(ridge.mod)[,50]
+sqrt(sum(coef(ridge.mod)[-1,50]^2))
+```
+
+##  Dependence on $\lambda$ {.smaller}
+
+When $\lambda$ = `r ridge.mod$lambda[100]` : 
+
+```{r, echo = T}
+ridge.mod$lambda[100]
+coef(ridge.mod)[,100]
+sqrt(sum(coef(ridge.mod)[-1,100]^2))
+```
+
+## Solution path 
+
+```{r, fig.asp = 0.8}
+plot(ridge.mod,xvar="lambda",label=TRUE)
+```
+
+## Choosing the best solution 
+
+- We will use cross-validation to choose the best $\lambda$ that minimizes the test error. 
+
+- We have discussed LOO-CV and $k$-fold CV in class. In general, LOO-CV has higher variance but $k$-fold is more stable. 
+
+- We'll first use a single validation set and then show CV. 
+
+- Also, note that if you are splitting randomly, you should fix the seed to reproduce your results. 
+
+
+## Ridge with CV 
+
+-  Now split the samples into a training set and a test set in order
+to estimate the test error of ridge regression. 
+
+-  Two ways to split:
+
+    1. Produce a random vector of `TRUE`, `FALSE` elements and select the observations corresponding to `TRUE` for the training data. 
+    
+    2. Randomly choose a subset of numbers between 1 and n - these can then be used as the indices for the training observations.
+    
+## Traing and Test 
+
+```{r, echo = T}
+set.seed(1)
+train=sample(1:nrow(x), nrow(x)/2)
+test=(-train)
+y.test=y[test]
+dim(x[train,])
+dim(x[test,])
+```
+
+## Fit on training 
+
+-  Next we fit a ridge regression model on the training set, and evaluate
+its MSE on the test set, using $\lambda = 4$. 
+-  The `predict()` function : here we get predictions for a test set, by replacing `type="coefficients"` with the `newx` argument.
+- Specify `s = 4` to fix $\lambda = 4$. 
+
+```{r, echo = T}
+ridge.mod=glmnet(x[train,],y[train],alpha=0,lambda=grid, thresh=1e-12)
+ridge.pred=predict(ridge.mod,s=4,newx=x[test,])
+mean((ridge.pred-y.test)^2)
+```
+
+## Fit 
+
+The test MSE is `r mean((ridge.pred-y.test)^2)` 
+
+If we had instead simply fit a model with just an intercept, we would have predicted each test observation using the mean of the training observations: 
+
+```{r, echo = T}
+mean((mean(y[train])-y.test)^2)
+```
+
+## Another way 
+
+-  We could also get the same result by fitting a ridge regression model with
+a very large value of $\lambda$. Note that `s=1e10` means $\lambda = 10^{10}$.
+
+```{r, echo = T}
+ridge.pred=predict(ridge.mod,s=1e10,newx=x[test,])
+mean((ridge.pred-y.test)^2)
+```
+
+-  So fitting a ridge regression model with $\lambda = 4$ leads to a much lower test MSE than fitting a model with just an intercept.
+
+
+## Obtaining least squres 
+
+- Is it better than just performing least squares regression? 
+- Ridge regression reduces to OLS for $\lambda = 0$. 
+
+```{r, echo = T}
+ridge.pred=predict(ridge.mod,s=0,newx=x[test,])
+mean((ridge.pred-y.test)^2)
+```
+
+- Ridge Regression MSE was 101036. OLS is worse. 
+
+## CV to choose $\lambda$
+
+-  In general, instead of arbitrarily choosing $\lambda = 4$, it would be better to use cross-validation to choose the tuning parameter. 
+
+- We can do this using the built-in cross-validation function, `cv.glmnet()`. 
+
+-  By default, the function `cv.glmnet()` performs ten-fold cross-validation, though this can be changed using the argument `nfolds`.
+
+## Best lambda
+
+```{r , echo = T}
+set.seed(1) 
+cv.out=cv.glmnet(x[train,],y[train],alpha=0)
+plot(cv.out)
+```
+
+## Best lambda
+
+```{r , echo = T}
+bestlam=cv.out$lambda.min
+bestlam
+```
+
+The value of $\lambda$ that yields lowest CV error is `r bestlam`, very different from 4. 
+
+## What happens to the MSE? 
+
+We should calculate the test error at this "best" $\lambda$ and check if it's improving the fit. 
+
+```{r, echo = T }
+bestlam=cv.out$lambda.min
+bestlam
+ridge.pred=predict(ridge.mod,s=bestlam,newx=x[test,])
+mean((ridge.pred-y.test)^2)
+```
+
+-  It does reduce the test MSE. 
+
+## The Coefficients {.smaller}
+
+```{r, echo = T}
+out=glmnet(x,y,alpha=0)
+predict(out,type="coefficients",s=bestlam)[1:20,]
+```
+
+- As expected, none of the coefficients are zero : Ridge regression does not perform any variable selection. 
+
+# Lasso 
+
+## Lasso Penalty
+
+- Recall: Ridge, Lasso, Elastic Net are all based on R package `glmnet`.
+- Elastic Net Penalty: 
+$$
+P_{\lambda,\alpha}(\beta) = \lambda \left \{ \frac{(1-\alpha)}{2} {\lVert \beta \rVert}_2^2 + \alpha {\lVert \beta \rVert}_1^2 \right \}
+$$
+
+- $\alpha = 0$ is Ridge, $\alpha = 1$ is Lasso, anything in between is Elastic Net. 
+- All we need to do is change `alpha = 1` in `glmnet` function call. 
+
+## Lasso in R 
+
+```{r, echo = T}
+lasso.mod =glmnet (x[train ,], y[train], alpha = 1, lambda = grid)
+plot(lasso.mod)
+```
+
+
+## Choosing lambda by 10-fold CV
+
+```{r , echo = TRUE}
+set.seed (1)
+cv.out =cv.glmnet( x[train ,], y[train], alpha = 1)
+plot(cv.out)
+```
+
+## Choosing lambda by 10-fold CV
+
+```{r, echo = T}
+bestlam =cv.out$lambda.min
+lasso.pred=predict(lasso.mod, s = bestlam , newx = x[test,])
+mean((lasso.pred - y.test)^2)
+```
+
+This is substantially lower than the test set MSE of the null model and of
+least squares, and very similar to the test MSE of ridge regression with $\lambda$ chosen by cross-validation.
+
+## Sparse Model {.smaller}
+
+```{r, echo = T}
+out=glmnet (x,y, alpha = 1, lambda =grid)
+lasso.coef=predict(out, type = "coefficients", s = bestlam )[1:20,]
+lasso.coef
+```
+
+## Sparse Model 
+
+Here we see that 12 of the 19 coefficient estimates are exactly zero. So the lasso model with $\lambda$ chosen by cross-validation contains only seven variables.
+
+```{r, echo = T}
+lasso.coef[lasso.coef !=0]
+```
+
+## Large $p$, small $n$
+
+- Generate $X$, $y$ with $n = 30, p = 60$ with a sparse $\beta$ vector with 5 non-zero elements. 
+- Generate $X$ matrix as $n \times p$ matrix with all entries from a $N(0,1)$ distribution. 
+- Take $\beta = (3,\ldots,3, 0, \ldots, 0)$, and a small error distribution $\epsilon \sim N(0,0.1)$. 
+
+
+## Generating the data
+
+```{r, echo = T}
+library(Matrix)
+set.seed(12345)
+n = 30;p = 60
+p1 = 5
+beta <- c(rep(3,p1),rep(0,p-p1))
+x=scale(matrix(rnorm(n*p),n,p))
+eps=rnorm(n,mean=0,sd = 0.1)
+fx = x %*% beta
+y=drop(fx+eps)
+```
+
+- Our goal is to see if Lasso can recover the 5 non-zero $\beta$'s correctly. 
+
+## Ordinary Least Squares 
+
+-  The OLS Solution will not work here, as expected. 
+
+```{r, echo = T, error = T}
+xtx = t(x)%*%x
+y1 <- t(x) %*% y 
+betahat.1 <- solve(xtx,y1)
+```
+
+## Does Pseudo-Inverse Work? {.smaller}
+
+The Moore-Penrose g-inverse is unstable and does not recover the  true sparsity pattern. 
+
+```{r, echo = T}
+library(MASS)
+xtx = t(x)%*%x
+y1 <- t(x) %*% y 
+xtx <- as.matrix(xtx)
+betahat <- ginv(xtx) %*% y1 
+t(betahat)
+```
+
+## The g-Inverse estimate 
+
+```{r, echo = T, fig.asp = 0.5}
+plot(betahat,col=2,ylim=c(0,3), pch = 1)
+points(beta,col= 3, pch = 2)
+legend(75,2,c("G-inv","True"),col=c(2,3),pch=c(1,2))
+```
+
+## Enter Lasso 
+
+```{r, echo = T}
+grid=10^seq(10,-2,length=100)
+lasso.mod =glmnet(x,y,alpha =1,lambda =grid)
+plot(lasso.mod)
+```
+
+## Choosing Lambda {.smaller}
+
+```{r, echo = T, fig.height = 3}
+cv.out =cv.glmnet(x,y,alpha =1)
+(bestlam =cv.out$lambda.min)
+plot(cv.out)
+```
+
+## Sparse Solution {.smaller}
+
+```{r, echo = T}
+lasso.coef=predict(lasso.mod,type ="coefficients",s=bestlam)
+lasso.coef[lasso.coef !=0]
+```
+
+- Use `which` function to get rid of the warning message
+
+```{r, echo = T}
+lasso.coef[which(lasso.coef!=0)]
+```
+
+## Lasso is close to the truth 
+
+```{r, echo = T}
+plot(lasso.coef[-1],col="red", pch = 1, ylim = c(-0.5,3.5))
+points(beta,col= rgb(0,0,1,0.5),pch = 16)
+legend(75,2,c("Lasso","True"),col=c("red","blue"),pch=c(17,16))
+```
+
+
+
