@@ -32,4 +32,11 @@ Data Analytics Summer Course: Stat 5525
 3. https://dattahub.github.io/stat5525/final-project-description.html#1 (final project description)
 4. https://dattahub.github.io/stat5525/final-project-proposal.html#1 
 
+### Week 6
 
+1. [Modern Regression 1](http://dattahub.github.io/stat5525/regression_demo_1.html)
+2. [Modern Regression 2](http://dattahub.github.io/stat5525/regression_demo_2.html)
+3. [Modern Regression 3](http://dattahub.github.io/stat5443/regression_demo_3.html)
+
+5. [Lab on Shrinkage Methods: Ridge, Lasso etc.](http://dattahub.github.io/stat5525/lab_glmnet.html) and [2019's version](http://dattahub.github.io/stat5525/lab_glmnet_2019.html)
+6. [Solutions to Lab on Shrinkage Methods: Ridge, Lasso etc.](http://dattahub.github.io/stat5525/lab_glmnet_soln.html)
