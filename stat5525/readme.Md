@@ -39,4 +39,4 @@ Data Analytics Summer Course: Stat 5525
 3. [Modern Regression 3](http://dattahub.github.io/stat5443/regression_demo_3.html)
 
 5. [Lab on Shrinkage Methods: Ridge, Lasso etc.](http://dattahub.github.io/stat5525/lab_glmnet.html) and [2019's version](http://dattahub.github.io/stat5525/lab_glmnet_2019.html)
-6. [Solutions to Lab on Shrinkage Methods: Ridge, Lasso etc.](http://dattahub.github.io/stat5525/lab_glmnet_soln.html)
+
