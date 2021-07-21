@@ -1,19 +1,22 @@
 /* Whole document: */
 body{
-  font-family: Palatino;
-  font-size: 11pt;
+  font-family: Times New Roman;
+  font-size: 10pt;
 }
 /* Headers */
-h1,h2,h3,h4,h5,h6{
-  font-size: 20pt;
+h1{
+  font-size: 16pt;
 }
-.gdbar img {
-  width: 500px ;
-  height: 350px ;
-  margin: 8px 8px;
+h2,h3,h4,h5,h6{
+  font-size: 14pt;
 }
-
-.gdbar {
-  width: 600px ;
-  height: 400px ;
+h3,h4,h5,h6{
+  font-size: 12pt;
+}
+.remark-slide-content {
+    font-size: 30px;
+    padding: 1em 4em 1em 4em;
+}
+.my-one-page-font {
+  font-size: 40px;
 }
