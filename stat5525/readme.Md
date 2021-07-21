@@ -40,3 +40,7 @@ Data Analytics Summer Course: Stat 5525
 4. Lab on Shrinkage Methods: Ridge, Lasso etc. http://dattahub.github.io/stat5525/lab_glmnet.html
 5. PCA, PCR demo: https://dattahub.github.io/stat5525/demoPCA.html#1
 
+### Week 8
+
+1. Splines & GAM: http://dattahub.github.io/stat5525/splines_and_gam.html
+
