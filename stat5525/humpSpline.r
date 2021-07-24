@@ -3,6 +3,9 @@
 library(splines)
   # read in the hump data
 df1 <- read.table('hump.csv',header=TRUE,sep=',')
+
+
+
   # make a dense prediction grid that goes past the boundaries
 pred.df = data.frame(x=seq(-2,27,length=200))
   # fit a cubic spline and get predictions
