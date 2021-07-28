@@ -32,7 +32,7 @@ Data Analytics Summer Course: Stat 5525
 3. https://dattahub.github.io/stat5525/final-project-description.html#1 (final project description)
 4. https://dattahub.github.io/stat5525/final-project-proposal.html#1 
 
-### Week 6 & 7 
+### Week 6, 7 & 8
 
 1. Modern Regression 1: http://dattahub.github.io/stat5525/regression_demo_1.html
 2. Modern Regression 2: http://dattahub.github.io/stat5525/regression_demo_2.html
@@ -40,7 +40,11 @@ Data Analytics Summer Course: Stat 5525
 4. Lab on Shrinkage Methods: Ridge, Lasso etc. http://dattahub.github.io/stat5525/lab_glmnet.html
 5. PCA, PCR demo: https://dattahub.github.io/stat5525/demoPCA.html#1
 
-### Week 8
+### Week 9
 
 1. Splines & GAM: http://dattahub.github.io/stat5525/splines_and_gam.html
+
+### Week 10
+
+1. Trees, Bagging, Boosting: http://dattahub.github.io/stat5525/tree_demo.html
 
