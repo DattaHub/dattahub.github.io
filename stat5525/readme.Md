@@ -48,3 +48,9 @@ Data Analytics Summer Course: Stat 5525
 
 1. Trees, Bagging, Boosting: http://dattahub.github.io/stat5525/tree_demo.html
 
+### Week 11
+
+1. Stochastic Gradient Descent: http://dattahub.github.io/stat5525/sgd_demo.html
+2. Introduction to Artificial Neural Net: http://dattahub.github.io/stat5525/neural_net_demo.html
+
+
