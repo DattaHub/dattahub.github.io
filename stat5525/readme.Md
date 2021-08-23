@@ -33,8 +33,7 @@ Dr. Jyotishka Datta
 
 1. Cross-validation: https://dattahub.github.io/stat5525/crossvalidation.html 
 2. Bootstrap : https://dattahub.github.io/stat5525/bootstrap_demo.html 
-3. https://dattahub.github.io/stat5525/final-project-description.html#1 (final project description)
-4. https://dattahub.github.io/stat5525/final-project-proposal.html#1 
+
 
 ### Week 6, 7 & 8
 
@@ -56,5 +55,11 @@ Dr. Jyotishka Datta
 
 1. Stochastic Gradient Descent: http://dattahub.github.io/stat5525/sgd_demo.html
 2. Introduction to Artificial Neural Net: http://dattahub.github.io/stat5525/neural_net_demo.html
+
+
+## For Summer 2021 students only 
+
+1. https://dattahub.github.io/stat5525/final-project-description.html#1 (final project description)
+2. https://dattahub.github.io/stat5525/final-project-proposal.html#1 
 
 
