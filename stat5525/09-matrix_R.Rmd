@@ -1,0 +1,359 @@
+---
+title: "Matrix in R"
+subtitle: "Data Analytics: Week 7"
+author: "Jyotishka Datta (<jyotishka@vt.edu>) <br> Department of Statistics, Virginia Tech"
+output: 
+  ioslides_presentation:
+    smaller: yes
+    logo: ../vt.png
+    transition: faster
+---
+
+```{r setup, include=FALSE}
+options(width=80)
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F)
+knit_hooks$set(no.main = function(before, options, envir) {
+    if (before) par(mar = c(4.1, 4.1, 1.1, 1.1))  # smaller margin on top
+})
+```
+
+
+## Sources 
+
+- Matrix in R tutorial by Prof. Giovanni Petris. 
+- doParallel guide by Weston and Calaway available [here](https://cran.r-project.org/web/packages/doParallel/vignettes/gettingstartedParallel.pdf). 
+- Miscellaneous internet resources. 
+- Before you run a module or chunk, make sure that you have all the packages installed. 
+- We need the R package 'Matrix' and 'doParallel'.
+
+## Matrices {.smaller}
+
+- To arrange values into a matrix, we use the `matrix()` function:
+```{r, echo = TRUE}
+a <- matrix(1 : 6, nrow = 2, ncol = 3)
+a
+```
+- Individual entries can be referred to using a pair of indices. For example, the element in the second row, third column can be printed as:
+
+```{r, echo = TRUE}
+a[2, 3]
+```
+
+## Rows, Columns 
+-  An entire row or column can be retrieved by specifying its index and leaving the other index empty:
+
+```{r, echo = TRUE}
+a[2, ]
+```
+-  Similarly to the way R works with vectors, you can use negative indices to exclude row or colums of a matrix:
+
+```{r, echo = TRUE}
+a[-2,]
+```
+
+## Matrix indices 
+
+- Note how the values 1,2,3,4,5,6 are used to create the matrix: the first two are used to fill the first column, then the next two to fill the second column, and so on.
+
+- R allows matrices to be indexed by a single number, e.g.,
+
+```{r, echo = TRUE}
+a[5]
+```
+- The fifth element of a is the fifth element of the vector obtained by "unrolling" the matrix, column by column. 
+
+## Fill by row 
+
+-  Sometimes you need to fill a matrix row by row, instead than column by column. 
+-  You can change the default behavior as follows:
+
+```{R,echo = TRUE}
+a <- matrix(1 : 6, nrow = 2, ncol = 3, byrow = TRUE)
+a
+```
+
+## Diagonals 
+
+- We have seen rbind() and cbind() before. 
+- e.g. We can use cbind() to construct a 3 x 3 Hilbert matrix. The (i, j) entry is
+1/(i + j - 1).
+```{r, echo = TRUE}
+H3 <- 1 / cbind(1 : 3, 2 : 4, 3 : 5)
+H3
+```
+
+## Diagonals and Determinants
+
+- The diagonal of a matrix can be extracted using `diag()`.
+```{r, echo = TRUE}
+diag(H3)
+```
+- The determinant of a square matrix can be obtained with `det()`.
+
+```{r, echo = TRUE}
+det(H3)
+```
+
+
+## Triangular 
+
+-  The functions `lower.tri()` and `upper.tri()` can be used to obtain the lower and upper triangular parts of matrices. 
+The output of the functions is a matrix of logical elements, with TRUE representing the relevant triangular elements. For example,
+
+```{r, echo = TRUE}
+lower.tri(H3)
+```
+
+## Triangular 
+
+- A typical use of these functions is to set the upper or lower triangular part of a matrix to zero, thus constructing a triangular matrix.
+
+```{r, echo = TRUE}
+Htri <- H3
+Htri[lower.tri(Htri)] <- 0
+Htri
+```
+
+## Multiplication {.smaller}
+
+- Matrix multiplication in R is performed by the operator %*%. For example,
+```{r, echo = TRUE}
+A <- matrix(c(1, 2, 0, 1), 2)
+B <- matrix(c(1, 3, 3, 1, 4, 5), nr = 2)
+A
+B
+```
+- Matrices must conform, i.e. multiplication must make sense !
+
+## Multiplication {.smaller}
+
+```{r, echo = TRUE}
+A %*% B
+dim(A)
+ncol(A)
+nrow(B)
+```
+
+## Multiplication 
+
+With $A$ and $B$ defined as above the matrix product $BA$ in not defined, but the product $B^T A$ is ($B^T$ denotes the transpose of $B$). 
+- The transpose of a matrix can be obtained with the function `t()`.
+```{r, echo = TRUE}
+t(B) %*% A
+```
+
+## Crossprod
+-  A much more efficient way of computing the same matrix product is via the function `crossprod()`.
+```{r, echo = TRUE}
+all.equal(crossprod(B, A), t(B) %*% A)
+```
+- A similar function, tcrossprod(), computes the matrix product $AB^T$ whenever the product is well defined.
+
+## Exercise (Try at home) {.smaller}
+
+- Consider the matrix
+```{r, echo = TRUE}
+X <- cbind(1, seq(-1, 1, length = 11))
+X
+```
+- Use crossprod() and tcrossprod() to find $X^T X$ and $X X^T$. 
+- Note the dimensions of the resulting matrices.
+
+## Matrix inversion
+
+- The inverse of a matrix can be found using `solve()`:
+```{r, echo = TRUE}
+Ainv <- solve(A)
+Ainv
+all.equal(Ainv %*% A, diag(2))
+```
+
+## Solve linear system 
+
+- Inverse in R uses QR decomposition, that we might briefly talk about at the very end (if time permits)! 
+
+- For linear systems we don't need to compute inverses. We can use Gaussian Elimination. 
+
+```{r, echo = TRUE}
+b <- c(5, 3)
+solve(A, b) # use this
+Ainv %*% b # don't use this
+```
+
+## Time comparison 
+
+- Compare execution times for the different methods of solving the Least Squares problem when the number of observations is large.
+
+-  Let us start by making up our own random data: $n \times p$ design matrix $X$ and an $n \times 1$ response vector $y$. 
+-  Take $n = 5 \times 10^5$. 
+
+```{r, echo = TRUE, cache = TRUE}
+set.seed(123)
+n <- 5e5; p <- 20
+X <- matrix(rnorm(n * p, mean = 1 : p, sd = 10), nr = n, nc = p, byrow = TRUE)
+y <- rowSums(X) + rnorm(n)
+```
+
+## OLS 
+
+- The naive approach to solve the LS problem is to compute: 
+$\hat{\beta} = (X^T X)^{-1}X^T y$
+
+```{r, echo = TRUE, cache = TRUE}
+system.time(bHat1 <- solve(t(X) %*% X) %*% t(X) %*% y)
+```
+
+-  Not so naive: use `crossprod`.
+
+```{r, echo = TRUE, cache = TRUE}
+system.time(bHat2 <- solve(crossprod(X), crossprod(X, y)))
+```
+
+# More advanced topics  
+
+## Inverting a matrix using Cholesky helps
+
+- A symmetric positive definite matrix can be factorized as: 
+$$
+A = L L^T
+$$
+
+```{r, echo = TRUE, cache = TRUE}
+p = 1000; A = array(rnorm(p*p), c(p,p))
+A = crossprod(A)
+ptm <- proc.time(); B = solve(A); proc.time()-ptm
+ptm <- proc.time(); B = chol2inv(A); proc.time()-ptm
+```
+
+## Storage of sparse matrices 
+
+- Sparse matrices appear in many areas of Statistics and Machine learning. 
+  1. For large Markov chain, the transition matrix becomes sparse. 
+  2. Large design matrix / contingency tables. 
+  3. Modern dataset with 0 as imputation for missing values. 
+
+- If matrix $A_{n\times n}$ has average $k$ non-zero entries in each row and $k << n$, then storage reduces from $O(n^2)$ to $O(n)$. 
+
+## Storage of unstructured sparse matrices 
+
+```{r, echo = TRUE, cache = TRUE}
+# Demo 2: saving sparse matrices in R can save memory
+library(Matrix)
+m1 = matrix(0, nrow=1000, ncol=1000)
+m2 = Matrix(0, nrow=1000, ncol=1000, sparse=TRUE)
+object.size(m1)
+object.size(m2)
+```
+
+<!-- # Parallel  -->
+
+
+<!-- ## A gentle start to parallel computing  -->
+
+<!-- - Parallel processing breaks up your task, splits it among multiple processors, and puts the components back together. -->
+<!-- - Useful and easy if you have a task that can be split up, especially without the different parts needing to "talk to" each other. -->
+<!-- - On your typical computer, implementing parallel processing in R might speed up your program by a factor of 2 to 4. -->
+<!-- - If you have access to clusters on the web, many many "cores". -->
+
+<!-- ## How do I know if I can apply these ideas? {.smaller} -->
+
+<!-- - Parallel processing works best when you have a task that has to be completed many times, but each repeat is independent. -->
+<!-- - For instance, if you are repreating a simulation, and in each case are drawing new parameters from a distribution, that is an easily parallelizable task. -->
+<!-- - A good rule of thumb is that if you can wrap your task in an apply function or one of its variants, it's a good option for parallelization.  -->
+<!-- - In fact most implementations of parallel processing in R are versions of apply. -->
+
+<!-- ## What happens? -->
+
+<!-- - When you run a task in parallel, your computer "dispatches" each task to a CPU core.  -->
+<!-- - This dispatching adds computational overhead.  -->
+<!-- - So, it's usually best to try to minimize the number of dispatches.  -->
+<!-- - In most cases you are going to have a small number of computing cores relative to your tasks. A powerful laptop or desktop will have 2, 4, or 8 cores, and even the most powerful Amazon virtual machine has 88. -->
+
+<!-- ## Introduction to doParallel -->
+
+<!-- - We will first write a super simple R code to explain the mechanism of parallel processing using doParallel.  -->
+
+<!-- ```{r, echo = TRUE, eval = FALSE, warning=FALSE, message = FALSE, cache = TRUE} -->
+<!-- n = as.numeric(Sys.getenv("NUMBER_OF_PROCESSORS")) # on Windows -->
+<!-- require(doParallel) -->
+<!-- cl <- makeCluster(n) -->
+<!-- registerDoParallel(cl) -->
+<!-- ptm <- proc.time() -->
+<!-- foreach(i=1:4) %dopar% {sqrt(i)} -->
+<!-- proc.time()-ptm -->
+<!-- ``` -->
+
+
+<!-- ## Output of the snippet  -->
+<!-- - Here is the output ! -->
+<!-- ```{r, echo = FALSE, eval = TRUE, warning=FALSE, message = FALSE} -->
+<!-- n = as.numeric(Sys.getenv("NUMBER_OF_PROCESSORS")) # on Windows -->
+<!-- require(doParallel) -->
+<!-- cl <- makeCluster(n) -->
+<!-- registerDoParallel(cl) -->
+<!-- ptm <- proc.time() -->
+<!-- foreach(i=1:4) %dopar% {sqrt(i)} -->
+<!-- proc.time()-ptm -->
+<!-- ``` -->
+
+<!-- ## Hello, world ! -->
+
+<!-- - This is our "Hello, world" program for parallel computing.  -->
+<!-- - It tests that everything is installed and set up properly, **but don't expect it to run faster than a sequential for loop, because it won't**!  -->
+<!-- -  With small tasks, the overhead of scheduling the task and returning the result -->
+<!-- can be greater than the time to execute the task itself, resulting in poor performance.  -->
+
+<!-- ## We will see a non-trivial example  -->
+
+<!-- - Non-trivial examples need sophisticated Statistical methods, and I haven't covered these yet. So don't worry at all if you don't understand any of it. I just want to show you an example of the advantage of using parallel processing.  -->
+
+<!-- - How long does it take to do 10,000 Bootstrap iterations using 2 cores? -->
+
+<!-- ## Bootstrapping GLM  -->
+
+<!-- ```{r} -->
+<!-- x <- iris[which(iris[,5] != "setosa"), c(1,5)] -->
+<!-- str(x) -->
+<!-- ``` -->
+
+<!-- - Logistic Regression: predict species using sepal.length. -->
+<!-- - Want the distribution of parameter estimates. -->
+<!-- - Fit the model repeatedly (like 10k times) for observations randomly sampled with replacements. -->
+<!-- - Gives us Bootstrap distribution.  -->
+<!-- - Cover Bootstrap in greater details towards the end.  -->
+
+
+<!-- ## Bootstrap using parallel  -->
+
+<!-- ```{r, echo = TRUE, cache = TRUE} -->
+<!-- x <- iris[which(iris[,5] != "setosa"), c(1,5)] -->
+<!-- trials <- 10000 -->
+<!-- ptime <- system.time({ -->
+<!-- r <- foreach(icount(trials), .combine=cbind) %dopar% { -->
+<!--   ind <- sample(100, 100, replace=TRUE) -->
+<!--   result1 <- glm(x[ind,2]~x[ind,1], family=binomial(logit)) -->
+<!--   coefficients(result1) -->
+<!-- } -->
+<!-- }) -->
+<!-- ptime -->
+<!-- ``` -->
+
+<!-- ## Sequential counter-part  -->
+
+<!-- ```{r, echo = TRUE, cache = TRUE} -->
+<!-- stime <- system.time({ -->
+<!-- r <- foreach(icount(trials), .combine=cbind) %do% { -->
+<!--   ind <- sample(100, 100, replace=TRUE) -->
+<!--   result1 <- glm(x[ind,2]~x[ind,1], family=binomial(logit)) -->
+<!--   coefficients(result1) -->
+<!-- } -->
+<!-- }) -->
+<!-- stime -->
+<!-- ``` -->
+
+<!-- ## Exercise (Try at home) -->
+
+<!-- -  Can you parallelise any of the divide-and-conquer algorithms you have learned in class?  -->
+
+
