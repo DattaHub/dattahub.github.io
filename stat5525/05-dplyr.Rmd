@@ -3,6 +3,10 @@ title: Herding cats with dplyr
 author: "Jyotishka Datta"
 date: "2020/01/24 (updated: `r Sys.Date()`)"
 output: 
+  html_document:
+      css: css/lesson.css
+      toc: true
+      number_sections: true
   pdf_document:
       toc: true
       number_sections: false
