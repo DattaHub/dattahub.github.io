@@ -5,6 +5,8 @@ date: "2020/01/24 (updated: `r Sys.Date()`)"
 output:
   xaringan::moon_reader:
   css: mystyle.css
+  logo: ../vt.png
+
 lib_dir: libs
 nature:
   highlightStyle: github
@@ -333,7 +335,8 @@ can be greater than the time to execute the task itself, resulting in poor perfo
 ---
 ## We will see a non-trivial example 
 
-- Non-trivial examples need sophisticated Statistical methods, and I haven't covered these yet. So don't worry at all if you don't understand any of it. I just want to show you an example of the advantage of using parallel processing. 
+- Non-trivial examples need sophisticated Statistical methods, and I haven't covered these yet. 
+- So don't worry at all if you don't understand why we are using this example of a method. I just want to show you an example of the advantage of using parallel processing. 
 
 - How long does it take to do 10,000 Bootstrap iterations using 2 cores?
 
@@ -345,11 +348,11 @@ x <- iris[which(iris[,5] != "setosa"), c(1,5)]
 str(x)
 ```
 
-- Logistic Regression: predict species using sepal.length.
+- Logistic Regression: predict species using `sepal.length`.
 - Want the distribution of parameter estimates.
-- Fit the model repeatedly (like 10k times) for observations randomly sampled with replacements.
+- Fit the model repeatedly (like 10,000 times) for observations *randomly sampled with replacements*.
 - Gives us Bootstrap distribution. 
-- Cover Bootstrap in greater details towards the end. 
+- Cover *Bootstrap* in greater details towards the end. 
 
 
 ---
@@ -382,10 +385,10 @@ r <- foreach(icount(trials), .combine=cbind) %do% {
 stime
 ```
 
----
-## Exercise (Try at home)
+<!-- --- -->
+<!-- ## Exercise  -->
 
--  Can you parallelise any of the divide-and-conquer algorithms you have learned in class? 
+<!-- -  Can you think of any algorithms that you can easily parallelize?  -->
 
 
 
