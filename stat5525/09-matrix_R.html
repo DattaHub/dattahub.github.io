@@ -20,7 +20,7 @@
       // Slide settings
       settings: {
                 title: 'Matrix in R',
-                        subtitle: 'Data Analytics: Week 7',
+                        subtitle: 'Data Analytics: Week 2',
                 useBuilds: true,
         usePrettify: true,
         enableSlideAreas: true,
@@ -483,7 +483,7 @@ y &lt;- rowSums(X) + rnorm(n)</pre>
 <pre class = 'prettyprint lang-r'>system.time(bHat1 &lt;- solve(t(X) %*% X) %*% t(X) %*% y)</pre>
 
 <pre >##    user  system elapsed 
-##    0.48    0.05    0.55</pre>
+##    0.44    0.03    0.47</pre>
 
 <ul>
 <li>Not so naive: use <code>crossprod</code>.</li>
@@ -492,7 +492,7 @@ y &lt;- rowSums(X) + rnorm(n)</pre>
 <pre class = 'prettyprint lang-r'>system.time(bHat2 &lt;- solve(crossprod(X), crossprod(X, y)))</pre>
 
 <pre >##    user  system elapsed 
-##    0.23    0.00    0.24</pre>
+##     0.2     0.0     0.2</pre>
 
 </article></slide><slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>More advanced topics</h2></hgroup><article  class="smaller " id="more-advanced-topics">
 
@@ -509,12 +509,12 @@ A = crossprod(A)
 ptm &lt;- proc.time(); B = solve(A); proc.time()-ptm</pre>
 
 <pre >##    user  system elapsed 
-##    0.86    0.00    0.86</pre>
+##    0.81    0.00    0.81</pre>
 
 <pre class = 'prettyprint lang-r'>ptm &lt;- proc.time(); B = chol2inv(A); proc.time()-ptm</pre>
 
 <pre >##    user  system elapsed 
-##    0.26    0.02    0.28</pre>
+##    0.22    0.00    0.22</pre>
 
 </article></slide><slide class=""><hgroup><h2>Storage of sparse matrices</h2></hgroup><article  class="smaller " id="storage-of-sparse-matrices">
 

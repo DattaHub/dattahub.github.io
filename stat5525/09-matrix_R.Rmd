@@ -1,6 +1,6 @@
 ---
 title: "Matrix in R"
-subtitle: "Data Analytics: Week 7"
+subtitle: "Data Analytics: Week 2"
 author: "Jyotishka Datta (<jyotishka@vt.edu>) <br> Department of Statistics, Virginia Tech"
 output: 
   ioslides_presentation:
