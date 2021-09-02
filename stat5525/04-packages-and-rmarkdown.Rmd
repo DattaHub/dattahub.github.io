@@ -86,7 +86,7 @@ If you've used ipython/Jupyter notebooks before, R Markdown will feel similar. A
 
 ## My First Rmd
 
-Rstudio makes it easy to create a new RMarkdown file, and it even starts with a demo file that shows off most of the basic features of the `Rmd` format. In the upper-left corner, click the "new file" icon and select RMarkdown. A window should appear to help you configure this file initially. There's a lot of options (R Markdown can do so much!), but for now, make sure your name is in the "Author" field, and change the "Title" to be something like "AARUG Workshop".
+Rstudio makes it easy to create a new RMarkdown file, and it even starts with a demo file that shows off most of the basic features of the `Rmd` format. In the upper-left corner, click the "new file" icon and select RMarkdown. A window should appear to help you configure this file initially. There's a lot of options (R Markdown can do so much!), but for now, make sure your name is in the "Author" field, and change the "Title" to be something like "Stat 5525".
 
 Before we delve into what each of these pieces mean, let's "knit" the document so we can see what kind of output RMarkdown produces. Above the file, press the `knit` button, the one that looks like a ball of yarn.
 
