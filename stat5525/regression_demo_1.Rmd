@@ -1,8 +1,13 @@
 ---
 title: "Modern Regression"
 author: "Jyotishka Datta"
-date: "March 25, 2019"
-output: ioslides_presentation
+date: "`r Sys.Date()`"
+output: 
+  ioslides_presentation:
+    theme: journal
+    smaller: yes
+    logo: ../vt.png
+    transition: faster
 ---
 
 ```{r setup, include=FALSE}
