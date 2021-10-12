@@ -1,12 +1,23 @@
 ---
-title: "Elastic Net and Bayesian Sparse Regression"
+title: "Modern Regression" 
+subtitle: "Elastic Net and Bayesian Sparse Regression"
 author: "Jyotishka Datta"
-date: "April 9, 2019"
-output: ioslides_presentation
+date: "`r Sys.Date()`"
+output: 
+  ioslides_presentation:
+    theme: journal
+    smaller: yes
+    logo: ../vt.png
+    transition: faster
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, message = F, warning = F, cache = T)
+options(width=80)
+library(knitr)
+knitr::opts_chunk$set(echo = FALSE, warning = F, message = F, fig.asp = 0.6, cache = TRUE)
+knit_hooks$set(no.main = function(before, options, envir) {
+    if (before) par(mar = c(4.1, 4.1, 1.1, 1.1))  # smaller margin on top
+})
 ```
 
 ## Elastic Net 

@@ -1,6 +1,6 @@
 ---
 title: "PCA Demo"
-subtitle: "Data Analytics: Week 7"
+subtitle: "Data Analytics: Stat 5525"
 author: "Jyotishka Datta (<jyotishka@vt.edu>) <br> Department of Statistics, Virginia Tech"
 output: 
   ioslides_presentation:
@@ -210,7 +210,7 @@ The variables are:
 
 The data are in the "city_crime.txt" file that I read next.
 ```{r, echo = T}
-setwd("~/Course Notes/stat5525/2021Summer/R codes")
+setwd("~/Course Notes/stat5525/2021/R codes")
 crime<-read.table("city_crime.txt")
 ```
 

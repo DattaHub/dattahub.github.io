@@ -1,14 +1,23 @@
 ---
 title: "Modern Regression"
+subtitle: "Lasso, Ridge, and Elastic Net"
 author: "Jyotishka Datta"
-date: "April 4, 2019"
-output: ioslides_presentation
+date: "`r Sys.Date()`"
+output: 
+  ioslides_presentation:
+    smaller: yes
+    logo: ../vt.png
+    transition: faster
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+options(width=80)
+library(knitr)
+knitr::opts_chunk$set(echo = FALSE, warning = F, message = F, fig.asp = 0.6, cache = TRUE)
+knit_hooks$set(no.main = function(before, options, envir) {
+    if (before) par(mar = c(4.1, 4.1, 1.1, 1.1))  # smaller margin on top
+})
 ```
-
 ## Source 
 
 The R codes for the baseball example and the data are taken from the ISLR book by James, Witten, Hastie and Tibshirani. 
