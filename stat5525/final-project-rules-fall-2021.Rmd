@@ -40,6 +40,10 @@ The litearure review part is meant for reading and understanding "recent" litear
 2. Ideally you'd choose a different data-set than the ones shown in class or labs and choose at least two methods to compare. 
 3. Your reports will be due by the final day of the class. 
 
+## Project description and examples
+
+1. [Project 1: Modern Regression](https://dattahub.github.io/stat5525/project-1-fall-2021.html)
+2. [Project 2: Modern Classification](https://dattahub.github.io/stat5525/project-2-fall-2021.html)
 
 # Part 2: Lit Review
 
