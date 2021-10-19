@@ -1,0 +1,113 @@
+---
+title: "Final Project Rules and Ideas"
+author: "Jyotishka Datta"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    fontsize: 11pt
+    theme: united
+    toc: true
+    toc_depth: 6
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This document describes the rules for the final class project and the literature review paper. The goal of the final class project is to implement some of the computational tools you have learned in this class. This includes principal component analysis for exploratory analysis and modern regression and classification tasks for wide data, where the number of variables might exceed the number of observations in the data-set. 
+
+The litearure review part is meant for reading and understanding "recent" litearture in the intersectional area of Statistics and Machine Learning. The field of Statistical learning is one that changes very, very rapidly and as a result, tools get outdated and obsolete very fast. What remains valid is the understanding of the statistical rigour and intuition behind the development of new tools. So in the literature review part, we will focus on understanding the main ideas and the intuition and more importantly, try to understand their limitations. A key question to ask is __does the method really do what it claims to do?__. 
+
+## Final Project Deliverables 
+
+-  The deliverables for your final project are two documents: a data analysis report and a lit review report. 
+
+-  Project report will be due on the 11th of December (check with me if you're plan to submit early). You must upload your presentation to Canvas by 7:30 pm on the due date. 
+
+-  The ideal group size for this project is 3, and you can choose your group members. Please let me know your groups by the end of this month. If you want me to select a group for you, I will be happy to do so. I will form a group and email the members to introduce everyone. 
+
+# Part 1 : Implementation and Analysis
+
+1.  Sparse Regression: Compare and contrast penalized regression and Bayesian shrinkage priors for large $p$, small $n$ data.
+2.  High-dimensional Classification problem for large $p$, small $n$ data: compare between different methods: e.g. Logistic regression with $\ell_1$ penalty and Random forests. 
+
+
+
+## Rules - Part 1
+
+1. Part 1 is a small research project - each student will choose one of the above problems and one data-set to analyze. If you want to work on a different problem/data-set, that is fine too, but you will need my prior approval. 
+2. Ideally you'd choose a different data-set than the ones shown in class or labs and choose at least two methods to compare. 
+3. Your reports will be due by the final day of the class. 
+
+
+# Part 2: Lit Review
+
+I will point out a few interesting directions, and you can also choose a paper that will be directly relevant for your area of interest or research. If you want me to choose a paper for you I will be happy to do so. 
+
+<!-- 1. Network Inference (Graph partition / Stochastic Block Models etc.)  -->
+<!-- 2. Efficient Inference for Bayesian MCMC.  -->
+<!-- 3. Optimization and $\ell_0$ regularization.  -->
+<!-- 4. Topic Modeling - Latent Dirichlet Allocation.  -->
+
+
+## Rules - Lit Review 
+
+1.  Part 2 is an individual reading project - each of the students will submit their own report. You can discuss papers you have chosen but do not review the same paper. 
+
+2.  Each student must select at least one paper related to the topic and write at least a full page review but there is no upper bound.  
+
+3.  Ideally you will write a review that is clear enough for your classmates to understand, focus on the broader perspectives: e.g. Why is this method important? How does it improve over the state-of-the-art methods? What are the limitations? Do the authors provide any implementation (e.g. R package / MCMC steps)? Is there any theoretical justification? 
+
+4.  Your literature review reports will be due by the final day of the class. 
+
+## Possible Directions for Lit Review
+
+<!-- ### **Community Detection Resources** -->
+
+<!-- 1. [Community detection and stochastic block models: recent developments](https://arxiv.org/pdf/1703.10146.pdf) -->
+<!-- 2. [Original paper: Stochastic Block Models](http://www.stat.cmu.edu/~brian/780/bibliography/04%20Blockmodels/Holland%20-%201983%20-%20Stochastic%20blockmodels,%20first%20steps.pdf) -->
+<!-- 3. [A. Clauset, M.E.J. Newman and C. Moore, - "Finding community structure in very large networks.", Physical Review E 70, 066111 (2004)](http://tuvalu.santafe.edu/~aaronc/courses/5352/fall2013/readings/Clauset_Newman_Moore_04_FindingCommunityStructureInVeryLargeNetworks.pdf). -->
+
+
+<!-- ### **Efficient Bayesian Inference** -->
+
+<!-- 1.  [Fast sampling with Gaussian scale mixture priors in high-dimensional regression, Chakrabarty, Bhattacharya, Mallick](https://academic.oup.com/biomet/article/103/4/985/2447851) -->
+<!-- 2.  [GPU-accelerated Gibbs sampling, Terenin, Dong, Draper](https://arxiv.org/ftp/arxiv/papers/1608/1608.04329.pdf) -->
+<!-- 3.  [Comment: A brief survey of the current state of play for Bayesian computation in data science at big-data scale](https://arxiv.org/pdf/1712.00849.pdf) -->
+
+
+### **Optimization and $\ell_0$ regularization**
+
+1.  [An Algorithmic Approach to Linear Regression - Bertsimas and King](https://pubsonline.informs.org/doi/pdf/10.1287/opre.2015.1436)
+2.  [Best Subset Selection Via A Modern Optimization Lens, Bertsimas and Mazumder](https://projecteuclid.org/download/pdfview_1/euclid.aos/1458245736)
+3.  [Relaxed Lasso](https://www.sciencedirect.com/science/article/pii/S0167947306004956)
+4.  [The Adaptive Lasso and Its Oracle Properties](https://www.tandfonline.com/doi/abs/10.1198/016214506000000735)
+5.  [A Primal Dual Active Set Algorithm For A Class Of Nonconvex Sparsity Optimization](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.740.9614&rep=rep1&type=pdf)
+6.  [Model selection consistency of Lasso](https://www.jmlr.org/papers/volume7/zhao06a/zhao06a.pdf)
+7.  [The lasso problem and uniqueness](https://projecteuclid.org/journals/electronic-journal-of-statistics/volume-7/issue-none/The-lasso-problem-and-uniqueness/10.1214/13-EJS815.full)
+8.  [On the “degrees of freedom” of the lasso](https://projecteuclid.org/journals/annals-of-statistics/volume-35/issue-5/On-the-degrees-of-freedom-of-the-lasso/10.1214/009053607000000127.full)
+9.  [On the conditions used to prove oracle results for the Lasso](https://projecteuclid.org/journals/electronic-journal-of-statistics/volume-3/issue-none/On-the-conditions-used-to-prove-oracle-results-for-the/10.1214/09-EJS506.full)
+10. [A SIGNIFICANCE TEST FOR THE LASSO](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4285373/)
+11. [Lasso: A retrospective](https://rss.onlinelibrary.wiley.com/doi/10.1111/j.1467-9868.2011.00771.x)
+
+<!-- ### **Topic Modeling - Latent Dirichlet Allocation** -->
+
+<!-- 1.  [Latent Dirichlet Allocation - Blei, Ng, Jordan](http://www.jmlr.org/papers/volume3/blei03a/blei03a.pdf) -->
+<!-- 2.  [Introduction to Latent Dirichlet Allocation](http://blog.echen.me/2011/08/22/introduction-to-latent-dirichlet-allocation/) -->
+<!-- 3.  [LDA Tutorial](http://obphio.us/pdfs/lda_tutorial.pdf) -->
+
+
+
+### **Other topics**
+
+There are many, other interesting topics to be explored. Here are some papers on diverse topics that I read over the last few weeks, and liked: 
+
+1. [The xyz algorithm for fast interaction search in high-dimensional data](https://arxiv.org/pdf/1610.05108.pdf), Thanei, Meinhausen, Shah. 
+2. [Mendelian Randomization with Poor Instruments: a Bayesian Approach](https://arxiv.org/pdf/1608.02990.pdf), Berzuini et al. 
+3. [Finding Online Extremists in Social Networks](https://arxiv.org/pdf/1610.06242.pdf), Klausen et al. 
+4. [Lasso, fractional norm and structured sparse estimation using a Hadamard product parametrization](https://arxiv.org/pdf/1611.00040.pdf), Peter Hoff. 
+5. [A framework for probabilistic inferences from imperfect models](https://arxiv.org/pdf/1611.01241.pdf), Meng Li and David Dunson.
+6. [Posterior Graph Selection and Estimation Consistency for High-dimensional Bayesian DAG Models](https://arxiv.org/pdf/1611.01205.pdf) by    Xuan Cao, Kshitij Khare, Malay Ghosh.
+
+
