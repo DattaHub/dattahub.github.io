@@ -17,15 +17,30 @@ theme: united
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Overview
+## Overview
 
-I have described how to download and read two high-dimensional datasets, one for regression and one for classification. Feel free to use them if you want. I have also pasted some other sources for finding interesting data-sets below where you can find more such data-sets. 
+I have described how to download and read two high-dimensional datasets, one for regression and one for classification and also point to a few R packages with extensions of Lasso-like methods for handling high-dim datasets. Feel free to use them if you want. I have also pasted some other sources for finding interesting data-sets below where you can find more such data-sets. 
 
 
 -  UCI ML repository (good source for high-dimensional data) https://archive.ics.uci.edu/ml/index.php 
+- Kaggle.com has really interesting data-sets, too. For example, you can find cool data sets for classification here: https://www.kaggle.com/datasets?tags=13302-Classification 
 - `library(datasets)` in R.  
 -  TIDYTUESDAY datasets: (I love this) https://github.com/rfordatascience/tidytuesday#datasets
 -  FiveThirtyEight datasets: (a little contextual reading might be required) https://github.com/fivethirtyeight/data
+
+
+## R packages for extensions of Lasso-like ethods 
+
+Some variants of Lasso and other methods for high-dimensional inference. It will be a great idea to learn how to use one of these packages for a high-dimensional data-set and compare one of these more advanced methods wih Lasso. 
+
+1. Minimax concave penalty (MCP) and smoothly clipped absolute deviation (SCAD) penalty. [R package vignette](https://cran.r-project.org/web/packages/ncvreg/vignettes/getting-started.html) and [main webpage](https://pbreheny.github.io/ncvreg/)
+
+2. FLARE: Family of Lasso Regression: Includes Dantzig Selector, LAD Lasso, SQRT Lasso, Lq Lasso: [Vignette](https://cran.r-project.org/web/packages/flare/vignettes/vignette.pdf) and [main webpage]() https://cran.r-project.org/web/packages/flare/index.html).
+
+3. sparsenet: Fit Sparse Linear Regression Models via Nonconvex Optimization. [main webpage](https://cran.r-project.org/web/packages/sparsenet/index.html)
+
+4. horseshoe: Bayesian method for high-dimensional regression [Vignette](https://cran.r-project.org/web/packages/horseshoe/vignettes/horseshoe-vignette.html) and [main page](https://cran.r-project.org/web/packages/horseshoe/index.html)
+
 
 
 ## Examples 
