@@ -1,13 +1,25 @@
 ---
 title: "SVM R Demo"
-author: "Jyotishka Datta"
-date: "April 26, 2019"
-output: ioslides_presentation
+subtitle: "Data Analytics"
+author: "Jyotishka Datta (<jyotishka@vt.edu>) <br> Department of Statistics, Virginia Tech"
+output: 
+  ioslides_presentation:
+    smaller: yes
+    logo: ../vt.png
+    transition: faster
+fontsize: 11pt
+geometry: margin=1in
+urlcolor: blue
 ---
+  
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
-knitr::opts_chunk$set(cache = TRUE)
+options(width=80)
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F, cache = TRUE)
+knit_hooks$set(no.main = function(before, options, envir) {
+    if (before) par(mar = c(4.1, 4.1, 1.1, 1.1))  # smaller margin on top
+})
 ```
 
 ## SVM 

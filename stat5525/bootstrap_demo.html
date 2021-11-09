@@ -4,7 +4,7 @@
     <title>Bootstrap</title>
     <meta charset="utf-8" />
     <meta name="author" content="Jyotishka Datta" />
-    <script src="libs/header-attrs-2.6/header-attrs.js"></script>
+    <script src="libs/header-attrs-2.10/header-attrs.js"></script>
     <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
     <link href="libs/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
   </head>
@@ -15,7 +15,7 @@ class: center, middle, inverse, title-slide
 # Bootstrap
 ### Jyotishka Datta
 ### Virginia Tech
-### 2021/06/21 (updated: 2021-06-22)
+### 2021/06/21 (updated: 2021-10-28)
 
 ---
 
@@ -314,7 +314,7 @@ Botstrapping with 1000 replications:
 
 ```r
 library(boot)
-results &lt;- boot(data = mtcars, statistic = rsq, R = 1000, formula = mpg ~ 
+results &lt;- boot(data = mtcars, statistic = rsq, R = 1000, formula = mpg ~
     wt + disp)
 ```
 
@@ -382,7 +382,7 @@ plot(results)
 df &lt;- data.frame(x = results$t)
 x &lt;- df$x
 library(ggplot2)
-ggplot(df, aes(x)) + geom_histogram(aes(y = ..density..), alpha = 0.5) + 
+ggplot(df, aes(x)) + geom_histogram(aes(y = ..density..), alpha = 0.5) +
     geom_density()
 ```
 
@@ -393,7 +393,7 @@ ggplot(df, aes(x)) + geom_histogram(aes(y = ..density..), alpha = 0.5) +
 
 
 ```r
-setwd("~/Course Notes/stat5525/2021Summer/R codes")
+setwd("~/Course Notes/stat5525/2021/R codes")
 load("law.rda")
 library(ggplot2)
 qplot(LSAT, GPA, data = law)
@@ -479,7 +479,7 @@ proc.time() - ptm
 
 ```
      user  system elapsed 
-     0.40    0.00    0.41
+     0.33    0.00    0.33
 ```
 
 ---
@@ -490,7 +490,7 @@ proc.time() - ptm
 ptm &lt;- proc.time()
 B &lt;- 5000
 cors &lt;- replicate(B, {
-    with(law[sample(nrow(law), replace = TRUE), ], cor(LSAT, 
+    with(law[sample(nrow(law), replace = TRUE), ], cor(LSAT,
         GPA))
 })
 summary(cors)
@@ -507,7 +507,7 @@ proc.time() - ptm
 
 ```
      user  system elapsed 
-     0.48    0.00    0.49
+     0.42    0.00    0.42
 ```
 
 - Slight gain in running time! Gets better with bigger data.
@@ -520,7 +520,7 @@ proc.time() - ptm
 df &lt;- data.frame(x = cors)
 x &lt;- df$x
 library(ggplot2)
-ggplot(df, aes(x)) + geom_histogram(aes(y = ..density..), binwidth = 0.1, 
+ggplot(df, aes(x)) + geom_histogram(aes(y = ..density..), binwidth = 0.1,
     alpha = 0.5) + geom_density()
 ```
 
@@ -580,7 +580,7 @@ proc.time() - ptm
 
 ```
      user  system elapsed 
-    39.91    0.03   40.39
+    23.77    0.00   23.89
 ```
 ]
 
@@ -618,7 +618,7 @@ ptm &lt;- proc.time()
 library(plyr)
 corsize &lt;- ldply(Bs, function(B) {
     cors &lt;- replicate(B, {
-        with(law[sample(nrow(law), replace = TRUE), ], cor(LSAT, 
+        with(law[sample(nrow(law), replace = TRUE), ], cor(LSAT,
             GPA))
     })
     c(B = B, cor = mean(cors))
@@ -639,7 +639,7 @@ proc.time() - ptm
 
 ```
      user  system elapsed 
-    36.71    0.01   36.95
+    26.86    0.00   27.02
 ```
 
 

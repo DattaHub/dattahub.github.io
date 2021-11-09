@@ -257,7 +257,7 @@ geom_density()
 ## Law data example 
 
 ```{r, echo = TRUE, fig.height=3}
-setwd("~/Course Notes/stat5525/2021Summer/R codes")
+setwd("~/Course Notes/stat5525/2021/R codes")
 load("law.rda")
 library(ggplot2)
 qplot(LSAT, GPA, data = law)
