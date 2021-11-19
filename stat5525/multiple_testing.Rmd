@@ -1,5 +1,5 @@
 ---
-title: 'Multiple testing'
+title: 'Multiple testing (Updated)'
 author: "Jyotishka Datta (<jyotishka@vt.edu>) <br> Department of Statistics, Virginia Tech"
 output: 
   ioslides_presentation:
@@ -21,16 +21,12 @@ knit_hooks$set(no.main = function(before, options, envir) {
 })
 ```
 
+## Acknowledgement 
 
-## Multiple testing
+- I have used a few slides from Prof. Jim Berger's talk at Purdue Symposium in 2012 and Prof. Chris Genovese's talk on multiple testing. 
 
--  This intro will show you how to read the two data-sets and get basic summary. It will also suggest some of the analysis that you can perform.
+- Most of the other examples and texts are following Prof. Brad Efron's 'Large Scale Inference' book and website. 
 
--  Possible Inferential Goals: 
-
-  1. Compare the baseline expression values between two groups using a  nonparametric test, e.g. Wilcoxon/Mann-Whitney test. 
-  2. We have $p$ genes: $p$ simultaneous tests for each of the variables. We need to correct for multiple testing. 
-  
 ## Example 
 
 - Gene expression levels for $6033$ genes from $n_1 = 50$ normal controls and $n_2 = 52$ cancer patients. 
@@ -89,6 +85,46 @@ $$
 - We need some kind of multiplicity control. 
 
 - We will learn these, but first let's see the issue of multiplicity a little more closely. 
+
+
+
+## Multiple testing 
+
+-  Last time, we talked a little bit about multiple testing issues: and showed why the probability of a false rejection would grow as we test more and more hypotheses simultaneously. 
+
+- Today, we will learn about methods to control these errors. 
+
+- But first one quick reminder about P-values. 
+
+
+## Jim Berger's talk at Purdue Symposium (JBPS'12)
+
+<div style="text-align:center" markdown="1">
+![ ](art/Berger_incorrect_ways.png "Incorrect Ways P-values are used"){width=80%}
+</div>
+
+-  *What do you think?*
+
+## From the talk (JBPS'12)
+
+>- "This isn't right. This isn't even wrong" - Wolfgang Pauli, on a
+submitted paper. 
+
+>- Actual correct answer: The chances are less than 5% of having
+obtained the observed response or any more extreme response if
+the therapy is not effective. 
+
+## Multiplicity control
+
+<div style="text-align:center" markdown="1">
+![ ](art/Genovese_slide4.png "Many tests"){width=80%}
+</div>
+
+
+## From the talk 
+<div style="text-align:center" markdown="1">
+![ ](art/Berger_failure.png "Failure to adjust for multiple testing"){width=85%}
+</div>
 
 
 ## Example with Simulated Data {.small}
@@ -150,6 +186,39 @@ alpha = 0.05
 FWEP = 1 - (1-alpha)^m 
 plot(m,FWEP,type = "l", ylab = "P(at least 1 false positive)")
 ```
+
+## Multiple testing 
+
+- Let $M_0$ be the number of null hypotheses that are true, $M_0 = M - M_1$. 
+
+|           |$H_0$ acc |	$H_0$ rej | Total |
+|-----------|----------|------------|-------|
+|$H_0$ true |	U        | V          | $M_0$ |
+|$H_0$ false|	T        | S          | $M_1$ |
+|Total      |	M-R      | R          | $M$   |
+
+- All quantities except $M$ and $R$ are unobserved. 
+
+- The problem is to choose a testing procedure that will balance between *false positives* and *false negatives* 
+
+- We can use subscript $i$ for the $i^{th}$ test, i.e. $R_i$ be the number of rejections by the $i^{th}$ test and $\sum R_i = R$. 
+
+
+## How to choose a threshold? 
+
+1. *Uncorrected testing*: 
+   - Also called 'control per-comparison type I error' (PCER)
+   - Gives $P(V_i>0) \le \alpha$ for each test $i = 1, \ldots, M$. 
+   
+2. *Control Familywise Type I Error (FWER)*
+  -  e.g.: Bonferroni: use per-comparison significance level $\alpha/m$ 
+  -  Guarantees $P(V> 0) \le \alpha$.
+
+3. *Control False Discovery Rate (FDR)*
+   - first defined by Benjamini and Hochberg (BH, 1995, 2000)
+  -  Guarantees $FDR \equiv E(V/R) \le \alpha$. 
+
+4.  Many developments since until now ... 
 
 ## Bonferroni Procedure
 
@@ -302,11 +371,14 @@ sum(fit$reject.indices)
 -  Here is another hand-wavy argument. 
 
 ## Plot first 50 sorted p-values 
+
 ```{r BH_proof, fig.asp = 0.6}
 M <- length(teststat)
 plot(fit$sorted.p[1:50], type = "p", pch = 10)
 lines((1:50)*0.05/M)
 ```
+
+
 
 
 # Another example
@@ -382,9 +454,11 @@ teststat = mt.teststat(all.mat,all.cl,test="t")
 
 - These functions provide a convenient way to compute test statistics, e.g., two-sample Welch t-statistics, **Wilcoxon statistics**, F-statistics, paired t-statistics, block F-statistics, for each row of a data frame.
 - Should we use a t-test or a different test? 
-- How do you know? 
+- Depends on whether you believe in normality assumption for each test or have sufficient data for CLT to kick in. 
 
-## Visualize {.small}
+## Visualize data {.small}
+
+- QQplot/overlaid histogram: visual inspection of normality. Departure from diagonal (QQ) or bell-shape suggests presence of signals. 
 
 ```{r, echo = F}
 par(mfrow=c(1,2))
@@ -428,15 +502,59 @@ selected  <- p.adjust(rawp, method = "BH") <0.05
 sum(selected)
 ```
 
+## Using package 
+
+- `multtest' package also has own functions for applying multiple testing correction. 
+
+```{r}
+## Multiple testing 
+library(multtest)
+rawp = 2 * (1 - pnorm(abs(teststat)))
+adjusted = mt.rawp2adjp(rawp, c("Bonferroni", "BH"))
+rejected <- mt.reject(adjusted$adj[order(adjusted$index), ], 0.05)
+rejected$r
+```
+
+
+
+## Using package 
+
+- Has many, many procedures built-in: 
+
+```{r}
+adjusted = mt.rawp2adjp(rawp, c("Bonferroni", "Holm", "Hochberg", "SidakSS", 
+                                "SidakSD", "BH", "BY", "ABH", "TSBH"))
+rejected <- mt.reject(adjusted$adj[order(adjusted$index), ], 0.05)
+rejected$r
+```
+
+- I'll talk about one more procedure, here abbreviated as "BY"
+
 ## Dependence?
 
 -  The Benjamini--Hochberg procedure assumes that the P-values (and the underlying test statistics) are independent of each other. 
 
 - This is not always true in real life, and as a result the outcomes of Benjamini-Hochberg often tend to be anti-conservative. 
 
--  Benjamini & Yekutieli (2001) proposed a modification for the BH procedure that takes dependence into account. You can apply their approach by simply changing `method = BH` to `method = BY` in your `p.adjust` function. 
+-  Benjamini & Yekutieli (2001) proposed a modification for the BH procedure that takes dependence into account. 
+
+-  You can apply their approach by simply changing `method = BH` to `method = BY` in your `p.adjust` function. 
 
 - You should investigate whether there is a strong dependence in your data (i.e. dependence between genes), and whether applying BY instead of BH changes your conclusion. 
+
+
+## Benjamini-Yekutieli 
+
+- BH is a lot more liberal than FWER control.
+- This is good for large M; for small M, the story is different, because FWER is actually reasonably workable for small problems.
+- BH is nice, elegant and useful, it does have drawbacks: 
+- One is the independence assumption. You can drop independence if you use:
+
+$$
+p(i) \le \frac{iq}{M}\frac{1}{\sum_{j=1}^{i} \frac{1}{j}}
+$$
+- $M$ is the total number of tests, $q$ is desired control. The correction factor can be large, i.e. the test could be conservative. 
+
 
 ## Benjamini-Yekutieli 
 
