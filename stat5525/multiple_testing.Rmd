@@ -370,6 +370,7 @@ sum(fit$reject.indices)
 
 -  Here is another hand-wavy argument. 
 
+
 ## Plot first 50 sorted p-values 
 
 ```{r BH_proof, fig.asp = 0.6}
