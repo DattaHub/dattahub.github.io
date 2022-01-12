@@ -1,0 +1,262 @@
+---
+title: "Modern Regression"
+subtitle: "Stepwise and Ridge"
+author: "Jyotishka Datta"
+date: "`r Sys.Date()`"
+output: 
+  ioslides_presentation:
+    theme: journal
+    smaller: yes
+    logo: ../vt.png
+    transition: faster
+---
+
+```{r setup, include=FALSE}
+options(width=80)
+library(knitr)
+knitr::opts_chunk$set(echo = FALSE, warning = F, message = F, fig.asp = 0.6, cache = TRUE)
+knit_hooks$set(no.main = function(before, options, envir) {
+    if (before) par(mar = c(4.1, 4.1, 1.1, 1.1))  # smaller margin on top
+})
+```
+
+## Source 
+
+The R codes for the baseball example and the data are taken from the ISLR book by James, Witten, Hastie and Tibshirani. 
+
+## Baseball data
+
+Major League Baseball Data from the 1986 and 1987 seasons.
+
+```{R, echo = T}
+library(ISLR)
+#fix(Hitters)
+names(Hitters)
+dim(Hitters)
+```
+
+## Remove NA's
+
+Salary is missing for some players. The na.omit() function
+removes all of the rows that have missing values in any variable.
+
+```{R, echo = T}
+sum(is.na(Hitters$Salary))
+Hitters=na.omit(Hitters)
+dim(Hitters)
+```
+
+## Best Subset Selection
+
+```{r, echo = T}
+library(leaps)
+regfit.full=regsubsets(Salary~.,Hitters)
+#summary(regfit.full)
+```
+
+The `regsubsets()` function (part of the `leaps` library) performs best subset selection by identifying the best model that contains a given number of predictors, where best is quantified using RSS. 
+
+## Best Subset Selection
+
+By default, `regsubsets()` reports up to the best eight-variable model, which we can change using the `nvmax` argument. 
+
+```{R, echo = T}
+regfit.full=regsubsets(Salary~.,data=Hitters,nvmax=19)
+reg.summary=summary(regfit.full)
+```
+
+
+## Best Subset Selection
+
+The `summary()` function also returns $R^2$, RSS, adjusted $R^2$, $C_p$, and BIC.
+We can examine these to try to select the best overall model.
+
+```{r, echo = T}
+names(reg.summary)
+reg.summary$rsq
+```
+
+The $R^2$ values increase monotonically !
+
+## Choosing the best model 
+
+Plotting RSS, adjusted $R^2$, $C_p$, and BIC for all of the models at once will
+help us decide which model to select:
+
+```{r, echo = T, eval = F}
+par(mfrow=c(2,2))
+plot(reg.summary$rss,xlab="Number of Variables",ylab="RSS",type="l")
+plot(reg.summary$adjr2,xlab="Number of Variables",ylab="Adjusted RSq",type="l")
+plot(reg.summary$cp,xlab="Number of Variables",ylab="Cp",type='l')
+plot(reg.summary$bic,xlab="Number of Variables",ylab="BIC",type='l')
+plot(regfit.full,scale="r2")
+```
+
+
+## Choosing the best model 
+
+Plotting RSS, adjusted $R^2$, $C_p$, and BIC for all of the models at once will
+help us decide which model to select:
+
+```{r, echo = F, eval = T}
+par(mfrow=c(2,2))
+plot(reg.summary$rss,xlab="Number of Variables",ylab="RSS",type="l")
+plot(reg.summary$adjr2,xlab="Number of Variables",ylab="Adjusted RSq",type="l")
+plot(reg.summary$cp,xlab="Number of Variables",ylab="Cp",type='l')
+plot(reg.summary$bic,xlab="Number of Variables",ylab="BIC",type='l')
+plot(regfit.full,scale="r2")
+```
+
+
+## Choosing the best model 
+
+The functions `which.max()` and `which.min()` helps us select the maximum point of a vector. 
+
+```{r, echo = T, eval = T}
+which.max(reg.summary$adjr2)
+which.min(reg.summary$cp)
+which.min(reg.summary$bic)
+```
+
+
+## Now plot everything together 
+
+```{r, echo = F, eval = T}
+par(mfrow=c(2,2))
+plot(reg.summary$rss,xlab="Number of Variables",ylab="RSS",type="l")
+plot(reg.summary$adjr2,xlab="Number of Variables",ylab="Adjusted RSq",type="l")
+points(11,reg.summary$adjr2[11], col="red",cex=2,pch=20)
+plot(reg.summary$cp,xlab="Number of Variables",ylab="Cp",type='l')
+points(10,reg.summary$cp[10],col="red",cex=2,pch=20)
+plot(reg.summary$bic,xlab="Number of Variables",ylab="BIC",type='l')
+points(6,reg.summary$bic[6],col="red",cex=2,pch=20)
+plot(regfit.full,scale="r2")
+```
+
+## Forward 
+
+```{r, echo = T}
+regfit.fwd=regsubsets(Salary~.,data=Hitters,nvmax=19,method="forward")
+fwd.summary <- summary(regfit.fwd)
+```
+
+
+## Plots
+
+```{r, echo = F, eval = T}
+par(mfrow=c(2,2))
+plot(fwd.summary$rss,xlab="Number of Variables",ylab="RSS",type="l")
+plot(fwd.summary$adjr2,xlab="Number of Variables",ylab="Adjusted RSq",type="l")
+plot(fwd.summary$cp,xlab="Number of Variables",ylab="Cp",type='l')
+plot(fwd.summary$bic,xlab="Number of Variables",ylab="BIC",type='l')
+#plot(regfit.full,scale="r2")
+```
+
+## Best model 
+
+```{r, echo = T, eval = T}
+which.max(fwd.summary$adjr2)
+which.min(fwd.summary$cp)
+which.min(fwd.summary$bic)
+```
+
+
+## Now plot everything together 
+
+```{r, echo = F, eval = T}
+par(mfrow=c(2,2))
+plot(fwd.summary$rss,xlab="Number of Variables",ylab="RSS",type="l")
+plot(fwd.summary$adjr2,xlab="Number of Variables",ylab="Adjusted RSq",type="l")
+points(11,fwd.summary$adjr2[11], col="red",cex=2,pch=20)
+plot(fwd.summary$cp,xlab="Number of Variables",ylab="Cp",type='l')
+points(10,fwd.summary$cp[10],col="red",cex=2,pch=20)
+plot(fwd.summary$bic,xlab="Number of Variables",ylab="BIC",type='l')
+points(6,fwd.summary$bic[6],col="red",cex=2,pch=20)
+#plot(regfit.full,scale="r2")
+```
+
+
+## Backward 
+```{r, echo = T}
+regfit.bwd=regsubsets(Salary~.,data=Hitters,nvmax=19,method="backward")
+bwd.summary <- summary(regfit.bwd)
+```
+
+## Best model 
+
+```{r, echo = T, eval = T}
+which.max(bwd.summary$adjr2)
+which.min(bwd.summary$cp)
+which.min(bwd.summary$bic)
+```
+
+## Now plot everything together 
+
+```{r, echo = F, eval = T}
+par(mfrow=c(2,2))
+plot(bwd.summary$rss,xlab="Number of Variables",ylab="RSS",type="l")
+plot(bwd.summary$adjr2,xlab="Number of Variables",ylab="Adjusted RSq",type="l")
+points(11,bwd.summary$adjr2[11], col="red",cex=2,pch=20)
+plot(bwd.summary$cp,xlab="Number of Variables",ylab="Cp",type='l')
+points(10,bwd.summary$cp[10],col="red",cex=2,pch=20)
+plot(bwd.summary$bic,xlab="Number of Variables",ylab="BIC",type='l')
+points(8,fwd.summary$bic[8],col="red",cex=2,pch=20)
+#plot(regfit.full,scale="r2")
+```
+
+## Different Models {.smaller}
+
+```{r, echo = T}
+coef(regfit.full,7)
+coef(regfit.fwd,7)
+coef(regfit.bwd,7)
+```
+
+## Ridge Regression 
+
+-  Ridge, Lasso, Elastic Net are all based on R package `glmnet`.
+- Elastic Net Penalty: 
+$$
+P_{\lambda,\alpha}(\beta) = \frac{(1-\alpha)}{2} {\lVert \beta \rVert}_2^2 + \alpha {\lVert \beta \rVert}_1^2
+$$
+
+- $\alpha = 0$ is Ridge, $\alpha = 1$ is Lasso, anything in between is Elastic Net. 
+
+## R commands 
+
+```{r, echo = T, warning=FALSE, message=FALSE}
+x=model.matrix(Salary~.,Hitters)[,-1]
+y=Hitters$Salary
+dim(x)
+dim(y)
+library(glmnet)
+grid=10^seq(10,-2,length=100)
+ridge.mod=glmnet(x,y,alpha=0,lambda=grid)
+dim(coef(ridge.mod))
+```
+
+## Solutions {.smaller}
+
+When $\lambda$ = `r ridge.mod$lambda[50]` : 
+
+```{r, echo = T}
+ridge.mod$lambda[50]
+coef(ridge.mod)[,50]
+sqrt(sum(coef(ridge.mod)[-1,50]^2))
+```
+
+## Solutions {.smaller}
+
+When $\lambda$ = `r ridge.mod$lambda[60]` : 
+
+```{r, echo = T}
+ridge.mod$lambda[60]
+coef(ridge.mod)[,60]
+sqrt(sum(coef(ridge.mod)[-1,60]^2))
+```
+
+## Plot 
+
+```{r}
+plot(ridge.mod,xvar="lambda",label=TRUE)
+```

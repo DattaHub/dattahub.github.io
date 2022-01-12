@@ -1,0 +1,523 @@
+---
+title: "Logistic Regression"
+author: "Jyotishka Datta"
+date: "April 13, 2018, updated `r Sys.Date()`"
+output: 
+  ioslides_presentation:
+    smaller: true
+    widescreen: true
+    fontsize: 10pt
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## The Stock Market Data 
+
+We will begin by examining some numerical and graphical summaries of the `Smarket` data, which is part of the `ISLR` library. 
+
+This data set consists of percentage returns for the S & P 500 stock index over 1,250 days, from the beginning of 2001 until the end of 2005. 
+
+For each date, we have recorded the percentage returns for each of the five previous trading days, `Lag1` through `Lag5`. 
+
+We have also recorded `Volume` (the number of shares traded on the previous day, in billions), `Today` (the percentage return on the date in question) and `Direction` (whether the market was `Up` or `Down` on  this date).
+
+
+## Smarket 
+
+```{r, echo = T}
+library(ISLR)
+names(Smarket)
+dim(Smarket)
+```
+
+## Smarket {.smaller}
+
+```{r, echo = T}
+summary(Smarket)
+```
+
+## Smarket {.smaller}
+
+```{r, echo = T}
+pairs(Smarket)
+```
+
+
+## Smarket {.smaller}
+
+```{r, echo = T}
+cor(Smarket[,-9])
+```
+
+
+## Smarket {.smaller}
+
+```{r, echo = T}
+heatmap(cor(Smarket[,-9]))
+```
+
+
+## Smarket {.smaller}
+
+```{r, echo = T}
+attach(Smarket)
+plot(Volume)
+```
+
+## Logistic Regression 
+
+Next, we will fit a logistic regression model in order to predict `Direction` using `Lag1` through `Lag5` and `Volume`. 
+
+The `glm()` function fits generalized linear models, a class of models that includes logistic regression. 
+
+The syntax of the `glm()` function is similar to that of `lm()`, except that we must pass in linear model the argument `family=binomial` in order to tell `R` to run a logistic regression rather than some other type of generalized linear model.
+
+## Logistic Regression {.smaller}
+
+```{R, echo = T}
+glm.fits=glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume,data=Smarket,family=binomial)
+summary(glm.fits)
+```
+
+## Logistic Regression {.smaller}
+
+```{R, echo = T}
+coef(glm.fits)
+summary(glm.fits)$coef
+```
+
+## Logistic Regression {.smaller}
+
+```{R, echo = T}
+summary(glm.fits)$coef[,4]
+```
+
+## Prediction 
+
+The `predict()` function can be used to predict the probability that the
+market will go up, given values of the predictors. 
+
+The `type="response"` option tells `R` to output probabilities of the form $P(Y = 1|X)$. 
+
+If no test data set is supplied to the `predict()` function, then the probabilities are computed for the training data that was used to fit the logistic regression model.
+
+## Prediction 
+
+```{R, echo = T}
+glm.probs=predict(glm.fits,type="response")
+glm.probs[1:10]
+```
+
+## Up or Down?
+
+The `contrasts()` function indicates that R has created a dummy variable with a 1 for Up.
+
+```{r, echo = T}
+contrasts(Direction)
+```
+
+## Predictions
+
+- Must convert these predicted probabilities into class labels, `Up` or `Down`. 
+
+-  Can create a vector of class predictions based on whether the predicted probability of a market increase is greater than or less than 0.5.
+
+```{r, ehco = T}
+glm.pred=rep("Down",1250)
+glm.pred[glm.probs>.5]="Up"
+table(glm.pred,Direction)
+```
+
+## Confusion Matrix 
+
+```{r, echo = T}
+(507+145)/1250
+mean(glm.pred==Direction)
+```
+
+52% : Little better than random guessing. 
+
+Still this is misleading - training error can be overly optimistic ! 
+
+## Supervised Learning - Predicting the future Stock 
+
+Training Data: Before 2005, Test data: after 2005.
+
+```{r, echo = T}
+train=(Year<2005)
+Smarket.2005=Smarket[!train,]
+dim(Smarket.2005)
+Direction.2005=Direction[!train]
+glm.fits=glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume,data=Smarket,family=binomial,subset=train)
+glm.probs=predict(glm.fits,Smarket.2005,type="response")
+```
+
+## Supervised Learning
+
+
+```{r, echo = T}
+glm.pred=rep("Down",252)
+glm.pred[glm.probs>.5]="Up"
+table(glm.pred,Direction.2005)
+mean(glm.pred==Direction.2005)
+```
+
+- 48% - Worse than random guessing ! 
+
+## Prediction improves with better modelling 
+
+```{r, echo = T}
+glm.fits=glm(Direction~Lag1+Lag2,data=Smarket,family=binomial,subset=train)
+glm.probs=predict(glm.fits,Smarket.2005,type="response")
+glm.pred=rep("Down",252)
+glm.pred[glm.probs>.5]="Up"
+table(glm.pred,Direction.2005)
+mean(glm.pred==Direction.2005)
+```
+
+## Separability 
+
+-  The usual method of fitting a Logistic Regression doesn't work if one of the predictors perfectly separate the response. 
+-  The MLE does not exist in that situation. 
+-   Why? 
+
+## Separability 
+
+- Generate data: $x_1$ is unrelated, $x_2$ perfectly separates $y$.
+
+```{r, echo = T}
+set.seed(123456)
+d <- data.frame(y  =  c(0,0,0,0,0, 1,1,1,1,1),
+                x1 = rnorm(10),
+                x2 = c(runif(5,-3,0),runif(5,0,3)))
+
+fit <- glm(y ~ x1 + x2, data=d, family="binomial")
+```
+
+
+## What happens to the estimates? {.smaller}
+
+```{r}
+summary(fit,correlation = FALSE)
+```
+
+
+## Why? {.smaller}
+
+-  Classification rule based on probability: 
+$$
+P(Y = 0) = 1/ (1 + \exp(-\beta x))
+$$
+-  Figure below is the sequence of curves: 
+$$
+1/ (1 + \exp(-x)), 1/ (1 + \exp(-2x)), 1/ (1 + \exp(-3x)), \ldots, 1/ (1 + \exp(-n x))
+$$
+
+```{r, fig.height = 3.5}
+plot(d$x2,d$y,type = "p", col = d$y+1, pch = 15, xlim = c(-3,3), ylab = expression(1/(1+exp(-nx))))
+x = seq(-3,3,length.out = 100)
+for(n in 1:20){
+  lines(x, 1/(1+exp(-n*x)), type = "l")
+}
+```
+
+## Solution 
+
+-  The "best" solution is to use a Cauchy prior on each coefficient. 
+-  Gelman (2008): Cauchy(0, 2.5) for variance parameters. 
+-  Intuitively, Cauchy has heavier tails and it allows large values and also it shrinks the $\beta$'s just the right amount. 
+-  [Prior distributions for variance parameters in hierarchical models](http://www.stat.columbia.edu/~gelman/research/published/taumain.pdf)
+-  This is easy enough for you to write your own sampling algorithm. 
+
+
+## The `arm` package on R
+
+```{r, echo = T, message=FALSE, warning = F}
+library(arm)
+fit <- bayesglm(y ~ x1 + x2, data=d, family="binomial")
+display(fit)
+```
+
+
+# Discriminant Analysis
+
+## Recall the `Smarket` data 
+
+- Consists of percentage returns for the S & P 500 stock index over 1250 days, from the beginning of 2001 until the end of 2005. 
+
+- For each date, we have recorded the percentage returns for each of the five previous trading days, `Lag1` through `Lag5`. 
+
+- We have also recorded `Volume` (the number of shares traded on the previous day, in billions), `Today` (the percentage return on the date in question) and `Direction` (whether the market was `Up` or `Down` on  this date).
+
+- *Training Data: Before 2005*, *Test data: after 2005*.
+
+- Note that, this is _not_ the best way to split: can you suggest something else? (Open question!)
+
+## Linear Discriminant Analysis {.smaller}
+
+```{r, echo = T, eval = F}
+library (MASS)
+lda.fit=lda(Direction ~ Lag1+Lag2 ,data=Smarket ,subset =train)
+lda.fit
+```
+
+## Linear Discriminant Analysis {.smaller}
+
+```{r, echo = F, eval = T}
+library (MASS)
+lda.fit=lda(Direction ~ Lag1+Lag2 ,data=Smarket ,subset =train)
+lda.fit
+```
+
+## Interpretation 
+
+- The LDA output indicates that $\pi_1= 0.492$ and $\pi_2 = 0.508$; in other words,
+49.2% of the training observations correspond to days during which the
+market went down. 
+
+- It also provides the group means; these are the average
+of each predictor within each class, and are used by LDA as estimates
+of $\mu_k$.
+
+- The coefficients of linear discriminants output provides the linear
+combination of `Lag1` and `Lag2` that are used to form the LDA decision rule.
+
+## Plot LDA
+
+```{r, echo = T}
+plot(lda.fit)
+```
+
+## Prediction 
+
+```{r, echo = T}
+lda.pred=predict(lda.fit, Smarket.2005)
+lda.class =lda.pred$class
+table(lda.class, Direction.2005)
+
+mean(lda.class == Direction.2005)
+```
+We can see that the performance of LDA (correct classification: `r 100*mean(lda.class == Direction.2005)`%) is very similar to logistic. 
+
+
+## Changing thresholds 
+
+If we keep the threshold at 50% or 0.5 we will get back the results from our table.
+
+```{r, echo = T}
+sum(lda.pred$posterior [ ,1] >=.5)
+sum(lda.pred$posterior [,1]<.5)
+```
+
+But, changing it would produce a different performance, e.g. 
+```{r, echo = T}
+sum(lda.pred$posterior [,1]>.9)
+```
+
+
+## Quadratic Discriminant Analysis {.smaller}
+
+```{r, echo = T, eval = F}
+library (MASS)
+qda.fit=qda(Direction ~ Lag1+Lag2 ,data=Smarket ,subset =train)
+qda.fit
+```
+
+
+## Quadratic Discriminant Analysis {.smaller}
+
+```{r, echo = F, eval = T}
+library (MASS)
+qda.fit=qda(Direction ~ Lag1+Lag2 ,data=Smarket ,subset =train)
+qda.fit
+```
+
+
+## Prediction 
+
+
+```{r}
+qda.class = predict(qda.fit,Smarket.2005)$class
+table(qda.class, Direction.2005)
+mean(qda.class == Direction.2005)
+```
+
+Interestingly, with a QDA, our correct classification rate goes up to `r 100*mean(qda.class == Direction.2005)`%, which is impressive. 
+
+# K nearest neighbours
+
+## K-nearest neighbours 
+
+-  We will now perform KNN using the `knn()` function, which is part of the `class` library. 
+
+-  This function works _rather differently_ from the other model-fitting
+functions that we have encountered thus far. 
+
+- Rather than a two-step approach in which we first fit the model and then we use the model to make predictions, `knn()` forms predictions using a single command.
+
+
+## Arguments in `knn()`
+
+- A matrix containing the predictors associated with the training data,
+labeled `train.X` below.
+
+- A matrix containing the predictors associated with the data for which
+we wish to make predictions, labeled `test.X` below.
+
+- A vector containing the class labels for the training observations,
+labeled `train.Direction` below.
+
+- A value for $K$, the number of nearest neighbors to be used by the
+classifier.
+
+```{r, eval = F, echo = T}
+knn (train.X, test.X, train.Direction, k=1)
+```
+
+
+## Application
+
+```{r, echo = T}
+library(class)
+train.X = cbind(Lag1 ,Lag2)[train ,]
+test.X = cbind (Lag1 ,Lag2)[!train ,]
+train.Direction = Direction[train]
+```
+
+## Predictions
+
+```{r, echo = T}
+set.seed (1)
+knn.pred= knn(train.X, test.X, train.Direction, k=1)
+table(knn.pred, Direction.2005)
+```
+
+With 1-NN, or K =1, the correct classification rate is `r 100*mean(knn.pred == Direction.2005)`%,
+
+## Predictions
+
+```{r, echo = T}
+set.seed (1)
+knn.pred= knn(train.X, test.X, train.Direction, k=3)
+table(knn.pred , Direction.2005)
+```
+
+With 3-NN, or K = 3, the correct classification rate is `r 100*mean(knn.pred == Direction.2005)`%,
+
+
+## Choosing $K$
+
+- $K$ is a tuning parameter, as we have discussed before. 
+
+- The most common way of choosing $K$ is looking at the estimates of test set error over values of $K$, calculated using *cross-validation*, to be discussed later in this course. 
+
+
+
+<!-- ## Wide Data {.build} -->
+
+<!-- - That was a small example, where choosing the right variable improved the fit slightly.  -->
+<!-- - What if we have a *wide* data, large $p$ and small $n$?  -->
+<!-- - How do you select variables for such a problem?  -->
+
+<!-- ## Penalizing Logistic Regression {.smaller} -->
+
+<!-- - Logistic regression model:  -->
+<!-- $$  -->
+<!-- \eta_i = \frac{p_i}{1-p_i} = \alpha + \sum_{j=1}^{p} x_{ij}\beta_j  -->
+<!-- $$ -->
+<!-- - The log-likelihood is  -->
+<!-- $$ -->
+<!-- l(y,\beta) = \sum_{i=1}^{n} y_i \log(p_i) +\sum_{i=1}^{n}(1-y_i)\log(1-p_i) -->
+<!-- $$ -->
+<!-- - We minimize the penalized log-likelihood  -->
+<!-- $$ -->
+<!-- S = -l(y,\beta) + \frac{\lambda}{2}J(\beta) -->
+<!-- $$ -->
+
+<!-- - We can use the same R package 'glmnet'. Change family = "gaussian" to family="binomial".  -->
+
+
+<!-- ## Example from T-cell lymphoma {.build} -->
+
+<!-- ```{r,echo=TRUE, message=FALSE, warning=FALSE} -->
+<!-- ## required for gene expression data classification example -->
+<!-- require(ALL) -->
+<!-- data(ALL) -->
+<!-- dim(ALL) -->
+<!-- ``` -->
+
+<!-- ## Simplifying features  -->
+
+<!-- We are going to use the first three features.  -->
+
+<!-- ```{r, echo=TRUE} -->
+<!-- resp <- gsub("B[0-9]", "B", ALL$BT)  -->
+<!-- ## B-cell tumors of type B, B1,B2, T, T1, T2  -->
+<!-- resp <- factor(gsub("T[0-9]", "T", resp)) -->
+<!-- xmat <- t(exprs(ALL)) -->
+<!-- mydata <- data.frame(y = resp,x1 = xmat[,1],x2=xmat[,2],x3=xmat[,3]) -->
+<!-- head(mydata,n=3) -->
+<!-- ``` -->
+
+<!-- ## Useful tools {.smaller} -->
+
+<!-- ```{r, echo = FALSE, results = "asis"} -->
+<!-- static_help <- function(pkg, topic, out, links = tools::findHTMLlinks()) { -->
+<!--   pkgRdDB = tools:::fetchRdDB(file.path(find.package(pkg), 'help', pkg)) -->
+<!--   force(links) -->
+<!--   tools::Rd2HTML(pkgRdDB[[topic]], out, package = pkg, -->
+<!--                  Links = links, no_links = is.null(links)) -->
+<!-- } -->
+<!-- tmp <- tempfile() -->
+<!-- static_help("base", "grep", tmp) -->
+<!-- out <- readLines(tmp) -->
+<!-- headfoot <- grep("body", out) -->
+<!-- cat(out[(headfoot[1] + 5):(headfoot[2] - 1)], sep = "\n") -->
+<!-- ``` -->
+
+<!-- ##  Tumor data -->
+
+<!-- - We consider the tumor data with $p = 12625$ samples and $n = 128$ individuals. (**Wide Data**) -->
+<!-- - We shall fit a $\ell_1$ penalized logistic regression model.  -->
+<!-- - As we have seen before, this will shrink some of the coefficients to zero.  -->
+<!-- - Use R-package `glmnet` with `family = "binomial".  -->
+
+<!-- ## GLMNET  -->
+
+<!-- ```{r, echo=T, message=FALSE, warning=FALSE} -->
+<!-- library(glmnet);library(lars) -->
+<!-- bcell <- glmnet(x = xmat, y = resp,family = "binomial") # binomial for binary response -->
+<!-- plot(bcell) -->
+<!-- title("Fitted Coefficients",line=2.5) -->
+<!-- ``` -->
+<!-- - We can tell which of the $p = 12625$ features are important and classify $n = 128$ individuals into two groups.  -->
+
+<!-- ## Sensitivity and Specificity -->
+
+<!-- - **Sensitivity** (also called the true positive rate) measures the proportion of actual positives which are correctly identified and is complementary to the false negative rate. -->
+
+<!-- - **Specificity** (also called the true negative rate) measures the proportion of negatives which are correctly identified as such and is complementary to the false positive rate. -->
+
+
+<!-- ## Sensitivity  -->
+
+<!-- ```{r, echo=T} -->
+<!-- pred.class <- predict(bcell,newx=xmat,s=NULL,type="class") -->
+<!-- y.pred <- pred.class[,ncol(pred.class)] -->
+<!-- y.obs <- resp -->
+<!-- xtabs(~ y.obs +y.pred)  -->
+<!-- ``` -->
+<!-- - The classification table shows perfect specificity and sensitivity.  -->
+<!-- - Is this surprising?  -->
+
+
+<!-- ## Heatmap  -->
+
+<!-- ```{r, echo = T} -->
+<!-- heatmap(cor(t(xmat))) -->
+<!-- ``` -->
+
+

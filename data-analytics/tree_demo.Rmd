@@ -1,0 +1,581 @@
+---
+title: "Tree-based methods"
+subtitle: "Data Analytics"
+author: "Jyotishka Datta (<jyotishka@vt.edu>) <br> Department of Statistics, Virginia Tech"
+output: 
+  ioslides_presentation:
+    smaller: yes
+    logo: ../vt.png
+    transition: faster
+fontsize: 11pt
+geometry: margin=1in
+urlcolor: blue
+---
+  
+
+```{r setup, include=FALSE}
+options(width=80)
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F, cache = TRUE)
+knit_hooks$set(no.main = function(before, options, envir) {
+    if (before) par(mar = c(4.1, 4.1, 1.1, 1.1))  # smaller margin on top
+})
+```
+
+## Contents 
+
+<a href="javascript:slidedeck.loadSlide(3)">Decision Trees</a>
+
+<a href="javascript:slidedeck.loadSlide(25)">Compare to logistic</a>
+
+<a href="javascript:slidedeck.loadSlide(31)">Tree-based Regression</a>
+
+<a href="javascript:slidedeck.loadSlide(39)">Bagging and Random Forest</a>
+
+## Tree Based Methods 
+
+We will show how to grow a tree for classification. Regression trees are developed in a very similar way. 
+
+As before, these codes are taken from the Introduction to Statistical Learning book. 
+
+
+## Carseats data
+In these data, Sales is a continuous variable, and so we begin by recoding it as a binary variable.
+
+```{r, echo = T, warning= F, message = F}
+set.seed(2441139)
+library(tree)
+library(ISLR)
+attach(Carseats)
+High=ifelse(Sales<=8,"No","Yes")
+High=as.factor(ifelse(Sales<=8,"No","Yes"))
+```
+
+## Fit a tree 
+
+```{r, echo = T}
+tree.carseats=tree(High~.-Sales,Carseats)
+summary(tree.carseats)
+```
+
+## Interpretaion 
+
+We see that the training error rate is 9%. 
+
+For classification trees, the deviance reported in the output of summary() is given by
+$$
+-2 \sum_{m} \sum_k n_{mk} \log(\hat{p}_{mk})
+$$
+where $n_{mk}$ is the number of observations in the $m$th terminal node that belong to the $k$th class. 
+
+A small deviance indicates a tree that provides a good fit to the (training) data. 
+
+The residual mean deviance reported is simply the deviance divided by $n - |T_0|$, which in this case is 400 - 27 = 373.
+
+## Plotting the tree 
+
+ -  One of the most attractive properties of trees is that they can be
+graphically displayed. 
+ -  We use the `plot()` function to display the tree structure,
+and the `text()` function to display the node labels.
+
+## Plot tree 
+
+```{r, echo = T}
+plot(tree.carseats)
+```
+
+## Plot tree 
+
+```{r, echo = T}
+plot(tree.carseats)
+text(tree.carseats,pretty=0)
+```
+
+## Plot tree {.smaller}
+
+Shelving location is the most important predictor here. 
+
+```{r, echo = T}
+plot(tree.carseats)
+text(tree.carseats,pretty=1, cex = 0.65)
+```
+
+## Tree output 
+
+ -  If we just type the name of the tree object, `R` prints output corresponding to each branch of the tree. 
+ -  `R` displays the split criterion (e.g. `Price<92.5`), the
+number of observations in that branch, the deviance, the overall prediction for the branch (`Yes` or `No`), and the fraction of observations in that branch that take on values of `Yes` and `No`.
+
+## Tree output in R {.smaller}
+
+```{r, echo = T}
+tree.carseats
+```
+
+## Training and Testing 
+
+ - Need test error for proper evaluation. 
+ - Split the observations into a training set and a test set, *build the tree using the training set*, and evaluate its performance on the test data. 
+ - The `predict()` function can be used for this purpose. 
+ - In the case of a classification tree, the argument `type="class"` instructs `R` to return the actual class prediction.
+
+## Test error 
+
+```{r, echo = T}
+set.seed(2)
+train=sample(1:nrow(Carseats), 200)
+Carseats.test=Carseats[-train,]
+High.test=High[-train]
+tree.carseats=tree(High~.-Sales,Carseats,subset=train)
+tree.pred=predict(tree.carseats,Carseats.test,type="class")
+table(tree.pred,High.test)
+```
+
+This approach leads to correct predictions for `r (86+57)/200` cases. 
+
+## Pruning 
+
+ -  What you just saw was the full tree. 
+ -  Next, we consider whether pruning the tree might lead to improved
+results. 
+ - The function `cv.tree()` performs cross-validation in order to
+determine the optimal level of tree complexity; **cost complexity pruning** is used in order to select a sequence of trees for consideration. 
+
+
+## Recap (Classification Losses) {.smaller}
+
+1.  The 0-1 loss or misclassification error rate: 
+$$
+\sum_{m = 1}^{|T|} \sum_{x_i \in R_m} 1(y_i \neq y_{R_m})
+$$
+
+2.  Cross-entropy (measures the 'purity' of a leaf)
+
+$$
+- \sum_{m = 1}^{|T|} q_m \sum_{k=1}^{K} \hat{p}_{mk} \log(\hat{p}_{mk})
+$$
+
+where $\hat{p}_{mk}$ is the proportion of class $k$ within $R_m$, and $q_m$ is
+the proportion of samples in $R_m$.
+
+-  Use cross-entropy for growing the tree, while using the misclassification rate when pruning the tree.
+
+
+
+## Pruning (continued) 
+
+ -  We use the argument `FUN=prune.misclass` in order to indicate that we want the *classification error rate* to guide the cross-validation and pruning process, rather than the default for the `cv.tree()` function, which is deviance.
+
+- The `cv.tree()` function reports 
+1.  the number of terminal nodes of each tree considered (size),
+2.  the corresponding error rate, and 
+3.  the value of the cost-complexity parameter used (`k` corresponds to our $\alpha$)
+
+
+## Cost-complexity pruning 
+
+-  Cost-complexity pruning is similar to regularization idea. You put a penalty for the size of the tree - larger trees are penalized more. 
+
+$$
+\text{minimize}
+\sum_{m = 1}^{|T|} \sum_{x_i \in R_m} 1(y_i \neq y_{R_m}) + \alpha |T|
+$$
+
+-  Just like regularized methods, $\alpha$ is a tuning parameter - we can choose a suitable value by cross-validation. 
+
+
+## Using `cv.tree()` {.smaller}
+
+
+```{r, echo = T}
+set.seed(3)
+cv.carseats=cv.tree(tree.carseats,FUN=prune.misclass)
+names(cv.carseats)
+cv.carseats
+```
+ 
+
+## Output explanation 
+
+ -  Note that, despite the name, `dev` corresponds to the cross-validation error rate in this instance. 
+ -  The tree with 9 terminal nodes results in the lowest
+cross-validation error rate, with 50 cross-validation errors.
+
+## Plotting CV errors 
+
+```{r, echo = T}
+par(mfrow=c(1,2))
+plot(cv.carseats$size,cv.carseats$dev,type="b")
+plot(cv.carseats$k,cv.carseats$dev,type="b")
+```
+
+
+## Prune the tree {.smaller}
+
+We now apply the `prune.misclass()` function in order to prune the tree to obtain the nine-node tree.
+
+```{r, echo = T}
+prune.carseats=prune.misclass(tree.carseats,best=9)
+plot(prune.carseats)
+text(prune.carseats,pretty=0, cex = 0.7)
+```
+
+## Pruned tree 
+
+ - How does the pruned tree do in terms of prediction? 
+
+```{r}
+tree.pred=predict(prune.carseats,Carseats.test,type="class")
+table(tree.pred,High.test)
+```
+
+Now precentage of correct prediction is `r (94+60)/200`. 
+
+## Different k
+
+-  You can choose a different `k`, e.g. $k = 15$. 
+
+```{r}
+prune.carseats=prune.misclass(tree.carseats,best=15)
+tree.pred=predict(prune.carseats,Carseats.test,type="class")
+table(tree.pred,High.test)
+```
+
+-  Percentage of correct predictions will be lower: `r (86+62)/200` 
+
+-   Compare to the best model by CV:  `r (94+60)/200` 
+
+
+## How does this compare to Logistic? {.smaller}
+
+
+```{r}
+glm.fits=glm(High~.-Sales,Carseats,family=binomial,subset=train)
+summary(glm.fits)
+```
+
+## Prediction {.smaller}
+
+```{r}
+glm.probs=predict(glm.fits,Carseats.test,type="response")
+contrasts(as.factor(High))
+glm.pred=rep("No",200)
+glm.pred[glm.probs>.5]="Yes"
+table(glm.pred,High.test)
+mean(glm.pred==High.test)
+```
+
+
+## Significant predictors drive the prediction. 
+
+```{r, fig.height=3}
+par(mfrow=c(1,2))
+plot(Carseats.test$ShelveLoc,glm.probs); abline(h=0.5)
+plot(Carseats.test$Price,glm.probs);abline(h=0.5)
+```
+
+
+## Exercise (not HW)
+
+1.  Plot the ROC curve for both logistic and decision tree (with pruning). 
+2.  Also apply k-NN with CV and LDA on the same data-set and compare accuracies. 
+3.  Can you create an artificial data-set where decision tree will do better than logistic or LDA? 
+
+
+## Linear Regression vs. Tree 
+
+  - Linear Regression: 
+$$
+f(X) = \beta_0 + \sum_{j=1}^{p}X_j \beta_j
+$$
+
+ -  Regression Tree Method:
+$$
+f(X) = \sum_{m=1}^{M} c_m 1_{(X \in R_m)}
+$$
+where $R_1, \ldots, R_m$ is a partition of the $X$-space. 
+
+ -  Which model is better? It depends on the problem at hand.
+
+
+## Which model is better?
+
+```{r, echo = F, out.height = "400px", out.width = "600px"}
+knitr::include_graphics("8_7.jpg")
+```
+
+If true decision boundary is linear, classical methods work well, if it's non-linear tree-based methods might work better. 
+
+## Regression 
+
+```{r}
+tree.car=tree(Sales~.,Carseats,subset=train)
+summary(tree.car)
+```
+
+## Plot Regression Tree
+
+```{r}
+plot(tree.car, type = "unif")
+text(tree.car,pretty=0,cex=0.7)
+```
+
+## CV for Regression Tree {.smaller}
+
+```{r, fig.height = 3}
+cv.car=cv.tree(tree.car)
+cv.car
+```
+
+## Plot the CV error 
+
+```{r}
+plot(cv.car)
+```
+
+## Manually plot the deviance 
+
+```{r}
+plot(cv.car$size,cv.car$dev,type='b')
+```
+
+## Prune the Regression Tree
+
+```{r}
+prune.car=prune.tree(tree.car,best=9)
+plot(prune.car,type = "unif")
+text(prune.car,pretty=0,cex=0.7)
+```
+
+## MSE with full tree {.smaller}
+
+```{r, fig.height = 3}
+yhat=predict(tree.car,newdata=Carseats[-train,])
+car.test=Carseats[-train,"Sales"]
+mean((yhat-car.test)^2)
+plot(yhat,car.test); abline(0,1)
+```
+
+## MSE with Pruned Tree {.smaller}
+
+```{r, fig.height = 3}
+yhat=predict(prune.car,newdata=Carseats[-train,])
+car.test=Carseats[-train,"Sales"]
+mean((yhat-car.test)^2)
+plot(yhat,car.test); abline(0,1)
+```
+
+
+# Next: Bagging 
+
+## Bagging and Random Forest 
+
+Here we apply bagging and random forests to the `Boston` data, using the `randomForest` package in R.
+
+
+## Random Forest 
+
+ - Ensemble Learning: Generae many predictors and aggregate their results. 
+ - Two well-known methods: Boosting (Shapire et al., 1998) and Bagging (Breiman, 1996).
+ - In boosting, successive trees give extra weight to points incorrectly predicted by earlier predictors. In the end, a weighted vote is taken for prediction. 
+  - In bagging, successive trees do not depend on earlier trees - each is independently constructed using a bootstrap sample of the data set.
+
+
+## We use the Boston housing data 
+
+```{r}
+str(Boston)
+```
+
+## Bagging 
+
+ - Bagging is a special case of a random forest with $m = p$. 
+ - `randomForest()` can perform both random forests and bagging.
+```{r, warning = F, message = F}
+library(randomForest)
+train = sample(1:nrow(Boston), nrow(Boston)/2)
+boston.test=Boston[-train,"medv"]
+bag.boston=randomForest(medv~.,data=Boston,subset=train,mtry=13,
+                        importance=TRUE)
+```
+
+ -  The argument `mtry=13` indicates that all 13 predictors should be considered for each split of the tree. 
+ -  In other words, bagging should be done.
+ - `importance=TRUE`: should importance of the predictors be assessed? 
+
+## Bagging output 
+
+```{r}
+bag.boston
+```
+
+
+## Test error 
+
+```{r, fig.height = 3}
+yhat.bag = predict(bag.boston,newdata=Boston[-train,])
+mean((yhat.bag-boston.test)^2)
+plot(yhat.bag, boston.test); abline(0,1)
+```
+
+## Bagging is much better than using a single Tree 
+
+```{r, fig.height = 3, fig.width = 3}
+tree.boston=tree(medv~.,Boston,subset=train)
+yhat=predict(tree.boston,newdata=Boston[-train,])
+boston.test=Boston[-train,"medv"]
+mean((yhat-boston.test)^2)
+plot(yhat,boston.test);abline(0,1)
+```
+
+## Number of Trees 
+
+ -  By default `ntree = 500`. 
+ -  We could change the number of trees grown by `randomForest()` using the `ntree` argument:
+
+```{r}
+bag.boston=randomForest(medv~.,data=Boston,subset=train,mtry=13,
+                        ntree=25)
+yhat.bag = predict(bag.boston,newdata=Boston[-train,])
+mean((yhat.bag-boston.test)^2)
+```
+
+ -  This is still bagging as `mtry = 13`, but the test error has decreased. 
+ 
+ 
+## Random Forest 
+
+-  Random forest improves over bagging by a small tweak that decorrelates the trees. 
+
+-  Just like bagging, we build many decision trees on bootstrapped samples ... but when building a tree, **each time a split is considered in the tree**, a random sample of $m$ predictors is chosen from the full set of $p$ predictors. 
+
+-  A fresh sample of $m$ predictors are chosen for each split and typically $m = \sqrt{p}$ for classification and $p/3$ for regression.
+
+## Random Forest 
+
+  -  Growing a random forest proceeds in exactly the same way, except that we use a smaller value of the `mtry` argument.
+  
+  -  By default, `randomForest()` uses $p/3$ variables when building a random forest of regression trees, and $\sqrt{p}$ variables when building a random forest of classification trees. 
+  
+  -  Here we use `mtry = 6`.
+  
+## Random Forest 
+
+
+```{r}
+set.seed(1)
+rf.boston=randomForest(medv~.,data=Boston,subset=train,mtry=6,importance=TRUE)
+yhat.rf = predict(rf.boston,newdata=Boston[-train,])
+mean((yhat.rf-boston.test)^2)
+```
+
+The test set MSE is 11.88: this indicates that random forests yielded a little
+improvement over bagging in this case.
+
+
+## Importance {.smaller}
+
+ -  Using the `importance()` function, we can view the importance of each
+variable.
+
+```{r}
+importance(rf.boston)
+```
+ 1.  Mean decrease of accuracy in predictions on the out of bag samples when a given variable is excluded from the model 
+ 2.  Measure of the total decrease in node impurity that results from splits over that variable, averaged over all trees.
+
+
+## Importance Plot
+
+```{r}
+varImpPlot(rf.boston)
+```
+
+## Compare Bagging and RF
+
+```{r}
+ntreeset = seq(10,300,by = 10)
+mse.bag = rep(0,length(ntreeset));mse.rf = rep(0,length(ntreeset))
+
+for(i in 1:length(ntreeset)){
+  nt = ntreeset[i]
+  bag.boston=randomForest(medv~.,data=Boston,subset=train,mtry=13,ntree=nt)
+  yhat.bag = predict(bag.boston,newdata=Boston[-train,])
+  mse.bag[i] = mean((yhat.bag-boston.test)^2)
+  
+  rf.boston=randomForest(medv~.,data=Boston,subset=train,ntree=nt)
+  yhat.bag = predict(rf.boston,newdata=Boston[-train,])
+  mse.rf[i] = mean((yhat.bag-boston.test)^2)
+}
+```
+
+## Plot the test error 
+
+```{r}
+plot(ntreeset,mse.bag,type="l",col=2,ylim=c(5,20))
+lines(ntreeset,mse.rf,col=3)
+legend("bottomright",c("Bagging","Random Forest"),col=c(2,3),lty=c(1,1))
+```
+
+## Try 3 different sizes (m = 13, 6 and 4)
+
+```{r}
+ntreeset = seq(10,300,by = 10)
+mse.bag = rep(0,length(ntreeset));mse.rf1 = rep(0,length(ntreeset));
+mse.rf2 = rep(0,length(ntreeset));
+
+for(i in 1:length(ntreeset)){
+  nt = ntreeset[i]
+  bag.boston=randomForest(medv~.,data=Boston,subset=train,mtry=13,ntree=nt)
+  yhat.bag = predict(bag.boston,newdata=Boston[-train,])
+  mse.bag[i] = mean((yhat.bag-boston.test)^2)
+  
+  rf.boston=randomForest(medv~.,data=Boston,mtry = 6, subset=train,ntree=nt)
+  yhat.bag = predict(rf.boston,newdata=Boston[-train,])
+  mse.rf1[i] = mean((yhat.bag-boston.test)^2)
+  
+  rf.boston=randomForest(medv~.,data=Boston,mtry = 4, subset=train,ntree=nt)
+  yhat.bag = predict(rf.boston,newdata=Boston[-train,])
+  mse.rf2[i] = mean((yhat.bag-boston.test)^2)
+}
+```
+
+## Plot the test error curve
+
+```{r}
+plot(ntreeset,mse.bag,type="l",col=2,ylim=c(5,20))
+lines(ntreeset,mse.rf1,col=3); lines(ntreeset,mse.rf2,col=4)
+legend("bottomright",c("Bagging","Random Forest (m = 6)",
+                       "Random Forest (m = 4)"),col=c(2,3,4), lty=c(1,1,1))
+```
+
+
+## Exercise (at home)
+
+
+-   Using a small value of $m$ in building a random forest will typically be helpful when we have a large number of correlated predictors.
+
+-  Apply bagging and random forests to a data set of your choice. Be sure to fit the models on a training set and to evaluate their performance on a test set. 
+
+-  How accurate are the results compared to simple methods like linear or logistic regression? If it;s a wide data, how does it compare to Lasso or Bayesian methods?
+
+-  Which of these approaches yields the best performance?
+
+
+## Try at home 
+
+-  We'll construct a highly non-linear model. 
+
+-  Sample $p$ predictors $X_1, X_2, \ldots, X_p$ from a known distribution (normal or uniform), consider 
+$$
+Y_i = f(\prod_{j=1}^{p} X_{i,j}) + \epsilon_i, \; i = 1, \ldots, n.
+$$
+
+-   Non-linear model : All $X_i$'s are important here ! 
+
+-  (but you don't know that, you just have $y$ vector and the $n \times p$ matrix $X$.)
+
+-   How does Lasso compare to random forest? 
+
+

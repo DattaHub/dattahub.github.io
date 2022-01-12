@@ -1,0 +1,221 @@
+---
+title: "PLS Demo"
+subtitle: "Data Analytics: Stat 5525"
+author: "Jyotishka Datta (<jyotishka@vt.edu>) <br> Department of Statistics, Virginia Tech"
+output: 
+  ioslides_presentation:
+  smaller: yes
+logo: ../vt.png
+transition: faster
+---
+  
+```{r setup, include=FALSE}
+options(width=80)
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F)
+knit_hooks$set(no.main = function(before, options, envir) {
+  if (before) par(mar = c(4.1, 4.1, 1.1, 1.1))  # smaller margin on top
+})
+```
+
+## Load libraries 
+
+```{r}
+# First, load in the necessary libraries
+library(ISLR)
+#library(leaps)
+library(pls) # for PCR and PLS
+
+# remove any row with a NA value in it.
+Hitters <- na.omit(Hitters)
+```
+
+
+<!-- ## Take a smaller data frame  -->
+
+<!-- ```{r} -->
+<!-- # take a smaller piece of this dataframe for now. -->
+<!-- smallData=FALSE -->
+<!-- if(smallData) Hitters <- Hitters[,c(1:10,19)] -->
+<!-- Pvar = ncol(Hitters) -->
+<!-- ``` -->
+
+<!-- You can turn `smallData = FALSE` to turn this off.  -->
+
+
+## PLS regression
+
+- follow the example in the book
+- set the random number seed so that the randomly chosen folds in the cross validation can be repeated (good for debugging)
+
+```{r}
+set.seed(2)
+plsr.fit=plsr(Salary ~ ., data=Hitters ,scale=TRUE,validation ="CV")
+```
+
+
+## What does this produce?
+
+```{R}
+summary(plsr.fit)
+```
+
+## What does this produce?
+
+```{R}
+names(plsr.fit)
+```
+
+## a summary plot
+
+```{R}
+validationplot(plsr.fit,val.type="RMSEP")
+```
+
+## Alternative evaluation
+
+This previous approach used 10-fold cv.  An alternative is to use training and test sets.
+
+```{R}
+set.seed(1)
+itrain = sample(1:nrow(Hitters),size=nrow(Hitters)/2,replace=F)
+plsr.fit=plsr(Salary ~ ., data=Hitters,subset=itrain,scale=TRUE,
+            validation ="CV")
+```
+
+## What does this produce?
+
+```{R}
+summary(plsr.fit)
+```
+
+## a summary plot
+
+```{R}
+validationplot(plsr.fit,val.type="RMSEP")
+```
+
+## Errors
+
+Here, 2 basis functions gives the smallest RMSE on the prediction set.
+
+the predict function needs the actual x matrix
+
+```{R}
+y <- Hitters$Salary
+plsr.pred=predict(plsr.fit,Hitters[-itrain,],ncomp=2) 
+ # note, the rmse for the test dataset is not as good.
+sqrt(mean((plsr.pred-y[-itrain])^2))
+```
+
+- Note the `sqrt` : MSE vs. RMSE.
+
+## Errors
+
+again, we can show predicted vs actual for itrain and -itrain
+
+```{R}
+plsr.pred.train=predict(plsr.fit,Hitters[itrain,],ncomp=2) 
+ # the rmse
+sqrt(mean((plsr.pred.train-y[itrain])^2))
+```
+
+## Visual {.smaller}
+
+```{r,dev.args=list(bg='transparent'), fig.width=5, fig.height=3.75, fig.align="center", no.main=TRUE}
+par(pty='s',mar=c(4,4,1,1))  # a square plot
+plot(plsr.pred.train,y[itrain],
+     xlab='fitted',ylab='observed',xlim=range(Hitters$Salary), ylim=range(Hitters$Salary),col='blue')
+points(plsr.pred,y[-itrain],col='red')
+abline(c(0,1),lty=2) # diagonal line intercept=0, slope=1
+```
+
+## A simpler example 
+
+```{r,dev.args=list(bg='transparent'), fig.width=5, fig.height=3.75, fig.align="center", no.main=TRUE}
+# a simpler example:
+Hitters2 <- Hitters[,c("Salary","CRBI","CHits")]
+plot(Hitters2)
+```
+
+## Fit PLS {.smaller}
+
+```{r}
+plsr2.fit <- plsr(Salary ~ ., data=Hitters2,scale=TRUE, validation ="CV")
+summary(plsr2.fit)
+```
+
+## X matrix 
+
+```{R,dev.args=list(bg='transparent'), fig.width=5, fig.height=3.75, fig.align="center", no.main=TRUE}
+ # look at the X matrix; these are almost the same variable
+X <- Hitters2[,2:3]
+X <- apply(X,2,function(x) (x-mean(x))/sqrt(var(x)))  # standardize the columns of X
+plot(X)
+```
+
+## partial least-squares directions {.smaller}
+
+```{r, dev.args=list(bg='transparent'), fig.width=5, fig.height=3.5, fig.align="center", no.main=TRUE}
+vpls = plsr2.fit$projection
+par(pty='s',mar=c(4,4,1,1),oma=c(0,0,0,0))
+plot(X,xlim=range(X),ylim=range(X))
+abline(c(0,vpls[2,1]/vpls[1,1]),lty=2)
+abline(c(0,vpls[2,2]/vpls[1,2]),lty=2)
+points(0,0,pch=16,col='yellow')
+```
+
+
+## PCR {.smaller}
+compare to the PC projection: similar, but not exactly the same
+
+```{r, dev.args=list(bg='transparent'), fig.width=5, fig.height=3.5, fig.align="center", no.main=TRUE}
+pcr2.fit <- pcr(Salary ~ ., data=Hitters2,scale=TRUE, validation ="CV")
+vpc = pcr2.fit$projection
+plot(X,xlim=range(X),ylim=range(X))
+abline(c(0,vpc[2,1]/vpc[1,1]),lty=2,col='red')
+abline(c(0,vpc[2,2]/vpc[1,2]),lty=2,col='red')
+points(0,0,pch=16,col='yellow')
+```
+
+## Compare {.smaller}
+
+```{r, dev.args=list(bg='transparent'), fig.width=5, fig.height=3.5, fig.align="center", no.main=TRUE}
+plot(X,xlim=range(X),ylim=range(X))
+abline(c(0,vpls[2,1]/vpls[1,1]),lty=2)
+abline(c(0,vpls[2,2]/vpls[1,2]),lty=2)
+abline(c(0,vpc[2,1]/vpc[1,1]),lty=2,col='red')
+abline(c(0,vpc[2,2]/vpc[1,2]),lty=2,col='red')
+points(0,0,pch=16,col='yellow')
+```
+
+## PLSR {.smaller}
+
+`plsr` perturbs y so that it is more correlated with each component.
+
+```{R,echo = F, dev.args=list(bg='transparent'), fig.width=5, fig.height= 4, fig.align="center", no.main=TRUE}
+pcr2.fit <- pcr(Salary ~ ., data=Hitters2,scale=TRUE, validation ="CV")
+par(mfrow=c(2,2),oma=c(0,2,0,0),mar=c(4,4,1,1),pty='m')
+plot(plsr2.fit$scores[,1],plsr2.fit$Yscores[,1])
+plot(plsr2.fit$scores[,2],plsr2.fit$Yscores[,2])
+mtext('partial least squares',side=2,line=.5,outer=T,at=.75)
+plot(pcr2.fit$scores[,1],Hitters2$Salary)
+plot(pcr2.fit$scores[,2],Hitters2$Salary)
+mtext('principal components reg',side=2,line=.5,outer=T,at=.25)
+```
+
+
+## Correlations {.smaller}
+
+note that the first pls projection is based on the correlation between y=Salary and x[,1]=CRBI and x[,2]=CHits
+
+```{r}
+ryx = c(cor(Hitters2$Salary,Hitters2$CRBI),
+        cor(Hitters2$Salary,Hitters2$CHits))
+ # normalize ryx
+ryx/(sqrt(sum(ryx^2)))
+ # compare to the 1st column of plsr2.fit$projection
+plsr2.fit$projection
+```
+
+
