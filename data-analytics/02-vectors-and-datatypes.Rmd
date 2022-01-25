@@ -1,5 +1,5 @@
 ---
-title: Introduction to R
+title: Vectors and data types
 author: "Jyotishka Datta"
 date: "`r Sys.Date()`"
 output: 
