@@ -6,10 +6,10 @@
 **Semester/term**: Spring 2022 <br>
 **Meeting time**: : T/R: 3:30PM 4:45PM (Location: SAUND 409) <br>
 **Canvas web-site**: [Canvas](https://canvas.vt.edu/courses/144945) <br>
-**Office hours**: Tuesdays 9-10 am or by appointment (either in-person or online).  <br>
+**Office hours**: Tuesdays 9-10 am or by appointment (online: zoom link on canvas).  <br>
 **Instructor**: Dr. Jyotishka Datta (Email: jyotishka@vt.edu, Office: Hutcheson 409C <br>
 **GTA**: Samuel Soon (samksoon2@vt.edu) <br>
-**GTA office hours**: TBA (Location/link: See canvas) <br>
+**GTA office hours**: (Location/link: See canvas) <br>
 
 Git repo for this course: https://github.com/DattaHub/DattaHub.github.io/tree/master/data-analytics
 
@@ -18,10 +18,13 @@ Git repo for this course: https://github.com/DattaHub/DattaHub.github.io/tree/ma
 (**You'll find below links to some R tutorials for this course, but these will be updated during the course, adjusting to the needs and interest of the current cohort. These are generated using R-markdown and you can find the source files by going to the github repository. In addition, I will post base R codes for different topics covered.**)
 
 #### Introduction to R 
-1. Logic in R and functions: https://dattahub.github.io/data-analytics/logic_in_R_1.html#1
-2. Efficiency considerations: https://dattahub.github.io/data-analytics/01-what-is-R.html 
-3. Vectors and data types: https://dattahub.github.io/data-analytics/02-vectors-and-datatypes.html
-4. Data frames: https://dattahub.github.io/data-analytics/03-data-frames.html
+
+(*You can skip to 4 directly if you know about vectors and data-frames.*)
+
+1. What is R: https://dattahub.github.io/data-analytics/000_why_R.html 
+2. Vectors and data types: https://dattahub.github.io/data-analytics/02-vectors-and-datatypes.html
+3. Data frames: https://dattahub.github.io/data-analytics/03-data-frames.html
+4. Logic in R and functions: https://dattahub.github.io/data-analytics/00_logic_in_R.html#1 
 
 #### R-tools for data wrangling and visulization 
 
