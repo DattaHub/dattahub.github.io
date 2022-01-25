@@ -42,10 +42,14 @@ getwd()
 
 To set you working directory, use the `setwd()` command. We want to set the working directory to the location of our project. For example: 
 ```{r, eval=FALSE}
-setwd("~/Workshops/UA-R-Users-Group")
+setwd("~/GitHub/BeginneR/R codes")
+
+## note that your folder path would be different.
 ```
 
+If your "/data" subfolder is in the same folder as your R codes, then you might try the following:
 
+Open the R code in RStudio and then click on "Session -> Set Working Directory -> To Source File Location" to set the path to the same folder location as your R codes. 
 
 # Looking at data
 
