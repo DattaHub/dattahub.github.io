@@ -15,8 +15,9 @@
 class: center, middle, inverse, title-slide
 
 # Efficiency tricks in R
+## CMDA 4654: Week 2
 ### Jyotishka Datta
-### 2020/01/24 (updated: 2021-09-02)
+### 2020/01/24 (updated: 2022-01-27)
 
 ---
 
@@ -30,6 +31,10 @@ count: false
 # (Apply) vs. (Loop)
 
 ---
+
+## Loops
+
+- We have seen 'loop's last time: for, while and repeat. Let's quickly recall their syntax. 
 
 ## for loop
 
@@ -100,7 +105,7 @@ apply(m, 2, mean)
 ```
 
 ```
-## [1] -0.01990789  2.34830635  5.15712478
+## [1] 0.1637286 2.0291401 5.1830205
 ```
 
 ---
@@ -115,11 +120,10 @@ apply(m, 1, mean)
 ```
 
 ```
-##  [1] 2.6846340 1.9193751 3.4880053 3.7335246 3.4022720 1.4286542 2.4512457
-##  [8] 2.2720896 2.3145384 2.3608971 3.4080475 2.1014846 1.8813603 2.1330656
-## [15] 2.4892264 2.6162437 2.9319260 2.6276414 2.8568572 3.2673956 2.6096566
-## [22] 3.5458584 2.1471004 2.1657184 2.1407431 2.0308182 2.9859882 2.0540479
-## [29] 1.9129876 0.8938293
+##  [1] 2.154553 2.618439 1.922040 2.381263 2.071664 2.569030 2.128490 1.596888
+##  [9] 2.495452 3.870885 2.085134 3.366564 2.468015 2.257123 2.805229 2.802027
+## [17] 2.726620 2.196979 2.370899 1.800343 2.625799 3.089095 1.881737 3.091508
+## [25] 2.254283 2.723137 1.878764 2.131349 2.742659 2.652925
 ```
 - Or, our own function: (how many negative numbers in each column?)
 
@@ -128,7 +132,7 @@ apply(m, 2, function(x) length(x[x&lt;0]))
 ```
 
 ```
-## [1] 18  0  0
+## [1] 15  0  0
 ```
 
 ---
@@ -203,7 +207,7 @@ system.time(Sys.sleep(2))
 
 ```
 ##    user  system elapsed 
-##    0.00    0.00    2.03
+##    0.00    0.00    2.01
 ```
 
 
@@ -218,7 +222,7 @@ proc.time()-now
 
 ```
 ##    user  system elapsed 
-##    0.00    0.00    2.05
+##    0.00    0.00    2.03
 ```
 
 ---
@@ -241,7 +245,7 @@ proc.time()-now
 
 ```
 ##    user  system elapsed 
-##    0.41    0.00    0.40
+##    0.51    0.00    0.51
 ```
 
 
@@ -280,9 +284,9 @@ microbenchmark(sqrt(x),x^(0.5))
 
 ```
 ## Unit: microseconds
-##     expr   min    lq    mean median     uq    max neval cld
-##  sqrt(x)  93.5  99.9 112.863  108.7 116.55  162.7   100  a 
-##  x^(0.5) 682.2 713.0 775.553  780.7 797.75 1050.5   100   b
+##     expr   min     lq     mean median      uq    max neval cld
+##  sqrt(x) 129.8  135.6  148.223  140.1  150.45  228.2   100  a 
+##  x^(0.5) 993.2 1021.7 1064.155 1046.2 1071.10 1357.5   100   b
 ```
 
 
@@ -453,7 +457,7 @@ proc.time()-ptm
 
 ```
 ##    user  system elapsed 
-##    0.02    0.00    1.13
+##    0.00    0.01    1.12
 ```
 
 - The `NULL` values are there because we are not returning anything to the list. 
@@ -469,12 +473,18 @@ can be greater than the time to execute the task itself, resulting in poor perfo
 
 
 ---
-## We will see a non-trivial example 
+## We will see a non-trivial example
 
-- Non-trivial examples need sophisticated Statistical methods, and I haven't covered these yet. 
-- So don't worry at all if you don't understand why we are using this example of a method. I just want to show you an example of the advantage of using parallel processing. 
+- **Non-trivial examples need sophisticated Statistical methods**, and I haven't covered these yet. So don't worry at all if you don't understand any of it. I just want to show you an example of the advantage of using parallel processing.
+
+- The method here is 'Bootstrap': a resampling strategy for estimating sampling distribution of various statistics. 
+
+- The idea is that you repeatedly *sample with replacement* from the given sample to get an idea about the underlying population distribution, which is an unknown quantity! 
+
+- We will cover 'Bootstrap' in this class, later. 
 
 - How long does it take to do 10,000 Bootstrap iterations using 2 cores?
+
 
 ---
 ## Bootstrapping GLM 

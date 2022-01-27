@@ -20,7 +20,7 @@
       // Slide settings
       settings: {
                 title: 'Matrix in R',
-                        subtitle: 'Data Analytics: Week 2',
+                        subtitle: 'CMDA 4654: Week 2',
                 useBuilds: true,
         usePrettify: true,
         enableSlideAreas: true,
@@ -191,7 +191,7 @@ slide:not(.current) .plotly.html-widget{
           </hgroup>
   </slide>
 
-<slide class=""><hgroup><h2>Sources</h2></hgroup><article  class="smaller " id="sources">
+<slide class=""><hgroup><h2>Sources</h2></hgroup><article  id="sources" class="smaller ">
 
 <ul>
 <li>Matrix in R tutorial by Prof. Giovanni Petris.</li>
@@ -201,7 +201,7 @@ slide:not(.current) .plotly.html-widget{
 <li>We need the R package &lsquo;Matrix&rsquo; and &lsquo;doParallel&rsquo;.</li>
 </ul>
 
-</article></slide><slide class=""><hgroup><h2>Matrices</h2></hgroup><article  class="smaller smaller" id="matrices">
+</article></slide><slide class=""><hgroup><h2>Matrices</h2></hgroup><article  id="matrices" class="smaller smaller">
 
 <ul>
 <li>To arrange values into a matrix, we use the <code>matrix()</code> function:</li>
@@ -222,7 +222,7 @@ a</pre>
 
 <pre >## [1] 6</pre>
 
-</article></slide><slide class=""><hgroup><h2>Rows, Columns</h2></hgroup><article  class="smaller " id="rows-columns">
+</article></slide><slide class=""><hgroup><h2>Rows, Columns</h2></hgroup><article  id="rows-columns" class="smaller ">
 
 <ul>
 <li>An entire row or column can be retrieved by specifying its index and leaving the other index empty:</li>
@@ -240,7 +240,7 @@ a</pre>
 
 <pre >## [1] 1 3 5</pre>
 
-</article></slide><slide class=""><hgroup><h2>Matrix indices</h2></hgroup><article  class="smaller " id="matrix-indices">
+</article></slide><slide class=""><hgroup><h2>Matrix indices</h2></hgroup><article  id="matrix-indices" class="smaller ">
 
 <ul>
 <li><p>Note how the values 1,2,3,4,5,6 are used to create the matrix: the first two are used to fill the first column, then the next two to fill the second column, and so on.</p></li>
@@ -255,7 +255,7 @@ a</pre>
 <li>The fifth element of a is the fifth element of the vector obtained by &ldquo;unrolling&rdquo; the matrix, column by column.</li>
 </ul>
 
-</article></slide><slide class=""><hgroup><h2>Fill by row</h2></hgroup><article  class="smaller " id="fill-by-row">
+</article></slide><slide class=""><hgroup><h2>Fill by row</h2></hgroup><article  id="fill-by-row" class="smaller ">
 
 <ul>
 <li>Sometimes you need to fill a matrix row by row, instead than column by column.</li>
@@ -269,7 +269,7 @@ a</pre>
 ## [1,]    1    2    3
 ## [2,]    4    5    6</pre>
 
-</article></slide><slide class=""><hgroup><h2>Diagonals</h2></hgroup><article  class="smaller " id="diagonals">
+</article></slide><slide class=""><hgroup><h2>Diagonals</h2></hgroup><article  id="diagonals" class="smaller ">
 
 <ul>
 <li>We have seen rbind() and cbind() before.</li>
@@ -284,7 +284,7 @@ H3</pre>
 ## [2,] 0.5000000 0.3333333 0.2500000
 ## [3,] 0.3333333 0.2500000 0.2000000</pre>
 
-</article></slide><slide class=""><hgroup><h2>Diagonals and Determinants</h2></hgroup><article  class="smaller " id="diagonals-and-determinants">
+</article></slide><slide class=""><hgroup><h2>Diagonals and Determinants</h2></hgroup><article  id="diagonals-and-determinants" class="smaller ">
 
 <ul>
 <li>The diagonal of a matrix can be extracted using <code>diag()</code>.</li>
@@ -302,7 +302,7 @@ H3</pre>
 
 <pre >## [1] 0.000462963</pre>
 
-</article></slide><slide class=""><hgroup><h2>Triangular</h2></hgroup><article  class="smaller " id="triangular">
+</article></slide><slide class=""><hgroup><h2>Triangular</h2></hgroup><article  id="triangular" class="smaller ">
 
 <ul>
 <li>The functions <code>lower.tri()</code> and <code>upper.tri()</code> can be used to obtain the lower and upper triangular parts of matrices. The output of the functions is a matrix of logical elements, with TRUE representing the relevant triangular elements. For example,</li>
@@ -315,7 +315,7 @@ H3</pre>
 ## [2,]  TRUE FALSE FALSE
 ## [3,]  TRUE  TRUE FALSE</pre>
 
-</article></slide><slide class=""><hgroup><h2>Triangular</h2></hgroup><article  class="smaller " id="triangular-1">
+</article></slide><slide class=""><hgroup><h2>Triangular</h2></hgroup><article  id="triangular-1" class="smaller ">
 
 <ul>
 <li>A typical use of these functions is to set the upper or lower triangular part of a matrix to zero, thus constructing a triangular matrix.</li>
@@ -330,7 +330,7 @@ Htri</pre>
 ## [2,]    0 0.3333333 0.2500000
 ## [3,]    0 0.0000000 0.2000000</pre>
 
-</article></slide><slide class=""><hgroup><h2>Multiplication</h2></hgroup><article  class="smaller smaller" id="multiplication">
+</article></slide><slide class=""><hgroup><h2>Multiplication</h2></hgroup><article  id="multiplication" class="smaller smaller">
 
 <ul>
 <li>Matrix multiplication in R is performed by the operator %*%. For example,</li>
@@ -354,7 +354,7 @@ A</pre>
 <li>Matrices must conform, i.e. multiplication must make sense !</li>
 </ul>
 
-</article></slide><slide class=""><hgroup><h2>Multiplication</h2></hgroup><article  class="smaller smaller" id="multiplication-1">
+</article></slide><slide class=""><hgroup><h2>Multiplication</h2></hgroup><article  id="multiplication-1" class="smaller smaller">
 
 <pre class = 'prettyprint lang-r'>A %*% B</pre>
 
@@ -374,7 +374,7 @@ A</pre>
 
 <pre >## [1] 2</pre>
 
-</article></slide><slide class=""><hgroup><h2>Multiplication</h2></hgroup><article  class="smaller " id="multiplication-2">
+</article></slide><slide class=""><hgroup><h2>Multiplication</h2></hgroup><article  id="multiplication-2" class="smaller ">
 
 <p>With \(A\) and \(B\) defined as above the matrix product \(BA\) in not defined, but the product \(B^T A\) is (\(B^T\) denotes the transpose of \(B\)). - The transpose of a matrix can be obtained with the function <code>t()</code>.</p>
 
@@ -385,7 +385,7 @@ A</pre>
 ## [2,]    5    1
 ## [3,]   14    5</pre>
 
-</article></slide><slide class=""><hgroup><h2>Crossprod</h2></hgroup><article  class="smaller " id="crossprod">
+</article></slide><slide class=""><hgroup><h2>Crossprod</h2></hgroup><article  id="crossprod" class="smaller ">
 
 <ul>
 <li>A much more efficient way of computing the same matrix product is via the function <code>crossprod()</code>.</li>
@@ -399,7 +399,7 @@ A</pre>
 <li>A similar function, tcrossprod(), computes the matrix product \(AB^T\) whenever the product is well defined.</li>
 </ul>
 
-</article></slide><slide class=""><hgroup><h2>Exercise (Try at home)</h2></hgroup><article  class="smaller smaller" id="exercise-try-at-home">
+</article></slide><slide class=""><hgroup><h2>Exercise (Try at home)</h2></hgroup><article  id="exercise-try-at-home" class="smaller smaller">
 
 <ul>
 <li>Consider the matrix</li>
@@ -426,7 +426,7 @@ X</pre>
 <li>Note the dimensions of the resulting matrices.</li>
 </ul>
 
-</article></slide><slide class=""><hgroup><h2>Matrix inversion</h2></hgroup><article  class="smaller " id="matrix-inversion">
+</article></slide><slide class=""><hgroup><h2>Matrix inversion</h2></hgroup><article  id="matrix-inversion" class="smaller ">
 
 <ul>
 <li>The inverse of a matrix can be found using <code>solve()</code>:</li>
@@ -443,7 +443,7 @@ Ainv</pre>
 
 <pre >## [1] TRUE</pre>
 
-</article></slide><slide class=""><hgroup><h2>Solve linear system</h2></hgroup><article  class="smaller " id="solve-linear-system">
+</article></slide><slide class=""><hgroup><h2>Solve linear system</h2></hgroup><article  id="solve-linear-system" class="smaller ">
 
 <ul>
 <li><p>Inverse in R uses QR decomposition, that we might briefly talk about at the very end (if time permits)!</p></li>
@@ -461,7 +461,7 @@ solve(A, b) # use this</pre>
 ## [1,]    5
 ## [2,]   -7</pre>
 
-</article></slide><slide class=""><hgroup><h2>Time comparison</h2></hgroup><article  class="smaller " id="time-comparison">
+</article></slide><slide class=""><hgroup><h2>Time comparison</h2></hgroup><article  id="time-comparison" class="smaller ">
 
 <ul>
 <li><p>Compare execution times for the different methods of solving the Least Squares problem when the number of observations is large.</p></li>
@@ -474,7 +474,7 @@ n &lt;- 5e5; p &lt;- 20
 X &lt;- matrix(rnorm(n * p, mean = 1 : p, sd = 10), nr = n, nc = p, byrow = TRUE)
 y &lt;- rowSums(X) + rnorm(n)</pre>
 
-</article></slide><slide class=""><hgroup><h2>OLS</h2></hgroup><article  class="smaller " id="ols">
+</article></slide><slide class=""><hgroup><h2>OLS</h2></hgroup><article  id="ols" class="smaller ">
 
 <ul>
 <li>The naive approach to solve the LS problem is to compute: \(\hat{\beta} = (X^T X)^{-1}X^T y\)</li>
@@ -494,9 +494,9 @@ y &lt;- rowSums(X) + rnorm(n)</pre>
 <pre >##    user  system elapsed 
 ##     0.2     0.0     0.2</pre>
 
-</article></slide><slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>More advanced topics</h2></hgroup><article  class="smaller " id="more-advanced-topics">
+</article></slide><slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>More advanced topics</h2></hgroup><article  id="more-advanced-topics" class="smaller ">
 
-</article></slide><slide class=""><hgroup><h2>Inverting a matrix using Cholesky helps</h2></hgroup><article  class="smaller " id="inverting-a-matrix-using-cholesky-helps">
+</article></slide><slide class=""><hgroup><h2>Inverting a matrix using Cholesky helps</h2></hgroup><article  id="inverting-a-matrix-using-cholesky-helps" class="smaller ">
 
 <ul>
 <li>A symmetric positive definite matrix can be factorized as: \[
@@ -516,7 +516,7 @@ ptm &lt;- proc.time(); B = solve(A); proc.time()-ptm</pre>
 <pre >##    user  system elapsed 
 ##    0.22    0.00    0.22</pre>
 
-</article></slide><slide class=""><hgroup><h2>Storage of sparse matrices</h2></hgroup><article  class="smaller " id="storage-of-sparse-matrices">
+</article></slide><slide class=""><hgroup><h2>Storage of sparse matrices</h2></hgroup><article  id="storage-of-sparse-matrices" class="smaller ">
 
 <ul>
 <li>Sparse matrices appear in many areas of Statistics and Machine learning.
@@ -529,7 +529,7 @@ ptm &lt;- proc.time(); B = solve(A); proc.time()-ptm</pre>
 <li>If matrix \(A_{n\times n}\) has average \(k\) non-zero entries in each row and \(k &lt;&lt; n\), then storage reduces from \(O(n^2)\) to \(O(n)\).</li>
 </ul>
 
-</article></slide><slide class=""><hgroup><h2>Storage of unstructured sparse matrices</h2></hgroup><article  class="smaller " id="storage-of-unstructured-sparse-matrices">
+</article></slide><slide class=""><hgroup><h2>Storage of unstructured sparse matrices</h2></hgroup><article  id="storage-of-unstructured-sparse-matrices" class="smaller ">
 
 <pre class = 'prettyprint lang-r'># Demo 2: saving sparse matrices in R can save memory
 library(Matrix)
@@ -543,9 +543,9 @@ object.size(m1)</pre>
 
 <pre >## 5072 bytes</pre>
 
-<!-- # Parallel  -->
+<!-- # Parallel -->
 
-<!-- ## A gentle start to parallel computing  -->
+<!-- ## A gentle start to parallel computing -->
 
 <!-- - Parallel processing breaks up your task, splits it among multiple processors, and puts the components back together. -->
 
@@ -561,23 +561,23 @@ object.size(m1)</pre>
 
 <!-- - For instance, if you are repreating a simulation, and in each case are drawing new parameters from a distribution, that is an easily parallelizable task. -->
 
-<!-- - A good rule of thumb is that if you can wrap your task in an apply function or one of its variants, it's a good option for parallelization.  -->
+<!-- - A good rule of thumb is that if you can wrap your task in an apply function or one of its variants, it's a good option for parallelization. -->
 
 <!-- - In fact most implementations of parallel processing in R are versions of apply. -->
 
 <!-- ## What happens? -->
 
-<!-- - When you run a task in parallel, your computer "dispatches" each task to a CPU core.  -->
+<!-- - When you run a task in parallel, your computer "dispatches" each task to a CPU core. -->
 
-<!-- - This dispatching adds computational overhead.  -->
+<!-- - This dispatching adds computational overhead. -->
 
-<!-- - So, it's usually best to try to minimize the number of dispatches.  -->
+<!-- - So, it's usually best to try to minimize the number of dispatches. -->
 
 <!-- - In most cases you are going to have a small number of computing cores relative to your tasks. A powerful laptop or desktop will have 2, 4, or 8 cores, and even the most powerful Amazon virtual machine has 88. -->
 
 <!-- ## Introduction to doParallel -->
 
-<!-- - We will first write a super simple R code to explain the mechanism of parallel processing using doParallel.  -->
+<!-- - We will first write a super simple R code to explain the mechanism of parallel processing using doParallel. -->
 
 <!-- ```{r, echo = TRUE, eval = FALSE, warning=FALSE, message = FALSE, cache = TRUE} -->
 
@@ -597,7 +597,7 @@ object.size(m1)</pre>
 
 <!-- ``` -->
 
-<!-- ## Output of the snippet  -->
+<!-- ## Output of the snippet -->
 
 <!-- - Here is the output ! -->
 
@@ -621,21 +621,27 @@ object.size(m1)</pre>
 
 <!-- ## Hello, world ! -->
 
-<!-- - This is our "Hello, world" program for parallel computing.  -->
+<!-- - This is our "Hello, world" program for parallel computing. -->
 
-<!-- - It tests that everything is installed and set up properly, **but don't expect it to run faster than a sequential for loop, because it won't**!  -->
+<!-- - It tests that everything is installed and set up properly, **but don't expect it to run faster than a sequential for loop, because it won't**! -->
 
 <!-- -  With small tasks, the overhead of scheduling the task and returning the result -->
 
-<!-- can be greater than the time to execute the task itself, resulting in poor performance.  -->
+<!-- can be greater than the time to execute the task itself, resulting in poor performance. -->
 
-<!-- ## We will see a non-trivial example  -->
+<!-- ## We will see a non-trivial example -->
 
-<!-- - Non-trivial examples need sophisticated Statistical methods, and I haven't covered these yet. So don't worry at all if you don't understand any of it. I just want to show you an example of the advantage of using parallel processing.  -->
+<!-- - **Non-trivial examples need sophisticated Statistical methods**, and I haven't covered these yet. So don't worry at all if you don't understand any of it. I just want to show you an example of the advantage of using parallel processing. -->
+
+<!-- - The method here is 'Bootstrap': a resampling strategy for estimating sampling distribution of various statistics.  -->
+
+<!-- - The idea is that you repeatedly *sample with replacement* from the given sample to get an idea about the underlying population distribution, which is an unknown quantity!  -->
+
+<!-- - We will cover 'Bootstrap' in this class, later.  -->
 
 <!-- - How long does it take to do 10,000 Bootstrap iterations using 2 cores? -->
 
-<!-- ## Bootstrapping GLM  -->
+<!-- ## Bootstrapping GLM -->
 
 <!-- ```{r} -->
 
@@ -651,11 +657,11 @@ object.size(m1)</pre>
 
 <!-- - Fit the model repeatedly (like 10k times) for observations randomly sampled with replacements. -->
 
-<!-- - Gives us Bootstrap distribution.  -->
+<!-- - Gives us Bootstrap distribution. -->
 
-<!-- - Cover Bootstrap in greater details towards the end.  -->
+<!-- - Cover Bootstrap in greater details towards the end. -->
 
-<!-- ## Bootstrap using parallel  -->
+<!-- ## Bootstrap using parallel -->
 
 <!-- ```{r, echo = TRUE, cache = TRUE} -->
 
@@ -681,7 +687,7 @@ object.size(m1)</pre>
 
 <!-- ``` -->
 
-<!-- ## Sequential counter-part  -->
+<!-- ## Sequential counter-part -->
 
 <!-- ```{r, echo = TRUE, cache = TRUE} -->
 
@@ -705,7 +711,7 @@ object.size(m1)</pre>
 
 <!-- ## Exercise (Try at home) -->
 
-<!-- -  Can you parallelise any of the divide-and-conquer algorithms you have learned in class?  --></article></slide>
+<!-- -  Can you parallelise any of the divide-and-conquer algorithms you have learned in class? --></article></slide>
 
 
   <slide class="backdrop"></slide>

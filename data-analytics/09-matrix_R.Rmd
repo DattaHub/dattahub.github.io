@@ -1,6 +1,6 @@
 ---
 title: "Matrix in R"
-subtitle: "Data Analytics: Week 2"
+subtitle: "CMDA 4654: Week 2"
 author: "Jyotishka Datta (<jyotishka@vt.edu>) <br> Department of Statistics, Virginia Tech"
 output: 
   ioslides_presentation:
@@ -246,10 +246,10 @@ object.size(m1)
 object.size(m2)
 ```
 
-<!-- # Parallel  -->
+<!-- # Parallel -->
 
 
-<!-- ## A gentle start to parallel computing  -->
+<!-- ## A gentle start to parallel computing -->
 
 <!-- - Parallel processing breaks up your task, splits it among multiple processors, and puts the components back together. -->
 <!-- - Useful and easy if you have a task that can be split up, especially without the different parts needing to "talk to" each other. -->
@@ -260,19 +260,19 @@ object.size(m2)
 
 <!-- - Parallel processing works best when you have a task that has to be completed many times, but each repeat is independent. -->
 <!-- - For instance, if you are repreating a simulation, and in each case are drawing new parameters from a distribution, that is an easily parallelizable task. -->
-<!-- - A good rule of thumb is that if you can wrap your task in an apply function or one of its variants, it's a good option for parallelization.  -->
+<!-- - A good rule of thumb is that if you can wrap your task in an apply function or one of its variants, it's a good option for parallelization. -->
 <!-- - In fact most implementations of parallel processing in R are versions of apply. -->
 
 <!-- ## What happens? -->
 
-<!-- - When you run a task in parallel, your computer "dispatches" each task to a CPU core.  -->
-<!-- - This dispatching adds computational overhead.  -->
-<!-- - So, it's usually best to try to minimize the number of dispatches.  -->
+<!-- - When you run a task in parallel, your computer "dispatches" each task to a CPU core. -->
+<!-- - This dispatching adds computational overhead. -->
+<!-- - So, it's usually best to try to minimize the number of dispatches. -->
 <!-- - In most cases you are going to have a small number of computing cores relative to your tasks. A powerful laptop or desktop will have 2, 4, or 8 cores, and even the most powerful Amazon virtual machine has 88. -->
 
 <!-- ## Introduction to doParallel -->
 
-<!-- - We will first write a super simple R code to explain the mechanism of parallel processing using doParallel.  -->
+<!-- - We will first write a super simple R code to explain the mechanism of parallel processing using doParallel. -->
 
 <!-- ```{r, echo = TRUE, eval = FALSE, warning=FALSE, message = FALSE, cache = TRUE} -->
 <!-- n = as.numeric(Sys.getenv("NUMBER_OF_PROCESSORS")) # on Windows -->
@@ -285,7 +285,7 @@ object.size(m2)
 <!-- ``` -->
 
 
-<!-- ## Output of the snippet  -->
+<!-- ## Output of the snippet -->
 <!-- - Here is the output ! -->
 <!-- ```{r, echo = FALSE, eval = TRUE, warning=FALSE, message = FALSE} -->
 <!-- n = as.numeric(Sys.getenv("NUMBER_OF_PROCESSORS")) # on Windows -->
@@ -299,18 +299,24 @@ object.size(m2)
 
 <!-- ## Hello, world ! -->
 
-<!-- - This is our "Hello, world" program for parallel computing.  -->
-<!-- - It tests that everything is installed and set up properly, **but don't expect it to run faster than a sequential for loop, because it won't**!  -->
+<!-- - This is our "Hello, world" program for parallel computing. -->
+<!-- - It tests that everything is installed and set up properly, **but don't expect it to run faster than a sequential for loop, because it won't**! -->
 <!-- -  With small tasks, the overhead of scheduling the task and returning the result -->
-<!-- can be greater than the time to execute the task itself, resulting in poor performance.  -->
+<!-- can be greater than the time to execute the task itself, resulting in poor performance. -->
 
-<!-- ## We will see a non-trivial example  -->
+<!-- ## We will see a non-trivial example -->
 
-<!-- - Non-trivial examples need sophisticated Statistical methods, and I haven't covered these yet. So don't worry at all if you don't understand any of it. I just want to show you an example of the advantage of using parallel processing.  -->
+<!-- - **Non-trivial examples need sophisticated Statistical methods**, and I haven't covered these yet. So don't worry at all if you don't understand any of it. I just want to show you an example of the advantage of using parallel processing. -->
+
+<!-- - The method here is 'Bootstrap': a resampling strategy for estimating sampling distribution of various statistics.  -->
+
+<!-- - The idea is that you repeatedly *sample with replacement* from the given sample to get an idea about the underlying population distribution, which is an unknown quantity!  -->
+
+<!-- - We will cover 'Bootstrap' in this class, later.  -->
 
 <!-- - How long does it take to do 10,000 Bootstrap iterations using 2 cores? -->
 
-<!-- ## Bootstrapping GLM  -->
+<!-- ## Bootstrapping GLM -->
 
 <!-- ```{r} -->
 <!-- x <- iris[which(iris[,5] != "setosa"), c(1,5)] -->
@@ -320,11 +326,11 @@ object.size(m2)
 <!-- - Logistic Regression: predict species using sepal.length. -->
 <!-- - Want the distribution of parameter estimates. -->
 <!-- - Fit the model repeatedly (like 10k times) for observations randomly sampled with replacements. -->
-<!-- - Gives us Bootstrap distribution.  -->
-<!-- - Cover Bootstrap in greater details towards the end.  -->
+<!-- - Gives us Bootstrap distribution. -->
+<!-- - Cover Bootstrap in greater details towards the end. -->
 
 
-<!-- ## Bootstrap using parallel  -->
+<!-- ## Bootstrap using parallel -->
 
 <!-- ```{r, echo = TRUE, cache = TRUE} -->
 <!-- x <- iris[which(iris[,5] != "setosa"), c(1,5)] -->
@@ -339,7 +345,7 @@ object.size(m2)
 <!-- ptime -->
 <!-- ``` -->
 
-<!-- ## Sequential counter-part  -->
+<!-- ## Sequential counter-part -->
 
 <!-- ```{r, echo = TRUE, cache = TRUE} -->
 <!-- stime <- system.time({ -->
@@ -354,6 +360,6 @@ object.size(m2)
 
 <!-- ## Exercise (Try at home) -->
 
-<!-- -  Can you parallelise any of the divide-and-conquer algorithms you have learned in class?  -->
+<!-- -  Can you parallelise any of the divide-and-conquer algorithms you have learned in class? -->
 
 

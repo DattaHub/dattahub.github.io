@@ -1,5 +1,6 @@
 ---
 title: "Efficiency tricks in R"
+subtitle: "CMDA 4654: Week 2"
 author: "Jyotishka Datta"
 date: "2020/01/24 (updated: `r Sys.Date()`)"
 output:
@@ -31,6 +32,10 @@ count: false
 # (Apply) vs. (Loop)
 
 ---
+
+## Loops
+
+- We have seen 'loop's last time: for, while and repeat. Let's quickly recall their syntax. 
 
 ## for loop
 
@@ -333,12 +338,18 @@ can be greater than the time to execute the task itself, resulting in poor perfo
 
 
 ---
-## We will see a non-trivial example 
+## We will see a non-trivial example
 
-- Non-trivial examples need sophisticated Statistical methods, and I haven't covered these yet. 
-- So don't worry at all if you don't understand why we are using this example of a method. I just want to show you an example of the advantage of using parallel processing. 
+- **Non-trivial examples need sophisticated Statistical methods**, and I haven't covered these yet. So don't worry at all if you don't understand any of it. I just want to show you an example of the advantage of using parallel processing.
+
+- The method here is 'Bootstrap': a resampling strategy for estimating sampling distribution of various statistics. 
+
+- The idea is that you repeatedly *sample with replacement* from the given sample to get an idea about the underlying population distribution, which is an unknown quantity! 
+
+- We will cover 'Bootstrap' in this class, later. 
 
 - How long does it take to do 10,000 Bootstrap iterations using 2 cores?
+
 
 ---
 ## Bootstrapping GLM 

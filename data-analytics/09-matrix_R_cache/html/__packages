@@ -1,3 +1,6 @@
 base
 knitr
 Matrix
+foreach
+iterators
+doParallel
