@@ -28,6 +28,7 @@ Git repo for this course: https://github.com/DattaHub/DattaHub.github.io/tree/ma
 
 #### R-tools for data wrangling and visulization 
 
+
 1. Packages and R-markdown: https://dattahub.github.io/data-analytics/04-packages-and-rmarkdown.html 
 2. Using dplyr: https://dattahub.github.io/data-analytics/05-dplyr.html
 3. Data Viz Using ggplot2:
@@ -37,6 +38,26 @@ https://dattahub.github.io/data-analytics/06-data-visualization.html (notes)
 5. Efficiency considerations: https://dattahub.github.io/data-analytics/08-efficient_R.html 
 6. Matrix in R: https://dattahub.github.io/data-analytics/09-matrix_R.html 
 
+### Univariate and multiple regression basics 
+
+1. Simple univariate regression [Canvas folder link, needs login](https://canvas.vt.edu/courses/144945/files/folder/Lecture%205%3A%20Simple%20linear%20regression)
+2. Multiple regression basics [Canvas folder link, needs login](https://canvas.vt.edu/courses/144945/files/folder/Lecture%206%3A%20Multiple%20Linear%20Regression)
+3. (Related topic) Bias and variance trade-off in ML [Canvas folder link, needs login](https://canvas.vt.edu/courses/144945/files/folder/Lecture%207-9%3A%20Modern%20regression%201)
+
+#### Modern Regression 
+
+1. Modern Regression 1: http://dattahub.github.io/data-analytics/regression_demo_1.html (adjusted $R^2$, AIC, BIC, stepwise procedures and Ridge)
+2. Modern Regression 2: http://dattahub.github.io/data-analytics/regression_demo_2.html
+3. Modern Regression 3: http://dattahub.github.io/stat5443/regression_demo_3.html
+4. Lab on Shrinkage Methods: Ridge, Lasso etc.
+http://dattahub.github.io/data-analytics/lab_glmnet.html
+5. PCA, PCR demo: https://dattahub.github.io/data-analytics/demoPCA.html#1
+
+#### Resampling methods 
+
+1. Cross-validation: https://dattahub.github.io/data-analytics/crossvalidation.html 
+2. Bootstrap : https://dattahub.github.io/data-analytics/bootstrap_demo.html 
+
 #### Classification & KDE
 
 1. Kernel Density: https://dattahub.github.io/data-analytics/kde_demo.html 
@@ -44,19 +65,6 @@ https://dattahub.github.io/data-analytics/06-data-visualization.html (notes)
 3. Deviance explained: https://dattahub.github.io/data-analytics/deviance_explained.html 
 4. Multiclass Logistic Regression : https://dattahub.github.io/data-analytics/logistic_other.html 
 5. LDA, QDA & KNN: https://dattahub.github.io/data-analytics/classification_demo.html#27 (# denotes page) 
-
-#### Resampling methods 
-
-1. Cross-validation: https://dattahub.github.io/data-analytics/crossvalidation.html 
-2. Bootstrap : https://dattahub.github.io/data-analytics/bootstrap_demo.html 
-
-#### Regression 
-
-1. Modern Regression 1: http://dattahub.github.io/data-analytics/regression_demo_1.html (adjusted $R^2$, AIC, BIC, stepwise procedures and Ridge)
-2. Modern Regression 2: http://dattahub.github.io/data-analytics/regression_demo_2.html
-3. Modern Regression 3: http://dattahub.github.io/stat5443/regression_demo_3.html
-4. Lab on Shrinkage Methods: Ridge, Lasso etc. http://dattahub.github.io/data-analytics/lab_glmnet.html
-5. PCA, PCR demo: https://dattahub.github.io/data-analytics/demoPCA.html#1
 
 
 #### Trees, random forests etc.
