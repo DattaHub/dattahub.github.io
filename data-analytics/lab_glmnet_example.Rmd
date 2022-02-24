@@ -1,0 +1,106 @@
+---
+title: "Another example of Lasso vs. Elastic Net"
+author: "Jyotishka Datta"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+      css: mystyle.css
+      toc: true
+      number_sections: true
+fontsize: 12pt
+geometry: margin=1in
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = F, warning = F)
+```
+
+## Lab Exercise: Comparing Lasso, Ridge and Elastic Net. 
+
+We will look at an example of sparse regression where the predictors are highly correlated and compare between Lasso, Elastic Net and Ridge Regression in terms of the test set errors. Recall that  Ridge, Lasso, Elastic Net are all special cases of Elastic net with the following penalty: 
+$$
+P_{\lambda,\alpha}(\beta) = \lambda \frac{(1-\alpha)}{2} {\lVert \beta \rVert}_2^2 + \lambda \alpha {\lVert \beta \rVert}_1
+$$
+So $\alpha = 0$ is Ridge, $\alpha = 1$ is Lasso, anything in between is Elastic Net.
+
+Errata: There's no square on the Lasso penalty, as one of you pointed out. 
+
+## Data Generation 
+
+We fix a $\beta$ with few non-zero elements and a design matrix ($X$ matrix) with large $p$, small $n$ settings. 
+
+$$
+\beta = (\underbrace{10, \ldots, 10}_{10},\underbrace{0,\ldots,0}_{40})^T \\
+p = 50, n = 100 \\
+Cov(X) = \Sigma = \{ (\rho)^{|i-j|}\}_{1\le i,j \le p} \\
+\text{and } y = X \beta + \epsilon 
+$$
+
+```{r, echo = T}
+if(!require(glmnet)){
+  install.packages("glmnet", dependencies = TRUE, repos = 'http://cran.rstudio.com')
+}
+library(MASS)  # Package needed to generate correlated precictors
+library(glmnet)
+set.seed(1234)
+n <- 100    # Number of observations
+p <- 50     # Number of predictors included in model
+p1 <- 10 # Number of non-zero beta'
+rho = 0.7
+CovMatrix <- outer(1:p, 1:p, function(x,y) {rho^abs(x-y)})
+
+x <- mvrnorm(n, rep(0,p), CovMatrix)
+beta <- c(rep(5,p1),rep(0,p-p1))
+eps=rnorm(n,mean=0,sd=0.1)
+fx = x %*% beta
+y=fx+eps
+
+# Split data into train and test sets
+train_rows <- sample(1:n, n/2)
+x.train <- x[train_rows, ]
+x.test <- x[-train_rows, ]
+
+y.train <- y[train_rows]
+y.test <- y[-train_rows]
+```
+
+## Lasso vs. Elastic Net 
+
+Our goal is to fit the lasso, ridge and elastic net with different values of $\alpha$ ranging from $0$ to $1$ using the training data, and compare the mean squared error for the test set. Here is a sample code for fitting elastic net with $\alpha = 0.5$ and lasso with $\alpha = 0$ and comparing their test MSE. 
+
+```{r, echo = T}
+fit.enet <- cv.glmnet(x.train, y.train, type.measure = "mse",alpha=.5)
+plot(fit.enet)
+yhat.enet <- predict(fit.enet, s=fit.enet$lambda.1se, newx=x.test)
+
+fit.lasso <- cv.glmnet(x.train, y.train, type.measure = "mse",alpha=1)
+plot(fit.lasso)
+yhat.lasso <- predict(fit.lasso, s=fit.lasso$lambda.1se, newx=x.test)
+
+(mse.enet <- mean((y.test - yhat.enet)^2))
+(mse.lasso <- mean((y.test - yhat.lasso)^2))
+```
+
+Clearly, Elastic Net is the winner. This happens because the predictors are correlated. Lasso does not work well for highly correlated predictors (can we think of a reason?). If you make $\rho$ small, the situation reverses. 
+
+**Exercise**: 
+
+1. Find an otimal value of $\alpha$ that minimizes the test MSE for three different values of correlation $\rho$. You can take $3$ different values of $\rho$ (small, medium and high correlation). Please avoid copy-pasting the R code $10 \times 3$ times - use a for loop or apply-type constructs. 
+
+2. Download the breast cancer data-set from your blackboard website and load it on your workspace by typing the following command on R console: 
+
+```{R, eval = F}
+load("bc-tcga.Rdata")
+```
+
+You will now see a large matrix $X$ and a vector $y$ on your workspace. What are their dimensions?
+
+Perform a 10-fold cross-validation on this data-set using the R function `cv.glmnet` from `glmnet` library. 
+
+Plot the fitted object (simply calling `plot` on the cross-validated fit will give you a plot of mean-squared error versus $\log(\lambda)$). Also plot the solution path. 
+
+Calculate the predicted value of $y[1:100]$ for both LASSO and Ridge and compare the mean squared errors. 
+
+You can refer to the R codes on the lecture
+notes: (http://dattahub.github.io/data-analytics/regression_demo_2.html#1)
