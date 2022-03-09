@@ -1,0 +1,120 @@
+---
+title: "Deviance Explained"
+subtitle: "Logistic Regression"
+author: "Jyotishka Datta"
+institute: "Virginia Tech"
+date: "2016/12/12 (updated: `r Sys.Date()`)"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(echo = T, warning = F, message = F)
+
+```
+
+```{r include, include=FALSE, cache = TRUE}
+set.seed(12345)
+library(ggplot2)
+library(dplyr)
+library(ISLR)
+```
+
+## Example 
+
+```{r, eval = F}
+options(contrasts = c("contr.treatment", "contr.poly"))
+ldose <- rep(0:5, 2)
+numdead <- c(1, 4, 9, 13, 18, 20, 0, 2, 6, 10, 12, 16)
+sex <- factor(rep(c("M", "F"), c(6, 6)))
+SF <- cbind(numdead, numalive = 20 - numdead)
+
+budworm.lg <- glm(SF ~ sex*ldose, family = binomial)
+summary(budworm.lg, cor = F)
+```
+
+---
+## R output
+
+```{r, echo = F}
+options(contrasts = c("contr.treatment", "contr.poly"))
+ldose <- rep(0:5, 2)
+numdead <- c(1, 4, 9, 13, 18, 20, 0, 2, 6, 10, 12, 16)
+sex <- factor(rep(c("M", "F"), c(6, 6)))
+SF <- cbind(numdead, numalive = 20 - numdead)
+
+budworm.lg <- glm(SF ~ sex*ldose, family = binomial)
+summary(budworm.lg, cor = F)
+```
+
+
+---
+## Deviances are stored in `summary` object
+
+```{r}
+summaryLog <- summary(budworm.lg)
+# 'Residual deviance' is the deviance; 
+# 'Null deviance' is the null deviance
+
+(summaryLog$deviance)
+(summaryLog$null.deviance)
+```
+
+-  Recall: Intuitively, if the null deviance is much larger than the fitted deviance, the predictors are important, if they are similar the predictors are noise. 
+
+
+---
+## Fit the null model to check
+
+```{r}
+# Null model - only intercept
+budworm.null <- glm(SF ~ 1, family = binomial)
+summary(budworm.null, cor = F)
+```
+
+---
+## Calculate $R^2$
+
+Recall:
+
+$$
+		R^2 = 1 - \frac{D}{D_0} = 1 - \frac{\text{deviance of fitted model to saturated}}{\text{deviance of null model to saturated}}.
+$$
+-  It is a quantity between $0$ and $1$. 
+
+-  If the fit is perfect, then $D=0$ and $R^2 = 1$, but if the predictors have no information about $Y$, then $D = D_0$, and $R^2 = 0$. 
+-  For the example at hand, 
+
+```{r}
+(R_sq = 1 - summaryLog$deviance / summaryLog$null.deviance)
+```
+-  Is the high value of $R^2$ surprising or not? 
+
+---
+## Smarket data 
+
+```{r}
+glm.fits=glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume,data=Smarket,family=binomial)
+summary(glm.fits)
+```
+
+
+---
+## Smarket data 
+
+- Calculate the $R^2$ for this fitted model. 
+
+```{r, echo = T}
+summarySmarket <- summary(glm.fits)
+(R_sq = 1 - summarySmarket$deviance / summarySmarket$null.deviance)
+```
+-  Now, what does this say about the quality of fit? 
+
+-  How do you connect this with the $p$-values? 
+

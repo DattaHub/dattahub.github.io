@@ -1,0 +1,321 @@
+---
+title: "Modern Regression" 
+subtitle: "Elastic Net and Bayesian Sparse Regression"
+author: "Jyotishka Datta"
+date: "`r Sys.Date()`"
+output: 
+  ioslides_presentation:
+    theme: journal
+    smaller: yes
+    logo: ../vt.png
+    transition: faster
+---
+
+```{r setup, include=FALSE}
+options(width=80)
+library(knitr)
+knitr::opts_chunk$set(echo = FALSE, warning = F, message = F, fig.asp = 0.6, cache = TRUE)
+knit_hooks$set(no.main = function(before, options, envir) {
+    if (before) par(mar = c(4.1, 4.1, 1.1, 1.1))  # smaller margin on top
+})
+```
+
+## Elastic Net 
+
+Two independent hidden factors $z_1$ and $z_2$: 
+```{r, echo = T}
+n = 100
+z_1 = runif(n,0,20); z_2 = runif(n,0,20)
+```
+Generate the response as $y = z_1 + 0.1*z_2 + N(0,1)$
+```{r, echo = T}
+y = z_1 + 0.1*z_2 + rnorm(n)
+```
+Observe predictors:
+$$
+x_1 = z_1 + \epsilon_1, x_2 = -z_1 + \epsilon_2, x_3 = z_1 + \epsilon_3 \\
+x_4 = z_2 + \epsilon_4, x_5 = -z_2 + \epsilon_5, x_6 = z_2 + \epsilon_6
+$$
+```{r, echo = T}
+x_1 = z_1 + rnorm(n); x_2 = -z_1 + rnorm(n); x_3 = z_1 + rnorm(n)
+x_4 = z_2 + rnorm(n);x_5 = -z_2 + rnorm(n);x_6 = z_2 + rnorm(n)
+x = cbind(x_1,x_2,x_3,x_4,x_5,x_6)
+```
+
+## Run Lasso 
+
+```{r, echo = T, message = FALSE}
+library(lars)
+lasso.fit <- lars(x=x,y=y)
+plot(lasso.fit, breaks = F)
+```
+
+
+## Run Elastic Net 
+
+```{r, echo = T}
+if(!require(elasticnet)){
+  install.packages('elasticnet',dependencies=TRUE, repos='http://cran.rstudio.com/')
+}
+library(elasticnet)
+en.fit <- enet(x=x,y=y, lambda = 1)
+plot(en.fit, use.color = T, main = "Elastic Net")
+```
+
+
+# Bayesian Regularization 
+
+## Bayesian Lasso 
+
+We will look at the same simulation experiment with $p = 60 > n = 30$ where the parameter vector $\beta$ is sparse. 
+
+We ask: Does Bayesian Lasso produce the same solution as Lasso?
+
+## Simulation Experiments 
+
+- Generate $X$, $y$ with $n = 30, p = 60$ with a sparse $\beta$ vector with 5 non-zero elements. 
+
+```{r, echo = T}
+library(Matrix)
+set.seed(12345)
+n=30;p=60
+p1 = 5
+beta <- c(rep(3,p1),rep(0,p-p1))
+x=scale(matrix(rnorm(n*p),n,p))
+eps=rnorm(n,mean=0,sd=0.1)
+fx = x %*% beta
+y=drop(fx+eps)
+```
+
+- Our goal is to see if Lasso can recover the 5 non-zero $\beta$'s correctly. 
+
+
+## Lasso is sparse
+
+```{r, echo = T, message = F}
+library(glmnet)
+grid=10^seq(10,-2,length=100)
+lasso.mod =glmnet(x,y,alpha =1,lambda =grid)
+plot(lasso.mod)
+```
+
+## Choosing Lambda {.smaller}
+
+```{r, echo = T, fig.height = 3}
+cv.out =cv.glmnet(x,y,alpha =1)
+(bestlam =cv.out$lambda.min)
+plot(cv.out)
+```
+
+## Sparse Solution {.smaller}
+
+```{r, echo = T}
+lasso.coef=predict(lasso.mod,type ="coefficients",s=bestlam)
+lasso.coef[lasso.coef !=0]
+```
+
+- Use `which` function to get rid of the warning message
+
+```{r, echo = T}
+lasso.coef[which(lasso.coef!=0)]
+```
+
+## LASSO correctly recovers the signals
+
+```{r, echo = T}
+col.index = c(rep(2,p1),rep(3,p-p1))
+plot(lasso.coef[-1], col = col.index, pch = 15)
+```
+
+
+## Bayesian Lasso {.smaller}
+
+```{r, echo = T, eval = F}
+library(monomvn)
+?blasso
+```
+
+**Description**
+
+Inference for ordinary least squares, **lasso**/NG, horseshoe and **ridge** regression models by (Gibbs) sampling from the Bayesian posterior distribution, augmented with Reversible Jump for model selection.
+
+```{r, echo = T, eval = F}
+blasso(X, y, T = 1000, thin = NULL, RJ = TRUE, M = NULL,
+       beta = NULL, lambda2 = 1, s2 = var(y-mean(y)),
+       case = c("default", "ridge", "hs", "ng"), mprior = 0, rd = NULL,
+       ab = NULL, theta = 0, rao.s2 = TRUE, icept = TRUE, 
+       normalize = TRUE, verb = 1)
+```
+
+
+## Help {.smaller}
+
+```{r, echo = FALSE, results = "asis"}
+static_help <- function(pkg, topic, out, links = tools::findHTMLlinks()) {
+  pkgRdDB = tools:::fetchRdDB(file.path(find.package(pkg), 'help', pkg))
+  force(links)
+  tools::Rd2HTML(pkgRdDB[[topic]], out, package = pkg,
+                 Links = links, no_links = is.null(links))
+}
+tmp <- tempfile()
+static_help("monomvn", "blasso", tmp)
+out <- readLines(tmp)
+headfoot <- grep("body", out)
+cat(out[(headfoot[1] + 5):(headfoot[2] - 1)], sep = "\n")
+```
+
+## Apply Bayesian Lasso to sparse data
+
+```{r, echo = T, error = T, message=FALSE, warning = F }
+library(monomvn)
+## Lasso regression
+reg.las <- regress(x, y, method="lasso")
+## Bayesian Lasso regression
+reg.blas <- blasso(x, y)
+```
+
+## Visualize $\hat{\beta}$
+
+```{r, echo = T, fig.height = 4}
+plot(reg.blas, burnin=200) 
+points(drop(reg.las$b), col=3, pch=20) 
+legend("topright", c("blasso-map", "lasso"), col=c(2,3), pch=c(20,18))
+```
+
+## Model Dimensions 
+We can plot the size of different models visited:
+
+```{r, echo = T}
+plot(reg.blas, burnin=200, which="m")
+```
+
+## Get the summary 
+
+The summary contains useful information about the fit. 
+
+```{r, echo = T}
+s <- summary(reg.blas, burnin=200)
+names(s)
+```
+
+## Calculate $P(\beta_i \ne 0 \mid y_i)$ {.smaller} 
+
+This is called posterior inclusion probability. 
+
+```{r, echo = T}
+s$bn0
+```
+
+## Inclusion Prob and Estimates
+
+```{r, echo = T}
+par(mfrow=c(1,2))
+plot(apply(reg.blas$beta,2,median),pch=15,col="red", ylab = expression(beta), main = "Estimates")
+plot(s$bn0,pch=15,col="red",main = "Inclusion probabilty")
+```
+
+
+## Summarize s2 
+
+`s2` is the estimates of the variance parameter. 
+
+```{r, echo = T}
+plot(reg.blas, burnin=200, which="s2") 
+s$s2
+```
+
+## Summarize lambda2 
+
+```{r, echo = T}
+plot(reg.blas, burnin=200, which="lambda2")
+s$lambda2
+```
+
+## Bayesian Ridge 
+
+```{r, echo = T}
+## Ridge regression
+reg.ridge <- regress(x, y, method="ridge")
+## Bayesian Ridge
+reg.bridge <- bridge(x, y)
+```
+
+## Visualize $\hat{\beta}$
+
+```{r, echo = T, fig.height = 4}
+plot(reg.bridge, burnin=200) 
+points(drop(reg.ridge$b), col=3, pch=18) 
+legend("topright", c("b-ridge", "ridge"), col=c(2,3), pch=c(21,18))
+```
+
+## Model Dimensions 
+
+We can plot the size of different models visited:
+
+```{r, echo = T}
+plot(reg.bridge, burnin=200, which="m")
+```
+
+## Calculate $P(\beta_i \ne 0 \mid y_i)$ {.smaller} 
+
+This is called posterior inclusion probability. 
+
+```{r, echo = T}
+sridge <- summary(reg.bridge, burnin=200)
+sridge$bn0
+```
+
+## Compare {.smaller}
+
+```{r, echo = T}
+par(mfrow=c(1,2))
+plot(apply(reg.blas$beta,2,median),pch=15,col="red", ylab = expression(beta), main = "Estimates")
+points(apply(reg.bridge$beta,2,median),pch=15,col="blue")
+plot(s$bn0,pch=15,col="red",main = "Inclusion probabilty")
+points(sridge$bn0,pch=15,col="blue")
+```
+
+## Horseshoe 
+
+- Another option in `monomovn` package is "hs" or horseshoe. 
+- Horseshoe prior was proposed by Carvalho, Polson and Scott (2010) for sparse signal recovery. 
+- Horseshoe prior improves on the Laplace prior used for Bayesian Lasso when the underlying data is nearly-black. 
+- R package `horseshoe`, `monomvn`, `bayeslm` etc.
+
+## Horseshoe R package 
+
+```{r, echo = T}
+library(horseshoe)
+hs.fit <- horseshoe(y = y, X = x)
+```
+
+## Plot 
+ Plot predicted values against the observed data
+```{r, echo = T}
+par(mfrow=c(1,2))
+plot(hs.fit$BetaHat)
+plot(y, x%*%hs.fit$BetaHat) 
+```
+
+## Variable Selection {.smaller}
+
+```{r, echo = T}
+HS.var.select(hs.fit, y, method = "intervals") #selected betas
+```
+
+Ideally, none of the $\beta$'s are selected (all zeros). 
+```{r, echo = T}
+hs.fit$BetaHat
+```
+
+## Credible Intervals
+
+Plot the credible intervals
+```{r, echo = T, message = F, warning= F}
+library(Hmisc)
+xYplot(Cbind(hs.fit$BetaHat, hs.fit$LeftCI, hs.fit$RightCI) ~ 1:60)
+```
+
+
+
+

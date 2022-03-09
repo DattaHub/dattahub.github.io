@@ -1,0 +1,161 @@
+---
+title: "Resampling Methods"
+subtitle: "Cross-validation"
+author: "Jyotishka Datta"
+institute: "Virginia Tech"
+date: "2021/06/21 (updated: `r Sys.Date()`)"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(echo = T, warning = F, message = F, cache = T)
+
+```
+
+```{r include, include=FALSE, cache = TRUE}
+library(ggplot2)
+library(dplyr)
+library(ISLR)
+library(boot)
+```
+
+## Validation 
+
+Split the data set into a training and test set. 
+Calculate the error on the test set. 
+Here, we fit a simple linear model `mpg ~ horsepower`
+
+```{r, eval = T}
+set.seed(1)
+train=sample(392,196)
+lm.fit=lm(mpg~horsepower,data=Auto,subset=train)
+attach(Auto)
+mean((mpg-predict(lm.fit,Auto))[-train]^2)
+```
+
+---
+## Try other orders
+
+Let's fit polynomials of orders 2 and 3. 
+As before, report the error on the test set. 
+
+```{r, echo = T}
+lm.fit2=lm(mpg~poly(horsepower,2),data=Auto,subset=train)
+mean((mpg-predict(lm.fit2,Auto))[-train]^2)
+
+lm.fit3=lm(mpg~poly(horsepower,3),data=Auto,subset=train)
+mean((mpg-predict(lm.fit3,Auto))[-train]^2)
+```
+
+- Note which one has minimum test error now.
+
+---
+## Now we try a different seed 
+
+- Now let's look at the test error for the same three models, but now the random seed is different - so the splits are also different. 
+
+
+```{R}
+set.seed(2)
+train=sample(392,196)
+lm.fit=lm(mpg~horsepower,subset=train)
+mean((mpg-predict(lm.fit,Auto))[-train]^2)
+lm.fit2=lm(mpg~poly(horsepower,2),data=Auto,subset=train)
+mean((mpg-predict(lm.fit2,Auto))[-train]^2)
+lm.fit3=lm(mpg~poly(horsepower,3),data=Auto,subset=train)
+mean((mpg-predict(lm.fit3,Auto))[-train]^2)
+```
+
+-  Which one has minimum test error now?
+
+---
+## Leave-one-out CV 
+
+LOOCV can help with the vagaries of validation set approach. 
+
+```{r}
+glm.fit=glm(mpg~horsepower,data=Auto)
+coef(glm.fit)
+
+lm.fit=lm(mpg~horsepower,data=Auto)
+coef(lm.fit)
+```
+
+-  Recall: `lm` is a special type of `glm` with `family = gaussian` 
+
+---
+## Leave-one-out CV 
+
+
+We will use the `cv.glm` function inside library `boot` (more on `boot` or bootstrap elsewhere)
+
+Returns 4 objects: `call`, `K`, `delta` and `seed`. Look at `delta` from `help`. 
+
+delta: 
+
+A vector of length two. The first component is the raw cross-validation estimate of prediction error. The second component is the adjusted cross-validation estimate. The adjustment is designed to compensate for the bias introduced by not using leave-one-out cross-validation.
+
+---
+## Leave-one-out CV 
+
+```{r}
+library(boot)
+glm.fit=glm(mpg~horsepower,data=Auto)
+cv.err=cv.glm(Auto,glm.fit)
+cv.err$delta
+```
+
+-  Note: we can consider the first component of `delta` for this tutorial.  
+
+
+---
+## Perform LOOCV
+
+Perform LOOCV for a series of polynomials and look at the cross-validated errors. 
+
+
+```{r}
+cv.error=rep(0,10)
+for (i in 1:10){
+   glm.fit=glm(mpg~poly(horsepower,i),data=Auto)
+   cv.error[i]=cv.glm(Auto,glm.fit)$delta[1]
+}
+cv.error
+```
+
+- Which one has the minimum test error? 
+
+
+---
+## K-Fold Cross-Validation
+
+- The other option is trying $K = 10$.
+
+```{r}
+set.seed(17)
+cv.error.10=rep(0,10)
+for (i in 1:10){
+   glm.fit=glm(mpg~poly(horsepower,i),data=Auto)
+   cv.error.10[i]=cv.glm(Auto,glm.fit,K=10)$delta[1]
+}
+cv.error.10
+```
+
+
+---
+## Plot LOOCV vs K-fold
+
+- Which polynomial order would you choose?? 
+
+```{r, fig.asp = 0.8}
+plot(c(1:10),cv.error, type = "l", ylabel = "LOOCV vs. K-fold")
+lines(cv.error.10, lty = 2)
+legend("topright", c("loocv", "k-fold"),lty = c(1,2))
+```

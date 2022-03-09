@@ -1,0 +1,22 @@
+/* Whole document: */
+body{
+  font-family: Times New Roman;
+  font-size: 10pt;
+}
+/* Headers */
+h1{
+  font-size: 16pt;
+}
+h2,h3,h4,h5,h6{
+  font-size: 14pt;
+}
+h3,h4,h5,h6{
+  font-size: 12pt;
+}
+.remark-slide-content {
+    font-size: 30px;
+    padding: 1em 4em 1em 4em;
+}
+.my-one-page-font {
+  font-size: 40px;
+}

@@ -1,0 +1,28 @@
+---
+title: "My first R-markdown"
+author: "Jyotishka Datta"
+date: "9/2/2021"
+output: 
+  html_document:
+    number_section: true
+    toc: true
+---
+
+# Introduction 
+
+I *really* like _R-markdown_. 
+
+My favourite website is [google.com](google.com).
+
+## Background 
+
+I will draw a histogram of $N(\mu, \sigma)$ random samples. Below is the code: 
+
+```{r, fig.asp = 0.5}
+x = rnorm(100)
+hist(x)
+```
+
+
+
+### More background 

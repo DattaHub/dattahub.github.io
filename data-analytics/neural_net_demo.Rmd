@@ -1,0 +1,307 @@
+---
+title: "Simple Neural Network"
+subtitle: "Data Analytics: Week 11"
+author: "Jyotishka Datta (<jyotishka@vt.edu>) <br> Department of Statistics, Virginia Tech"
+output: 
+  ioslides_presentation:
+    smaller: yes
+    logo: ../vt.png
+    transition: faster
+    widescreen: true
+fontsize: 11pt
+geometry: margin=1in
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = T, message = F, warning = F)
+```
+
+
+## Source 
+
+Stat 665 Course Lecture Notes from Yale: by Taylor Arnold. 
+
+
+## Simple neural network
+
+-   Support for running modern, deep, neural networks in R is quite weak. 
+
+-   Here we'll see how to use the two most popular packages. 
+
+-   To start, let's load in the cars dataset:
+
+
+## Cars Dataset
+
+
+```{r}
+set.seed(1)
+x <- read.csv("datasets/cars.csv", as.is=TRUE)
+names(x) <- tolower(names(x))
+x$expensive <- as.numeric(x$retail > median(x$retail))
+x$testFlag <- as.numeric(runif(nrow(x)) > 0.8)
+dim(x)
+```
+
+
+## Cars dataset {.smaller}
+
+```{r}
+head(x)
+```
+
+
+
+## Logistic Regression 
+
+
+For a point of reference, I'll fit a logistic regression on the response of whether this car is in the upper half of the dataset in terms of retail price:
+
+Predictors are **weight, citympg, highway mpg, sports (0/1), suv (0/1)*.
+
+```{r}
+out <- glm(expensive ~ weight + citympg + highwaympg + sports + suv,
+                  data=x,
+                  subset=(testFlag == 0),
+                  family=binomial)
+glm.probs <- predict(out, x, type='response')
+```
+
+
+## Logistic Regression 
+
+
+```{r}
+glm.pred=rep(0,387)
+glm.pred[glm.probs>.5]=1
+
+table(glm.pred[x$testFlag==0],x$expensive[x$testFlag==0])
+table(glm.pred[x$testFlag==1],x$expensive[x$testFlag==1])
+```
+
+
+## Neural Network 
+
+Using the **nnet** package, I can fit a neural network with one hidden layers with 10 nodes:
+
+```{r}
+library(nnet)
+out <- nnet(expensive ~ weight + citympg + highwaympg + sports + suv,
+                  data=x,
+                  subset=(testFlag == 0),
+                  size=10)
+predNnet10 <- predict(out, x)
+```
+
+
+## Outcome 
+
+```{r}
+table(predNnet10)
+```
+
+Notice that the prediction results are all the same. In truth, we do not have enough nodes here to learn anything useful. 
+
+If I increase this number to 500, the results seem to mimic those of the glm model fairly well.
+
+
+## Increasing number of nodes 
+
+```{r}
+out <- nnet(expensive ~ weight + citympg + highwaympg + sports + suv,
+                  data=x, subset=(testFlag == 0), size=500, MaxNWts=7500L)
+predNnet500 <- predict(out, x)
+```
+
+
+## Increasing number of nodes 
+
+```{r}
+table(round(predNnet500,2))
+cor(predNnet500, glm.probs)
+```
+
+
+## Classification Accuracy
+
+```{r}
+nnet500.pred=rep(0,387)
+nnet500.pred[ predNnet500 > 0.5]=1
+table(nnet500.pred[x$testFlag==0],x$expensive[x$testFlag==0])
+table(nnet500.pred[x$testFlag==1],x$expensive[x$testFlag==1])
+```
+
+## Further Increase 
+
+Increasing the number of nodes to 900, we see that the correlation actually
+drops; at this point, the capacity of the model is too large given the input
+data size.
+
+## Further Increase 
+
+```{r}
+out <- nnet(expensive ~ weight + citympg + highwaympg + sports + suv,
+                  data=x, subset=(testFlag == 0), size=900, MaxNWts=7500L)
+predNnet900 <- predict(out, x)
+```
+
+## Further Increase 
+
+```{r}
+table(round(predNnet900,2))
+cor(predNnet900, glm.probs)
+```
+
+
+## Classification Accuracy
+
+
+```{r}
+nnet900.pred=rep(0,387)
+nnet900.pred[ predNnet900 > 0.5]=1
+table(nnet900.pred[x$testFlag==0],x$expensive[x$testFlag==0])
+table(nnet900.pred[x$testFlag==1],x$expensive[x$testFlag==1])
+```
+
+
+## Bake-off 
+
+What other methods are applicable here? 
+
+
+## Random Forest 
+
+```{r, fig.asp = 0.4}
+library(randomForest)
+cars_rf <- randomForest(factor(expensive) ~ weight + citympg + highwaympg 
+                        + sports + suv, data=x, subset=(testFlag == 0),
+                        ntree=100,proximity=TRUE)
+
+carsPred<-predict(cars_rf,x)
+plot(cars_rf)
+```
+
+## Random Forest 
+
+```{r}
+table(carsPred[x$testFlag==0],x$expensive[x$testFlag==0])
+table(carsPred[x$testFlag==1],x$expensive[x$testFlag==1])
+```
+
+
+## Bake-off 
+
+Notice that the neural network with 500 nodes performs similarly to the glm, but the other neural nets under-perform. 
+
+**Random Forest** performs very similar to **logistic glm** on test data.
+
+$0$: Training error, $1$: Test error. 
+
+```{r}
+tapply(as.numeric(glm.probs > 0.5) == x$expensive, x$testFlag, mean)
+tapply(as.numeric(predNnet10 > 0.5) == x$expensive, x$testFlag, mean)
+```
+
+
+## Bake-off (Contd.)
+
+
+```{r}
+tapply(as.numeric(predNnet500 > 0.5) == x$expensive, x$testFlag, mean)
+tapply(as.numeric(predNnet900 > 0.5) == x$expensive, x$testFlag, mean)
+tapply(carsPred == x$expensive, x$testFlag, mean)
+```
+
+
+## Tuning is everything 
+
+This is a general property of neural networks that will soon become painfully
+obvious: 
+
+There is some way to construct a very predictive neural network, but
+unless it is very well tuned it will often get outperformed by much simpler
+models. 
+
+**Keep in mind: a simpler model is often interpretable.**
+
+
+## Pros and Cons 
+
+
+The **nnet** package is actually quite well written, the *multinom* function is
+particularly useful, but only handles a single hidden layer. 
+
+The **neuralnet** allows for larger models, but I have not extensively tested it. 
+
+Quickly construct a visualization of a simple neural network model:
+
+
+## Visualize Neural Net 
+
+```{r, echo = T, eval = F}
+library(neuralnet)
+out <- neuralnet(expensive ~ weight + citympg + highwaympg + sports + suv,
+                  data=x,
+                  err.fct="sse",
+                  hidden=c(3,2),
+                  linear.output=FALSE,
+                  likelihood=TRUE)
+plot(out)
+```
+
+
+## Visualize Neural Net 
+
+```{r, echo = F, out.height = "500px", out.width = "600px"}
+# All defaults
+setwd(getwd())
+library(knitr)
+include_graphics("hidden_layers.png")
+```
+
+
+## Compare with Logistic {.smaller}
+
+```{r, echo = F}
+library(knitr)
+out <- glm(expensive ~ weight + citympg + highwaympg + sports + suv,
+                  data=x,
+                  subset=(testFlag == 0),
+                  family=binomial)
+summary(out)
+# knitr::kable(summary(out)$coefficients, align = 'c', format = 'html')
+```
+
+
+## Logistic Coefficients 
+
+
+```{r,echo=F, results = 'asis'}
+coefs <- data.frame(coef(summary(out)))
+
+tab <- cbind.data.frame(Effects = row.names(coefs),Estimate = coefs$Estimate, Exp.Estimate = exp(coefs$Estimate),
+              P.value = coefs$Pr...z..,            Significance = ifelse(coefs$Pr...z..<0.05,"Yes","No"))
+
+align_pander(tab, "rcccc", caption = "Effect sizes and P-values")
+
+```
+
+
+## Logistic Coefficients 
+
+```{r, echo = F, fig.cap="Parameter Estimates for the Fixed Effects", fig.height = 4}
+# load packages
+library(sjPlot)
+library(sjmisc)
+sjp.glm(out, "fe", y.offset = .4)
+```
+
+
+## Compare with random forest 
+
+```{R}
+varImpPlot(cars_rf)
+```
+
+

@@ -1,0 +1,219 @@
+---
+title: "Multinomial Logistic regression "
+subtitle: "<br/> A Short Tutorial"
+author: "Jyotishka Datta"
+institute: "Virginia Tech"
+date: "2016/12/12 (updated: `r Sys.Date()`)"
+
+output:
+  html_document:
+      toc: yes
+      toc_depth: '3'
+      toc_float: yes
+      number_sections: yes
+      theme: united
+---
+
+```{r setup, include=FALSE, purl=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment= ' ',warning=FALSE, message=FALSE, cache =TRUE, fig.show='asis',results='markup', fig.width=6.5, fig.height=3.5, fig.align='center',  linewidth=60, tidy=TRUE, tidy.opts=list(width.cutoff=60))
+
+
+local({r <- getOption("repos"); r["CRAN"] <- "http://R.research.att.com"; options(repos=r)})
+```
+
+# Multinomial logistic regression 
+
+We said in class last time that we can easily extend multinomial logistic regression by fixing a baseline 'reference' category, but we did not see an example. Here, I will show you an example of multi-class classification using a multinomial logistic regression. 
+
+To start, suppose $Y$ takes values in $\{0, 2, \ldots, K-1\}$, and we have $p$ predictors $X_1, X_2, \ldots, X_p$, and also assume that none of the degeneracy issues like `separability' or `high-dimensionality' ($p > n$) are present here. 
+
+Then we use a linear model for the log-odds against a baseline category (e.g. category 0). 
+
+\begin{align}
+		\log \left[ \frac{P(Y = 1 \mid X)}{P(Y = 0 \mid X)} \right] & = \beta_{10} + \beta_{11}X_1 + \ldots + \beta_{1p} X_p \\
+		\log \left[ \frac{P(Y = 2 \mid X)}{P(Y = 0 \mid X)} \right] & = \beta_{20} + \beta_{21}X_1 + \ldots + \beta_{2p} X_p \\
+		& \cdots \\
+		\log \left[ \frac{P(Y = K-1 \mid X)}{P(Y = 0 \mid X)} \right] & = \beta_{k0} + \beta_{k1}X_1 + \ldots + \beta_{kp} X_p \\
+\end{align}
+
+Note that the interpretation of these coefficients are dependent on the choice of baseline category for $Y$. However, if you want to fix a different category as the baseline, there is no "statistical" reason of preferring one category over another. 
+
+
+## Example: Breast cancer tissue classification 
+
+Here we will use the Breast cancer data from the UCI ML repository. You can find the data set here: [http://archive.ics.uci.edu/ml/datasets/breast+tissue](http://archive.ics.uci.edu/ml/datasets/breast+tissue). The main information is pasted below: 
+
+### Data Set Information:
+
+Impedance measurements were made at the frequencies: 15.625, 31.25, 62.5, 125, 250, 500, 1000 KHz. Impedance measurements of freshly excised breast tissue were made at the following frequencies: 15.625, 31.25, 62.5, 125, 250, 500, 1000 KHz. These measurements plotted in the (real, -imaginary) plane constitute the impedance spectrum from where the breast tissue features are computed. The dataset can be used for predicting the classification of either the original 6 classes or of *4 classes by merging together the fibro-adenoma, mastopathy and glandular classes whose discrimination is not important* (they cannot be accurately discriminated anyway).
+
+The predictor variables ($X_i$'s) are as follows: 
+
+|Predictor | Description |
+|------|-----|
+|I0 | Impedivity (ohm) at zero frequency |
+|PA500 | phase angle at 500 KHz |
+|HFS | high-frequency slope of phase angle |
+|DA | impedance distance between spectral ends |
+|AREA | area under spectrum |
+|A/DA | area normalized by DA |
+|MAX IP | maximum of the spectrum |
+|DR | distance between I0 and real part of the maximum frequency point |
+|P | length of the spectral curve |
+|Class | car(carcinoma), fad (fibro-adenoma), mas (mastopathy), gla (glandular), con (connective), adi (adipose). |
+
+Now, we will read this data set into R's environment. Note that you will need to change your directory to the location of this data set for the R code to run. The same data set is also available on your course website (both xls and csv files, but reading csv is easier).
+
+```{r}
+set.seed(12345)
+
+setwd("~/Course Notes/stat5525/2021Summer/R codes")
+tissue <- read.csv("BreastTissuesData.csv")
+str(tissue)
+```
+
+The breast tissues were originally classified into 6 groups, but we have merged the fibro-adenoma, mastopathy, and glandular classes into one group called "other". We can also ignore the first column with Case numbers. 
+
+```{r}
+require(nnet)
+tissue <- tissue[, -1]
+tissue$Class <- as.factor(tissue$Class)
+levels(tissue$Class)[levels(tissue$Class) %in% c("fad", "gla", "mas")] <- "other"
+levels(tissue$Class)
+```
+
+Now, our goal is to (1) fit a multinomial logistic regression to this data set and (2) also use the fitted model to predict future responses. 
+Here, we will first split the sample into a training set and a test set for using the supervised learning approach. I have used a 75%-25% split here. Also, remember that you will need a baseline for multinomial logistic regression and here that baseline is the class "adi". 
+
+
+```{r}
+train <- sample(1:nrow(tissue), 0.75*nrow(tissue))
+
+tissue.train <- tissue[train,]
+tissue.test <- tissue[-train,]
+
+# Setting the reference
+tissue$Class <- relevel(tissue$Class, ref = "adi")
+
+# Training the multinomial model
+multinom_model <- multinom(Class ~ ., data = tissue.train)
+```
+
+We first see that some output is generated by running the model, even though we are assigning the model to a new R object. This model-running output includes some iteration history and includes the final negative log-likelihood $0.001933$. 
+
+```{r}
+# Checking the model
+summary(multinom_model)
+```
+
+This $-2 \times \text{log-likelihood}$ is often called residual deviance and it appears on the summary output, this can be used in comparisons of nested models, but we will not get into model comparisoon here. We will pick this up at a later stage. 
+
+## Coefficients 
+
+The model summary output has a block of coefficients and a block of standard errors. 
+
+Each of these blocks has one row of values corresponding to a model equation. Focusing on the block of coefficients, we can look at the first row comparing Class = "car" to our baseline Class = "adi" and the second row comparing Class = "con" to our baseline Class = "adi". 
+
+If we consider our coefficients from the first row to be  and our coefficients from the second row to be , we can write our model equations in this way: 
+
+
+\begin{align}
+\ln(\frac{P(Class = ``car")}{P(Class = ``adi")}) & = \beta_{10} + \beta_{11} \times I0 + \beta_{12} \times PA500 + \ldots + \beta_{19} \times P \\
+
+\ln(\frac{P(Class = ``con")}{P(Class = ``adi")}) & = \beta_{20} + \beta_{21} \times I0 + \beta_{22} \times PA500 + \ldots + \beta_{29} \times P \\
+
+\ln(\frac{P(Class = ``other")}{P(Class = ``adi")}) & = \beta_{30} + \beta_{31} \times I0 + \beta_{32} \times PA500 + \ldots + \beta_{39} \times P 
+\end{align}
+
+
+Now, let's look at the coefficients again and try to interpret them: 
+
+```{r}
+coef(multinom_model)
+```
+
+- $\beta_{11}$: A one-unit increase in the variable $I0$ is associated with the decrease in the log odds of being a "carcinoma" tissue vs.an "adipose" tissue in the amount of $3.69752132$.
+
+- $\beta_{12}$: A one-unit increase in the variable $PA500$ is associated with the increase in the log odds of being a "carcinoma" tissue vs.an "adipose" tissue in the amount of $228.43655$.
+
+- $\beta_{21}$: A one-unit increase in the variable $I0$ is associated with the increase in the log odds of being a "connected" tissue vs. "adipose" tissue in the amount of $0.18037065$.
+
+- $\beta_{12}$: A one-unit increase in the variable $PA500$ is associated with the increase in the log odds of being a "connected" tissue vs. "adipose" tissue in the amount of $35.90941$.
+
+- and so on. 
+
+## Relative Risk ratio 
+
+The ratio of the probability of choosing one outcome category over the probability of choosing the baseline category is often referred as relative risk (and it is sometimes referred to as odds, described in the regression parameters above). 
+
+The relative risk is the right-hand side linear equation exponentiated, leading to the fact that the exponentiated regression coefficients are relative risk ratios for a unit change in the predictor variable. We can exponentiate the coefficients from our model to see these risk ratios.
+
+
+```{r}
+exp(coef(multinom_model))
+```
+
+-  The relative risk ratio for a one-unit increase in the variable $I0$ is $0.02478488$ for being in "carcinoma" vs. "adipose" tissue. 
+
+-  The relative risk ratio for a one-unit increase in the variable $PA500$ is $1.617093e+99$ for being in "carcinoma" vs. "adipose" tissue. (This variable must be important for tissue classification. )
+
+You can also use predicted probabilities to help you understand the model. You can calculate predicted probabilities for each of our outcome levels using the fitted function. We can start by generating the predicted probabilities for the observations in our *training* dataset and viewing the first few rows:
+
+```{r}
+head(pp <- fitted(multinom_model))
+```
+
+## Z-scores and P-values 
+
+We can also calculate the P-values simply by looking the coefficients, their standard errors. The Z-scores are simply the estimated coefficients divided by the standard errors, and the P-values can be obtained from Z-scores using tail probabilities of a standard Normal distribution. 
+
+$$
+\text{two-sided P-value} = 2 \times (1 - \Phi(z)), \text{ where } \Phi \text{ is N(0,1) CDF/}
+$$
+
+```{r}
+z <- summary(multinom_model)$coefficients/summary(multinom_model)$standard.errors
+p <- (1 - pnorm(abs(z), 0, 1)) * 2
+
+p
+```
+
+As one would expect, the PA500 predictor is significant and has a very small P-value. We see "0" here because it's smaller than my machine precision. 
+
+
+## Predicting and validating
+
+The main function for predicting class labels is called `predict` and you will need to supply a couple of arguments. 
+
+First, the argument `newdata` that is simply a data-set that you want to predict labels for, it could be your training data or test data or any other subset as long as it has the same predictor variables as were used to fit the model. Second, the argument is `type` that lets you specify what type of outcome you'd like: class labels or probabilities, (i.e. type = "class" or type = "probs").
+
+### Training error 
+
+```{r, eval = T}
+# Predicting the values for train dataset
+tissue.train$ClassPredicted <- predict(multinom_model, newdata = tissue.train, type = "class")
+
+# Building classification table
+(tab <- table(tissue.train$Class, tissue.train$ClassPredicted))
+
+# Calculating accuracy - sum of diagonal elements divided by total obs
+round((sum(diag(tab))/sum(tab))*100,2)
+```
+
+We see that the correct classification rate for the training data set is `r round((sum(diag(tab))/sum(tab))*100,2)`%, which is good, but could be overly optimistic. We will need to look at the test data set error rate. 
+
+### Test error 
+
+```{r}
+# Predicting the class for test dataset
+tissue.test$ClassPredicted <- predict(multinom_model, newdata = tissue.test, "class")
+
+# Building classification table
+(tab <- table(tissue.test$Class, tissue.test$ClassPredicted))
+
+# Calculating accuracy - sum of diagonal elements divided by total obs
+round((sum(diag(tab))/sum(tab))*100,2)
+```
+
+Here, the test data set correct classification rate is `r round((sum(diag(tab))/sum(tab))*100,2)`%, and we can see from the confusion table where the errors were made (or not).
+

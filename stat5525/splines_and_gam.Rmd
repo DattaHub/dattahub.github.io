@@ -1,0 +1,317 @@
+---
+title: "Splines and GAMS"
+subtitle: "Data Analytics: Week 9"
+author: "Jyotishka Datta (<jyotishka@vt.edu>) <br> Department of Statistics, Virginia Tech"
+output: 
+  html_document:
+      css: mystyle.css
+      toc: true
+      number_sections: true
+      toc_float: yes
+      toc_depth: 3
+fontsize: 11pt
+geometry: margin=1in
+urlcolor: blue
+---
+  
+```{r setup, include=FALSE}
+options(width=80)
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F)
+knit_hooks$set(no.main = function(before, options, envir) {
+  if (before) par(mar = c(4.1, 4.1, 1.1, 1.1))  # smaller margin on top
+})
+```
+
+# Introduction
+
+Some commands to splines and local regressions in the univariate setting. 
+
+```{r}
+# First, load in the necessary libraries
+library(ISLR)
+library(splines)
+attach(Wage)
+library(gam)
+
+if(!require(akima)){
+packageurl <- "https://cran.r-project.org/src/contrib/akima_0.6-2.1.tar.gz"
+install.packages(packageurl, repos=NULL, type="source")
+}
+
+library(akima) ##plotting
+```
+
+## Wage 
+
+We'll focus on predicting salary given other predictors (why the gap in wages between 200-260k?)
+
+```{R,results=c(5,8),fig.width=5,fig.height=3}
+summary(Wage)
+hist(Wage$wage)
+plot(Wage$age,Wage$wage)
+```
+
+## Splines
+
+```{r}
+ # fit piecewise constants
+fit=lm(wage ~ cut(age,c(0,30,40,50,60,70,100)),data=Wage)
+ # what is this
+x1 <- cut(age,c(0,30,40,50,60,70,100))
+table(x1)
+```
+
+```{R,results=c(5,8),fig.width=5,fig.height=3}
+# make the prediction data frame
+pred.df = data.frame(age=seq(10,100,by=1))
+pred=predict(fit,newdata=pred.df,se=T)
+plot(age,wage,col="gray",xlim=range(pred.df$age))
+lines(pred.df$age,pred$fit,lwd=2)
+lines(pred.df$age,pred$fit+2*pred$se ,lty="dashed")
+lines(pred.df$age,pred$fit-2*pred$se ,lty="dashed")
+```
+
+```{R,results=c(5,8),fig.width=5,fig.height=3}
+ # fit a spline model
+fit=lm(wage ~ bs(age,knots=c(25,40,60)),data=Wage)
+pred=predict(fit,newdata=pred.df,se=T)
+plot(age,wage,col="gray",xlim=range(pred.df$age))
+lines(pred.df$age,pred$fit,lwd=2)
+lines(pred.df$age,pred$fit+2*pred$se ,lty="dashed")
+lines(pred.df$age,pred$fit-2*pred$se ,lty="dashed")
+```
+
+Check out the polynomial basis that is created. The model fits a constant + a linear combination of "bumps"
+ 
+
+```{R,results=c(5,8),fig.width=5,fig.height=3}
+x1 <- model.matrix(wage ~ bs(age,knots=c(25,40,60)),data=Wage)
+matplot(Wage$age,x1,pch=16,cex=.6)
+abline(v=c(25,40,60),lty=2)
+```
+
+```{R,results=c(5,8),fig.width=5,fig.height=3}
+# try with different knot settings:
+x1 <- model.matrix(wage ~ bs(age,df=6),data=Wage)
+matplot(Wage$age,x1,pch=16,cex=.6)
+abline(v=c(25,40,60),lty=2)
+```
+
+Mess with the Boundary.knots, df=6 puts knots uniformly on quantiles.
+ 
+```{R,results=c(5,8),fig.width=5,fig.height=3}
+x1 <- model.matrix(wage ~ bs(age,df=6,Boundary.knots=c(0,100)),data=Wage)
+matplot(Wage$age,x1,pch=16,cex=.6)
+```
+
+```{R,results=c(5,8),fig.width=5,fig.height=3}
+# make knots equally spaced
+x1 <- model.matrix(wage ~ bs(age,knots=seq(20,80,by=20),Boundary.knots=c(0,100)),data=Wage)
+matplot(Wage$age,x1,pch=16,cex=.6)
+```
+
+```{R,results=c(5,8),fig.width=5,fig.height=3}
+ # check out the fit
+fit=lm(wage ~ bs(age,df=6,Boundary.knots=c(0,100)),data=Wage)
+# make the prediction data frame
+pred=predict(fit,newdata=pred.df,se=T)
+plot(age,wage,col="gray",xlim=range(pred.df$age))
+lines(pred.df$age,pred$fit,lwd=2)
+lines(pred.df$age,pred$fit+2*pred$se ,lty="dashed")
+lines(pred.df$age,pred$fit-2*pred$se ,lty="dashed")
+# the natural spline enforces linearity at the edges - this is usually better
+pred.df = data.frame(age=seq(0,100,by=2))
+fit2=lm(wage~ns(age,df=4),data=Wage)
+pred2=predict(fit2,newdata=pred.df,se=T)
+lines(pred.df$age, pred2$fit,col="blue",lwd=2)
+```
+
+```{R,results=c(5,8),fig.width=5,fig.height=3}
+ # note: intercept should be TRUE; otherwise spline goes thru origin
+plot(age,wage,col="gray",xlim=range(pred.df$age))
+fit2=lm(wage~ns(age,df=4,intercept=T),data=Wage)
+pred2=predict(fit2,newdata=pred.df,se=T)
+lines(pred.df$age, pred2$fit,col="blue",lwd=2)
+```
+
+```{R,results=c(5,8),fig.width=5,fig.height=3}
+ # look at the resulting basis functions
+matplot(Wage$age,ns(age,df=4),pch=16,cex=.6)
+ # equally spaced over 0:100
+matplot(0:100,ns(0:100,df=4),pch=16,cex=.6)
+matplot(0:100,ns(0:100,df=5),pch=16,cex=.6)
+matplot(0:100,ns(0:100,df=5,intercept=T),pch=16,cex=.6)
+```
+
+ try out the smoothing spline
+ the function smooth.spline takes in data in the x,y format
+ This is yet another univariate modeling approach
+ 
+```{R,results=c(5,8),fig.width=5,fig.height=3}
+plot(age,wage,xlim=c(10,88) ,cex=.5,col="darkgrey")
+title (" Smoothing Spline ")
+fit=smooth.spline(age,wage,df=16)
+fit2=smooth.spline(age,wage,cv=TRUE)
+fit2$df
+lines(fit,col="red",lwd=2)
+lines(fit2,col="blue",lwd=2)
+legend("topright",legend=c("16 DF","6.8 DF"),
+         col=c("red","blue"),lty=1,lwd=2,cex=.8)
+```
+
+```{R,results=c(5,8),fig.width=5,fig.height=3}
+ # perform local regression, we use the loess() function.
+plot(age,wage,xlim=range(age) ,cex=.5,col="darkgrey")
+title (" Local Regression ")
+ # span controls how much of the data is used for estimating each local
+ # regression fit.  span=.2 means 20% of the data is used locally
+fit=loess(wage~age,span=.08,data=Wage)
+fit2=loess(wage~age,span=.5,data=Wage)
+lines(pred.df$age,predict(fit,pred.df), col="red",lwd=2)
+lines(pred.df$age,predict(fit2,pred.df), col="blue",lwd=2)
+legend("topright",legend=c("Span=0.1","Span=0.5"), col=c("red","blue"),lty=1,lwd=2,cex=.8)
+```
+
+ try reading in the hump1000.csv dataset - useful for homework
+ 
+```{R,results=c(5,8),fig.width=5,fig.height=3}
+df3 <- read.table('hump1000.csv',sep=',',header=TRUE)
+plot(df3$x,df3$y,cex=.5,col='grey')
+fit=loess(y~x,span=.08,data=df3)
+fit2=loess(y~x,span=.9,data=df3)
+pred.df = data.frame(x=seq(1,24,length=200))
+lines(pred.df$x,predict(fit,pred.df), col="red",lwd=2)
+lines(pred.df$x,predict(fit2,pred.df), col="blue",lwd=2)
+legend("topright",legend=c("Span=0.08","Span=0.9"), col=c("red","blue"),lty=1,lwd=2,cex=.8)
+
+ # try natural spline
+fitLR = lm(y~ns(x,df=6,intercept=T),data=df3)
+lines(pred.df$x,predict(fitLR,pred.df), col="cyan",lwd=2,lty=2)
+```
+
+
+## GAMS
+
+First, we fit a gam using natural splines.  Since these make standard basis matrices for a linear model, we can use `lm`
+
+```{R,results=c(5,8),fig.width=5,fig.height=3}
+gam1=lm(wage~ns(year ,4)+ns(age ,5)+education ,data=Wage)
+summary(gam1)
+```
+
+Now, a plot showing the additive effects.  Since `plot.Gam` shows each of the estimated effects in the model, we'll show a region of 3 plots:
+
+```{R,results=c(5,8),fig.width=5,fig.height=3}
+par(mfrow=c(1,3),oma=c(0,0,0,0),mar=c(4,4,1,2))
+plot.Gam(gam1, se=TRUE, col="red")
+```
+
+Specify the same model using the `gam` package
+
+```{R,results=c(5,8),fig.width=5,fig.height=3}
+gam2=gam(wage ~ s(year ,4)+s(age ,5)+education ,data=Wage)
+ # make a plot to show the 3 estimated additive effects
+par(mfrow=c(1,3),oma=c(0,0,0,0),mar=c(4,4,1,1))
+plot(gam2, se=TRUE,col="blue")
+```
+
+The year effect is both small and almost linear, we can use standard linear model theory to compare a sequence of nested models:
+
+```{R,results=c(5,8),fig.width=5,fig.height=3}
+gam.m1=gam(wage ~ s(age ,5)+education ,data=Wage)
+gam.m2=gam(wage ~ year+s(age ,5)+education ,data=Wage)
+gam.m3=gam(wage ~ s(year,4)+s(age ,5)+education ,data=Wage)
+ # use the anova function to compare these nested models
+anova(gam.m1,gam.m2,gam.m3,test="F")
+ # note, the F-test is good for linear models.  More generally the 
+ # Chisq test will be appropriate.  Since these are linear models,
+ # the F-test and Chi-square tests are equivalent.
+anova(gam.m1,gam.m2,gam.m3,test="Chisq")
+ # this suggests gam.m3 adds very little over gam.m2.
+ # note, you could use fewer degrees of freedom in the spline for age
+gam.y1a5=gam(wage ~ s(year,1)+s(age ,5)+education ,data=Wage)
+anova(gam.m1,gam.y1a5,gam.m3,test="F")
+par(mfrow=c(1,3),oma=c(0,0,0,0),mar=c(4,4,1,1))
+plot(gam.y1a5, se=TRUE,col="blue")
+```
+
+You could even hone in on how many degrees of freedom to use for age.
+
+```{R,results=c(5,8),fig.width=5,fig.height=3}
+gam.y1a1=gam(wage ~ s(year,1)+s(age ,1)+education ,data=Wage)
+gam.y1a2=gam(wage ~ s(year,1)+s(age ,2)+education ,data=Wage)
+gam.y1a3=gam(wage ~ s(year,1)+s(age ,3)+education ,data=Wage)
+gam.y1a4=gam(wage ~ s(year,1)+s(age ,4)+education ,data=Wage)
+gam.y1a5=gam(wage ~ s(year,1)+s(age ,5)+education ,data=Wage)
+anova(gam.y1a1,gam.y1a2,gam.y1a3,gam.y1a4,gam.y1a5,test="F")
+ # plot the estimated effects for the best fitting model
+par(mfrow=c(1,3),oma=c(0,0,0,0),mar=c(4,4,1,1),pty='m')
+plot(gam.y1a4, se=TRUE,col="blue")
+```
+
+predictions can be obtained using predict - note: predict cannot produce se's for gam model fits.
+
+```{R,results=c(5,8),fig.width=5,fig.height=3}
+preds=predict(gam.y1a4,newdata=Wage)
+ # show a square plot
+par(mfrow=c(1,1),oma=c(0,0,0,0),mar=c(4,4,1,1),pty='s')
+plot(Wage$wage,preds,xlim=range(Wage$wage),ylim=range(Wage$wage),
+     xlab='actual wages',ylab='predicted wages',cex=.6)
+```
+
+note, these models have difficulty predicting if any wages are over 200
+one can also use local regression within the gam framework:
+  
+```{R,results=c(5,8),fig.width=5,fig.height=3}
+gam.lo=gam(wage~s(year,df=4)+lo(age,span=0.7)+education, data=Wage)
+ # look at the estimated effects (note: need capitol G in plot.Gam)
+par(mfrow=c(1,3),oma=c(0,0,0,0),mar=c(4,4,1,1),pty='m')
+plot.Gam(gam.lo, se=TRUE, col="green")
+```
+
+
+Local regressions are nice since they can produce bivariate effects that
+allow interactions between variables.  This requires sufficient data. Here, a 2-d response surface is estimated over year and age. 
+
+```{R}
+gam.lo.i=gam(wage~lo(year,age,span=0.5)+education,data=Wage)
+```
+
+
+```{R,results=c(5,8)}
+# plotting requires a special library be added
+library(akima)
+par(mfrow=c(1,2),oma=c(0,0,0,0),mar=c(4,4,1,1),pty='m')
+plot(gam.lo.i)
+ # maybe with a different rotation - there's not a lot of interaction
+gam.lo.i=gam(wage~lo(age,year,span=0.5)+education,data=Wage)
+plot(gam.lo.i)
+```
+
+Seeing 2-d surfaces is hard, and I'm not sure how to extract it. You can try using R packages that do this, see the mgcViz vignette:
+
+[https://cran.r-project.org/web/packages/mgcViz/vignettes/mgcviz.html]
+
+gam also works for the generalized linear models framework
+create a binary outcome
+```{r,results=c(5,8),fig.width=5,fig.height=3}
+Wage$wage250 = ifelse(Wage$wage >= 250,1,0)
+gam.lr=gam(wage250 ~ year+s(age,df=4)+education, family=binomial,data=Wage)
+par(mfrow=c(1,3))
+plot(gam.lr,se=T,col="green")
+```
+
+
+all low wages in the low education category makes the LR estimate for
+the effect of the lowest age group unstable (why?).  A crude solution
+is to remove the low education group from the analysis
+
+```{r,results=c(5,8),fig.width=5,fig.height=3}
+table(Wage$education ,Wage$wage250)
+gam.lr=gam(wage250 ~ year+s(age,df=4)+education, family=binomial,data=Wage,
+           subset=education != '1. < HS Grad')
+par(mfrow=c(1,3))
+plot(gam.lr,se=T,col="green")
+```
+
