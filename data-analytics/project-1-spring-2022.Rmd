@@ -1,7 +1,7 @@
 ---
 title: "Project 1 Description"
 subtitle: "Regression"
-author: "Jyotishka Datta"
+author: "Dr. Jyotishka Datta"
 date: "`r Sys.Date()`"
 output: 
   html_document:
@@ -20,16 +20,15 @@ knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 
 # Project 1: Supervised Learning: Sparse Regression 
 
-The goal of this project is to apply supervised learning to high-dimensional regression and classification problems. Our goal would be to compare a penalized regression approach (e.g. Lasso) with a Bayesian approach (either Bayesian Lasso or the horseshoe prior) for the same inferential task. 
+The goal of this project is to apply supervised learning to a high-dimensional regression problem. Our goal would be to compare between multiple modern regression approaches (e.g. Stepwise, Lasso, Ridge, Elastic Net, PCR or others) for the same inferential task. 
 
-This project should have two parts: 
+The project goals include the following:
 
-1.  Understand how to handle sparse regression and classification problems. 
-2.  use R packages for comparing at least *two* different methods. 
+1.  Understand how to handle sparse regression problem. 
+2.  use R packages for comparing at least *three* different methods. 
 3.  Perform supervised learning with a real data-set. 
 
-I will discuss how a supervised sparse regression method like Lasso works in details in class, and talk about some of the improvements since Lasso. We have also done at leas t one simulation study involving Lasso in our computer lab. 
-
+I will discuss how a supervised sparse regression method like Lasso works in details in class, and talk about some of the improvements since Lasso. We have also done at least one simulation study involving Lasso in our computer lab. 
 ## Example 1: HIV Data (Supervised)
 
 A PNAS paper studied in-vitro drug resistance of $n = 1057$ HIV-1 isolates to protease and reverse transcriptase mutations. There are $p = 208$ (binary) mutation variables. The original paper compares 5 different regression methods: decision trees, neural networks, SVM regression, OLS and LASSO. 
@@ -105,9 +104,36 @@ lasso.pred=predict(fit, s = bestlam , newx = hiv.test$x)
 mean((lasso.pred - hiv.test$y)^2)
 ```
 
+# Inferential Goals for this project 
+
+Now your goal would be to compare a few other popular regularization methods or Bayesian methods for this data and compare their performance. You don't need to implement any regularization method or dimension reduction strategies on your own. You can use R packages available freely for this project. 
+
+1.  Apply different sparse regression (regularization/shrinkage/dimension reduction technique) on this data. You can choose any 3 methods covered in class or outside. Here is a short list of some of the popular regularization methods we have not covered in class. It is not mandatory to use them but using a different/new tool is always an advantage. 
+
+| **Method **                                                                                                                                                                                      | **R   demo/example/package **                                                       |
+|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| [Adaptive   Lasso](https://pages.cs.wisc.edu/~shao/stat992/zou2006.pdf)                                                                                                                          | https://ricardocarvalho.ca/post/lasso/                                              |
+| [Dantzig   selector](https://projecteuclid.org/journals/annals-of-statistics/volume-35/issue-6/The-Dantzig-selector--Statistical-estimation-when-p-is-much/10.1214/009053606000001523.full)      | https://cran.r-project.org/web/packages/fastclime/                                  |
+| [Square Root   Lasso](https://arxiv.org/abs/1009.5689)                                                                                                                                           | [flare   package](https://www.jmlr.org/papers/volume16/li15a/li15a.pdf)             |
+| [Minimum   Concave   Penalty](https://projecteuclid.org/journals/annals-of-statistics/volume-38/issue-2/Nearly-unbiased-variable-selection-under-minimax-concave-penalty/10.1214/09-AOS729.full) | [plus   package](https://cran.r-project.org/web/packages/plus/)                     |
+| [Sparsenet](https://hastie.su.domains/Papers/Sparsenet/jasa_MFH_final.pdf)                                                                                                                       | [sparsenet   package](https://cran.r-project.org/web/packages/sparsenet/index.html) |
+
+
+
+2. You can also look at able 1 and 2 of the excellent review paper: ['In praise of sparsity and convexity", Tibshirani (2014)](https://tibshirani.su.domains/ftp/tibs-copss.pdf) by the author of Lasso Robert Tibshirani for a list of popular regularization methods. All of these methods are designed for sparse systems. 
+
+2. Compare between different methods? e.g. Would Elastic Net (or MCP or Dantzig Selector) be a better fit than Lasso? Do concave methods outperform convex regularizing methods? How do you test? How about Bayesian methods or PC Regression? Choose any *three* methods that you like. 
+
+
+
+
+# Appendix: Bayesian alternatives 
+
 ## Horseshoe 
 
-We have also talked briefly about Bayesian methods for handling sparse regression such as Bayesian Lasso and horseshoe in class. We will show here the horseshoe prior, proposed by Carvalho, Polson and Scott (2010) for sparse signal recovery. Horseshoe prior improves on the Laplace prior used for Bayesian Lasso when the underlying data is nearly-black. The horsehoe prior is given by the following hierachical model: 
+We have not talked much about Bayesian methods for handling sparse regression such as Bayesian Lasso and horseshoe in class. The main idea is that we can interpret the penalty as a prior on the coefficients in a Bayesian set up, e.g. the Lasso penalty $\ell_1$ norm $\sum_j |\beta_j|$ can be interpreted in a Bayesian set-up as a double exponential or Laplace prior density on $\beta_j$ like $p(\beta_j) \propto \exp\{-|\beta_j|\}$. There are, of course, other motivations of Bayesian estimators for high-dimensional data and most of the successful methods are derived in a natural way, i.e. in a truely Bayesian fashion. For example, the [spike and slab prior](https://www.tandfonline.com/doi/abs/10.1080/01621459.1988.10478694) puts a 'spike' at zero for capturing sparsity and a 'slab' that explains the non-zero signals. This is a very active and well-developed area with lots of development but we won't get into this here. 
+
+Just as an example of what Bayesian methods look like, I will briefly describe the horseshoe prior, proposed by [Carvalho, Polson and Scott (2010)](http://proceedings.mlr.press/v5/carvalho09a/carvalho09a.pdf) for sparse signal recovery here. Horseshoe prior improves on the Laplace prior used for Bayesian Lasso when the underlying truth is sparse. The horseshoe prior is given by the following hierarchical model: 
 
 $$
 \begin{align}
@@ -140,6 +166,13 @@ plot(hs.fit$BetaHat, main = "Horseshoe", ylab = "Estimates")
 plot(lasso_cv_est, main = "Lasso", ylab = "Estimates")
 ```
 
+
+### Which method performs better? 
+
+-  In absence of "ground truth" about the predictors, it is hard to tell if horseshoe is over-penalizing or Lasso is severely under-penalizing. 
+-  That's why we choose methods based on a simulation study that we think accurately represents our reality (hard!)
+
+
 ### Variable Selection by Horseshoe
 
 ```{r, echo = T}
@@ -166,21 +199,3 @@ hs.pred <- hiv.test$x%*%hs.fit$BetaHat
 ```
 
 Again, the same questions can be asked. 
-
-### Which method performs better? 
-
--  In absence of "ground truth" about the predictors, it is hard to tell if horseshoe is over-penalizing or Lasso is severely under-penalizing. 
--  That's why we choose methods based on a simulation study that we think accurately represents our reality (hard!)
-
-
-# Inferential Goals for this project 
-
-Now your goal would be to compare a few other popular regularization methods or Bayesian methods for this data and compare their performance. You don't need to implement any regularization method or a Bayesian method on your own. You can use R packages for this project. 
-
-1.  Apply different sparse regression (regularization/shrinkage/dimension reduction technique) on this data. See table 1 and 2 of [Bhadra et al. (2019)](https://arxiv.org/pdf/1706.10179.pdf) for a list of popular regularization methods and Bayesian methods. All of them are for similar problems in sparse signal recovery. The same paper has a list of R packages for implementing Bayesian methods in Table 5. 
-
-<!-- 2.  Implement the MCMC for one of the Bayesian methods, see e.g. modify the R code for Gibbs sampling for horseshoe prior at the end of this paper : [https://arxiv.org/abs/1010.5265](https://arxiv.org/abs/1010.5265) -->
-
-2. Compare between different methods? e.g. Would Elastic Net or MCP or Dantzig Selector be a better fit than Lasso? Do concave methods outperform convex regularizing methods? How do you test? How about Bayesian methods or PC Regression? Choose any *two* methods that you like. 
-
-

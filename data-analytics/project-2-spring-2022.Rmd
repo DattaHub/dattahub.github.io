@@ -1,7 +1,7 @@
 ---
 title: "Project 2 Decription"
 subtitle: "Classification"
-author: "Jyotishka Datta"
+author: "Dr. Jyotishka Datta"
 date: "`r Sys.Date()`"
 output: 
   html_document:
@@ -18,15 +18,15 @@ urlcolor: blue
 knitr::opts_chunk$set(echo = TRUE, message = F, warning = F, cache = T)
 ```
 
-# High-dimensional classification 
+# Project 2: Supervised Learning: High-dimensional classification 
 
-The goal of this project would be to compare a few different classification methods when the number of variables $p$ is large, in either a large $p$, small $n$ setting or when $p$ is of the order of several hundreds or thousands where the problem of selecting a subset of variables is an important one. 
+The goal of this project would be to compare three different classification methods when the number of variables $p$ is large, in either a large $p$, small $n$ setting or when $p$ is of an order where the problem of selecting a subset of variables is an important one. 
 
 The methods that you can consider are logistic regression (with or without penalty depending on your situation), k-nearest neighbour, support vector machine and random forest. We will talk about these methods during the course but for an overview, you can check these pages: 
 
-1. [Logistic Demo](http://dattahub.github.io/stat5525/logistic_demo.html)
-2. [Decision Tree, Random Forest](http://dattahub.github.io/stat5525/tree_demo.html)
-3. [Support Vector Machine](http://dattahub.github.io/stat5525/svm_islr.html)
+1. [Logistic Demo](http://dattahub.github.io/data-analytics/logistic_demo.html)
+2. [Decision Tree, Random Forest](http://dattahub.github.io/data-analytics/tree_demo.html)
+3. [Support Vector Machine](http://dattahub.github.io/data-analytics/svm_islr.html)
 
 **Note:** You should submit a 4-page project report (and R codes separately) with descriptions of the methods that you have used and a thorough comparison of the methods used. The report should also mention which member carried out which part of the project. 
 
@@ -172,8 +172,8 @@ xtabs(~ y.obs +y.pred)
 
 No, because we are checking classification on training data and zero errors does not mean the method will perform well on test data as well. 
 
+# Appendix
 
-# APPENDIX 
 
 ## Tools used in working with text data 
 
