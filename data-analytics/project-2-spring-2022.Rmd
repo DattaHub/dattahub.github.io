@@ -172,8 +172,8 @@ xtabs(~ y.obs +y.pred)
 
 No, because we are checking classification on training data and zero errors does not mean the method will perform well on test data as well. 
 
-
 # Appendix
+
 
 ## Tools used in working with text data 
 

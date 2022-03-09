@@ -1536,9 +1536,7 @@ methods.</li>
 <p>I will discuss how a supervised sparse regression method like Lasso
 works in details in class, and talk about some of the improvements since
 Lasso. We have also done at least one simulation study involving Lasso
-in our computer lab.</p>
-<div id="example-1-hiv-data-supervised" class="section level2">
-<h2>Example 1: HIV Data (Supervised)</h2>
+in our computer lab. ## Example 1: HIV Data (Supervised)</p>
 <p>A PNAS paper studied in-vitro drug resistance of <span class="math inline">\(n = 1057\)</span> HIV-1 isolates to protease and
 reverse transcriptase mutations. There are <span class="math inline">\(p
 = 208\)</span> (binary) mutation variables. The original paper compares
@@ -1609,7 +1607,6 @@ property of Lasso:</p>
 <pre class="r"><code>lasso.pred=predict(fit, s = bestlam , newx = hiv.test$x)
 mean((lasso.pred - hiv.test$y)^2)</code></pre>
 <pre><code>## [1] 0.06878929</code></pre>
-</div>
 </div>
 </div>
 <div id="inferential-goals-for-this-project" class="section level1">

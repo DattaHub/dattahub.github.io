@@ -29,7 +29,6 @@ The project goals include the following:
 3.  Perform supervised learning with a real data-set. 
 
 I will discuss how a supervised sparse regression method like Lasso works in details in class, and talk about some of the improvements since Lasso. We have also done at least one simulation study involving Lasso in our computer lab. 
-
 ## Example 1: HIV Data (Supervised)
 
 A PNAS paper studied in-vitro drug resistance of $n = 1057$ HIV-1 isolates to protease and reverse transcriptase mutations. There are $p = 208$ (binary) mutation variables. The original paper compares 5 different regression methods: decision trees, neural networks, SVM regression, OLS and LASSO. 
@@ -105,7 +104,6 @@ lasso.pred=predict(fit, s = bestlam , newx = hiv.test$x)
 mean((lasso.pred - hiv.test$y)^2)
 ```
 
-
 # Inferential Goals for this project 
 
 Now your goal would be to compare a few other popular regularization methods or Bayesian methods for this data and compare their performance. You don't need to implement any regularization method or dimension reduction strategies on your own. You can use R packages available freely for this project. 
@@ -168,6 +166,7 @@ plot(hs.fit$BetaHat, main = "Horseshoe", ylab = "Estimates")
 plot(lasso_cv_est, main = "Lasso", ylab = "Estimates")
 ```
 
+
 ### Which method performs better? 
 
 -  In absence of "ground truth" about the predictors, it is hard to tell if horseshoe is over-penalizing or Lasso is severely under-penalizing. 
@@ -200,4 +199,3 @@ hs.pred <- hiv.test$x%*%hs.fit$BetaHat
 ```
 
 Again, the same questions can be asked. 
-
