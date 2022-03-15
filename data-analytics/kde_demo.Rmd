@@ -1,10 +1,14 @@
 ---
 title: "Kernel Density Estimation using R"
-author: "Jyotishka Datta"
-date: "`r Sys.Date()`"
-output: ioslides_presentation
+author: "Jyotishka Datta (<jyotishka@vt.edu>) <br> Department of Statistics, Virginia Tech"
+output: 
+  ioslides_presentation:
+    smaller: yes
+logo: ../vt.png
+transition: faster
 ---
-  ```{r setup, include=FALSE}
+
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
