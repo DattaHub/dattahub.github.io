@@ -1,6 +1,6 @@
 ---
 title: "Logistic Regression: Case study"
-subtitle: "Data Analytics: Stat 5525"
+subtitle: "Challenger disaster"
 author: "Jyotishka Datta (<jyotishka@vt.edu>) <br> Department of Statistics, Virginia Tech"
 output: 
   ioslides_presentation:
@@ -71,7 +71,7 @@ The Rogers Commission concluded:
 ## Data-set 
 
 ```{r}
-challenger <- read.delim("~/Course Notes/stat5525/2021/R codes/datasets/challenger.txt")
+challenger <- read.delim("~/Course Notes/data_analytics/2022/R codes/datasets/challenger.txt")
 # View(challenger)
 str(challenger)
 ```
