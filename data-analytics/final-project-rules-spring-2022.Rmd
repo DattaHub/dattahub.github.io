@@ -43,5 +43,5 @@ This document describes the rules for the final class project. The goal of the f
 
 # Project description and examples: 
 
-1. [Project 1: Modern Regression](https://dattahub.github.io/stat5525/project-1-spring-2022.html)
-2. [Project 2: Modern Classification](https://dattahub.github.io/stat5525/project-2-spring-2022.html)
+1. [Project 1: Modern Regression](https://dattahub.github.io/data-analytics/project-1-spring-2022.html)
+2. [Project 2: Modern Classification](https://dattahub.github.io/data-analytics/project-2-spring-2022.html)
