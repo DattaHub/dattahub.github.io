@@ -13,7 +13,7 @@
 
 <meta name="date" content="2022-03-17" />
 
-<title>Answer for HW4, Q4</title>
+<title>Hint for HW4, Q4</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -359,7 +359,7 @@ pre code {
 
 
 
-<h1 class="title toc-ignore">Answer for HW4, Q4</h1>
+<h1 class="title toc-ignore">Hint for HW4, Q4</h1>
 <h4 class="author">Jyotishka Datta</h4>
 <h4 class="date">2022-03-17</h4>
 
@@ -388,19 +388,17 @@ Derive an expression for <span class="math inline">\(\hat{\beta}^\mathrm{ridge}_
 can be calculated with simple matrix-vector multiplications in the same
 way as in ordinary least squares.</p>
 </div>
-<div id="answer-to-q.4" class="section level2">
-<h2>Answer to Q.4</h2>
-<p>For HW4, Q4, you need to derive an analytic, closed form solution for
-the ridge regression estimate:</p>
-<p>Ridge Regression solves the following optimization: <span class="math display">\[
-\hat{\beta}_{ridge} =   \min_{\beta} \sum_{i=1}^{n} \left( y_i - \beta_0
-- \sum_{j=1}^{p} \beta_j x_{i,j} \right)^2 + \lambda \sum_{j=1}^{p}
-\beta_j^2.
+<div id="hint" class="section level2">
+<h2>Hint:</h2>
+<p>First, let us look at the case of multiple linear regression OLS
+estimate. OLS solves the following optimization: <span class="math display">\[
+\hat{\beta}_{ols} = \min_{\beta} \sum_{i=1}^{n} \left( y_i - \beta_0 -
+\sum_{j=1}^{p} \beta_j x_{i,j} \right)^2
 \]</span> We can write this in matrix-vector notation as:</p>
 <p><span class="math display">\[
 \begin{align}
-\hat{\beta}_{ridge} &amp; = \min_{\beta} \left\{ (y-X\beta)^T(y-X\beta)
-+ \lambda \beta^T \beta \right\} \doteq \min_{\beta} \{ Q(\beta) \}
+\hat{\beta}_{ols} &amp; =   \min_{\beta} \left\{
+(y-X\beta)^T(y-X\beta)\right\} \doteq \min_{\beta} \{ Q(\beta) \}
 \end{align}
 \]</span> Now we can differentiate the objective function <span class="math inline">\(Q(\beta)\)</span> with respect to <span class="math inline">\(\beta\)</span>, set the (partial) derivatives to
 zero and get the solution for ridge regression.</p>
@@ -408,22 +406,28 @@ zero and get the solution for ridge regression.</p>
 \begin{align}
 \frac{d}{d\beta} Q(\beta) &amp; = \frac{d}{d\beta} \left\{
 (y-X\beta)^T(y-X\beta) + \lambda \beta^T \beta \right\} \\
-&amp; = \frac{d}{d\beta} \{ y^Ty - 2 \beta^T X^T y + \beta^T X^T X \beta
-+ \lambda \beta^T \beta \} \\
-&amp; = \frac{d}{d\beta} \{ y^Ty - 2 \beta^T X^T y + \beta^T (X^T X +
-\lambda I) \beta \} \\
-&amp; = - 2 X^T y + 2 \beta (X^TX + \lambda I).
+&amp; = \frac{d}{d\beta} \{ y^Ty - 2 \beta^T X^T y + \beta^T X^T X
+\beta  \} \\
+&amp; = \frac{d}{d\beta} \{ y^Ty - 2 \beta^T X^T y + \beta^T (X^T X I)
+\beta \} \\
+&amp; = - 2 X^T y + 2 \beta (X^TX).
 \end{align}
 \]</span> Hence, <span class="math inline">\(\frac{d}{d\beta} Q(\beta) =
 0\)</span> would lead to:</p>
 <p><span class="math display">\[
 \begin{align}
-- 2 X^T y + 2 \beta (X^TX + \lambda I) &amp; = 0 \\
-\beta = (X^TX + \lambda I)^{-1}(X^Ty).
+- 2 X^T y + 2 \beta (X^TX) &amp; = 0 \\
+\therefore, \quad \hat{\beta}_{ols} = (X^TX)^{-1}(X^Ty).
 \end{align}
 \]</span></p>
-<p>This is the solution for the ridge regression optimization problem
-for a given value of <span class="math inline">\(\lambda\)</span>.</p>
+<p>Observe that the penalized objective function for ridge regression is
+identical to the following.</p>
+<p><span class="math display">\[
+(y - X\beta)^\top (y- X\beta) + \lambda \beta^\top \mathbb{I}_n \beta
+= y^\top y - 2 \beta^\top X^\top y + \beta^\top(X^\top X + \lambda
+\mathbb{I}_n) \beta
+\]</span></p>
+<p>We could differentiate this and solve for <span class="math inline">\(\beta\)</span> to get the answer.</p>
 </div>
 
 
