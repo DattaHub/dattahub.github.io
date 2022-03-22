@@ -1,35 +1,58 @@
 ---
-title: "Untitled"
+title: "Answer for HW4, Q4"
 author: "Jyotishka Datta"
 date: '2022-03-17'
-output: ioslides_presentation
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## R Markdown
+## Q4. Ridge regression (25 pts)
 
-This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+In this question we will study the so-called *ridge regression* estimator, and see how it is connected to lasso and principal components regressions.  Whereas lasso involves an "L1 penalty", ridge involves L2.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
+$$
+\hat{\beta}^\mathrm{ridge}_\lambda = \mathrm{argmin}_\beta \; ||y - X \beta||^2 + \lambda \sum_{j=1}^p |\beta_j|^2.
+$$
 
-## Slide with Bullets
+As in the lasso, it is typical to center the $x$-values so that the intercept can be inferred as $\hat{\beta}_0 = \bar{y}$ without penalty; then $y$ above would really be $y-\hat{\beta}_0$ and $X$ would not contain a column of ones.  So basically, assume no intercept.  (It is also common to normalize the $x$-values as described in class.)
 
-- Bullet 1
-- Bullet 2
-- Bullet 3
+One of the advantages of ridge over lasso is that the solution $\hat{\beta}$ is available in closed form.  Derive an expression for $\hat{\beta}^\mathrm{ridge}_\lambda$ that can be calculated with simple matrix-vector multiplications in the same way as in ordinary least squares.  
 
-## Slide with R Output
+## Answer to Q.4 
 
-```{r cars, echo = TRUE}
-summary(cars)
-```
+For HW4, Q4, you need to derive an analytic, closed form solution for the ridge regression estimate:
 
-## Slide with Plot
+Ridge Regression solves the following optimization:
+$$
+\hat{\beta}_{ridge} =	\min_{\beta} \sum_{i=1}^{n} \left( y_i - \beta_0 - \sum_{j=1}^{p} \beta_j x_{i,j} \right)^2 + \lambda \sum_{j=1}^{p} \beta_j^2.
+$$
+We can write this in matrix-vector notation as:
 
-```{r pressure}
-plot(pressure)
-```
+$$
+\begin{align}
+\hat{\beta}_{ridge} & =	\min_{\beta} \left\{ (y-X\beta)^T(y-X\beta) + \lambda \beta^T \beta \right\} \doteq \min_{\beta} \{ Q(\beta) \}
+\end{align}
+$$
+Now we can differentiate the objective function $Q(\beta)$ with respect to $\beta$, set the (partial) derivatives to zero and get the solution for ridge regression. 
 
+$$
+\begin{align}
+\frac{d}{d\beta} Q(\beta) & = \frac{d}{d\beta} \left\{ (y-X\beta)^T(y-X\beta) + \lambda \beta^T \beta \right\} \\
+& = \frac{d}{d\beta} \{ y^Ty - 2 \beta^T X^T y + \beta^T X^T X \beta + \lambda \beta^T \beta \} \\
+& = \frac{d}{d\beta} \{ y^Ty - 2 \beta^T X^T y + \beta^T (X^T X + \lambda I) \beta \} \\
+& = - 2 X^T y + 2 \beta (X^TX + \lambda I).
+\end{align}
+$$
+Hence, $\frac{d}{d\beta} Q(\beta) = 0$ would lead to:
+
+$$
+\begin{align}
+- 2 X^T y + 2 \beta (X^TX + \lambda I) & = 0 \\
+\beta = (X^TX + \lambda I)^{-1}(X^Ty). 
+\end{align}
+$$
+
+This is the solution for the ridge regression optimization problem for a given value of $\lambda$. 
