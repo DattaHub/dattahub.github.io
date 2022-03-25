@@ -401,14 +401,14 @@ estimate. OLS solves the following optimization: <span class="math display">\[
 (y-X\beta)^T(y-X\beta)\right\} \doteq \min_{\beta} \{ Q(\beta) \}
 \end{align}
 \]</span> Now we can differentiate the objective function <span class="math inline">\(Q(\beta)\)</span> with respect to <span class="math inline">\(\beta\)</span>, set the (partial) derivatives to
-zero and get the solution for ridge regression.</p>
+zero and get the solution.</p>
 <p><span class="math display">\[
 \begin{align}
 \frac{d}{d\beta} Q(\beta) &amp; = \frac{d}{d\beta} \left\{
-(y-X\beta)^T(y-X\beta) + \lambda \beta^T \beta \right\} \\
+(y-X\beta)^T(y-X\beta)\right\} \\
 &amp; = \frac{d}{d\beta} \{ y^Ty - 2 \beta^T X^T y + \beta^T X^T X
 \beta  \} \\
-&amp; = \frac{d}{d\beta} \{ y^Ty - 2 \beta^T X^T y + \beta^T (X^T X I)
+&amp; = \frac{d}{d\beta} \{ y^Ty - 2 \beta^T X^T y + \beta^T (X^T X)
 \beta \} \\
 &amp; = - 2 X^T y + 2 \beta (X^TX).
 \end{align}

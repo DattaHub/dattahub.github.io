@@ -34,13 +34,13 @@ $$
 \hat{\beta}_{ols} & =	\min_{\beta} \left\{ (y-X\beta)^T(y-X\beta)\right\} \doteq \min_{\beta} \{ Q(\beta) \}
 \end{align}
 $$
-Now we can differentiate the objective function $Q(\beta)$ with respect to $\beta$, set the (partial) derivatives to zero and get the solution for ridge regression. 
+Now we can differentiate the objective function $Q(\beta)$ with respect to $\beta$, set the (partial) derivatives to zero and get the solution. 
 
 $$
 \begin{align}
-\frac{d}{d\beta} Q(\beta) & = \frac{d}{d\beta} \left\{ (y-X\beta)^T(y-X\beta) + \lambda \beta^T \beta \right\} \\
+\frac{d}{d\beta} Q(\beta) & = \frac{d}{d\beta} \left\{ (y-X\beta)^T(y-X\beta)\right\} \\
 & = \frac{d}{d\beta} \{ y^Ty - 2 \beta^T X^T y + \beta^T X^T X \beta  \} \\
-& = \frac{d}{d\beta} \{ y^Ty - 2 \beta^T X^T y + \beta^T (X^T X I) \beta \} \\
+& = \frac{d}{d\beta} \{ y^Ty - 2 \beta^T X^T y + \beta^T (X^T X) \beta \} \\
 & = - 2 X^T y + 2 \beta (X^TX).
 \end{align}
 $$
