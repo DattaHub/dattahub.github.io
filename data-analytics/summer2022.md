@@ -1,4 +1,6 @@
-## About this course 
+## Data Analytics R Tutorials 
+
+### Details 
 
 **Course Title**: DAAS 5525 (Data Analytics)
 **Semester/term**: Summer 2022 <br>
@@ -7,13 +9,87 @@
 **Office hours**: Friday 9-10 am or by appointment (online: zoom link on canvas).  <br>
 **Instructor**: Dr. Jyotishka Datta (Email: jyotishka@vt.edu, Office: Hutcheson 409C <br>
 
-Git repo for this course: https://github.com/DattaHub/DattaHub.github.io/tree/master/stat5525 
+Git repo for this course: https://github.com/DattaHub/DattaHub.github.io/tree/master/data-analytics
+
+**This is just the R repository for some of the demos I will show in class. The lecture notes are available on Canvas. I will also upload the PDF prints of these demos on Canvas.**
+
+## R demos/tutorials 
+
+(*You'll find below links to some R tutorials for this course, but these will be updated during the course, adjusting to the needs and interest of the current cohort. These are generated using R-markdown and you can find the source files by going to the github repository. In addition, I will post base R codes for different topics covered.*)
+
+#### Introduction to R 
+
+(*You can skip to 4 directly if you know about vectors and data-frames.*)
+
+1. What is R: https://dattahub.github.io/data-analytics/000_why_R.html 
+2. Vectors and data types: https://dattahub.github.io/data-analytics/02-vectors-and-datatypes.html
+3. Data frames: https://dattahub.github.io/data-analytics/03-data-frames.html
+4. Logic in R and functions: https://dattahub.github.io/data-analytics/00_logic_in_R.html#1 
+
+#### R-tools for data wrangling and visulization 
+
+1. Packages and R-markdown: https://dattahub.github.io/data-analytics/04-packages-and-rmarkdown.html 
+2. Using dplyr: https://dattahub.github.io/data-analytics/05-dplyr.html
+3. Data Viz Using ggplot2:
+https://dattahub.github.io/data-analytics/06-data-visualization-slide.html (slides, preferred)
+https://dattahub.github.io/data-analytics/06-data-visualization.html (notes)
+4. Basic Statistics (we might skip this): https://dattahub.github.io/data-analytics/07-statistics.html 
+5. Efficiency considerations: https://dattahub.github.io/data-analytics/08-efficient_R.html 
+6. Matrix in R: https://dattahub.github.io/data-analytics/09-matrix_R.html 
+
+### Univariate and multiple regression basics 
+
+1. Simple univariate regression [Canvas folder link, needs login](https://canvas.vt.edu/courses/144945/files/folder/Lecture%205%3A%20Simple%20linear%20regression)
+2. Multiple regression basics [Canvas folder link, needs login](https://canvas.vt.edu/courses/144945/files/folder/Lecture%206%3A%20Multiple%20Linear%20Regression)
+3. (Related topic) Bias and variance trade-off in ML [Canvas folder link, needs login](https://canvas.vt.edu/courses/144945/files/folder/Lecture%207-9%3A%20Modern%20regression%201)
+
+#### Modern Regression 
+
+1. Modern Regression 1: http://dattahub.github.io/data-analytics/regression_demo_1.html (adjusted $R^2$, AIC, BIC, stepwise procedures and Ridge)
+2. Modern Regression 2: http://dattahub.github.io/data-analytics/regression_demo_2.html
+3. Modern Regression 3: http://dattahub.github.io/stat5443/regression_demo_3.html
+4. Lab on Shrinkage Methods: Ridge, Lasso etc.
+http://dattahub.github.io/data-analytics/lab_glmnet.html
+5. PCA, PCR demo: https://dattahub.github.io/data-analytics/demoPCA.html#1
+
+#### Resampling methods 
+
+1. Cross-validation: https://dattahub.github.io/data-analytics/crossvalidation.html 
+2. Bootstrap : https://dattahub.github.io/data-analytics/bootstrap_demo.html 
+
+#### Classification & KDE
+
+1. Kernel Density: https://dattahub.github.io/data-analytics/kde_demo.html 
+2. Logistic demo: https://dattahub.github.io/data-analytics/logistic_demo.html (from last week)
+3. Deviance explained: https://dattahub.github.io/data-analytics/deviance_explained.html 
+4. Multiclass Logistic Regression : https://dattahub.github.io/data-analytics/logistic_other.html 
+5. LDA, QDA & KNN: https://dattahub.github.io/data-analytics/classification_demo.html#27 (# denotes page) 
+
+
+#### Trees, random forests etc.
+
+1. Trees, Bagging, Boosting: http://dattahub.github.io/data-analytics/tree_demo.html
+
+#### Multile Testing
+
+1. http://dattahub.github.io/data-analytics/multiple_testing.html
+
+#### Neural net
+
+1. Stochastic Gradient Descent: http://dattahub.github.io/data-analytics/sgd_demo.html
+2. Introduction to Artificial Neural Net: http://dattahub.github.io/data-analytics/neural_net_demo.html
 
 ### Email: 
 
-Please use "STAT 5525 + [Your query]" on the subject line for me to easily find and respond to your email. Example: if you have a query about Q.1 on homework 3, your subject line should be something like: "STAT 5525 (Query about HW1, Q1)". 
+Please use "Data Analytics + [Your query]" on the subject line for me to easily find and respond to your email. Example: if you have a query about Q.1 on homework 3, your subject line should be something like: "Data Analytics (Query about HW1, Q1)". 
 
-# **Course Outlines**
+### Covid-19 classroom expectations:
+
+Students are required to follow the university's guidelines for public health and uphold the wellness commitment. Please visit https://ready.vt.edu/public-health-guidelines.html#wellness for more information. 
+
+**Patience and Communication:** As we navigate coming back to in-person modality for a technical class that has a strong focus in creative, group, problem solving, we will discover that some course choices will work and not work for supporting your needs to learn. I will be as responsive as possible to such discoveries.  In no way do I want your experience as a student to suffer from constraints imposed by Covid-19 and the university.  Please be patient and communicate your needs as they arise. 
+
+### Course Outlines
 
 (Items in _italic fonts_ are optional, depending on interest, preparation etc.)
 
@@ -65,60 +141,6 @@ Please use "STAT 5525 + [Your query]" on the subject line for me to easily find 
 
 **Note:** This is only a _ **tentative list of topics** _ - the instructor may add topics or change the length of time spent on any particular topic to accommodate this particular class of students.
 
-(**You'll find below links to some R tutorials for this course, but these will be updated during the course, adjusting to the needs and interest of the current cohort. These are generated using R-markdown and you can find the source files by going to the github repository. In addition, I will post base R codes for different topics covered.**)
-
-### R tutorials 
-
-#### Introduction to R 
-
-1.	Logic in R and functions: https://dattahub.github.io/stat5525/logic_in_R_1.html#1
-2.	Efficiency considerations: https://dattahub.github.io/stat5525/efficienct_R.html 
-3.  Matrix operations (large intersection with tutorial #2): https://dattahub.github.io/stat5525/matrix_R.html
-
-#### R-tools for data wrangling and visulization 
-
-1. Efficiency considerations: https://dattahub.github.io/stat5525/efficienct_R.html (from last week, apologies for the weird typo in file name)
-2. Data Viz Using ggplot2: https://dattahub.github.io/stat5525/data-visualization.html (from last week)
-3. Using dplyr: https://dattahub.github.io/stat5525/05-dplyr.pdf
-
-#### Classification & KDE
-
-1. Kernel Density: https://dattahub.github.io/stat5525/kde_demo.html 
-2. Logistic demo: https://dattahub.github.io/stat5525/logistic_demo.html (from last week)
-3. Deviance explained: https://dattahub.github.io/stat5525/deviance_explained.html 
-4. Multiclass Logistic Regression : https://dattahub.github.io/stat5525/logistic_other.html 
-5. LDA, QDA & KNN: https://dattahub.github.io/stat5525/classification_demo.html#27 (# denotes page) 
-
-#### Resampling methods 
-
-1. Cross-validation: https://dattahub.github.io/stat5525/crossvalidation.html 
-2. Bootstrap : https://dattahub.github.io/stat5525/bootstrap_demo.html 
-
-#### Regression 
-
-1. Modern Regression 1: http://dattahub.github.io/stat5525/regression_demo_1.html
-2. Modern Regression 2: http://dattahub.github.io/stat5525/regression_demo_2.html
-3. Modern Regression 3: http://dattahub.github.io/stat5443/regression_demo_3.html
-4. Lab on Shrinkage Methods: Ridge, Lasso etc. http://dattahub.github.io/stat5525/lab_glmnet.html
-5. PCA, PCR demo: https://dattahub.github.io/stat5525/demoPCA.html#1
-
-
-#### Trees, random forests etc.
-
-1. Trees, Bagging, Boosting: http://dattahub.github.io/stat5525/tree_demo.html
-
-#### Multile Testing
-
-1. http://dattahub.github.io/stat5525/multiple_testing.html
-
-#### Neural net
-
-1. Stochastic Gradient Descent: http://dattahub.github.io/stat5525/sgd_demo.html
-2. Introduction to Artificial Neural Net: http://dattahub.github.io/stat5525/neural_net_demo.html
-
-
-## Syllabus 
-
 
 **Homework Policies:**
 
@@ -168,8 +190,5 @@ There are many books for teaching the basics of R, also lots of resources on the
 
 The instructor reserves the right to make changes to the syllabus during the course. Any necessary changes will be announced in class and posted on the course website.
 
-**Graduate Academic Integrity Statement**
-
-The tenets of the Virginia Tech Graduate Honor Code will be strictly enforced in this course, and all assignments shall be subject to the stipulations of the Graduate Honor Code. For more information on the Graduate Honor Code, please refer to theGHS Constitution located at [https://graduateschool.vt.edu/academics/expectations/graduate-honor-system.html](https://graduateschool.vt.edu/academics/expectations/graduate-honor-system.html)
 
 

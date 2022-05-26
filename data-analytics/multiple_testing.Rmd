@@ -1,6 +1,6 @@
 ---
 title: 'Multiple testing (Updated)'
-author: "Jyotishka Datta (<jyotishka@vt.edu>) <br> Department of Statistics, Virginia Tech"
+author: "Jyotishka Datta"
 output: 
   ioslides_presentation:
     smaller: yes
