@@ -1,7 +1,8 @@
 ---
-title: "Logistic Regression"
+title: "Classification R Demo" 
+subtitle: "Logistic Regression, kNN and LDA, QDA"
 author: "Jyotishka Datta"
-date: "April 13, 2018, updated `r Sys.Date()`"
+date: "`r Sys.Date()`"
 output: 
   ioslides_presentation:
     smaller: true

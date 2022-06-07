@@ -1,0 +1,90 @@
+---
+title: "Logistic regression example in R"
+author: "Jyotishka Datta"
+date: '2022-06-05'
+output: 
+  html_document:
+    fontsize: 11pt
+    theme: journal
+    highlight: tango 
+    toc: true
+    toc_depth: 6
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# South African Heart Disease Data 
+
+## Overview 
+
+A retrospective sample of males in a heart-disease high-risk region of the Western Cape, South Africa. There are roughly two controls per case of CHD. Many of the CHD positive men have undergone blood pressure reduction treatment and other programs to reduce their risk factors after their CHD event. In some cases the measurements were made after these treatments. These data are taken from a larger dataset, described in Rousseauw et al, 1983, South African Medical Journal. The following description is found in Hastie et al. section 4.4.2. 
+
+"The data ... are a subset of the Coronary Risk-Factor Study (CORIS) baseline survey, carried out in three rural areas of the Western Cape, South Africa (Rousseauw et al., 1983). The aim of the study was to establish the intensity of ischemic heart disease risk factors in that high-incidence region. The data represent white males between 15 and 64, and the response variable is the presence or absence of myocardial infarction (MI) at the time of the survey (the overall prevalence of MI was 5.1% in this region). There are 160 cases in our data set, and a sample of 302 controls."
+
+The data-set can be directly from the ESLI website loaded as follows:
+
+## Data import 
+
+```{r data_read}
+rm(list = ls())
+
+sahd <- read.csv("https://hastie.su.domains/ElemStatLearn/datasets/SAheart.data",
+                 stringsAsFactors = T, row.names = 1)
+```
+
+The variables included in this data-set are as follows: 
+
+1. `sbp` systolic blood pressure
+2. `tobacco` cumulative tobacco (kg)
+3. `ldl` low densiity lipoprotein cholesterol
+4. `adiposity`
+5. `famhist` family history of heart disease (Present, Absent)
+6. `typea` type-A behavior
+7. `obesity`
+8. `alcohol` current alcohol consumption
+9. `age` age at onset
+10. `chd` **response**, coronary heart disease
+
+The pairwise correlation plot is shown below, with the two colours indicating `chd` levels. 
+
+```{r pairwise, echo = F}
+pairs(sahd[,-c(5,10)], col  = 2+sahd$chd)
+```
+
+
+## Scientific question 
+
+The main problem here is to understand the factors affecting patient's chance of having coronary heart disease. 
+
+### Fitting a logistic regression 
+
+We can fit a logistic regression using the `glm` function with `family = binomial` and `chd` as the response variable. Note that we are fitting the model on the entire data-set and looking at the estimates of the coefficients obtained for assesing importance of the covariates. The summary shows the estimated coefficients along with their standard errors, Z-scores and P-values, and their significance at 5% level. 
+
+```{r}
+glm.fits=glm(chd~.,data=sahd,family=binomial)
+summary(glm.fits)
+```
+
+As Hastie et al. (ESLI) note, some of the coefficient estimates are surprising, e.g. `sbp` (systolic b.p.) is not significant and `obesity` has a negative coefficient! They ascribe these to presence of many correlated predictors and caution that these should be interpreted with caution. 
+
+Now, recall the interpretation of $\hat{\beta}$ in a logistic regression model. If you have just one predictor $X$ and the associated coefficient is $\beta$.
+$$
+\log\left(\frac{P(Y = 1 | X = x)}{(1- P(Y = 1|X = x))}\right) = \alpha + \beta x \equiv P(Y = 1 \mid X = x) = \frac{\exp(\alpha + \beta x)}{1+\exp(\alpha + \beta x)}. 
+$$
+
+Increasing $X$ by one unit (say from $x$ to $x+1$) changes the log-odds by a factor of $\beta$, or equivalently it multiplies the odds by $e^{\beta}$. 
+
+Now, you can interpret the meaning of the significant coefficients in the above model. For example, if $\hat\beta$ for `ldl` is 0.1739239, then increasing `ldl` by 1 unit will increase the odds by `r exp(0.1739239)` amount. 
+
+Self-evaluation task:
+
+- What are the "significant" predictors here? 
+- What are the effects of systolic blood pressure and obesity? Why are they surprising? 
+- Fit a model with only the significant predictors. Is it a better fit? 
+
+
+
+
