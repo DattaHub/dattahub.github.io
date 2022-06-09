@@ -3,7 +3,7 @@ title: "Multinomial Logistic regression "
 subtitle: "<br/> A Short Tutorial"
 author: "Jyotishka Datta"
 institute: "Virginia Tech"
-date: "2016/12/12 (updated: `r Sys.Date()`)"
+date: "`r Sys.Date()`"
 
 output:
   html_document:
@@ -67,7 +67,7 @@ Now, we will read this data set into R's environment. Note that you will need to
 ```{r}
 set.seed(12345)
 
-setwd("~/Course Notes/stat5525/2021Summer/R codes")
+setwd("~/GitHub/DattaHub.github.io/data-analytics")
 tissue <- read.csv("BreastTissuesData.csv")
 str(tissue)
 ```
