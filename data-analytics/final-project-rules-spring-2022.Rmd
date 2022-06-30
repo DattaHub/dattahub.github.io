@@ -21,9 +21,9 @@ This document describes the rules for the final class project. The goal of the f
 
 -  The deliverable for your final project is a complete data analysis report with your R codes embedded into it, using R-markdown or your tool of choice.  
 
--  The project report will be due on May 3rd (check with me if you're plan to submit early). You must upload your presentation to Canvas on the due date. 
+-  The project report will be due on August 5th (check with me if you're plan to submit early). You must upload your presentation to Canvas on the due date. 
 
--  The group size for this project is 3, and you can choose your group members, and some of you have done this already. If not, I will select a group for you on Canvas. 
+-  The group size for this project is 2, and you can choose your group members, and some of you have done this already. If not, I will select a group for you on Canvas. 
 
 # Implementation and Analysis
 

@@ -1,0 +1,192 @@
+---
+title: "Project 2 Description"
+subtitle: "Classification"
+author: "Dr. Jyotishka Datta"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+      toc: true
+      number_sections: false
+      toc_float: true
+      theme: united
+fontsize: 12pt
+geometry: margin=1in
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = F, warning = F, cache = T)
+```
+
+# Supervised Learning: High-dimensional classification 
+
+The goal of this project would be to compare three different classification methods when the number of variables $p$ is large, in either a large $p$, small $n$ setting or when $p$ is of an order where the problem of selecting a subset of variables is an important one. 
+
+The methods that you can consider are logistic regression (with or without penalty depending on your situation), k-nearest neighbour, support vector machine and random forest. We will talk about these methods during the course but for an overview, you can check these pages: 
+
+1. [Logistic Demo](http://dattahub.github.io/data-analytics/logistic_demo.html)
+2. [Decision Tree, Random Forest](http://dattahub.github.io/data-analytics/tree_demo.html)
+3. [Support Vector Machine](http://dattahub.github.io/data-analytics/svm_islr.html)
+
+**Note:** You should submit a 4-page project report (and R codes separately) with descriptions of the methods that you have used and a thorough comparison of the methods used. The report should also mention which member carried out which part of the project. 
+
+I will provide a quick example of using `glmnet' below: 
+
+# Penalized Logistic regression
+
+We have seen in class that the estimates from a logistic regression will be unstable in presence of either collinearity or separability, and in the latter case the estimates blow up. It turns out that this is always the case when $p > n$. 
+
+For a smaller $p$, the issues might not be as severe but one can still improve the accuracy of prediction and estimation by removing the "noisy" predictors from the data, or equivalently, selecting the significant variables. We show how this works for a logistic regression with an $\ell_1$ penalty. 
+
+Logistic regression model: 
+$$ 
+\eta_i = \log(\frac{p_i}{1-p_i}) = \alpha + \sum_{j=1}^{p} x_{ij}\beta_j 
+$$
+The log-likelihood is given by: 
+$$
+l(y,\beta) = \sum_{i=1}^{n} y_i \log(p_i) +\sum_{i=1}^{n}(1-y_i)\log(1-p_i)
+$$
+We minimize the penalized log-likelihood:
+$$
+S = -l(y,\beta) + \frac{\lambda}{2}J(\beta),
+$$
+
+where $J(\beta)$ is a penalty function, e.g. $J(\beta) = \lVert \beta \rVert_1$ will lead to an $\ell_1$ penalty that will shrink some of the coefficients all the way to zero to lead to a sparse model. To fit this model to the data, we can use the same R package 'glmnet', but we need to change the argument family = "gaussian" to family="binomial". 
+
+## Measuring performance: Sensitivity and Specificity
+
+- **Sensitivity** (also called the true positive rate) measures the proportion of actual positives which are correctly identified and is complementary to the false negative rate.
+
+- **Specificity** (also called the true negative rate) measures the proportion of negatives which are correctly identified as such and is complementary to the false positive rate.
+
+
+## HIV Data (Supervised)
+
+PNAS paper studies in vitro drug resistance of $n = 1057$ HIV-1 isolates to protease and reverse transcriptase mutations. There are $p = 208$ (binary) mutation variables. 
+
+The original paper compares 5 different regression methods: decision trees, neural networks, SVM regression, OLS and LASSO.
+
+Full paper (if you're interested): [http://www.pnas.org/content/103/46/17355.full](http://www.pnas.org/content/103/46/17355.full)
+
+```{r, echo = T, tidy = T, cache=T}
+setwd("C:/Users/jyotishka/OneDrive/Documents/Course Notes/data_analytics/master/R codes/datasets")
+## save the hiv.rda file somewhere that R can find and use that path
+load("hiv.rda")
+dim(hiv.train$x)
+dim(hiv.test$x)
+```
+
+We have seen how LASSO for regression works on this data-set. 
+
+```{r, echo = T, warning = F, message = F, cache=T, fig.asp = 0.5}
+library(glmnet)
+set.seed(1)
+cvfit <- cv.glmnet(hiv.train$x, hiv.train$y)
+fit <- cvfit$glmnet.fit
+plot(fit, xvar = "lambda")
+```
+
+# Dichotomizing Response 
+
+To see how classification works, we will dichotomize the response to create a binary $Y$ variable. 
+
+```{r, echo = T, fig.width=3.5}
+hist(hiv.train$y, col = "red")
+abline(v = log(25,10))
+ytr_b = hiv.train$y > log(25,10)
+table(ytr_b)
+```
+
+We'll treat `ytr_b` as our new response and try a classification algorithm. 
+
+```{r, echo = T}
+# library(glmnet)
+fit.bin=glmnet(hiv.train$x,ytr_b, alpha = 1, family = "binomial")
+plot(fit.bin)
+```
+
+```{r, echo = F}
+par(mfrow=c(1,2))
+plot(fit)
+plot(fit.bin)
+```
+
+
+Now, you can find out how many variables were selected by this method, and the MSE in a test data-set. You can compare between different values of $\alpha$, to see if a particular Elastic Net will outperform Lasso, and also compare with the outputs from other methods described before.
+
+The next section decsribes the codes for analyzing the ALL lymphoma data where $p \gg n$, you can also use that data-set if you want. **A simulated data with a large $p$, where the ground truth is known would be fine too**.
+
+
+## Example from T-cell lymphoma 
+
+```{r,echo=TRUE, message=FALSE, warning=FALSE}
+## required for gene expression data classification example
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+## Caution: if you're doing this for the first time, it will install *many* packages. 
+# BiocManager::install(version = "3.12")
+# BiocManager::install("ALL", version = "3.12")
+library(ALL)
+data(ALL)
+dim(ALL)
+```
+
+## Simplifying features 
+
+We are going to use the first three features. 
+
+```{r, echo=TRUE}
+resp <- gsub("B[0-9]", "B", ALL$BT) 
+## B-cell tumors of type B, B1,B2, T, T1, T2 
+resp <- factor(gsub("T[0-9]", "T", resp))
+xmat <- t(exprs(ALL))
+mydata <- data.frame(y = resp,x1 = xmat[,1],x2=xmat[,2],x3=xmat[,3])
+head(mydata,n=3)
+```
+
+##  Penalized logistic regression on ALL data
+
+- We consider the tumor data with $p = 12625$ samples and $n = 128$ individuals. (**Wide Data**)
+- We shall fit a $\ell_1$ penalized logistic regression model. 
+- As we have seen before, this will shrink some of the coefficients to zero. 
+- Use R-package `glmnet` with `family = "binomial". 
+
+```{r, echo=T, message=FALSE, warning=FALSE}
+library(glmnet);library(lars)
+bcell <- glmnet(x = xmat, y = resp,family = "binomial") # binomial for binary response
+plot(bcell)
+title("Fitted Coefficients",line=2.5)
+```
+
+- We can tell which of the $p = 12625$ features are important and classify $n = 128$ individuals into two groups. 
+
+
+```{r, echo=T}
+pred.class <- predict(bcell,newx=xmat,s=NULL,type="class")
+y.pred <- pred.class[,ncol(pred.class)]
+y.obs <- resp
+xtabs(~ y.obs +y.pred) 
+```
+
+- The classification table shows perfect specificity and sensitivity. Is this surprising? 
+
+ +  No, because we are checking classification on training data and zero errors does not mean the method will perform well on test data as well. 
+
+<!-- # Appendix -->
+
+<!-- ## Tools used in working with text data  -->
+
+<!-- ```{r, echo = FALSE, results = "asis"} -->
+<!-- static_help <- function(pkg, topic, out, links = tools::findHTMLlinks()) { -->
+<!--   pkgRdDB = tools:::fetchRdDB(file.path(find.package(pkg), 'help', pkg)) -->
+<!--   force(links) -->
+<!--   tools::Rd2HTML(pkgRdDB[[topic]], out, package = pkg, -->
+<!--                  Links = links, no_links = is.null(links)) -->
+<!-- } -->
+<!-- tmp <- tempfile() -->
+<!-- static_help("base", "grep", tmp) -->
+<!-- out <- readLines(tmp) -->
+<!-- headfoot <- grep("body", out) -->
+<!-- cat(out[(headfoot[1] + 5):(headfoot[2] - 1)], sep = "\n") -->
+<!-- ``` -->

@@ -1,0 +1,52 @@
+---
+title: "Final Project Rules and Ideas"
+author: "Dr. Jyotishka Datta"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    fontsize: 11pt
+    theme: united
+    toc: true
+    toc_depth: 6
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This document describes the rules for the final class project. The goal of the final class project is to implement some of the computational tools and methods you have learned in this class. This includes principal component analysis for exploratory analysis and all methods we have covered and will cover for modern regression and classification. Our goal would be to analyze a data set with enough variables such that the problem of selection and shrinkage are important.  
+
+## Final Project Deliverables 
+
+-  The deliverable for your final project is a complete data analysis report with your `R` codes embedded into it, using R-markdown or your tool of choice.  
+
+-  The project report will be due on August 5th (check with me if you're plan to submit early). You must upload your presentation to Canvas on the due date. 
+
+-  The group size for this project is 2, and you can choose your group members, and some of you have done this already. If not, I will select a group for you on Canvas. 
+
+# Implementation and Analysis
+
+1.  Sparse Regression: Compare and contrast different methods for a data set with more than 20 variables ($p > 20$). You can choose a large $p$, small $n$ data set like the genomic data sets showed in class or a data set with moderately large $p$ and larger $n$, like the prostate cancer data. The main criteria is that variable selection and shrinkage methods must make sense for such a data set (which means you can not choose a data set with very few variables). You can choose methods covered in class like LASSO, Ridge, Elastic Net and PCR and also any other extensions as you like. More details [here](https://dattahub.github.io/stat5525/project-1-spring-2022.html).
+
+2.  High-dimensional Classification problem for a large or mderately large $p$ data: compare between different methods: e.g. Logistic regression: original and with $\ell_1$ or $\ell_2$ penalty, LDA, QDA, k-NN, support vector machines and random forest etc. Like the regression counterpart, variable selection and shrinkage methods must make sense for your chosen data set (which means you can not choose a data set with very few variables).
+
+
+# Rules
+
+1. This is a group project where each student group will choose one of the above problems, i.e. **either regression or classification**, and at least one data set to analyze. 
+
+2. Ideally you'd choose a different data-set than the ones shown in class or demos and choose at least three methods to compare. 
+
+3. You will present your work on the final day of this class and submit a full report. Your reports will be due by the final day of the class, August 4th. 
+
+4. If you want to work on a problem different from regression and classification (e.g. clustering or time series), that is fine too, but you will need my prior approval and discuss how we can incorporate the course materials into that project. 
+
+### Project description and examples: 
+
+Here are the two project descriptions for regression and classification with example `R` codes:
+
+1. [Project 1: Modern Regression](https://dattahub.github.io/data-analytics/project-1-summer-2022.html)
+2. [Project 2: Modern Classification](https://dattahub.github.io/data-analytics/project-2-summer-2022.html)
+
+

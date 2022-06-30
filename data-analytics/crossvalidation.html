@@ -16,7 +16,7 @@ class: center, middle, inverse, title-slide
 ## Cross-validation
 ### Jyotishka Datta
 ### Virginia Tech
-### 2021/06/21 (updated: 2021-06-22)
+### 2021/06/21 (updated: 2022-06-22)
 
 ---
 
@@ -226,6 +226,82 @@ legend("topright", c("loocv", "k-fold"),lty = c(1,2))
 ```
 
 ![](crossvalidation_files/figure-html/unnamed-chunk-8-1.png)&lt;!-- --&gt;
+
+
+---
+## Use caret package 
+
+- An useful alternative is to use the `caret` package that is a general purpose statistical package for predictive modeling with tools for 
+
+-  data splitting
+-  pre-processing
+-  feature selection
+-  model tuning using resampling
+-  variable importance estimation
+
+- Almost all the methods covered in stat 5525 and ISLR are also available via `caret` but I will only show the cross-validation aspect. 
+
+- [https://topepo.github.io/caret/](https://topepo.github.io/caret/)
+
+
+---
+## A minimal example 
+
+- We want to tune using a 10-fold CV. 
+- The `trainControl` function helps us do that. 
+
+
+
+```r
+library(caret)
+fitControl &lt;- trainControl(method = "cv",number = 10)
+```
+
+- We will try a classification example now: knn with `\(k\)` as the tuning parameter for the iris data-set.  
+
+
+---
+## Tune the polynomial degree 
+
+- Look at the arguments carefully. 
+- `method` specifies which classification or regression method to use. 
+- `metric`: By default, possible values are "RMSE" and "Rsquared" for regression and "Accuracy" and "Kappa" for classification. 
+- Important to remember which ones are maximized vs. minimized. 
+
+
+```r
+fit &lt;- train(Species ~ .,
+             method     = "knn",
+             tuneGrid   = expand.grid(k = 1:10),
+             trControl  = fitControl,
+             metric     = "Accuracy",
+             data       = iris)
+```
+
+---
+## Result from kFCV
+
+
+```r
+plot(fit)
+```
+
+![](crossvalidation_files/figure-html/unnamed-chunk-10-1.png)&lt;!-- --&gt;
+
+---
+## Best `\(k\)` 
+
+
+```r
+## the best value of k can be obtained by
+fit$bestTune
+```
+
+```
+##   k
+## 7 7
+```
+
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
