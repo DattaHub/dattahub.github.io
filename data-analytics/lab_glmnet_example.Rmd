@@ -6,7 +6,8 @@ output:
   html_document:
       css: mystyle.css
       toc: true
-      number_sections: true
+      number_sections: false
+      toc_float: yes
 fontsize: 12pt
 geometry: margin=1in
 urlcolor: blue
@@ -16,19 +17,23 @@ urlcolor: blue
 knitr::opts_chunk$set(echo = TRUE, message = F, warning = F)
 ```
 
+## In-class exercise 
+
+Complete problem 1 below and send the R codes or the compiled pdf to jyotishka@vt.edu. 
+
 ## Lab Exercise: Comparing Lasso, Ridge and Elastic Net. 
 
 We will look at an example of sparse regression where the predictors are highly correlated and compare between Lasso, Elastic Net and Ridge Regression in terms of the test set errors. Recall that  Ridge, Lasso, Elastic Net are all special cases of Elastic net with the following penalty: 
 $$
 P_{\lambda,\alpha}(\beta) = \lambda \frac{(1-\alpha)}{2} {\lVert \beta \rVert}_2^2 + \lambda \alpha {\lVert \beta \rVert}_1
 $$
-So $\alpha = 0$ is Ridge, $\alpha = 1$ is Lasso, anything in between is Elastic Net.
+Here $\alpha = 0$ is equivalent to a ridge penalty, $\alpha = 1$ is the Lasso penalty, and anything in between ($0 < \alpha < 1)$ is Elastic Net. 
 
-Errata: There's no square on the Lasso penalty, as one of you pointed out. 
 
 ## Data Generation 
 
-We fix a $\beta$ with few non-zero elements and a design matrix ($X$ matrix) with large $p$, small $n$ settings. 
+We fix the regression parameter vector $\beta$ with a few non-zero elements and a design matrix ($X$ matrix) with large $p$, small $n$. Specifically, we chose:
+
 
 $$
 \beta = (\underbrace{10, \ldots, 10}_{10},\underbrace{0,\ldots,0}_{40})^T \\
@@ -55,6 +60,40 @@ beta <- c(rep(5,p1),rep(0,p-p1))
 eps=rnorm(n,mean=0,sd=0.1)
 fx = x %*% beta
 y=fx+eps
+```
+
+The assumed covariance structure $Cov(X) = \Sigma = \{(\rho)^{|i-j|}\}_{1\le i,j \le p}$ will lead to a generated data where the covariance between $X_i$ and $X_j$ will decay as $i$ and $j$ move further away, i.e. as $|i-j|$ increases. This is called an $AR(1)$ structure. See the heatmap below:
+
+```{r heatmap, echo = T}
+library(reshape2)
+
+simple_heatmap <- function(x){
+  melted_x <- melt(x)
+  min_x = min(x)
+  mid_x = mean(x)
+  max_x = max(x)
+  
+  head(melted_x)
+  library(ggplot2)
+  p = ggplot(data = melted_x, aes(x=Var1, y=Var2, fill=value)) + 
+    geom_tile(color = "grey")+
+    scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                         midpoint = mid_x, limit = c(min_x, max_x), space = "Lab", 
+                         name="Scale") +
+    theme_light()+ 
+    # theme(axis.text.x = element_text(angle = 45, vjust = 1,
+    #                                  size = 12, hjust = 1))+
+    theme(axis.text.x = element_blank())+
+    coord_fixed()
+   return(p)
+}
+
+simple_heatmap(CovMatrix)
+```
+
+## Supervised learning set-up 
+
+```{r train_test, echo = T}
 
 # Split data into train and test sets
 train_rows <- sample(1:n, n/2)
@@ -84,23 +123,26 @@ yhat.lasso <- predict(fit.lasso, s=fit.lasso$lambda.1se, newx=x.test)
 
 Clearly, Elastic Net is the winner. This happens because the predictors are correlated. Lasso does not work well for highly correlated predictors (can we think of a reason?). If you make $\rho$ small, the situation reverses. 
 
-**Exercise**: 
+**Exercise** 
 
 1. Find an otimal value of $\alpha$ that minimizes the test MSE for three different values of correlation $\rho$. You can take $3$ different values of $\rho$ (small, medium and high correlation). Please avoid copy-pasting the R code $10 \times 3$ times - use a for loop or apply-type constructs. 
 
-2. Download the breast cancer data-set from your blackboard website and load it on your workspace by typing the following command on R console: 
+
+**Practice**
+
+2. Download the breast cancer data-set from the [Canvas website](https://canvas.vt.edu/courses/151354/files/folder/datasets) and load it on your workspace by typing the following command on R console: 
 
 ```{R, eval = F}
 load("bc-tcga.Rdata")
 ```
 
-You will now see a large matrix $X$ and a vector $y$ on your workspace. What are their dimensions?
+3. You will now see a large matrix $X$ and a vector $y$ on your workspace. What are their dimensions?
 
-Perform a 10-fold cross-validation on this data-set using the R function `cv.glmnet` from `glmnet` library. 
+4. Perform a 10-fold cross-validation on this data-set using the R function `cv.glmnet` from `glmnet` library. 
 
-Plot the fitted object (simply calling `plot` on the cross-validated fit will give you a plot of mean-squared error versus $\log(\lambda)$). Also plot the solution path. 
+5. Plot the fitted object (simply calling `plot` on the cross-validated fit will give you a plot of mean-squared error versus $\log(\lambda)$). Also plot the solution path. 
 
-Calculate the predicted value of $y[1:100]$ for both LASSO and Ridge and compare the mean squared errors. 
+6. Calculate the predicted value of $y[1:100]$ for both LASSO and Ridge and compare the mean squared errors. 
 
 You can refer to the R codes on the lecture
 notes: (http://dattahub.github.io/data-analytics/regression_demo_2.html#1)
