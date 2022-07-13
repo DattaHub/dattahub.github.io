@@ -15,7 +15,7 @@ class: center, middle, inverse, title-slide
 # Bootstrap
 ### Jyotishka Datta
 ### Virginia Tech
-### 2021/06/21 (updated: 2022-07-12)
+### 2021/06/21 (updated: 2022-07-13)
 
 ---
 
@@ -34,11 +34,11 @@ class: center, middle, inverse, title-slide
 ---
 ## Bootstrap 
 
-- Wikipedia: group of metaphors which refer to a self-sustaining process that proceeds without external help.
-- In Statistics, Bootstrap is a procedure that helps us get an idea about the distribution of a test statistic by resampling from the sample that produces the statistic. 
-- Introduced by Brad Efron in 1979 - spread like a bushfire in scientific disciplines within a couple of decades. 
+- *Group of metaphors which refer to a self-sustaining process that proceeds without external help.*
 
-![](bootstrap_cite.jpg){width=200px height=150px}
+- In Statistics, Bootstrap is a procedure that helps us get an idea about the distribution of a test statistic by resampling from the sample that produces the statistic. 
+
+- Introduced by Brad Efron in 1979 - spread like a bushfire in scientific disciplines within a couple of decades. 
 
 
 
@@ -754,6 +754,37 @@ qplot(B, cor, data = data.frame(corsize)) + theme_bw()
 ```
 
 &lt;img src="bootstrap_tutorial_files/figure-html/unnamed-chunk-28-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+## Exercise 
+
+We will now derive the probability that a given observation is part of a bootstrap sample. Suppose that we obtain a bootstrap sample from a set of `\(n\)` observations.
+
+-  What is the probability that the first bootstrap observation is not the `\(j^{th}\)` observation from the original sample? Justify your answer.
+
+-  What is the probability that the second bootstrap observation is not the `\(j^{th}\)` observation from the original sample?
+
+-  Argue that the probability that the `\(j^{th}\)` observation is not in the bootstrap sample is `\((1 - 1/n)^n\)`.
+
+-  As `\(n\)` becomes larger and larger, (i.e. `\(n \to \infty\)`), where will this probability `\((1 - 1/n)^n\)` converge? You can get an idea by plotting `\((1 - 1/n)^n\)` as a function of `\(n\)` for a long sequence. 
+
+---
+## Exercise 2 
+
+Example 29.4 in DasGupta (2008). 
+
+Suppose `\(X_1, \ldots, X_n\)` are IID samples from a Cauchy distribution [(Wiki)](https://en.wikipedia.org/wiki/Cauchy_distribution) with location `\(\mu\)`. The sample mean `\(\bar{X}\)` is a bad estimator of `\(\mu\)` (Cauchy distribution has infinite moments, i.e. the mean or variance of Cauchy does not exist}), so use the sample median `\(M_n\)` instead. 
+Now, the exact formula for the variance of a Cauchy median exists for an odd `\(n\)`, and is given by:
+
+$$
+`\begin{equation}
+V\left(M_{n}\right)=\frac{2 n !}{(k !)^{2} \pi^{n}} \int_{0}^{\pi / 2} x^{k}(\pi-x)^{k}(\cot x)^{2} d x
+\end{equation}`
+$$
+
+Your task is to derive the Bootstrap approximation for the variance of the median.What is your bootstrap estimate `\(\widehat{V(M_n)}_{boot}\)`? 
+
+You can use `rcauchy(n)` to generate `\(n\)` samples from the Cauchy distribution. 
 
 ---
 ## References
