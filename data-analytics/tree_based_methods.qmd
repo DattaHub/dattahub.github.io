@@ -23,7 +23,9 @@ knit_hooks$set(no.main = function(before, options, envir) {
 
 - We will show how to grow a tree for classification. Regression trees are developed in a very similar way. 
 
-- Some of these codes are taken from the Introduction to Statistical Learning book. 
+- Once we learn how to build decision trees, we will look at two ensemble methods: bagging/random forest and boosting. 
+
+- Some of these R codes are taken from the Introduction to Statistical Learning <https://www.statlearning.com/> book. 
 
 ## Carseats data
 In these data, Sales is a continuous variable, and so we begin by recoding it as a binary variable.
@@ -602,3 +604,6 @@ yhat.boost=predict(boost.boston,newdata=Boston[-train,],
 n.trees =5000)
 mean((yhat.boost -boston.test)^2)
 ```
+
+
+
