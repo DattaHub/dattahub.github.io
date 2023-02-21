@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="tree_based_methods_files/libs/clipboard/clipboard.min.js"></script>
+<script src="tree_based_methods_files/libs/quarto-html/tabby.min.js"></script>
+<script src="tree_based_methods_files/libs/quarto-html/popper.min.js"></script>
+<script src="tree_based_methods_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="tree_based_methods_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="tree_based_methods_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
+<link href="tree_based_methods_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.2.269">
+
+  <meta name="author" content="Jyotishka Datta">
+  <title>Tree-based methods</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="tree_based_methods_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="tree_based_methods_files/libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #003b4f; background-color: #f1f3f5; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #003b4f; } /* Normal */
+    code span.al { color: #ad0000; } /* Alert */
+    code span.an { color: #5e5e5e; } /* Annotation */
+    code span.at { color: #657422; } /* Attribute */
+    code span.bn { color: #ad0000; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #003b4f; } /* ControlFlow */
+    code span.ch { color: #20794d; } /* Char */
+    code span.cn { color: #8f5902; } /* Constant */
+    code span.co { color: #5e5e5e; } /* Comment */
+    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+    code span.dt { color: #ad0000; } /* DataType */
+    code span.dv { color: #ad0000; } /* DecVal */
+    code span.er { color: #ad0000; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #ad0000; } /* Float */
+    code span.fu { color: #4758ab; } /* Function */
+    code span.im { color: #00769e; } /* Import */
+    code span.in { color: #5e5e5e; } /* Information */
+    code span.kw { color: #003b4f; } /* Keyword */
+    code span.op { color: #5e5e5e; } /* Operator */
+    code span.ot { color: #003b4f; } /* Other */
+    code span.pp { color: #ad0000; } /* Preprocessor */
+    code span.sc { color: #5e5e5e; } /* SpecialChar */
+    code span.ss { color: #20794d; } /* SpecialString */
+    code span.st { color: #20794d; } /* String */
+    code span.va { color: #111111; } /* Variable */
+    code span.vs { color: #20794d; } /* VerbatimString */
+    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="tree_based_methods_files/libs/revealjs/dist/theme/quarto.css" id="theme">
+  <link rel="stylesheet" href="custom.css">
+  <link href="tree_based_methods_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="tree_based_methods_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="tree_based_methods_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="tree_based_methods_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+
+  .callout {
+    margin-top: 1em;
+    margin-bottom: 1em;  
+    border-radius: .25rem;
+  }
+
+  .callout.callout-style-simple { 
+    padding: 0em 0.5em;
+    border-left: solid #acacac .3rem;
+    border-right: solid 1px silver;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+    display: flex;
+  }
+
+  .callout.callout-style-default {
+    border-left: solid #acacac .3rem;
+    border-right: solid 1px silver;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+  }
+
+  .callout .callout-body-container {
+    flex-grow: 1;
+  }
+
+  .callout.callout-style-simple .callout-body {
+    font-size: 1rem;
+    font-weight: 400;
+  }
+
+  .callout.callout-style-default .callout-body {
+    font-size: 0.9rem;
+    font-weight: 400;
+  }
+
+  .callout.callout-captioned.callout-style-simple .callout-body {
+    margin-top: 0.2em;
+  }
+
+  .callout:not(.callout-captioned) .callout-body {
+      display: flex;
+  }
+
+  .callout:not(.no-icon).callout-captioned.callout-style-simple .callout-content {
+    padding-left: 1.6em;
+  }
+
+  .callout.callout-captioned .callout-header {
+    padding-top: 0.2em;
+    margin-bottom: -0.2em;
+  }
+
+  .callout.callout-captioned .callout-caption  p {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+    
+  .callout.callout-captioned.callout-style-simple .callout-content  p {
+    margin-top: 0;
+  }
+
+  .callout.callout-captioned.callout-style-default .callout-content  p {
+    margin-top: 0.7em;
+  }
+
+  .callout.callout-style-simple div.callout-caption {
+    border-bottom: none;
+    font-size: .9rem;
+    font-weight: 600;
+    opacity: 75%;
+  }
+
+  .callout.callout-style-default  div.callout-caption {
+    border-bottom: none;
+    font-weight: 600;
+    opacity: 85%;
+    font-size: 0.9rem;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .callout.callout-style-default div.callout-content {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .callout.callout-style-simple .callout-icon::before {
+    height: 1rem;
+    width: 1rem;
+    display: inline-block;
+    content: "";
+    background-repeat: no-repeat;
+    background-size: 1rem 1rem;
+  }
+
+  .callout.callout-style-default .callout-icon::before {
+    height: 0.9rem;
+    width: 0.9rem;
+    display: inline-block;
+    content: "";
+    background-repeat: no-repeat;
+    background-size: 0.9rem 0.9rem;
+  }
+
+  .callout-caption {
+    display: flex
+  }
+    
+  .callout-icon::before {
+    margin-top: 1rem;
+    padding-right: .5rem;
+  }
+
+  .callout.no-icon::before {
+    display: none !important;
+  }
+
+  .callout.callout-captioned .callout-body > .callout-content > :last-child {
+    margin-bottom: 0.5rem;
+  }
+
+  .callout.callout-captioned .callout-icon::before {
+    margin-top: .5rem;
+    padding-right: .5rem;
+  }
+
+  .callout:not(.callout-captioned) .callout-icon::before {
+    margin-top: 1rem;
+    padding-right: .5rem;
+  }
+
+  /* Callout Types */
+
+  div.callout-note {
+    border-left-color: #4582ec !important;
+  }
+
+  div.callout-note .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEU0lEQVRYCcVXTWhcVRQ+586kSUMMxkyaElstCto2SIhitS5Ek8xUKV2poatCcVHtUlFQk8mbaaziwpWgglJwVaquitBOfhQXFlqlzSJpFSpIYyXNjBNiTCck7x2/8/LeNDOZxDuEkgOXe++553zfefee+/OYLOXFk3+1LLrRdiO81yNqZ6K9cG0P3MeFaMIQjXssE8Z1JzLO9ls20MBZX7oG8w9GxB0goaPrW5aNMp1yOZIa7Wv6o2ykpLtmAPs/vrG14Z+6d4jpbSKuhdcSyq9wGMPXjonwmESXrriLzFGOdDBLB8Y6MNYBu0dRokSygMA/mrun8MGFN3behm6VVAwg4WR3i6FvYK1T7MHo9BK7ydH+1uurECoouk5MPRyVSBrBHMYwVobG2aOXM07sWrn5qgB60rc6mcwIDJtQrnrEr44kmy+UO9r0u9O5/YbkS9juQckLed3DyW2XV/qWBBB3ptvI8EUY3I9p/67OW+g967TNr3Sotn3IuVlfMLVnsBwH4fsnebJvyGm5GeIUA3jljERmrv49SizPYuq+z7c2H/jlGC+Ghhupn/hcapqmcudB9jwJ/3jvnvu6vu5lVzF1fXyZuZZ7U8nRmVzytvT+H3kilYvH09mLWrQdwFSsFEsxFVs5fK7A0g8gMZjbif4ACpKbjv7gNGaD8bUrlk8x+KRflttr22JEMRUbTUwwDQScyzPgedQHZT0xnx7ujw2jfVfExwYHwOsDTjLdJ2ebmeQIlJ7neo41s/DrsL3kl+W2lWvAga0tR3zueGr6GL78M3ifH0rGXrBC2aAR8uYcIA5gwV8zIE8onoh8u0Fca/ciF7j1uOzEnqcIm59sEXoGc0+z6+H45V1CvAvHcD7THztu669cnp+L0okAeIc6zjbM/24LgGM1gZk7jnRu1aQWoU9sfUOuhrmtaPIO3YY1KLLWZaEO5TKUbMY5zx8W9UJ6elpLwKXbsaZ4EFl7B4bMtDv0iRipKoDQT2sNQI9b1utXFdYisi+wzZ/ri/1m7QfDgEuvgUUEIJPq3DhX/5DWNqIXDOweC2wvIR90Oq3lDpdMIgD2r0dXvGdsEW5H6x6HLRJYU7C69VefO1x8Gde1ZFSJLfWS1jbCnhtOPxmpfv2LXOA2Xk2tvnwKKPFuZ/oRmwBwqRQDcKNeVQkYcOjtWVBuM/JuYw5b6isojIkYxyYAFn5K7ZBF10fea52y8QltAg6jnMqNHFBmGkQ1j+U43HMi2xMar1Nv0zGsf1s8nUsmUtPOOrbFIR8bHFDMB5zL13Gmr/kGlCkUzedTzzmzsaJXhYawnA3UmARpiYj5ooJZiUoxFRtK3X6pgNPv+IZVPcnwbOl6f+aBaO1CNvPW9n9LmCp01nuSaTRF2YxHqZ8DYQT6WsXT+RD6eUztwYLZ8rM+rcPxamv1VQzFUkzFXvkiVrySGQgJNvXHJAxiU3/NwiC03rSf05VBaPtu/Z7/B8Yn/w7eguloAAAAAElFTkSuQmCC');
+  }
+
+  div.callout-note.callout-style-default .callout-caption {
+    background-color: #dae6fb
+  }
+
+  div.callout-important {
+    border-left-color: #d9534f !important;
+  }
+
+  div.callout-important .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEKklEQVRYCcVXTWhcVRS+575MJym48A+hSRFr00ySRQhURRfd2HYjk2SSTokuBCkU2o0LoSKKraKIBTcuFCoidGFD08nkBzdREbpQ1EDNIv8qSGMFUboImMSZd4/f9zJv8ibJMC8xJQfO3HPPPef7zrvvvnvviIkpC9nsw0UttFunbUhpFzFtarSd6WJkStVMw5xyVqYTvkwfzuf/5FgtkVoB0729j1rjXwThS7Vio+Mo6DNnvLfahoZ+i/o32lULuJ3NNiz7q6+pyAUkJaFF6JwaM2lUJlV0MlnQn5aTRbEu0SEqHUa0A4AdiGuB1kFXRfVyg5d87+Dg4DL6m2TLAub60ilj7A1Ec4odSAc8X95sHh7+ZRPCFo6Fnp7HfU/fBng/hi10CjCnWnJjsxvDNxWw0NfV6Rv5GgP3I3jGWXumdTD/3cbEOP2ZbOZp69yniG3FQ9z1jD7bnBu9Fc2tKGC2q+uAJOQHBDRiZX1x36o7fWBs7J9ownbtO+n0/qWkvW7UPIfc37WgT6ZGR++EOJyeQDSb9UB+DZ1G6DdLDzyS+b/kBCYGsYgJbSQHuThGKRcw5xdeQf8YdNHsc6ePXrlSYMBuSIAFTGAtQo+VuALo4BX83N190NWZWbynBjhOHsmNfFWLeL6v+ynsA58zDvvAC8j5PkbOcXCMg2PZFk3q8MjI7WAG/Dp9AwP7jdGBOOQkAvlFUB+irtm16I1Zw9YBcpGTGXYmk3kQIC/Cds55l+iMI3jqhjAuaoe+am2Jw5GT3Nbz3CkE12NavmzN5+erJW7046n/CH1RO/RVa8lBLozXk9uqykkGAyRXLWlLv5jyp4RFsG5vGVzpDLnIjTWgnRy2Rr+tDKvRc7Y8AyZq10jj8DqXdnIRNtFZb+t/ZRtXcDiVnzpqx8mPcDWxgARUqx0W1QB9MeUZiNrV4qP+Ehc+BpNgATsTX8ozYKL2NtFYAHc84fG7ndxUPr+AR/iQSns7uSUufAymwDOb2+NjK27lEFocm/EE2WpyIy/Hi66MWuMKJn8RvxIcj87IM5Vh9663ziW36kR0HNenXuxmfaD8JC7tfKbrhFr7LiZCrMjrzTeGx+PmkosrkNzW94ObzwocJ7A1HokLolY+AvkTiD/q1H0cN48c5EL8Crkttsa/AXQVDmutfyku0E7jShx49XqV3MFK8IryDhYVbj7Sj2P2eBxwcXoe8T8idsKKPRcnZw1b+slFTubwUwhktrfnAt7J++jwQtLZcm3sr9LQrjRzz6cfMv9aLvgmnAGvpoaGLxM4mAEaLV7iAzQ3oU0IvD5x9ix3yF2RAAuYAOO2f7PEFWCXZ4C9Pb2UsgDeVnFSpbFK7/IWu7TPTvBqzbGdCHOJQSxiEjt6IyZmxQyEJHv6xyQsYk//moVFsN2zP6fRImjfq7/n/wFDguUQFNEwugAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-important.callout-style-default .callout-caption {
+    background-color: #f7dddc
+  }
+
+  div.callout-warning {
+    border-left-color: #f0ad4e !important;
+  }
+
+  div.callout-warning .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAETklEQVRYCeVWW2gcVRg+58yaTUnizqbipZeX4uWhBEniBaoUX1Ioze52t7sRq6APio9V9MEaoWlVsFasRq0gltaAPuxms8lu0gcviE/FFOstVbSIxgcv6SU7EZqmdc7v9+9mJtNks51NTUH84ed889/PP+cmxP+d5FIbMJmNbpREu4WUkiTtCicKny0l1pIKmBzovF2S+hIJHX8iEu3hZJ5lNZGqyRrGSIQpq15AzF28jgpeY6yk6GVdrfFqdrD6Iw+QlB8g0YS2g7dyQmXM/IDhBhT0UCiRf59lfqmmDvzRt6kByV/m4JjtzuaujMUM2c5Z2d6JdKrRb3K2q6mA+oYVz8JnDdKPmmNthzkAk/lN63sYPgevrguc72aZX/L9C6x09GYyxBgCX4NlvyGUHOKELlm5rXeR1kchuChJt4SSwyddZRXgvwMGvYo4QSlk3/zkHD8UHxwVJA6zjZZqP8v8kK8OWLnIZtLyCAJagYC4rTGW/9Pqj92N/c+LUaAj27movwbi19tk/whRCIE7Q9vyI6yvRpftAKVTdUjOW40X3h5OXsKCdmFcx0xlLJoSuQngnrJe7Kcjm4OMq9FlC7CMmScQANuNvjfP3PjGXDBaUQmbp296S5L4DrpbrHN1T87ZVEZVCzg1FF0Ft+dKrlLukI+/c9ENo+TvlTDbYFvuKPtQ9+l052rXrgKoWkDAFnvh0wTOmYn8R5f4k/jN/fZiCM1tQx9jQQ4ANhqG4hiL0qIFTGViG9DKB7GYzgubnpofgYRwO+DFjh0Zin2m4b/97EDkXkc+f6xYAPX0KK2I/7fUQuwzuwo/L3AkcjugPNixC8cHf0FyPjWlItmLxWw4Ou9YsQCr5fijMGoD/zpdRy95HRysyXA74MWOnscpO4j2y3HAVisw85hX5+AFBRSHt4ShfLFkIMXTqyKFc46xdzQM6XbAi702a7sy04J0+feReMFKp5q9esYLCqAZYw/k14E/xcLLsFElaornTuJB0svMuJINy8xkIYuL+xPAlWRceH6+HX7THJ0djLUom46zREu7tTkxwmf/FdOZ/sh6Q8qvEAiHpm4PJ4a/doJe0gH1t+aHRgCzOvBvJedEK5OFE5jpm4AGP2a8Dxe3gGJ/pAutug9Gp6he92CsSsWBaEcxGx0FHytmIpuqGkOpldqNYQK8cSoXvd+xLxXADw0kf6UkJNFtdo5MOgaLjiQOQHcn+A6h5NuL2s0qsC2LOM75PcF3yr5STuBSAcGG+meA14K/CI21HcS4LBT6tv0QAh8Dr5l93AhZzG5ZJ4VxAqdZUEl9z7WJ4aN+svMvwHHL21UKTd1mqvChH7/Za5xzXBBKrUcB0TQ+Ulgkfbi/H/YT5EptrGzsEK7tR1B7ln9BBwckYfMiuSqklSznIuoIIOM42MQO+QnduCoFCI0bpkzjCjddHPN/F+2Yu+sd9bKNpVwHhbS3LluK/0zgfwD0xYI5dXuzlQAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-warning.callout-style-default .callout-caption {
+    background-color: #fcefdc
+  }
+
+  div.callout-tip {
+    border-left-color: #02b875 !important;
+  }
+
+  div.callout-tip .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAADr0lEQVRYCe1XTWgTQRj9ZjZV8a9SPIkKgj8I1bMHsUWrqYLVg4Ue6v9BwZOxSYsIerFao7UiUryIqJcqgtpimhbBXoSCVxUFe9CTiogUrUp2Pt+3aUI2u5vdNh4dmMzOzHvvezuz8xNFM0mjnbXaNu1MvFWRXkXEyE6aYOYJpdW4IXuA4r0fo8qqSMDBU0v1HJUgVieAXxzCsdE/YJTdFcVIZQNMyhruOMJKXYFoLfIfIvVIMWdsrd+Rpd86ZmyzzjJmLStqRn0v8lzkb4rVIXvnpScOJuAn2ACC65FkPzEdEy4TPWRLJ2h7z4cArXzzaOdKlbOvKKX25Wl00jSnrwVxAg3o4dRxhO13RBSdNvH0xSARv3adTXbBdTf64IWO2vH0LT+cv4GR1DJt+DUItaQogeBX/chhbTBxEiZ6gftlDNXTrvT7co4ub5A6gp9HIcHvzTa46OS5fBeP87Qm0fQkr4FsYgVQ7Qg+ZayaDg9jhg1GkWj8RG6lkeSacrrHgDaxdoBiZPg+NXV/KifMuB6//JmYH4CntVEHy/keA6x4h4CU5oFy8GzrBS18cLJMXcljAKB6INjWsRcuZBWVaS3GDrqB7rdapVIeA+isQ57Eev9eCqzqOa81CY05VLd6SamW2wA2H3SiTbnbSxmzfp7WtKZkqy4mdyAlGx7ennghYf8voqp9cLSgKdqNfa6RdRsAAkPwRuJZNbpByn+RrJi1RXTwdi8RQF6ymDwGMAtZ6TVE+4uoKh+MYkcLsT0Hk8eAienbiGdjJHZTpmNjlbFJNKDVAp2fJlYju6IreQxQ08UJDNYdoLSl6AadO+fFuCQqVMB1NJwPm69T04Wv5WhfcWyfXQB+wXRs1pt+nCknRa0LVzSA/2B+a9+zQJadb7IyyV24YAxKp2Jqs3emZTuNnKxsah+uabKbMk7CbTgJx/zIgQYErIeTKRQ9yD9wxVof5YolPHqaWo7TD6tJlh7jQnK5z2n3+fGdggIOx2kaa2YI9QWarc5Ce1ipNWMKeSG4DysFF52KBmTNMmn5HqCFkwy34rDg05gDwgH3bBi+sgFhN/e8QvRn8kbamCOhgrZ9GJhFDgfcMHzFb6BAtjKpFhzTjwv1KCVuxHvCbsSiEz4CANnj84cwHdFXAbAOJ4LTSAawGWFn5tDhLMYz6nWeU2wJfIhmIJBefcd/A5FWQWGgrWzyORZ3Q6HuV+Jf0Bj+BTX69fm1zWgK7By1YTXchFDORywnfQ7GpzOo6S+qECrsx2ifVQAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-tip.callout-style-default .callout-caption {
+    background-color: #ccf1e3
+  }
+
+  div.callout-caution {
+    border-left-color: #fd7e14 !important;
+  }
+
+  div.callout-caution .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAACV0lEQVRYCdVWzWoUQRCuqp2ICBLJXgITZL1EfQDBW/bkzUMUD7klD+ATSHBEfAIfQO+iXsWDxJsHL96EHAwhgzlkg8nBg25XWb0zIb0zs9muYYWkoKeru+vn664fBqElyZNuyh167NXJ8Ut8McjbmEraKHkd7uAnAFku+VWdb3reSmRV8PKSLfZ0Gjn3a6Xlcq9YGb6tADjn+lUfTXtVmaZ1KwBIvFI11rRXlWlatwIAAv2asaa9mlB9wwygiDX26qaw1yYPzFXg2N1GgG0FMF8Oj+VIx7E/03lHx8UhvYyNZLN7BwSPgekXXLribw7w5/c8EF+DBK5idvDVYtEEwMeYefjjLAdEyQ3M9nfOkgnPTEkYU+sxMq0BxNR6jExrAI31H1rzvLEfRIdgcv1XEdj6QTQAS2wtstEALLG1yEZ3QhH6oDX7ExBSFEkFINXH98NTrme5IOaaA7kIfiu2L8A3qhH9zRbukdCqdsA98TdElyeMe5BI8Rs2xHRIsoTSSVFfCFCWGPn9XHb4cdobRIWABNf0add9jakDjQJpJ1bTXOJXnnRXHRf+dNL1ZV1MBRCXhMbaHqGI1JkKIL7+i8uffuP6wVQAzO7+qVEbF6NbS0LJureYcWXUUhH66nLR5rYmva+2tjRFtojkM2aD76HEGAD3tPtKM309FJg5j/K682ywcWJ3PASCcycH/22u+Bh7Aa0ehM2Fu4z0SAE81HF9RkB21c5bEn4Dzw+/qNOyXr3DCTQDMBOdhi4nAgiFDGCinIa2owCEChUwD8qzd03PG+qdW/4fDzjUMcE1ZpIAAAAASUVORK5CYII=');
+  }
+
+  div.callout-caution.callout-style-default .callout-caption {
+    background-color: #ffe5d0
+  }
+
+  </style>
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Tree-based methods</h1>
+
+<div class="quarto-title-authors">
+<div class="quarto-title-author">
+<div class="quarto-title-author-name">
+Jyotishka Datta 
+</div>
+</div>
+</div>
+
+</section>
+<section id="tree-based-methods" class="slide level2">
+<h2>Tree Based Methods</h2>
+<ul>
+<li><p>We will show how to grow a tree for classification. Regression trees are developed in a very similar way.</p></li>
+<li><p>Some of these codes are taken from the Introduction to Statistical Learning book.</p></li>
+</ul>
+</section>
+<section id="carseats-data" class="slide level2">
+<h2>Carseats data</h2>
+<p>In these data, Sales is a continuous variable, and so we begin by recoding it as a binary variable.</p>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-1_ac870d1a6f90efc8efb7e9554f4a3a22">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">set.seed</span>(<span class="dv">2441139</span>)</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(tree)</span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="fu">library</span>(ISLR)</span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="fu">attach</span>(Carseats)</span>
+<span id="cb1-5"><a href="#cb1-5"></a>High<span class="ot">=</span><span class="fu">ifelse</span>(Sales<span class="sc">&lt;=</span><span class="dv">8</span>,<span class="st">"No"</span>,<span class="st">"Yes"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6"></a>High<span class="ot">=</span><span class="fu">as.factor</span>(<span class="fu">ifelse</span>(Sales<span class="sc">&lt;=</span><span class="dv">8</span>,<span class="st">"No"</span>,<span class="st">"Yes"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="fit-a-tree" class="slide level2">
+<h2>Fit a tree</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-2_b431c81f7d4186234a03e86942838ac6">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>tree.carseats<span class="ot">=</span><span class="fu">tree</span>(High<span class="sc">~</span>.<span class="sc">-</span>Sales,Carseats)</span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="fu">summary</span>(tree.carseats)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Classification tree:
+tree(formula = High ~ . - Sales, data = Carseats)
+Variables actually used in tree construction:
+[1] "ShelveLoc"   "Price"       "Income"      "CompPrice"   "Population" 
+[6] "Advertising" "Age"         "US"         
+Number of terminal nodes:  27 
+Residual mean deviance:  0.4575 = 170.7 / 373 
+Misclassification error rate: 0.09 = 36 / 400 </code></pre>
+</div>
+</div>
+</section>
+<section id="interpretaion" class="slide level2">
+<h2>Interpretaion</h2>
+<p>We see that the training error rate is 9%.</p>
+<p>For classification trees, the deviance reported in the output of summary() is given by <span class="math display">\[
+-2 \sum_{m} \sum_k n_{mk} \log(\hat{p}_{mk})
+\]</span> where <span class="math inline">\(n_{mk}\)</span> is the number of observations in the <span class="math inline">\(m\)</span>th terminal node that belong to the <span class="math inline">\(k\)</span>th class.</p>
+<p>A small deviance indicates a tree that provides a good fit to the (training) data.</p>
+<p>The residual mean deviance reported is simply the deviance divided by <span class="math inline">\(n - |T_0|\)</span>, which in this case is 400 - 27 = 373.</p>
+</section>
+<section id="plotting-the-tree" class="slide level2">
+<h2>Plotting the tree</h2>
+<ul>
+<li>One of the most attractive properties of trees is that they can be graphically displayed.</li>
+<li>We use the <code>plot()</code> function to display the tree structure, and the <code>text()</code> function to display the node labels.</li>
+</ul>
+</section>
+<section id="plot-tree" class="slide level2">
+<h2>Plot tree</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-3_9fe9a0e1e37132e0bf06b163334be002">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="fu">plot</span>(tree.carseats)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="tree_based_methods_files/figure-revealjs/unnamed-chunk-3-1.png" width="960" class="r-stretch"></section>
+<section id="plot-tree-1" class="slide level2">
+<h2>Plot tree</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-4_b277bc57fe73f08fee223d802205b421">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="fu">plot</span>(tree.carseats)</span>
+<span id="cb5-2"><a href="#cb5-2"></a><span class="fu">text</span>(tree.carseats,<span class="at">pretty=</span><span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="tree_based_methods_files/figure-revealjs/unnamed-chunk-4-1.png" width="960" class="r-stretch"></section>
+<section id="plot-tree-2" class="slide level2 smaller">
+<h2>Plot tree</h2>
+<p>Shelving location is the most important predictor here.</p>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-5_738be45eaef00015e87dfb3b9df5d580">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="fu">plot</span>(tree.carseats)</span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="fu">text</span>(tree.carseats,<span class="at">pretty=</span><span class="dv">1</span>, <span class="at">cex =</span> <span class="fl">0.65</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="tree_based_methods_files/figure-revealjs/unnamed-chunk-5-1.png" width="960" class="r-stretch"></section>
+<section id="tree-output" class="slide level2">
+<h2>Tree output</h2>
+<ul>
+<li>If we just type the name of the tree object, <code>R</code> prints output corresponding to each branch of the tree.</li>
+<li><code>R</code> displays the split criterion (e.g.&nbsp;<code>Price&lt;92.5</code>), the number of observations in that branch, the deviance, the overall prediction for the branch (<code>Yes</code> or <code>No</code>), and the fraction of observations in that branch that take on values of <code>Yes</code> and <code>No</code>.</li>
+</ul>
+</section>
+<section id="tree-output-in-r" class="slide level2 smaller">
+<h2>Tree output in R</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-6_e96dbe9b74668f8406a262c438b23827">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>tree.carseats</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>node), split, n, deviance, yval, (yprob)
+      * denotes terminal node
+
+  1) root 400 541.500 No ( 0.59000 0.41000 )  
+    2) ShelveLoc: Bad,Medium 315 390.600 No ( 0.68889 0.31111 )  
+      4) Price &lt; 92.5 46  56.530 Yes ( 0.30435 0.69565 )  
+        8) Income &lt; 57 10  12.220 No ( 0.70000 0.30000 )  
+         16) CompPrice &lt; 110.5 5   0.000 No ( 1.00000 0.00000 ) *
+         17) CompPrice &gt; 110.5 5   6.730 Yes ( 0.40000 0.60000 ) *
+        9) Income &gt; 57 36  35.470 Yes ( 0.19444 0.80556 )  
+         18) Population &lt; 207.5 16  21.170 Yes ( 0.37500 0.62500 ) *
+         19) Population &gt; 207.5 20   7.941 Yes ( 0.05000 0.95000 ) *
+      5) Price &gt; 92.5 269 299.800 No ( 0.75465 0.24535 )  
+       10) Advertising &lt; 13.5 224 213.200 No ( 0.81696 0.18304 )  
+         20) CompPrice &lt; 124.5 96  44.890 No ( 0.93750 0.06250 )  
+           40) Price &lt; 106.5 38  33.150 No ( 0.84211 0.15789 )  
+             80) Population &lt; 177 12  16.300 No ( 0.58333 0.41667 )  
+              160) Income &lt; 60.5 6   0.000 No ( 1.00000 0.00000 ) *
+              161) Income &gt; 60.5 6   5.407 Yes ( 0.16667 0.83333 ) *
+             81) Population &gt; 177 26   8.477 No ( 0.96154 0.03846 ) *
+           41) Price &gt; 106.5 58   0.000 No ( 1.00000 0.00000 ) *
+         21) CompPrice &gt; 124.5 128 150.200 No ( 0.72656 0.27344 )  
+           42) Price &lt; 122.5 51  70.680 Yes ( 0.49020 0.50980 )  
+             84) ShelveLoc: Bad 11   6.702 No ( 0.90909 0.09091 ) *
+             85) ShelveLoc: Medium 40  52.930 Yes ( 0.37500 0.62500 )  
+              170) Price &lt; 109.5 16   7.481 Yes ( 0.06250 0.93750 ) *
+              171) Price &gt; 109.5 24  32.600 No ( 0.58333 0.41667 )  
+                342) Age &lt; 49.5 13  16.050 Yes ( 0.30769 0.69231 ) *
+                343) Age &gt; 49.5 11   6.702 No ( 0.90909 0.09091 ) *
+           43) Price &gt; 122.5 77  55.540 No ( 0.88312 0.11688 )  
+             86) CompPrice &lt; 147.5 58  17.400 No ( 0.96552 0.03448 ) *
+             87) CompPrice &gt; 147.5 19  25.010 No ( 0.63158 0.36842 )  
+              174) Price &lt; 147 12  16.300 Yes ( 0.41667 0.58333 )  
+                348) CompPrice &lt; 152.5 7   5.742 Yes ( 0.14286 0.85714 ) *
+                349) CompPrice &gt; 152.5 5   5.004 No ( 0.80000 0.20000 ) *
+              175) Price &gt; 147 7   0.000 No ( 1.00000 0.00000 ) *
+       11) Advertising &gt; 13.5 45  61.830 Yes ( 0.44444 0.55556 )  
+         22) Age &lt; 54.5 25  25.020 Yes ( 0.20000 0.80000 )  
+           44) CompPrice &lt; 130.5 14  18.250 Yes ( 0.35714 0.64286 )  
+             88) Income &lt; 100 9  12.370 No ( 0.55556 0.44444 ) *
+             89) Income &gt; 100 5   0.000 Yes ( 0.00000 1.00000 ) *
+           45) CompPrice &gt; 130.5 11   0.000 Yes ( 0.00000 1.00000 ) *
+         23) Age &gt; 54.5 20  22.490 No ( 0.75000 0.25000 )  
+           46) CompPrice &lt; 122.5 10   0.000 No ( 1.00000 0.00000 ) *
+           47) CompPrice &gt; 122.5 10  13.860 No ( 0.50000 0.50000 )  
+             94) Price &lt; 125 5   0.000 Yes ( 0.00000 1.00000 ) *
+             95) Price &gt; 125 5   0.000 No ( 1.00000 0.00000 ) *
+    3) ShelveLoc: Good 85  90.330 Yes ( 0.22353 0.77647 )  
+      6) Price &lt; 135 68  49.260 Yes ( 0.11765 0.88235 )  
+       12) US: No 17  22.070 Yes ( 0.35294 0.64706 )  
+         24) Price &lt; 109 8   0.000 Yes ( 0.00000 1.00000 ) *
+         25) Price &gt; 109 9  11.460 No ( 0.66667 0.33333 ) *
+       13) US: Yes 51  16.880 Yes ( 0.03922 0.96078 ) *
+      7) Price &gt; 135 17  22.070 No ( 0.64706 0.35294 )  
+       14) Income &lt; 46 6   0.000 No ( 1.00000 0.00000 ) *
+       15) Income &gt; 46 11  15.160 Yes ( 0.45455 0.54545 ) *</code></pre>
+</div>
+</div>
+</section>
+<section id="training-and-testing" class="slide level2">
+<h2>Training and Testing</h2>
+<ul>
+<li>Need test error for proper evaluation.</li>
+<li>Split the observations into a training set and a test set, <em>build the tree using the training set</em>, and evaluate its performance on the test data.</li>
+<li>The <code>predict()</code> function can be used for this purpose.</li>
+<li>In the case of a classification tree, the argument <code>type="class"</code> instructs <code>R</code> to return the actual class prediction.</li>
+</ul>
+</section>
+<section id="test-error" class="slide level2">
+<h2>Test error</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-7_d3b2be0ca671418fde23990a99682e4a">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="fu">set.seed</span>(<span class="dv">2</span>)</span>
+<span id="cb9-2"><a href="#cb9-2"></a>train<span class="ot">=</span><span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(Carseats), <span class="dv">200</span>)</span>
+<span id="cb9-3"><a href="#cb9-3"></a>Carseats.test<span class="ot">=</span>Carseats[<span class="sc">-</span>train,]</span>
+<span id="cb9-4"><a href="#cb9-4"></a>High.test<span class="ot">=</span>High[<span class="sc">-</span>train]</span>
+<span id="cb9-5"><a href="#cb9-5"></a>tree.carseats<span class="ot">=</span><span class="fu">tree</span>(High<span class="sc">~</span>.<span class="sc">-</span>Sales,Carseats,<span class="at">subset=</span>train)</span>
+<span id="cb9-6"><a href="#cb9-6"></a>tree.pred<span class="ot">=</span><span class="fu">predict</span>(tree.carseats,Carseats.test,<span class="at">type=</span><span class="st">"class"</span>)</span>
+<span id="cb9-7"><a href="#cb9-7"></a><span class="fu">table</span>(tree.pred,High.test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         High.test
+tree.pred  No Yes
+      No  104  33
+      Yes  13  50</code></pre>
+</div>
+</div>
+<p>This approach leads to correct predictions for 0.715 cases.</p>
+</section>
+<section id="pruning" class="slide level2">
+<h2>Pruning</h2>
+<ul>
+<li>What you just saw was the full tree.</li>
+<li>Next, we consider whether pruning the tree might lead to improved results.</li>
+<li>The function <code>cv.tree()</code> performs cross-validation in order to determine the optimal level of tree complexity; <strong>cost complexity pruning</strong> is used in order to select a sequence of trees for consideration.</li>
+</ul>
+</section>
+<section id="recap-classification-losses" class="slide level2 smaller">
+<h2>Recap (Classification Losses)</h2>
+<ol type="1">
+<li><p>The 0-1 loss or misclassification error rate: <span class="math display">\[
+\sum_{m = 1}^{|T|} \sum_{x_i \in R_m} 1(y_i \neq y_{R_m})
+\]</span></p></li>
+<li><p>Cross-entropy (measures the ‘purity’ of a leaf)</p></li>
+</ol>
+<p><span class="math display">\[
+- \sum_{m = 1}^{|T|} q_m \sum_{k=1}^{K} \hat{p}_{mk} \log(\hat{p}_{mk})
+\]</span></p>
+<p>where <span class="math inline">\(\hat{p}_{mk}\)</span> is the proportion of class <span class="math inline">\(k\)</span> within <span class="math inline">\(R_m\)</span>, and <span class="math inline">\(q_m\)</span> is the proportion of samples in <span class="math inline">\(R_m\)</span>.</p>
+<ul>
+<li>Use cross-entropy for growing the tree, while using the misclassification rate when pruning the tree.</li>
+</ul>
+</section>
+<section id="pruning-continued" class="slide level2">
+<h2>Pruning (continued)</h2>
+<ul>
+<li><p>We use the argument <code>FUN=prune.misclass</code> in order to indicate that we want the <em>classification error rate</em> to guide the cross-validation and pruning process, rather than the default for the <code>cv.tree()</code> function, which is deviance.</p></li>
+<li><p>The <code>cv.tree()</code> function reports</p></li>
+</ul>
+<ol type="1">
+<li>the number of terminal nodes of each tree considered (size),</li>
+<li>the corresponding error rate, and</li>
+<li>the value of the cost-complexity parameter used (<code>k</code> corresponds to our <span class="math inline">\(\alpha\)</span>)</li>
+</ol>
+</section>
+<section id="cost-complexity-pruning" class="slide level2">
+<h2>Cost-complexity pruning</h2>
+<ul>
+<li>Cost-complexity pruning is similar to regularization idea. You put a penalty for the size of the tree - larger trees are penalized more.</li>
+</ul>
+<p><span class="math display">\[
+\text{minimize}
+\sum_{m = 1}^{|T|} \sum_{x_i \in R_m} 1(y_i \neq y_{R_m}) + \alpha |T|
+\]</span></p>
+<ul>
+<li>Just like regularized methods, <span class="math inline">\(\alpha\)</span> is a tuning parameter - we can choose a suitable value by cross-validation.</li>
+</ul>
+</section>
+<section id="using-cv.tree" class="slide level2 smaller">
+<h2>Using <code>cv.tree()</code></h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-8_0e728c7e279f1c27c78d5754df96b35e">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="fu">set.seed</span>(<span class="dv">3</span>)</span>
+<span id="cb11-2"><a href="#cb11-2"></a>cv.carseats<span class="ot">=</span><span class="fu">cv.tree</span>(tree.carseats,<span class="at">FUN=</span>prune.misclass)</span>
+<span id="cb11-3"><a href="#cb11-3"></a><span class="fu">names</span>(cv.carseats)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "size"   "dev"    "k"      "method"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>cv.carseats</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$size
+[1] 21 19 14  9  8  5  3  2  1
+
+$dev
+[1] 74 76 81 81 75 77 78 85 81
+
+$k
+[1] -Inf  0.0  1.0  1.4  2.0  3.0  4.0  9.0 18.0
+
+$method
+[1] "misclass"
+
+attr(,"class")
+[1] "prune"         "tree.sequence"</code></pre>
+</div>
+</div>
+</section>
+<section id="output-explanation" class="slide level2">
+<h2>Output explanation</h2>
+<ul>
+<li>Note that, despite the name, <code>dev</code> corresponds to the cross-validation error rate in this instance.</li>
+<li>The tree with 9 terminal nodes results in the lowest cross-validation error rate, with 50 cross-validation errors.</li>
+</ul>
+</section>
+<section id="plotting-cv-errors" class="slide level2">
+<h2>Plotting CV errors</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-9_5fd504756e356360fa5492404859c8e1">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb15-2"><a href="#cb15-2"></a><span class="fu">plot</span>(cv.carseats<span class="sc">$</span>size,cv.carseats<span class="sc">$</span>dev,<span class="at">type=</span><span class="st">"b"</span>)</span>
+<span id="cb15-3"><a href="#cb15-3"></a><span class="fu">plot</span>(cv.carseats<span class="sc">$</span>k,cv.carseats<span class="sc">$</span>dev,<span class="at">type=</span><span class="st">"b"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="tree_based_methods_files/figure-revealjs/unnamed-chunk-9-1.png" width="960" class="r-stretch"></section>
+<section id="prune-the-tree" class="slide level2 smaller">
+<h2>Prune the tree</h2>
+<p>We now apply the <code>prune.misclass()</code> function in order to prune the tree to obtain the nine-node tree.</p>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-10_a930b76555cc5f2f5d1ebc229562cae6">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>prune.carseats<span class="ot">=</span><span class="fu">prune.misclass</span>(tree.carseats,<span class="at">best=</span><span class="dv">9</span>)</span>
+<span id="cb16-2"><a href="#cb16-2"></a><span class="fu">plot</span>(prune.carseats)</span>
+<span id="cb16-3"><a href="#cb16-3"></a><span class="fu">text</span>(prune.carseats,<span class="at">pretty=</span><span class="dv">0</span>, <span class="at">cex =</span> <span class="fl">0.7</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="tree_based_methods_files/figure-revealjs/unnamed-chunk-10-1.png" width="960" class="r-stretch"></section>
+<section id="pruned-tree" class="slide level2">
+<h2>Pruned tree</h2>
+<ul>
+<li>How does the pruned tree do in terms of prediction?</li>
+</ul>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-11_e111c7dd7a407c783396de5a2d24f85b">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>tree.pred<span class="ot">=</span><span class="fu">predict</span>(prune.carseats,Carseats.test,<span class="at">type=</span><span class="st">"class"</span>)</span>
+<span id="cb17-2"><a href="#cb17-2"></a><span class="fu">table</span>(tree.pred,High.test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         High.test
+tree.pred No Yes
+      No  97  25
+      Yes 20  58</code></pre>
+</div>
+</div>
+<p>Now precentage of correct prediction is 0.77.</p>
+</section>
+<section id="different-k" class="slide level2">
+<h2>Different k</h2>
+<ul>
+<li>You can choose a different <code>k</code>, e.g.&nbsp;<span class="math inline">\(k = 15\)</span>.</li>
+</ul>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-12_68efb626f09f61282a844f6ff09b1342">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a>prune.carseats<span class="ot">=</span><span class="fu">prune.misclass</span>(tree.carseats,<span class="at">best=</span><span class="dv">15</span>)</span>
+<span id="cb19-2"><a href="#cb19-2"></a>tree.pred<span class="ot">=</span><span class="fu">predict</span>(prune.carseats,Carseats.test,<span class="at">type=</span><span class="st">"class"</span>)</span>
+<span id="cb19-3"><a href="#cb19-3"></a><span class="fu">table</span>(tree.pred,High.test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         High.test
+tree.pred  No Yes
+      No  102  30
+      Yes  15  53</code></pre>
+</div>
+</div>
+<ul>
+<li><p>Percentage of correct predictions will be lower: 0.74</p></li>
+<li><p>Compare to the best model by CV: 0.77</p></li>
+</ul>
+</section>
+<section id="how-does-this-compare-to-logistic" class="slide level2 smaller">
+<h2>How does this compare to Logistic?</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-13_07f5fa66f4c45a6b121b1edd1ac2b70c">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a>glm.fits<span class="ot">=</span><span class="fu">glm</span>(High<span class="sc">~</span>.<span class="sc">-</span>Sales,Carseats,<span class="at">family=</span>binomial,<span class="at">subset=</span>train)</span>
+<span id="cb21-2"><a href="#cb21-2"></a><span class="fu">summary</span>(glm.fits)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = High ~ . - Sales, family = binomial, data = Carseats, 
+    subset = train)
+
+Deviance Residuals: 
+     Min        1Q    Median        3Q       Max  
+-2.05629  -0.37761  -0.08149   0.26226   2.41387  
+
+Coefficients:
+                 Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)     -3.532167   3.072193  -1.150 0.250259    
+CompPrice        0.133686   0.025790   5.184 2.18e-07 ***
+Income           0.031353   0.009661   3.245 0.001173 ** 
+Advertising      0.229512   0.059475   3.859 0.000114 ***
+Population       0.002068   0.001882   1.099 0.271797    
+Price           -0.145926   0.023472  -6.217 5.06e-10 ***
+ShelveLocGood    7.165462   1.260501   5.685 1.31e-08 ***
+ShelveLocMedium  2.938850   0.750210   3.917 8.95e-05 ***
+Age             -0.066072   0.018683  -3.536 0.000405 ***
+Education       -0.023523   0.096187  -0.245 0.806803    
+UrbanYes        -0.233306   0.586017  -0.398 0.690541    
+USYes           -0.645051   0.745717  -0.865 0.387034    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 269.99  on 199  degrees of freedom
+Residual deviance: 109.95  on 188  degrees of freedom
+AIC: 133.95
+
+Number of Fisher Scoring iterations: 7</code></pre>
+</div>
+</div>
+</section>
+<section id="prediction" class="slide level2 smaller">
+<h2>Prediction</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-14_bc447057fbda04633b19a27f4ec9d53b">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a>glm.probs<span class="ot">=</span><span class="fu">predict</span>(glm.fits,Carseats.test,<span class="at">type=</span><span class="st">"response"</span>)</span>
+<span id="cb23-2"><a href="#cb23-2"></a><span class="fu">contrasts</span>(<span class="fu">as.factor</span>(High))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    Yes
+No    0
+Yes   1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a>glm.pred<span class="ot">=</span><span class="fu">rep</span>(<span class="st">"No"</span>,<span class="dv">200</span>)</span>
+<span id="cb25-2"><a href="#cb25-2"></a>glm.pred[glm.probs<span class="sc">&gt;</span>.<span class="dv">5</span>]<span class="ot">=</span><span class="st">"Yes"</span></span>
+<span id="cb25-3"><a href="#cb25-3"></a><span class="fu">table</span>(glm.pred,High.test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        High.test
+glm.pred  No Yes
+     No  111  11
+     Yes   6  72</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a><span class="fu">mean</span>(glm.pred<span class="sc">==</span>High.test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.915</code></pre>
+</div>
+</div>
+</section>
+<section id="significant-predictors-drive-the-prediction." class="slide level2">
+<h2>Significant predictors drive the prediction.</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-15_907a62cc323c64893452ff73f77440d2">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb29-2"><a href="#cb29-2"></a><span class="fu">plot</span>(Carseats.test<span class="sc">$</span>ShelveLoc,glm.probs); <span class="fu">abline</span>(<span class="at">h=</span><span class="fl">0.5</span>)</span>
+<span id="cb29-3"><a href="#cb29-3"></a><span class="fu">plot</span>(Carseats.test<span class="sc">$</span>Price,glm.probs);<span class="fu">abline</span>(<span class="at">h=</span><span class="fl">0.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="tree_based_methods_files/figure-revealjs/unnamed-chunk-15-1.png" width="960" class="r-stretch"></section>
+<section id="exercise" class="slide level2">
+<h2>Exercise</h2>
+<ol type="1">
+<li>Plot the ROC curve for both logistic and decision tree (with pruning).</li>
+<li>Also apply k-NN with CV and LDA on the same data-set and compare accuracies.</li>
+<li>Can you create an artificial data-set where decision tree will do better than logistic or LDA?</li>
+</ol>
+</section>
+<section id="linear-regression-vs.-tree" class="slide level2">
+<h2>Linear Regression vs.&nbsp;Tree</h2>
+<ul>
+<li><p>Linear Regression: <span class="math display">\[
+f(X) = \beta_0 + \sum_{j=1}^{p}X_j \beta_j
+\]</span></p></li>
+<li><p>Regression Tree Method: <span class="math display">\[
+f(X) = \sum_{m=1}^{M} c_m 1_{(X \in R_m)}
+\]</span> where <span class="math inline">\(R_1, \ldots, R_m\)</span> is a partition of the <span class="math inline">\(X\)</span>-space.</p></li>
+<li><p>Which model is better? It depends on the problem at hand.</p></li>
+</ul>
+</section>
+<section id="which-model-is-better" class="slide level2">
+<h2>Which model is better?</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-16_a9f1e6d9ed84ca34ce2efca94ebb6c83">
+<div class="cell-output-display">
+<p><img data-src="8_7.jpg" width="600" height="400"></p>
+</div>
+</div>
+<p>If true decision boundary is linear, classical methods work well, if it’s non-linear tree-based methods might work better.</p>
+</section>
+<section id="regression" class="slide level2">
+<h2>Regression</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-17_ee521594766a3889ef1eb58e53d87c9f">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1"></a>tree.car<span class="ot">=</span><span class="fu">tree</span>(Sales<span class="sc">~</span>.,Carseats,<span class="at">subset=</span>train)</span>
+<span id="cb30-2"><a href="#cb30-2"></a><span class="fu">summary</span>(tree.car)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Regression tree:
+tree(formula = Sales ~ ., data = Carseats, subset = train)
+Variables actually used in tree construction:
+[1] "Price"       "ShelveLoc"   "CompPrice"   "Age"         "Advertising"
+[6] "Population" 
+Number of terminal nodes:  14 
+Residual mean deviance:  2.602 = 484 / 186 
+Distribution of residuals:
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+-4.71700 -1.08700 -0.01026  0.00000  1.11300  4.06600 </code></pre>
+</div>
+</div>
+</section>
+<section id="plot-regression-tree" class="slide level2">
+<h2>Plot Regression Tree</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-18_c884306f63cc9da31b0c591b34cb8159">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1"></a><span class="fu">plot</span>(tree.car, <span class="at">type =</span> <span class="st">"unif"</span>)</span>
+<span id="cb32-2"><a href="#cb32-2"></a><span class="fu">text</span>(tree.car,<span class="at">pretty=</span><span class="dv">0</span>,<span class="at">cex=</span><span class="fl">0.7</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="tree_based_methods_files/figure-revealjs/unnamed-chunk-18-1.png" width="960" class="r-stretch"></section>
+<section id="cv-for-regression-tree" class="slide level2 smaller">
+<h2>CV for Regression Tree</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-19_4465873e70949fb32ee679953fe49468">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1"></a>cv.car<span class="ot">=</span><span class="fu">cv.tree</span>(tree.car)</span>
+<span id="cb33-2"><a href="#cb33-2"></a>cv.car</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$size
+ [1] 14 13 12 11 10  9  8  7  6  4  3  2  1
+
+$dev
+ [1]  991.6848 1047.5699 1038.7796 1052.8238 1048.0572 1070.0402 1015.0872
+ [8] 1010.9374 1074.3468 1105.4908 1103.4054 1254.1947 1546.0453
+
+$k
+ [1]      -Inf  16.92509  19.38585  23.44178  29.89370  36.28493  50.16562
+ [8]  54.84825  65.75957  80.79945  90.11022 179.77305 277.78708
+
+$method
+[1] "deviance"
+
+attr(,"class")
+[1] "prune"         "tree.sequence"</code></pre>
+</div>
+</div>
+</section>
+<section id="plot-the-cv-error" class="slide level2">
+<h2>Plot the CV error</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-20_f6d57dad244ef1e1d10fd3ec8968eae2">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1"></a><span class="fu">plot</span>(cv.car)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="tree_based_methods_files/figure-revealjs/unnamed-chunk-20-1.png" width="960" class="r-stretch"></section>
+<section id="manually-plot-the-deviance" class="slide level2">
+<h2>Manually plot the deviance</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-21_1451e0560607a7d72a0719a7a8ed8b27">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1"></a><span class="fu">plot</span>(cv.car<span class="sc">$</span>size,cv.car<span class="sc">$</span>dev,<span class="at">type=</span><span class="st">'b'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="tree_based_methods_files/figure-revealjs/unnamed-chunk-21-1.png" width="960" class="r-stretch"></section>
+<section id="prune-the-regression-tree" class="slide level2">
+<h2>Prune the Regression Tree</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-22_61af0041af981f0c505e2878ddec7749">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1"></a>prune.car<span class="ot">=</span><span class="fu">prune.tree</span>(tree.car,<span class="at">best=</span><span class="dv">9</span>)</span>
+<span id="cb37-2"><a href="#cb37-2"></a><span class="fu">plot</span>(prune.car,<span class="at">type =</span> <span class="st">"unif"</span>)</span>
+<span id="cb37-3"><a href="#cb37-3"></a><span class="fu">text</span>(prune.car,<span class="at">pretty=</span><span class="dv">0</span>,<span class="at">cex=</span><span class="fl">0.7</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="tree_based_methods_files/figure-revealjs/unnamed-chunk-22-1.png" width="960" class="r-stretch"></section>
+<section id="mse-with-full-tree" class="slide level2 smaller">
+<h2>MSE with full tree</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-23_972fd222f017abb471320cf964abe325">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1"></a>yhat<span class="ot">=</span><span class="fu">predict</span>(tree.car,<span class="at">newdata=</span>Carseats[<span class="sc">-</span>train,])</span>
+<span id="cb38-2"><a href="#cb38-2"></a>car.test<span class="ot">=</span>Carseats[<span class="sc">-</span>train,<span class="st">"Sales"</span>]</span>
+<span id="cb38-3"><a href="#cb38-3"></a><span class="fu">mean</span>((yhat<span class="sc">-</span>car.test)<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 4.471569</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1"></a><span class="fu">plot</span>(yhat,car.test); <span class="fu">abline</span>(<span class="dv">0</span>,<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="tree_based_methods_files/figure-revealjs/unnamed-chunk-23-1.png" width="960" class="r-stretch"></section>
+<section id="mse-with-pruned-tree" class="slide level2 smaller">
+<h2>MSE with Pruned Tree</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-24_16196371bcb94278f39d8cedf8950148">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1"></a>yhat<span class="ot">=</span><span class="fu">predict</span>(prune.car,<span class="at">newdata=</span>Carseats[<span class="sc">-</span>train,])</span>
+<span id="cb41-2"><a href="#cb41-2"></a>car.test<span class="ot">=</span>Carseats[<span class="sc">-</span>train,<span class="st">"Sales"</span>]</span>
+<span id="cb41-3"><a href="#cb41-3"></a><span class="fu">mean</span>((yhat<span class="sc">-</span>car.test)<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 4.847671</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1"></a><span class="fu">plot</span>(yhat,car.test); <span class="fu">abline</span>(<span class="dv">0</span>,<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="tree_based_methods_files/figure-revealjs/unnamed-chunk-24-1.png" width="960" class="r-stretch"></section>
+<section>
+<section id="next-bagging" class="title-slide slide level1 center">
+<h1>Next: Bagging</h1>
+
+</section>
+<section id="bagging-and-random-forest" class="slide level2">
+<h2>Bagging and Random Forest</h2>
+<p>Here we apply bagging and random forests to the <code>Boston</code> data, using the <code>randomForest</code> package in R.</p>
+</section>
+<section id="random-forest" class="slide level2">
+<h2>Random Forest</h2>
+<ul>
+<li>Ensemble Learning: Generae many predictors and aggregate their results.</li>
+<li>Two well-known methods: Boosting (Shapire et al., 1998) and Bagging (Breiman, 1996).</li>
+<li>In boosting, successive trees give extra weight to points incorrectly predicted by earlier predictors. In the end, a weighted vote is taken for prediction.</li>
+<li>In bagging, successive trees do not depend on earlier trees - each is independently constructed using a bootstrap sample of the data set.</li>
+</ul>
+</section>
+<section id="we-use-the-boston-housing-data" class="slide level2">
+<h2>We use the Boston housing data</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-25_dab344dd93f46b6f235b4303c0cb572a">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1"></a><span class="fu">library</span>(MASS)</span>
+<span id="cb44-2"><a href="#cb44-2"></a><span class="fu">str</span>(Boston)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>'data.frame':   506 obs. of  14 variables:
+ $ crim   : num  0.00632 0.02731 0.02729 0.03237 0.06905 ...
+ $ zn     : num  18 0 0 0 0 0 12.5 12.5 12.5 12.5 ...
+ $ indus  : num  2.31 7.07 7.07 2.18 2.18 2.18 7.87 7.87 7.87 7.87 ...
+ $ chas   : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ nox    : num  0.538 0.469 0.469 0.458 0.458 0.458 0.524 0.524 0.524 0.524 ...
+ $ rm     : num  6.58 6.42 7.18 7 7.15 ...
+ $ age    : num  65.2 78.9 61.1 45.8 54.2 58.7 66.6 96.1 100 85.9 ...
+ $ dis    : num  4.09 4.97 4.97 6.06 6.06 ...
+ $ rad    : int  1 2 2 3 3 3 5 5 5 5 ...
+ $ tax    : num  296 242 242 222 222 222 311 311 311 311 ...
+ $ ptratio: num  15.3 17.8 17.8 18.7 18.7 18.7 15.2 15.2 15.2 15.2 ...
+ $ black  : num  397 397 393 395 397 ...
+ $ lstat  : num  4.98 9.14 4.03 2.94 5.33 ...
+ $ medv   : num  24 21.6 34.7 33.4 36.2 28.7 22.9 27.1 16.5 18.9 ...</code></pre>
+</div>
+</div>
+</section>
+<section id="bagging" class="slide level2">
+<h2>Bagging</h2>
+<ul>
+<li>Bagging is a special case of a random forest with <span class="math inline">\(m = p\)</span>.</li>
+<li><code>randomForest()</code> can perform both random forests and bagging.</li>
+</ul>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-26_9e824b837f0e1546b5af3dbcf03b9c03">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb46-2"><a href="#cb46-2"></a><span class="fu">library</span>(randomForest)</span>
+<span id="cb46-3"><a href="#cb46-3"></a>train <span class="ot">=</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(Boston), <span class="fu">nrow</span>(Boston)<span class="sc">/</span><span class="dv">2</span>)</span>
+<span id="cb46-4"><a href="#cb46-4"></a>boston.test<span class="ot">=</span>Boston[<span class="sc">-</span>train,<span class="st">"medv"</span>]</span>
+<span id="cb46-5"><a href="#cb46-5"></a>bag.boston<span class="ot">=</span><span class="fu">randomForest</span>(medv<span class="sc">~</span>.,<span class="at">data=</span>Boston,<span class="at">subset=</span>train,<span class="at">mtry=</span><span class="dv">13</span>,</span>
+<span id="cb46-6"><a href="#cb46-6"></a>                        <span class="at">importance=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>The argument <code>mtry=13</code> indicates that all 13 predictors should be considered for each split of the tree.</li>
+<li>In other words, bagging should be done.</li>
+<li><code>importance=TRUE</code>: should importance of the predictors be assessed?</li>
+</ul>
+</section>
+<section id="bagging-output" class="slide level2">
+<h2>Bagging output</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-27_209e5931ba109d033f4262eb2bf2c995">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1"></a>bag.boston</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+ randomForest(formula = medv ~ ., data = Boston, mtry = 13, importance = TRUE,      subset = train) 
+               Type of random forest: regression
+                     Number of trees: 500
+No. of variables tried at each split: 13
+
+          Mean of squared residuals: 11.33119
+                    % Var explained: 85.26</code></pre>
+</div>
+</div>
+</section>
+<section id="test-error-1" class="slide level2">
+<h2>Test error</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-28_021b9f14a6299db470b4c1c1e8d247eb">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1"></a>yhat.bag <span class="ot">=</span> <span class="fu">predict</span>(bag.boston,<span class="at">newdata=</span>Boston[<span class="sc">-</span>train,])</span>
+<span id="cb49-2"><a href="#cb49-2"></a><span class="fu">mean</span>((yhat.bag<span class="sc">-</span>boston.test)<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 23.4579</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1"></a><span class="fu">plot</span>(yhat.bag, boston.test); <span class="fu">abline</span>(<span class="dv">0</span>,<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="tree_based_methods_files/figure-revealjs/unnamed-chunk-28-1.png" width="960" class="r-stretch"></section>
+<section id="bagging-is-much-better-than-using-a-single-tree" class="slide level2">
+<h2>Bagging is much better than using a single Tree</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-29_4ec8949ef6a524c982582056c8f7a48e">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1"></a>tree.boston<span class="ot">=</span><span class="fu">tree</span>(medv<span class="sc">~</span>.,Boston,<span class="at">subset=</span>train)</span>
+<span id="cb52-2"><a href="#cb52-2"></a>yhat<span class="ot">=</span><span class="fu">predict</span>(tree.boston,<span class="at">newdata=</span>Boston[<span class="sc">-</span>train,])</span>
+<span id="cb52-3"><a href="#cb52-3"></a>boston.test<span class="ot">=</span>Boston[<span class="sc">-</span>train,<span class="st">"medv"</span>]</span>
+<span id="cb52-4"><a href="#cb52-4"></a><span class="fu">mean</span>((yhat<span class="sc">-</span>boston.test)<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 35.28688</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1"></a><span class="fu">plot</span>(yhat,boston.test);<span class="fu">abline</span>(<span class="dv">0</span>,<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="tree_based_methods_files/figure-revealjs/unnamed-chunk-29-1.png" width="288" class="r-stretch"></section>
+<section id="number-of-trees" class="slide level2">
+<h2>Number of Trees</h2>
+<ul>
+<li>By default <code>ntree = 500</code>.</li>
+<li>We could change the number of trees grown by <code>randomForest()</code> using the <code>ntree</code> argument:</li>
+</ul>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-30_1d2cdb0da1eff6011f71ad742e6c74a9">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1"></a>bag.boston<span class="ot">=</span><span class="fu">randomForest</span>(medv<span class="sc">~</span>.,<span class="at">data=</span>Boston,<span class="at">subset=</span>train,<span class="at">mtry=</span><span class="dv">13</span>,</span>
+<span id="cb55-2"><a href="#cb55-2"></a>                        <span class="at">ntree=</span><span class="dv">25</span>)</span>
+<span id="cb55-3"><a href="#cb55-3"></a>yhat.bag <span class="ot">=</span> <span class="fu">predict</span>(bag.boston,<span class="at">newdata=</span>Boston[<span class="sc">-</span>train,])</span>
+<span id="cb55-4"><a href="#cb55-4"></a><span class="fu">mean</span>((yhat.bag<span class="sc">-</span>boston.test)<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 22.99145</code></pre>
+</div>
+</div>
+<ul>
+<li>This is still bagging as <code>mtry = 13</code>. What happens to the test error?</li>
+</ul>
+</section>
+<section id="random-forest-1" class="slide level2">
+<h2>Random Forest</h2>
+<ul>
+<li><p>Random forest improves over bagging by a small tweak that decorrelates the trees.</p></li>
+<li><p>Just like bagging, we build many decision trees on bootstrapped samples … but when building a tree, <strong>each time a split is considered in the tree</strong>, a random sample of <span class="math inline">\(m\)</span> predictors is chosen from the full set of <span class="math inline">\(p\)</span> predictors.</p></li>
+<li><p>A fresh sample of <span class="math inline">\(m\)</span> predictors are chosen for each split and typically <span class="math inline">\(m = \sqrt{p}\)</span> for classification and <span class="math inline">\(p/3\)</span> for regression.</p></li>
+</ul>
+</section>
+<section id="random-forest-2" class="slide level2">
+<h2>Random Forest</h2>
+<ul>
+<li><p>Growing a random forest proceeds in exactly the same way, except that we use a smaller value of the <code>mtry</code> argument.</p></li>
+<li><p>By default, <code>randomForest()</code> uses <span class="math inline">\(p/3\)</span> variables when building a random forest of regression trees, and <span class="math inline">\(\sqrt{p}\)</span> variables when building a random forest of classification trees.</p></li>
+<li><p>Here we use <code>mtry = 6</code>.</p></li>
+</ul>
+</section>
+<section id="calculate-mse" class="slide level2">
+<h2>Calculate MSE</h2>
+<ul>
+<li>We can calculate mean squared error on the test data set as usual.</li>
+</ul>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-31_dd94f300275272ef106eae4a0ec9c517">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb57-2"><a href="#cb57-2"></a>rf.boston<span class="ot">=</span><span class="fu">randomForest</span>(medv<span class="sc">~</span>.,<span class="at">data=</span>Boston,<span class="at">subset=</span>train,<span class="at">mtry=</span><span class="dv">6</span>,<span class="at">importance=</span><span class="cn">TRUE</span>)</span>
+<span id="cb57-3"><a href="#cb57-3"></a>yhat.rf <span class="ot">=</span> <span class="fu">predict</span>(rf.boston,<span class="at">newdata=</span>Boston[<span class="sc">-</span>train,])</span>
+<span id="cb57-4"><a href="#cb57-4"></a><span class="fu">mean</span>((yhat.rf<span class="sc">-</span>boston.test)<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 19.11609</code></pre>
+</div>
+</div>
+<ul>
+<li>The test set MSE is 19.1160948.</li>
+</ul>
+</section>
+<section id="importance" class="slide level2 smaller">
+<h2>Importance</h2>
+<ul>
+<li>Using the <code>importance()</code> function, we can view the importance of each variable.</li>
+</ul>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-32_3dac0e58ef7c75864c572c29009f223e">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1"></a><span class="fu">importance</span>(rf.boston)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           %IncMSE IncNodePurity
+crim    16.7422915     962.64560
+zn       4.5870114     103.88463
+indus    5.5192594     625.85603
+chas     0.4874899      36.22561
+nox     14.8880957     750.14221
+rm      32.1145236    7538.05524
+age     11.8694265     590.10533
+dis     12.2907793     692.36696
+rad      3.5801323      88.23554
+tax      8.7131066     374.44966
+ptratio  9.1472863     836.16087
+black    6.1578417     257.56556
+lstat   30.5232049    6360.09452</code></pre>
+</div>
+</div>
+<ol type="1">
+<li>Mean decrease of accuracy in predictions on the out of bag samples when a given variable is excluded from the model</li>
+<li>Measure of the total decrease in node impurity that results from splits over that variable, averaged over all trees.</li>
+</ol>
+</section>
+<section id="variable-importance-plot" class="slide level2">
+<h2>Variable Importance plot</h2>
+<ul>
+<li>Two different plots: percentage increase in MSE and increase in node purity.</li>
+</ul>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-33_ca278393430497a4a49f0d5b94806efe">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1"></a><span class="fu">varImpPlot</span>(rf.boston)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="tree_based_methods_files/figure-revealjs/unnamed-chunk-33-1.png" width="960" class="r-stretch"><ul>
+<li>Note that the order of variables in two plots do not match here. In general, they won’t necessarily match.</li>
+</ul>
+</section>
+<section id="try-3-different-sizes-m-13-6-and-4" class="slide level2">
+<h2>Try 3 different sizes (m = 13, 6 and 4)</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-34_cfb8217f2090a180a62ee5b467514797">
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1"></a>ntreeset <span class="ot">=</span> <span class="fu">seq</span>(<span class="dv">10</span>,<span class="dv">300</span>,<span class="at">by =</span> <span class="dv">10</span>)</span>
+<span id="cb62-2"><a href="#cb62-2"></a>mse.bag <span class="ot">=</span> <span class="fu">rep</span>(<span class="dv">0</span>,<span class="fu">length</span>(ntreeset));mse.rf1 <span class="ot">=</span> <span class="fu">rep</span>(<span class="dv">0</span>,<span class="fu">length</span>(ntreeset));</span>
+<span id="cb62-3"><a href="#cb62-3"></a>mse.rf2 <span class="ot">=</span> <span class="fu">rep</span>(<span class="dv">0</span>,<span class="fu">length</span>(ntreeset));</span>
+<span id="cb62-4"><a href="#cb62-4"></a></span>
+<span id="cb62-5"><a href="#cb62-5"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(ntreeset)){</span>
+<span id="cb62-6"><a href="#cb62-6"></a>  nt <span class="ot">=</span> ntreeset[i]</span>
+<span id="cb62-7"><a href="#cb62-7"></a>  bag.boston<span class="ot">=</span><span class="fu">randomForest</span>(medv<span class="sc">~</span>.,<span class="at">data=</span>Boston,<span class="at">subset=</span>train,<span class="at">mtry=</span><span class="dv">13</span>,<span class="at">ntree=</span>nt)</span>
+<span id="cb62-8"><a href="#cb62-8"></a>  yhat.bag <span class="ot">=</span> <span class="fu">predict</span>(bag.boston,<span class="at">newdata=</span>Boston[<span class="sc">-</span>train,])</span>
+<span id="cb62-9"><a href="#cb62-9"></a>  mse.bag[i] <span class="ot">=</span> <span class="fu">mean</span>((yhat.bag<span class="sc">-</span>boston.test)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb62-10"><a href="#cb62-10"></a>  </span>
+<span id="cb62-11"><a href="#cb62-11"></a>  rf.boston<span class="ot">=</span><span class="fu">randomForest</span>(medv<span class="sc">~</span>.,<span class="at">data=</span>Boston,<span class="at">mtry =</span> <span class="dv">6</span>, <span class="at">subset=</span>train,<span class="at">ntree=</span>nt)</span>
+<span id="cb62-12"><a href="#cb62-12"></a>  yhat.bag <span class="ot">=</span> <span class="fu">predict</span>(rf.boston,<span class="at">newdata=</span>Boston[<span class="sc">-</span>train,])</span>
+<span id="cb62-13"><a href="#cb62-13"></a>  mse.rf1[i] <span class="ot">=</span> <span class="fu">mean</span>((yhat.bag<span class="sc">-</span>boston.test)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb62-14"><a href="#cb62-14"></a>  </span>
+<span id="cb62-15"><a href="#cb62-15"></a>  rf.boston<span class="ot">=</span><span class="fu">randomForest</span>(medv<span class="sc">~</span>.,<span class="at">data=</span>Boston,<span class="at">mtry =</span> <span class="dv">4</span>, <span class="at">subset=</span>train,<span class="at">ntree=</span>nt)</span>
+<span id="cb62-16"><a href="#cb62-16"></a>  yhat.bag <span class="ot">=</span> <span class="fu">predict</span>(rf.boston,<span class="at">newdata=</span>Boston[<span class="sc">-</span>train,])</span>
+<span id="cb62-17"><a href="#cb62-17"></a>  mse.rf2[i] <span class="ot">=</span> <span class="fu">mean</span>((yhat.bag<span class="sc">-</span>boston.test)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb62-18"><a href="#cb62-18"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="plot-the-test-error-curve" class="slide level2">
+<h2>Plot the test error curve</h2>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-35_e35dddf5dac58965fc679d1b5a3aae7f">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1"></a><span class="fu">plot</span>(ntreeset,mse.bag,<span class="at">type=</span><span class="st">"l"</span>,<span class="at">col=</span><span class="dv">2</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(mse.bag)))</span>
+<span id="cb63-2"><a href="#cb63-2"></a><span class="fu">lines</span>(ntreeset,mse.rf1,<span class="at">col=</span><span class="dv">3</span>); <span class="fu">lines</span>(ntreeset,mse.rf2,<span class="at">col=</span><span class="dv">4</span>)</span>
+<span id="cb63-3"><a href="#cb63-3"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>,<span class="fu">c</span>(<span class="st">"Bagging"</span>,<span class="st">"Random Forest (m = 6)"</span>,</span>
+<span id="cb63-4"><a href="#cb63-4"></a>                       <span class="st">"Random Forest (m = 4)"</span>),<span class="at">col=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>), <span class="at">lty=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="tree_based_methods_files/figure-revealjs/unnamed-chunk-35-1.png" width="960" class="r-stretch"></section>
+<section id="exercise-at-home" class="slide level2">
+<h2>Exercise (at home)</h2>
+<ul>
+<li><p>Using a small value of <span class="math inline">\(m\)</span> in building a random forest will typically be helpful when we have a large number of correlated predictors.</p></li>
+<li><p>Apply bagging and random forests to a data set of your choice. Be sure to fit the models on a training set and to evaluate their performance on a test set.</p></li>
+<li><p>How accurate are the results compared to simple methods like linear or logistic regression?</p></li>
+<li><p>Which of these approaches yields the best performance?</p></li>
+</ul>
+</section>
+<section id="boosting" class="slide level2">
+<h2>Boosting</h2>
+<ul>
+<li><p>We run <code>gbm()</code> with the option <code>distribution="gaussian"</code> since this is a regression problem; if it were a binary classification problem, we would use <code>distribution="bernoulli"</code>.</p></li>
+<li><p>The argument <code>n.trees=5000</code> indicates that we want 5000 trees, and the option <code>interaction.depth=4</code> limits the depth of each tree.</p></li>
+</ul>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-36_bbe304f3d811589cb3dc88f770101089">
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1"></a><span class="fu">library</span>(gbm)</span>
+<span id="cb64-2"><a href="#cb64-2"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb64-3"><a href="#cb64-3"></a>boost.boston<span class="ot">=</span><span class="fu">gbm</span>(medv <span class="sc">~</span>.,<span class="at">data=</span>Boston [train ,], </span>
+<span id="cb64-4"><a href="#cb64-4"></a>                 <span class="at">distribution =</span> <span class="st">"gaussian"</span>, </span>
+<span id="cb64-5"><a href="#cb64-5"></a>                 <span class="at">n.trees =</span><span class="dv">5000</span>, </span>
+<span id="cb64-6"><a href="#cb64-6"></a>                 <span class="at">interaction.depth =</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="summary" class="slide level2 smaller">
+<h2>Summary</h2>
+<ul>
+<li>The usual <code>summary()</code> function also produces a plot, that you can turn off by adding <code>plotit = F</code>.</li>
+<li>Returns a data frame where the first component is the variable name and the second is the computed relative influence, normalized to sum to 100.</li>
+</ul>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-37_740aa2e9f62e48b748d2b8919e5751e6">
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1"></a><span class="fu">summary</span>(boost.boston, <span class="at">plotit =</span> F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            var      rel.inf
+rm           rm 46.410886279
+lstat     lstat 30.102518273
+crim       crim  5.551760643
+dis         dis  4.136537460
+nox         nox  2.770120310
+black     black  2.648786173
+age         age  2.623099922
+tax         tax  2.084415706
+ptratio ptratio  2.045893978
+indus     indus  0.774578360
+rad         rad  0.639323131
+zn           zn  0.210219519
+chas       chas  0.001860246</code></pre>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-38_df0c8f480946400583ed8939d41f29ee">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="tree_based_methods_files/figure-revealjs/unnamed-chunk-38-1.png" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="partial-dependence" class="slide level2">
+<h2>Partial dependence</h2>
+<ul>
+<li><p>An interesting feature is the <em>partial dependence plot</em>.</p></li>
+<li><p>This illustrates the <em>marginal effect</em> of the selected variables on the response after integrating out the other variables.</p></li>
+</ul>
+<div class="cell" data-fig.asp="0.5" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-39_1a792262968e6e869c572b234d1a5fc9">
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1"></a><span class="fu">plot</span>(boost.boston, <span class="at">i=</span><span class="st">"rm"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="tree_based_methods_files/figure-revealjs/unnamed-chunk-39-1.png" width="960" class="r-stretch"></section>
+<section id="mse" class="slide level2">
+<h2>MSE</h2>
+<ul>
+<li>Now, we calculate the mean squared error on the test data set as before.</li>
+</ul>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-40_e186d546e92bdf6f27df8a75894aecbe">
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1"></a>yhat.boost<span class="ot">=</span><span class="fu">predict</span>(boost.boston,<span class="at">newdata=</span>Boston[<span class="sc">-</span>train,], <span class="at">n.trees =</span><span class="dv">5000</span>)</span>
+<span id="cb68-2"><a href="#cb68-2"></a><span class="fu">mean</span>((yhat.boost <span class="sc">-</span>boston.test)<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 19.44239</code></pre>
+</div>
+</div>
+</section>
+<section id="different-lambda" class="slide level2">
+<h2>Different <span class="math inline">\(\lambda\)</span></h2>
+<ul>
+<li><p>For gradient boosting method, one can use a <em>learning rate</em> (<span class="math inline">\(\lambda\)</span>) that dampens the proposed move.</p></li>
+<li><p>That is, <span class="math inline">\(\lambda\)</span> controls the rate at which the boosting algorithm will descend the error surface or ascend the likelihood surface: similar to a regularization parameter.</p></li>
+</ul>
+<div class="cell" data-hash="tree_based_methods_cache/revealjs/unnamed-chunk-41_534a94ef25ee61196c8135397873de37">
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1"></a>boost.boston<span class="ot">=</span><span class="fu">gbm</span>(medv <span class="sc">~</span>.,<span class="at">data=</span>Boston [train ,], <span class="at">distribution=</span></span>
+<span id="cb70-2"><a href="#cb70-2"></a><span class="st">"gaussian"</span>,<span class="at">n.trees =</span><span class="dv">5000</span>, <span class="at">interaction.depth =</span><span class="dv">4</span>, <span class="at">shrinkage =</span><span class="fl">0.2</span>, <span class="at">verbose =</span>F)</span>
+<span id="cb70-3"><a href="#cb70-3"></a>yhat.boost<span class="ot">=</span><span class="fu">predict</span>(boost.boston,<span class="at">newdata=</span>Boston[<span class="sc">-</span>train,],</span>
+<span id="cb70-4"><a href="#cb70-4"></a><span class="at">n.trees =</span><span class="dv">5000</span>)</span>
+<span id="cb70-5"><a href="#cb70-5"></a><span class="fu">mean</span>((yhat.boost <span class="sc">-</span>boston.test)<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 19.40553</code></pre>
+</div>
+</div>
+
+<img src="vt.png" class="slide-logo r-stretch"><div class="footer footer-default">
+
+</div>
+</section></section>
+    </div>
+  </div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="tree_based_methods_files/libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="tree_based_methods_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="tree_based_methods_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="tree_based_methods_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="tree_based_methods_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="tree_based_methods_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="tree_based_methods_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="tree_based_methods_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="tree_based_methods_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="tree_based_methods_files/libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'smaller': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: false,
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1050,
+
+        height: 700,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
+    <script id="quarto-html-after-body" type="application/javascript">
+    window.document.addEventListener("DOMContentLoaded", function (event) {
+      const toggleBodyColorMode = (bsSheetEl) => {
+        const mode = bsSheetEl.getAttribute("data-mode");
+        const bodyEl = window.document.querySelector("body");
+        if (mode === "dark") {
+          bodyEl.classList.add("quarto-dark");
+          bodyEl.classList.remove("quarto-light");
+        } else {
+          bodyEl.classList.add("quarto-light");
+          bodyEl.classList.remove("quarto-dark");
+        }
+      }
+      const toggleBodyColorPrimary = () => {
+        const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+        if (bsSheetEl) {
+          toggleBodyColorMode(bsSheetEl);
+        }
+      }
+      toggleBodyColorPrimary();  
+      const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+      tabsets.forEach(function(tabset) {
+        const tabby = new Tabby('#' + tabset.id);
+      });
+      const clipboard = new window.ClipboardJS('.code-copy-button', {
+        target: function(trigger) {
+          return trigger.previousElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        // button target
+        const button = e.trigger;
+        // don't keep focus
+        button.blur();
+        // flash "checked"
+        button.classList.add('code-copy-button-checked');
+        var currentTitle = button.getAttribute("title");
+        button.setAttribute("title", "Copied!");
+        let tooltip;
+        if (window.bootstrap) {
+          button.setAttribute("data-bs-toggle", "tooltip");
+          button.setAttribute("data-bs-placement", "left");
+          button.setAttribute("data-bs-title", "Copied!");
+          tooltip = new bootstrap.Tooltip(button, 
+            { trigger: "manual", 
+              customClass: "code-copy-button-tooltip",
+              offset: [0, -8]});
+          tooltip.show();    
+        }
+        setTimeout(function() {
+          if (tooltip) {
+            tooltip.hide();
+            button.removeAttribute("data-bs-title");
+            button.removeAttribute("data-bs-toggle");
+            button.removeAttribute("data-bs-placement");
+          }
+          button.setAttribute("title", currentTitle);
+          button.classList.remove('code-copy-button-checked');
+        }, 1000);
+        // clear code selection
+        e.clearSelection();
+      });
+      function tippyHover(el, contentFn) {
+        const config = {
+          allowHTML: true,
+          content: contentFn,
+          maxWidth: 500,
+          delay: 100,
+          arrow: false,
+          appendTo: function(el) {
+              return el.closest('section.slide') || el.parentElement;
+          },
+          interactive: true,
+          interactiveBorder: 10,
+          theme: 'quarto-reveal',
+          placement: 'bottom-start'
+        };
+          config['offset'] = [0,0];
+          config['maxWidth'] = 700;
+        window.tippy(el, config); 
+      }
+      const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+      for (var i=0; i<noterefs.length; i++) {
+        const ref = noterefs[i];
+        tippyHover(ref, function() {
+          // use id or data attribute instead here
+          let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+          try { href = new URL(href).hash; } catch {}
+          const id = href.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          return note.innerHTML;
+        });
+      }
+      const findCites = (el) => {
+        const parentEl = el.parentElement;
+        if (parentEl) {
+          const cites = parentEl.dataset.cites;
+          if (cites) {
+            return {
+              el,
+              cites: cites.split(' ')
+            };
+          } else {
+            return findCites(el.parentElement)
+          }
+        } else {
+          return undefined;
+        }
+      };
+      var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+      for (var i=0; i<bibliorefs.length; i++) {
+        const ref = bibliorefs[i];
+        const citeInfo = findCites(ref);
+        if (citeInfo) {
+          tippyHover(citeInfo.el, function() {
+            var popup = window.document.createElement('div');
+            citeInfo.cites.forEach(function(cite) {
+              var citeDiv = window.document.createElement('div');
+              citeDiv.classList.add('hanging-indent');
+              citeDiv.classList.add('csl-entry');
+              var biblioDiv = window.document.getElementById('ref-' + cite);
+              if (biblioDiv) {
+                citeDiv.innerHTML = biblioDiv.innerHTML;
+              }
+              popup.appendChild(citeDiv);
+            });
+            return popup.innerHTML;
+          });
+        }
+      }
+    });
+    </script>
+    
+
+</body></html>

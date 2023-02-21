@@ -4,7 +4,12 @@ author: "Jyotishka Datta"
 date: '`r Sys.Date()`'
 output: 
   ioslides_presentation:
+    theme: united
     smaller: true
+    logo: ../vt.png
+    css: custom.css
+    transition: faster
+    widescreen: true
 ---
 
 ```{r setup, include=FALSE}
@@ -25,7 +30,7 @@ $$
 $$
 
 -  Narrow intervals (smaller h): histogram has a choppy appearance, large variance.
- - Large intervals (larger h): histogram may lose the local feature, large bias.
+- Large intervals (larger h): histogram may lose the local feature, large bias.
 
 ## R `hist()` {.smaller}
 
@@ -87,7 +92,7 @@ par(mfrow = c(1,1))
 -  Kernel Density Estimate:
 
 $$
-	\hat{f}(x) = \frac{1}{2nh} \sum_{i=1}^{n} K(|{X_i - x}| \le h).
+	\hat{f}(x) = \frac{1}{nh} \sum_{i=1}^{n} K\left(\frac{|{X_i - x|}}{h}\right).
 $$
 where $K(\cdot)$ is a Kernel function. 
 
@@ -186,3 +191,57 @@ p2 <- ggplot(data = faithful, aes(x = eruptions)) + geom_density(kernel = "recta
   labs(title = "Rectangular")+theme_bw()
 p1+p2
 ```
+
+## Drawing KDE manually 
+
+- We choose a range of values to plot using the minimum and maximum values of the data, and create a sequence of values using the seq() function. We set the bandwidth for the kernel density estimation using the bw variable.
+
+- Next, we use the sapply() function to compute the kernel density estimate for each value in the sequence. 
+
+
+```{r, echo = TRUE, eval = F}
+# Generate some sample data
+set.seed(123)
+x <- rnorm(100)
+
+# Choose a range of values to plot
+xmin <- min(x)
+xmax <- max(x)
+xseq <- seq(xmin, xmax, length.out = 100)
+
+# Set the bandwidth for the kernel density estimation
+bw <- 0.5
+
+# Compute the kernel density estimate
+kde <- sapply(xseq, function(xi) {
+  mean(dnorm((xi - x)/bw)/bw)
+})
+```
+
+
+## Drawing KDE manually 
+
+- The R code on the last slide would produce this KDE. 
+
+
+```{r, echo = FALSE, eval = T}
+# Generate some sample data
+set.seed(123)
+x <- rnorm(100)
+
+# Choose a range of values to plot
+xmin <- min(x)
+xmax <- max(x)
+xseq <- seq(xmin, xmax, length.out = 100)
+
+# Set the bandwidth for the kernel density estimation
+bw <- 0.5
+
+# Compute the kernel density estimate
+kde <- sapply(xseq, function(xi) {
+  mean(dnorm((xi - x)/bw)/bw)
+})
+# Plot the kernel density estimate
+plot(xseq, kde, type = "l", xlab = "x", ylab = "Density")
+```
+
