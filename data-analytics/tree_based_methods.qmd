@@ -3,6 +3,7 @@ title: "Tree-based methods"
 author: "Jyotishka Datta"
 format: 
   revealjs:
+    embed-resources: true
     scrollable: true
     smaller: false
 css: custom.css
