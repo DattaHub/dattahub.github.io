@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Challenger case study</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Jyotishka Datta" />
+    <script src="libs/header-attrs-2.19/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Challenger case study
+]
+.subtitle[
+## <br/>why modeling matters
+]
+.author[
+### Jyotishka Datta
+]
+.institute[
+### Virginia Tech
+]
+.date[
+### 2016/12/12 (updated: 2023-02-22)
+]
+
+---
+
+
+
+
+background-image: url(https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Challenger_explosion.jpg/450px-Challenger_explosion.jpg)
+
+[From wikipedia: Challenger's solid rocket boosters fly uncontrollably after the breakup of the external tank separated them from the shuttle stack. The remains of the orbiter and tank leave thin white contrails as they fall toward the Atlantic Ocean.]
+
+
+---
+## Challenger case study
+
+-   Today we will look at an (in)famous example of applying regression to data where assumptions were not met and failure to account for modeling errors led to a huge disaster.
+
+
+---
+## Challenger
+
+-   On January 28, 1986 NASA Space Shuttle orbiter Challenger broke apart and disintegrated at 73 seconds into its flight, leading to the deaths of its seven crew members.
+
+-   Had serious consequences for credibility and mass perception
+
+-   The Presidential Rogers Commission (formed by astronaut Neil A. Armstrong and Nobel laureate Richard P. Feynman, among others) was created to investigate the disaster.
+
+-   The commission determined that the disintegration began with the failure of an O-ring seal in the solid rocket motor due to the unusual cold temperatures (-0.6 Celsius degrees) during the launch.
+
+
+---
+## O-rings
+
+-   **The problematic with O-rings was something known:** the night before the launch, there was a three-hour teleconference between motor engineers and NASA management, discussing the effect of low temperature forecasted for the launch on the O-ring performance. The conclusion, influenced by Figure 4.2a, was:
+
+&gt; \`\`Temperature data [are] not conclusive on predicting primary O-ring blowby."
+
+
+---
+## Figure from the report 
+
+&lt;img src="plot_only_incidents.png" width="1173" height="100%" /&gt;
+
+
+"Number of incidents in the O-rings (filed joints) versus temperatures: showing only flights with incidents."
+
+---
+## Figure from the report 
+
+&lt;img src="plot_full_data.png" width="1483" height="80%" /&gt;
+
+
+"Number of incidents in the O-rings (filed joints) versus temperatures: showing all flights: incidents and no incidents."
+
+---
+## Rogers commission
+
+-   Rogers Commission noted a major flaw in this Figure :
+
+&gt; "the flights with zero incidents were excluded from the plot because it was felt that these flights did not contribute any information about the temperature effect."
+
+The Rogers Commission concluded:
+
+"A careful analysis of the flight history of O-ring performance would have revealed the correlation of O-ring damage in low temperature".
+
+
+---
+## Dalal, Fowlkes, and Hoadley (1989)
+
+-   Q1. Is the temperature associated with O-ring incidents?
+-   Q2. In which way was the temperature affecting the probability of O-ring incidents?
+-   Q3. What was the predicted probability of an incident in an O-ring for the temperature of the launch day?
+
+
+---
+## Data-set
+
+
+```r
+challenger &lt;- read.delim("~/Course Notes/data_analytics/master/R codes/datasets/challenger.txt")
+# View(challenger)
+str(challenger)
+```
+
+```
+## 'data.frame':	23 obs. of  9 variables:
+##  $ flight       : chr  "1" "2" "3" "5" ...
+##  $ date         : chr  "12/04/81" "12/11/81" "22/03/82" "11/11/82" ...
+##  $ nfails.field : int  0 1 0 0 0 0 0 0 1 1 ...
+##  $ nfails.nozzle: int  0 0 0 0 2 0 0 0 1 1 ...
+##  $ fail.field   : int  0 1 0 0 0 0 0 0 1 1 ...
+##  $ fail.nozzle  : int  0 0 0 0 1 0 0 0 1 1 ...
+##  $ temp         : num  18.9 21.1 20.6 20 19.4 22.2 22.8 21.1 13.9 17.2 ...
+##  $ pres.field   : int  50 50 50 50 50 50 100 100 100 200 ...
+##  $ pres.nozzle  : int  50 50 50 50 50 50 50 100 100 200 ...
+```
+
+
+---
+## Important variables
+
+-   `fail.field`, `fail.nozzle`: binary variables indicating whether there was an incident with the O-rings in the field joints or in the nozzles of the solid rocket boosters. 1 codifies an incident and 0 its absence. On the analysis, we focus on the O-rings of the field joint as being the most determinants for the accident. (`nfails.field`, `nfails.nozzle`: total numbers.)
+
+-   `temp`: temperature in the day of launch. Measured in Celsius degrees.
+
+-   `pres.field`, `pres.nozzle`: leak-check pressure tests of the O-rings. These tests assured that the rings would seal the joint.
+
+
+---
+## Try to recreate
+
+-   We make two scatterplots of `nfails.field` (number of total incidents in the field joints) versus temp,
+
+-   The first one excluding the launches without incidents (subset = `nfails.field &gt; 0`) and the second one for all the data.
+
+
+---
+class: small 
+
+## Without incidents 
+
+- The code below creates a scatterplot and draws a straight line through it. 
+
+- **Can you tell me what are fundamental flaws with this idea?**
+
+
+```r
+challenger.subset = challenger %&gt;% filter(nfails.field&gt;0)
+
+ggplot(challenger.subset, aes(x = temp, y = nfails.field)) + 
+  geom_point(aes(x = temp, y = nfails.field)) +
+  geom_smooth(method = lm, formula = y ~ x, se = FALSE) + theme_bw()
+```
+
+![](challenger_casestudy_ninja_files/figure-html/scatter1-1.png)&lt;!-- --&gt;
+
+---
+## With incidents
+
+- Now, this plot shows all data (incidents and non-incidents), so this is a better plot to consider, but it still has a serious error. 
+
+- **Do you know what the error is?**
+
+
+```r
+ggplot(challenger, aes(x = temp, y = nfails.field)) + 
+  geom_point(aes(x = temp, y = nfails.field)) +
+  geom_smooth(method = lm, formula = y ~ x, se = FALSE) + theme_bw()
+```
+
+![](challenger_casestudy_ninja_files/figure-html/scatter2-1.png)&lt;!-- --&gt;
+
+
+---
+## Major problems
+
+-   The fundamental problem in using linear regression for this data: **the response is not continuous**.
+
+-   As a consequence, there is no linearity and the errors around the mean are not normal (indeed, they are strongly non normal).
+
+-   Recall LM assumption: `\([ y \mid x] \sim N(\beta_0 + \beta_1 x, \sigma^2)\)`
+
+- In this example, `\(Y\)` is not a real-valued, normally distributed variable. It's count data, taking values in the set `\(\{ 0, 1, 2, \ldots \}\)`.
+
+
+---
+## How do we check
+
+- We can use regression diagnostics check that we learned before to check this ... 
+
+- But, this is more of a fundamental understanding that **number of incidents** must be a count data.
+
+
+```r
+lmfit &lt;- lm(nfails.field ~ temp, data = challenger)
+plot(lmfit, which = c(1))
+```
+
+![](challenger_casestudy_ninja_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
+
+---
+class: inverse, center, middle
+
+
+# Logistic regression 
+
+---
+## Recall
+
+-   Instead of modeling the number of incidents which is definitely not normal, we will take a different approach: We'll model the probability of expecting at least one incident given the temperature: $$
+    p(x) = \mathbb{P}(\text{incident} = 1 | \text{temperature} = x)
+    $$
+
+-   These two will come from `fail.field` and `temp`
+
+-   The logistic model would be: $$
+    p(x) = \text{logistic}(\beta_0 + \beta_1x) = \frac{e^{\beta_0 + \beta_1x}}{1 + e^{\beta_0 + \beta_1x}}
+    $$
+
+---
+## Logistic Regression
+
+We will use R to fit a logistic regression model in order to predict `fali.field` using `temp`.
+
+The `glm()` function fits generalized linear models, a class of models that includes logistic regression.
+
+The syntax of the `glm()` function is similar to that of `lm()`, except that we must pass in linear model the argument `family=binomial` in order to tell `R` to run a logistic regression rather than some other type of generalized linear model.
+
+
+---
+class: small
+
+## Output 
+
+
+```r
+nasa &lt;- glm(fail.field ~ temp, family = "binomial", data = challenger)
+summary(nasa)
+```
+
+```
+## 
+## Call:
+## glm(formula = fail.field ~ temp, family = "binomial", data = challenger)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.0566  -0.7575  -0.3818   0.4571   2.2195  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)  
+## (Intercept)   7.5837     3.9146   1.937   0.0527 .
+## temp         -0.4166     0.1940  -2.147   0.0318 *
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 28.267  on 22  degrees of freedom
+## Residual deviance: 20.335  on 21  degrees of freedom
+## AIC: 24.335
+## 
+## Number of Fisher Scoring iterations: 5
+```
+
+
+---
+## Interpretation
+
+The summary of the logistic model is notably different from the linear regression, as the methodology behind is quite different.
+
+Nevertheless, we have tests for the significance of each coefficient.
+
+Here we obtain that temp is significantly different from zero, at least at a level `\(\alpha = 0.05\)`.
+
+Therefore we can conclude that the temperature is indeed affecting the probability of an incident with the O-rings.
+
+---
+## Coefficients
+
+-   To interpret the coefficients, we have to be careful.
+
+-   Here our model is: $$
+    \text{logit}(P(\text{incident} = 1 | \text{temp} = x) = \beta_0 + \beta_1 x \\
+    \text{where } \text{logit}(p) = \frac{p}{1-p}
+    $$
+
+
+```r
+exp(coef(nasa)) 
+```
+
+```
+##  (Intercept)         temp 
+## 1965.9743592    0.6592539
+```
+
+
+---
+## We will draw the curve
+
+-   We are going to plot the logistic sigmoid for a grid of `\(x\)`, i.e. temparature values.
+
+-   Recall `\(\text{logistic}(x) = 1/(1 + e^{-x})\)`.
+
+-   We are plotting `\(\text{logistic}(\hat{\beta}_0 + \hat{\beta}_1 x)\)`, with `\(\hat{\beta}_0\)` and `\(\hat{\beta}_1\)` from glm output.
+
+
+```r
+# Plot data
+plot(challenger$temp, challenger$fail.field, xlim = c(-1, 30), xlab = "Temperature",
+     ylab = "Incident probability")
+
+# Draw the fitted logistic curve
+x &lt;- seq(-1, 30, l = 200)
+y &lt;- exp(-(nasa$coefficients[1] + nasa$coefficients[2] * x))
+y &lt;- 1 / (1 + y)
+lines(x, y, col = 2, lwd = 2)
+```
+
+
+---
+## We will draw the curve
+
+At the sight of this curve and the summary of the model we can conclude that the temperature was increasing the probability of an O-ring incident (Q2).
+
+![](challenger_casestudy_ninja_files/figure-html/logistic_curve2-1.png)&lt;!-- --&gt;
+
+
+---
+## Add challenger to it
+
+![](challenger_casestudy_ninja_files/figure-html/logistic_curve3-1.png)&lt;!-- --&gt;
+
+
+---
+## Prediction
+
+- Finally, the probability of having at least one incident with the O-rings in the launch day was 0.9996 according to the fitted logistic model (Q3). 
+
+- This is easily obtained by our R code: 
+
+
+```r
+predict(nasa, newdata = data.frame(temp = -0.6), type = "response")
+```
+
+```
+##        1 
+## 0.999604
+```
+
+- Be careful about extrapolations, though! 
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

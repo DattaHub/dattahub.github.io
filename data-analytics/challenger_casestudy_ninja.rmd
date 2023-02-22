@@ -1,0 +1,317 @@
+---
+title: "Challenger case study"
+subtitle: "<br/>why modeling matters"
+author: "Jyotishka Datta"
+institute: "Virginia Tech"
+date: "2016/12/12 (updated: `r Sys.Date()`)"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+options(width=80)
+library(knitr)
+knitr::opts_chunk$set(echo = T, warning = F, message = F, cache = T)
+knit_hooks$set(no.main = function(before, options, envir) {
+  if (before) par(mar = c(4.1, 4.1, 1.1, 1.1))  # smaller margin on top
+})
+library(ggplot2)
+library(dplyr)
+```
+
+background-image: url(https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Challenger_explosion.jpg/450px-Challenger_explosion.jpg)
+
+[From wikipedia: Challenger's solid rocket boosters fly uncontrollably after the breakup of the external tank separated them from the shuttle stack. The remains of the orbiter and tank leave thin white contrails as they fall toward the Atlantic Ocean.]
+
+
+---
+## Challenger case study
+
+-   Today we will look at an (in)famous example of applying regression to data where assumptions were not met and failure to account for modeling errors led to a huge disaster.
+
+
+---
+## Challenger
+
+-   On January 28, 1986 NASA Space Shuttle orbiter Challenger broke apart and disintegrated at 73 seconds into its flight, leading to the deaths of its seven crew members.
+
+-   Had serious consequences for credibility and mass perception
+
+-   The Presidential Rogers Commission (formed by astronaut Neil A. Armstrong and Nobel laureate Richard P. Feynman, among others) was created to investigate the disaster.
+
+-   The commission determined that the disintegration began with the failure of an O-ring seal in the solid rocket motor due to the unusual cold temperatures (-0.6 Celsius degrees) during the launch.
+
+
+---
+## O-rings
+
+-   **The problematic with O-rings was something known:** the night before the launch, there was a three-hour teleconference between motor engineers and NASA management, discussing the effect of low temperature forecasted for the launch on the O-ring performance. The conclusion, influenced by Figure 4.2a, was:
+
+> \`\`Temperature data [are] not conclusive on predicting primary O-ring blowby."
+
+
+---
+## Figure from the report 
+
+```{r, eval = T, echo = F, out.height = "100%"}
+knitr::include_graphics("plot_only_incidents.png")
+```
+
+
+"Number of incidents in the O-rings (filed joints) versus temperatures: showing only flights with incidents."
+
+---
+## Figure from the report 
+
+```{r, eval = T, echo = F, out.height = "80%"}
+knitr::include_graphics("plot_full_data.png")
+```
+
+
+"Number of incidents in the O-rings (filed joints) versus temperatures: showing all flights: incidents and no incidents."
+
+---
+## Rogers commission
+
+-   Rogers Commission noted a major flaw in this Figure :
+
+> "the flights with zero incidents were excluded from the plot because it was felt that these flights did not contribute any information about the temperature effect."
+
+The Rogers Commission concluded:
+
+"A careful analysis of the flight history of O-ring performance would have revealed the correlation of O-ring damage in low temperature".
+
+
+---
+## Dalal, Fowlkes, and Hoadley (1989)
+
+-   Q1. Is the temperature associated with O-ring incidents?
+-   Q2. In which way was the temperature affecting the probability of O-ring incidents?
+-   Q3. What was the predicted probability of an incident in an O-ring for the temperature of the launch day?
+
+
+---
+## Data-set
+
+```{r}
+challenger <- read.delim("~/Course Notes/data_analytics/master/R codes/datasets/challenger.txt")
+# View(challenger)
+str(challenger)
+```
+
+
+---
+## Important variables
+
+-   `fail.field`, `fail.nozzle`: binary variables indicating whether there was an incident with the O-rings in the field joints or in the nozzles of the solid rocket boosters. 1 codifies an incident and 0 its absence. On the analysis, we focus on the O-rings of the field joint as being the most determinants for the accident. (`nfails.field`, `nfails.nozzle`: total numbers.)
+
+-   `temp`: temperature in the day of launch. Measured in Celsius degrees.
+
+-   `pres.field`, `pres.nozzle`: leak-check pressure tests of the O-rings. These tests assured that the rings would seal the joint.
+
+
+---
+## Try to recreate
+
+-   We make two scatterplots of `nfails.field` (number of total incidents in the field joints) versus temp,
+
+-   The first one excluding the launches without incidents (subset = `nfails.field > 0`) and the second one for all the data.
+
+
+---
+class: small 
+
+## Without incidents 
+
+- The code below creates a scatterplot and draws a straight line through it. 
+
+- **Can you tell me what are fundamental flaws with this idea?**
+
+```{r scatter1, fig.asp = 0.5}
+challenger.subset = challenger %>% filter(nfails.field>0)
+
+ggplot(challenger.subset, aes(x = temp, y = nfails.field)) + 
+  geom_point(aes(x = temp, y = nfails.field)) +
+  geom_smooth(method = lm, formula = y ~ x, se = FALSE) + theme_bw()
+```
+
+---
+## With incidents
+
+- Now, this plot shows all data (incidents and non-incidents), so this is a better plot to consider, but it still has a serious error. 
+
+- **Do you know what the error is?**
+
+```{r scatter2, fig.asp = 0.5}
+ggplot(challenger, aes(x = temp, y = nfails.field)) + 
+  geom_point(aes(x = temp, y = nfails.field)) +
+  geom_smooth(method = lm, formula = y ~ x, se = FALSE) + theme_bw()
+```
+
+
+---
+## Major problems
+
+-   The fundamental problem in using linear regression for this data: **the response is not continuous**.
+
+-   As a consequence, there is no linearity and the errors around the mean are not normal (indeed, they are strongly non normal).
+
+-   Recall LM assumption: $[ y \mid x] \sim N(\beta_0 + \beta_1 x, \sigma^2)$
+
+- In this example, $Y$ is not a real-valued, normally distributed variable. It's count data, taking values in the set $\{ 0, 1, 2, \ldots \}$.
+
+
+---
+## How do we check
+
+- We can use regression diagnostics check that we learned before to check this ... 
+
+- But, this is more of a fundamental understanding that **number of incidents** must be a count data.
+
+```{r, fig.height = 3}
+lmfit <- lm(nfails.field ~ temp, data = challenger)
+plot(lmfit, which = c(1))
+```
+
+---
+class: inverse, center, middle
+
+
+# Logistic regression 
+
+---
+## Recall
+
+-   Instead of modeling the number of incidents which is definitely not normal, we will take a different approach: We'll model the probability of expecting at least one incident given the temperature: $$
+    p(x) = \mathbb{P}(\text{incident} = 1 | \text{temperature} = x)
+    $$
+
+-   These two will come from `fail.field` and `temp`
+
+-   The logistic model would be: $$
+    p(x) = \text{logistic}(\beta_0 + \beta_1x) = \frac{e^{\beta_0 + \beta_1x}}{1 + e^{\beta_0 + \beta_1x}}
+    $$
+
+---
+## Logistic Regression
+
+We will use R to fit a logistic regression model in order to predict `fali.field` using `temp`.
+
+The `glm()` function fits generalized linear models, a class of models that includes logistic regression.
+
+The syntax of the `glm()` function is similar to that of `lm()`, except that we must pass in linear model the argument `family=binomial` in order to tell `R` to run a logistic regression rather than some other type of generalized linear model.
+
+
+---
+class: small
+
+## Output 
+
+```{r}
+nasa <- glm(fail.field ~ temp, family = "binomial", data = challenger)
+summary(nasa)
+```
+
+
+---
+## Interpretation
+
+The summary of the logistic model is notably different from the linear regression, as the methodology behind is quite different.
+
+Nevertheless, we have tests for the significance of each coefficient.
+
+Here we obtain that temp is significantly different from zero, at least at a level $\alpha = 0.05$.
+
+Therefore we can conclude that the temperature is indeed affecting the probability of an incident with the O-rings.
+
+---
+## Coefficients
+
+-   To interpret the coefficients, we have to be careful.
+
+-   Here our model is: $$
+    \text{logit}(P(\text{incident} = 1 | \text{temp} = x) = \beta_0 + \beta_1 x \\
+    \text{where } \text{logit}(p) = \frac{p}{1-p}
+    $$
+
+```{r}
+exp(coef(nasa)) 
+```
+
+
+---
+## We will draw the curve
+
+-   We are going to plot the logistic sigmoid for a grid of $x$, i.e. temparature values.
+
+-   Recall $\text{logistic}(x) = 1/(1 + e^{-x})$.
+
+-   We are plotting $\text{logistic}(\hat{\beta}_0 + \hat{\beta}_1 x)$, with $\hat{\beta}_0$ and $\hat{\beta}_1$ from glm output.
+
+```{r logistic_curve1, echo = T, eval = F}
+# Plot data
+plot(challenger$temp, challenger$fail.field, xlim = c(-1, 30), xlab = "Temperature",
+     ylab = "Incident probability")
+
+# Draw the fitted logistic curve
+x <- seq(-1, 30, l = 200)
+y <- exp(-(nasa$coefficients[1] + nasa$coefficients[2] * x))
+y <- 1 / (1 + y)
+lines(x, y, col = 2, lwd = 2)
+```
+
+
+---
+## We will draw the curve
+
+At the sight of this curve and the summary of the model we can conclude that the temperature was increasing the probability of an O-ring incident (Q2).
+
+```{r logistic_curve2, echo = F, eval = T}
+# Plot data
+plot(challenger$temp, challenger$fail.field, xlim = c(-1, 30), xlab = "Temperature",
+     ylab = "Incident probability")
+
+# Draw the fitted logistic curve
+x <- seq(-1, 30, l = 200)
+y <- exp(-(nasa$coefficients[1] + nasa$coefficients[2] * x))
+y <- 1 / (1 + y)
+lines(x, y, col = 2, lwd = 2)
+```
+
+
+---
+## Add challenger to it
+
+```{r logistic_curve3, echo = F, eval = T}
+# Plot data
+plot(challenger$temp, challenger$fail.field, xlim = c(-1, 30), xlab = "Temperature",
+     ylab = "Incident probability")
+
+# Draw the fitted logistic curve
+x <- seq(-1, 30, l = 200)
+y <- exp(-(nasa$coefficients[1] + nasa$coefficients[2] * x))
+y <- 1 / (1 + y)
+lines(x, y, col = 2, lwd = 2)
+# The Challenger
+points(-0.6, 1, pch = 16)
+text(-0.6, 1, labels = "Challenger", pos = 4)
+```
+
+
+---
+## Prediction
+
+- Finally, the probability of having at least one incident with the O-rings in the launch day was 0.9996 according to the fitted logistic model (Q3). 
+
+- This is easily obtained by our R code: 
+
+```{r}
+predict(nasa, newdata = data.frame(temp = -0.6), type = "response")
+```
+
+- Be careful about extrapolations, though! 
