@@ -48,6 +48,14 @@ background-image: url(https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/
 
 
 ---
+background-image: url(https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Icicles_on_the_Launch_Tower_-_GPN-2000-001348.jpg/330px-Icicles_on_the_Launch_Tower_-_GPN-2000-001348.jpg)
+background-position: 50% 50%
+class: center, bottom, inverse
+
+### Ice on the launch tower hours before Challenger launch [Source: wiki](https://en.wikipedia.org/wiki/Space_Shuttle_Challenger_disaster)
+
+
+---
 ## O-rings
 
 -   **The problematic with O-rings was something known:** the night before the launch, there was a three-hour teleconference between motor engineers and NASA management, discussing the effect of low temperature forecasted for the launch on the O-ring performance. The conclusion, influenced by Figure 4.2a, was:
@@ -174,8 +182,8 @@ ggplot(challenger, aes(x = temp, y = nfails.field)) +
 - But, this is more of a fundamental understanding that **number of incidents** must be a count data.
 
 ```{r, fig.height = 3}
-lmfit <- lm(nfails.field ~ temp, data = challenger)
-plot(lmfit, which = c(1))
+barplot(table(challenger$nfails.field),main="Incidents Distribution", horiz=TRUE,
+  names.arg=c("0 Incidents", "1 Incidents", "2 Incidents"))
 ```
 
 ---
