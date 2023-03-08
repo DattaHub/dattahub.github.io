@@ -112,7 +112,7 @@ summary(glm.fits)
 
 ```{r, echo = T}
 summarySmarket <- summary(glm.fits)
-(R_sq = 1 - summarySmarket$deviance / summarySmarket$null.deviance)
+(R_sq = 1 - (summarySmarket$deviance / summarySmarket$null.deviance))
 ```
 -  Now, what does this say about the quality of fit? 
 
