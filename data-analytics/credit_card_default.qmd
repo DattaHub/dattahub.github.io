@@ -1,0 +1,266 @@
+---
+title: "Example: Default Data"
+author: "Jyotishka Datta"
+format: 
+  revealjs:
+    scrollable: true
+    smaller: true
+css: custom.css
+logo: vt.png
+---
+
+## Credit Card Default Data 
+
+- We want to predict the probability that a person will default on their credit card debt.
+
+- The possible features we can regress upon are:
+
+    + `student` Yes or No whether the customer is a student
+    + `balance` average balance that a customer has remaining on t heir credit card after making their monthly payment
+    + `Income` of customer.
+
+- We’ll practice a few things with this dataset, and then we’ll use it for classification. We would like to classify a person as possibly being "high risk" for defaulting on their credit card repayment.
+
+## Training and test data
+
+Let’s go ahead and subset 70% of our observations to build a testing dataset. We’ll pick the first 70% instead of a random subset so that my answers and yours match for illustration purposes.
+
+```{r, echo = T}
+library(ISLR)
+Default_train <- Default[1:7000, ]
+Default_test <- Default[-(1:7000), ]
+```
+
+
+## Fitting LDA 
+
+```{r, echo = T}
+library(MASS)
+lda.fit=lda(default ~., data=Default_train)
+lda.pred=predict(lda.fit, Default_test)
+lda.class =lda.pred$class
+table(lda.class, Default_test$default)
+mean(lda.class == Default_test$default)
+```
+- The accuracy of classification is quite good: 97.63%.
+
+- But, what is the percentage of true defaults captured? `r 27/(27+66)`
+
+## Confusion matrix 
+
+- A confusion matrix is vital component to evaluating classification models.
+
+```{r, echo = F, out.height = "300px", out.width = "400px"}
+knitr::include_graphics("confusion_matrix.png")
+```
+
+- This a generic confusion matrix, not associated with any particular data.
+
+- The cells will consist of counts for the particular situations.
+
+- We should be able to determine the following matrix based upon a confusion matrix, as seen on the next slide.
+
+
+## Using `caret`
+
+```{r, echo = T}
+library(caret)
+confusionMatrix(data = lda.class, reference = (Default_test$default))
+```
+
+
+## A plethora of terms 
+
+- Accuracy – determines the overall predicted accuracy of the model.
+$$
+Accuracy = \frac{(TP+TN)}{
+(TP+TN+FP+FN)}
+$$
+
+
+- True Positive Rate (TPR) – Given by TP/(TP + FN). Also, TPR = 1 - False Negative Rate. It is also known as **Sensitivity** or Recall.
+
+- False Positive Rate (FPR) – Given by FP/(FP + TN). Also, FPR = 1 - True Negative Rate.
+
+- True Negative Rate (TNR) – Given by TN/(TN + FP). It is also known as **Specificity.**
+
+- False Negative Rate (FNR) – Given by FN/(FN + TP). 
+
+- Precision – indicates how many values, out of all the predicted positive values, are actually positive. Given by TP/(TP + FP).
+
+- F Score – F score is the harmonic mean of precision and recall. It lies between 0 and 1. Higher the value, better
+the model. 
+
+$$Fscore = 2((precision ∗ recall)/(precision + recall))$$ 
+
+
+## Change the threshold 
+
+- Often, it is meaningful to sacrifice a little bit accuracy for better 'specificity', e.g. in credit card default prediction or medical diagnosis, we want to be able to correctly predict the defaulters. 
+
+
+```{r echo = T}
+threshold = 0.2
+lda.class.2 = ifelse(lda.pred$posterior[,"Yes"] > 0.2, "Yes", "No")
+table(lda.class.2, Default_test$default)
+mean(lda.class.2 == Default_test$default)
+```
+- What is the percentage of true defaults captured now? (54/(39+54) =  `r 54/(39+54)`)
+
+
+## ROC Curve 
+
+- We've discussed the ROC curve in class. Here is an R package to plot it. It does a bunch of other things that I will talk at the end of these slides. 
+
+
+```{r}
+#| echo: true
+library(ROCit)
+ROCit_obj <- rocit(score=lda.pred$posterior[,"Yes"], class = Default_test$default)
+plot(ROCit_obj)
+```
+## Logistic regression 
+
+- We have seen how LDA performs on this data. 
+
+- Now, we will check out how the logistic regression performs on the same data set. 
+
+## Fitting a Logistic Regression
+
+-  As before, we use the `glm` package, with `family = binomial`. (Review earlier demos & notes.)
+
+
+```{R, echo = T}
+modfit_full <- glm(default ~ balance + student + income, data = Default_train, family = binomial)
+modfit_null <- glm(default ~ 1, data = Default_train, family = binomial)
+summary(modfit_full)
+```
+
+## Better model 
+
+Looking back at our summary, we see that the p-value for the individual test on income was non-significant.
+Let’s go ahead and refit a model without income and carry out a drop in deviance test.
+
+```{R, echo = T}
+modfit_noincome <- glm(default ~ balance + student, data = Default_train, family = binomial)
+summary(modfit_noincome)
+```
+
+
+## In-sample confusion matrix 
+
+```{R, echo = T}
+pihat_train <- predict(modfit_noincome,
+newdata = Default_train,
+type = "response")
+threshold <- 0.5
+predicted_category <- factor( ifelse(pihat_train > threshold,
+"Yes",
+"No") )
+# Make sure the levels of pred matches the levels of Default$default
+# or else you need to relevel
+# Average Misclassification Rate
+mean((as.numeric(Default_train$default)-1) != (pihat_train > 0.5))
+```
+
+- So you see we have a misclassification rate of about `r mean((as.numeric(Default_train$default)-1) != (pihat_train > 0.5))` using
+our model on our training data.
+
+- Of course we hope that it should perform reasonably well on the training data. We should look at the performance on the test data.
+
+
+## Using `caret`
+
+- As before, you can use the `caret` package to get the full confusion matrix and all related quantities like sensitivity and specificity and so on, ine one go. 
+
+```{r, echo = T}
+library(caret)
+confusionMatrix(data = predicted_category, reference = (Default_train$default))
+```
+
+## Out-of-sample performance
+
+- As with any supervised learning algorithm, the in-sample performance (or training error) could be over-optimistic and is not a good yardstick for supervised learning algos. 
+
+- We will need performance on unobserved samples: test data. 
+
+- You can essentially copy-paste the code for training data error above and change the data-set input and the variables that you create/assign and that will do it. 
+
+
+```{R, echo = T}
+pihat_test <- predict(modfit_noincome, newdata = Default_test, type = "response")
+threshold <- 0.5
+predicted_category_test <- factor( ifelse(pihat_test > threshold,
+"Yes",
+"No") )
+# Make sure the levels of pred matches the levels of Default$default
+# or else you need to relevel
+# Average Misclassification Rate
+mean((as.numeric(Default_test$default)-1) != (pihat_test > 0.5)) 
+```
+
+- What is the misclassification rate here? 
+
+## Using `caret`
+
+- Now, we turn to the `caret` package to get the full confusion matrix and sensitivity and specificity etc. 
+
+- As before, the only changes are the inputs `data` and `reference`, and that's the beauty of this function too. Minimal input, maximum output. 
+
+```{r, echo = T}
+library(caret)
+confusionMatrix(data = predicted_category_test, reference = (Default_test$default))
+```
+
+## Low specificity 
+
+- As with the LDA before, the default cut-off leads to a very low specificity (only $35.48\%$). That is, out of 93 total fradulent transactions, we have identified only $33$, and missed $60$. 
+
+- The way to fix this is by lowering the threshold for detection, so that we can catch more fraudulent transactions, possibly increasing false positives -- which should be okay if we gain power of fraud detection. 
+
+- One way to do that is built into the ROC Curve, as we show quickly. 
+
+## ROC Curve 
+
+- Finally, use the `ROCit` or another library to plot the ROC curve. 
+
+- The extra argument `values = T` in the plot will return the AUC, Cutoff, TPR, FPR, optimal Youden Index, if you want to report them. 
+
+```{r}
+#| echo: true
+library(ROCit)
+ROCit_logistic <- rocit(score=pihat_test, class = Default_test$default)
+plt.roc.logistic <- plot(ROCit_logistic, values = T)
+```
+
+## Other quantities in Caret 
+
+-  The Youden index can be used to calculate the optimal threshold.
+- The Youden index (Youden’s J statistics) is defined as 
+
+$$
+J= \text{sensitivity} + \text{specificity} − 1 = TPR - FPR 
+$$
+
+-  Optimal Youden Index is where $|TPR - FPR|$ is maximum. 
+
+```{r}
+plt.roc.logistic$AUC
+plt.roc.logistic$`optimal Youden Index point`
+```
+
+
+## Use this as cutoff 
+
+- We can use this as the new cut-off. 
+
+- Specificity has increased a lot. Compare with the default performance. 
+
+```{r}
+#| echo: true 
+
+threshold <- plt.roc.logistic$`optimal Youden Index point`["cutoff"]
+predicted_category_test <- factor( ifelse(pihat_test > threshold,
+"Yes", "No") )
+confusionMatrix(data = predicted_category_test, reference = (Default_test$default))
+```

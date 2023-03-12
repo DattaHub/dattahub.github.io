@@ -1,0 +1,299 @@
+---
+title: "Regression Diagnostics in R"
+author: Jyotishka Datta
+format: 
+  revealjs:
+    logo: vt.png
+    smaller: true
+    scrollable: true
+    footer: "For CMDA 4654. Do not share outside this class"
+css: custom.css
+---
+
+## Objectives {.incremental}
+
+- We will see one example of linear regression 
+- Look at diagnostics plots and tests. 
+- Remember the four assumptions of a linear model: 
+1. Linearity
+2. Normally distributed errors (most important when you have a small sample size (because CLT isn’t working in your favor), and when you’re interested in constructing confidence intervals/doing significance testing.)
+3. Homoscedasticity/homogeneity of variance 
+4. Independence
+
+- Another important thing to check: No influential outliers! (Not an assumption)
+
+
+
+
+
+## Read data 
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false 
+
+setwd("~/Course Notes/data_analytics/master/R codes")
+wine <- read.csv("datasets/wine.csv")
+library(corrplot)
+corrplot(cor(wine), order = 'AOE')
+```
+
+
+## Fit the first linear model 
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false 
+
+## Include all of the predictors 
+modWine1 <- lm(Price ~ Age + AGST + FrancePop + HarvestRain + WinterRain, data = wine)
+summary(modWine1)
+```
+
+
+## Remove the non-significant variables 
+
+- This is not the ideal way of performing model selection but we could remove the non-significant variables and run the regression again. 
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false 
+
+## Remove the least significant variable 
+modWine2 <- lm(Price ~ Age + AGST + HarvestRain + WinterRain, data = wine) 
+summary(modWine2)
+```
+
+## Manually calculate $\hat{\beta}$ 
+
+- Once again, recall: $\hat{\boldsymbol{\beta}} = (X^T X)^{-1} X^T y$ 
+
+```{r }
+#| echo: true
+#| message: false
+#| warning: false 
+#| code-line-numbers: "|3|5"
+library(dplyr) ##dplyr is strictly speaking, not necessary here
+X = wine %>% select(c(Age, AGST, HarvestRain, WinterRain)) %>% as.matrix() 
+X = cbind(1, X) ## add a column of 1 for intercepts
+y = wine %>% select(Price) %>% as.matrix()
+bHat2 <- solve(crossprod(X), crossprod(X, y))
+```
+
+- Compare the manually calculated with the output from `lm`. 
+```{r}
+#| echo: true
+#| message: false
+#| warning: false 
+t(bHat2)
+modWine2$coefficients
+```
+
+
+## Diagnostics 
+
+-  The `lm` function has an in-built model diagnostic tool. 
+-  Using `lm`, regression diagnostics plots (residual diagnostics plots) can be created using the base R function plot().
+-  Open `R`, run all the previous lines of codes so that you have an `lm` object called `modWine2`. 
+-  then simply call `plot()` on `modWine2`. 
+
+```{r}
+#| echo: true
+#| eval: false
+#| message: false
+#| warning: false 
+
+plot(modWine2)
+```
+
+- Output plot will be interactive. 
+
+## Diagnostics
+
+-  Residuals vs Fitted: is used to check the assumptions of linearity. If the residuals are spread equally around a horizontal line without distinct patterns (red line is approximately horizontal at zero), that is a good indication of having a linear relationship.
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false 
+
+plot(modWine2, 1)
+```
+
+
+## Diagnostics
+
+-  Normal Q-Q: is used to check the normality of residuals assumption. If the majority of the residuals follow the straight dashed line, then the assumption is fulfilled.
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false 
+
+plot(modWine2, 2)
+```
+
+
+## Normality of residuals 
+
+- We could also create a histogram to check if the distribution looks like a typical bell-shaped curve. 
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false 
+
+hist(modWine2$residuals)
+```
+
+
+## Normality of residuals 
+
+- The qqplot or histogram are visual checks, they are very good for detecting really bad deviations but it helps to do a formal test. 
+
+- Using pre-installed library(MASS) get distribution of studentized residuals (i.e. transform residuals for test)
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false 
+library(MASS)
+sresid <- MASS::studres(modWine2) #using MASS package function to transform data easily
+shapiro.test(sresid) # p value non-sign: normal distribution of residuals
+```
+
+
+## Homoscedasticity
+
+-  Scale-Location: is used to check the homoscedasticity of residuals (equal variance of residuals). If the residuals are spread randomly and the see a horizontal line with equally (randomly) spread points, then the assumption is fulfilled.
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false 
+
+plot(modWine2, 3)
+```
+
+
+## Homoscedasticity violation 
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false 
+#| code-line-numbers: "2"
+
+x <- c(seq(-2.5, 2.5, l = 500))
+eps <- rnorm(n = length(x), sd = 0.25*x^2)
+y <- 2 + 3*x + eps
+lm.bad <- lm(y~x)
+plot(lm.bad, 3)
+```
+
+
+## Leverage and Influential points
+
+-  Residuals vs Leverage: is used to identify any influential value in our dataset. Influential values are extreme values that might influence the regression results when included or excluded from the analysis. 
+
+- *Look for cases outside of a dashed line.*
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false 
+
+plot(modWine2, 5)
+```
+
+## Ideal setting 
+
+- The plot below is a great example of a Residuals vs Leverage plot in which we see no evidence of outliers. 
+
+- Those "Cook's distance" dashed curves don't even appear on the plot. None of the points come close to having both high residual and leverage.
+
+```{r}
+#| echo: true
+n <- 100     # sample size
+x <- runif(n, min = 0, max = 100)
+y.good <- 3 + 0.1 * x + rnorm(n, sd = 3)
+# Run regression and display residual-fitted plot
+lm.good <- lm(y.good ~ x)
+plot(lm.good, 5)
+```
+
+
+## Situation with outliers 
+
+```{r}
+#| echo: true
+#| code-line-numbers: "|5-7"
+set.seed(123)
+y.corrupted <- y.good[1:100]
+x.corrupted <- x[1:100]
+# Randomly select 10 points to corrupt
+to.corrupt <- sample(1:length(x.corrupted), 10)
+y.corrupted[to.corrupt] <- - 1.5 * y.corrupted[to.corrupt] + rt(10, df = 3)
+x.corrupted[to.corrupt] <- x.corrupted[to.corrupt] * 2.5
+# Fit regression and display diagnostic plot
+lm.corrupted <- lm(y.corrupted ~ x.corrupted)
+plot(lm.corrupted, 5)
+```
+
+
+## Auto-correlation 
+
+- Finally, we also assume that the errors are not serially correlated, i.e. $\epsilon_i$ and $\epsilon_{i+1}$ should not be dependent, like, for example in stock returns. 
+
+- Consider $y_t =$ average daily temperature at O'Hare airport, Jan-Feb 1997. "Sticky" appearence. 
+
+
+```{r}
+#| echo: true
+#| 
+weather <- read.csv("datasets/weather.csv")
+plot(weather$temp, xlab="day", ylab="temp", type="l", col=2, lwd=2)
+```
+
+## Auto-correlation 
+
+- To summarize the time-varying dependence, compute lag-$\ell$ correlations for $\ell = 1,2,3, \dots$ 
+
+- The **autocorrelation function (ACF)** for $y$ is
+$$
+r(\ell) = \mathbb{C}\mathrm{orr}(Y_t, Y_{t-\ell}) \equiv r_{y_t,y_{t-\ell}}.
+$$
+- Blue lines mark "statistical significance". 
+
+```{r}
+#| echo: true
+acf(weather$temp)
+```
+
+
+## ACF for linear model 
+
+- Let's look at the ideal linear model we used a few minutes back! 
+
+- No points over the threshold of significance.
+
+```{r}
+#| echo: true 
+sresid <- MASS::studres(lm.good) #using MASS package function to transform data easily
+acf(sresid)
+```
+
+
+## ACF for Wine example
+
+- Let's look at the Wine data example. 
+- No points over the threshold of significance.
+
+```{r}
+#| echo: true 
+sresid <- MASS::studres(modWine2)
+acf(sresid)
+```
