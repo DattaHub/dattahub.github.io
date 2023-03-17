@@ -1,12 +1,13 @@
 ---
-title: "PCA Demo"
-subtitle: "Data Analytics: Stat 5525"
+title: "PCA"
+subtitle: "Data Analytics"
 author: "Jyotishka Datta (<jyotishka@vt.edu>) <br> Department of Statistics, Virginia Tech"
 output: 
   ioslides_presentation:
     smaller: yes
     logo: ../vt.png
     transition: faster
+css: custom.css
 ---
 
 ```{r setup, include=FALSE}
@@ -210,7 +211,7 @@ The variables are:
 
 The data are in the "city_crime.txt" file that I read next.
 ```{r, echo = T}
-setwd("~/Course Notes/stat5525/2021/R codes")
+setwd("~/GitHub/DattaHub.github.io/data-analytics/data")
 crime<-read.table("city_crime.txt")
 ```
 
@@ -303,21 +304,30 @@ pc.cr1$scale
 
 ## Iris Data
 
+- We consider the iris dataset again. 
+- Here the geometric features of the iris flowers can be used to cluster them into different species: setosa, versicolor, virginica. 
+
 ```{r, echo = T}
 data(iris)
 str(iris)
-dat.iris = data.matrix(iris[,1:4])
+dat.iris = data.matrix(iris[,1:4]) ## features except the species name. 
 ```
 
 ## Add noise and shuffle columns
 
+-  We add 6 extra columns of random normal noise. These extra columns have no information about the species. 
+
+-  We add the noise columns as columns 1-6, so now we have extra dimensions that we'd like to reduce. 
+
 ```{r, echo = TRUE}
-dat.iris = cbind(dat.iris, array(rnorm(150*6), c(150, 6)))
+set.seed(2023)
+dat.iris = cbind(array(rnorm(150*6), c(150, 6)),dat.iris)
 colnames(dat.iris)[5:10] <- paste('V', 1:6, sep='')
-dat.iris = dat.iris[,sample(10)]
 ```
 
--  Now we have original variables as well as noise variables but we don't know which is which. Let's see if PCA can still detect the species. 
+-  Now we have original variables as well as noise variables but we don't know which is which. 
+
+- Let's see if PCA can still detect the species. 
 
 ## Center and Scale before PCA
 
@@ -373,24 +383,18 @@ legend("topright", col=c('red', 'blue', 'green')
 -  Plot first two variables $X[,1:2]$ instead of the first two principal components. 
 -  Do we see any clustering?
 
-```{r, echo = F, fig.asp = 0.7}
+```{r, echo = T, fig.asp = 0.5}
 plot(dat.iris[,1:2], type='p', pch=15, col=col.code, xlab="X1", ylab="X2")
-legend("topright"
-     , col=c('red', 'blue', 'green')
-     , legend = c('setosa', 'versicolor', 'virginica')
-     , pch = 15
-      )
+legend("topright", col=c('red', 'blue', 'green'),legend = c('setosa', 'versicolor', 'virginica'), pch = 15)
 ```
 
 ## Importance of PC {.smaller}
 
 **When we have many variables, projecting observations into top few PC scores help avoid searching over important variables.**
 
-```{r, echo = F, fig.height=4}
+```{r, echo = T, fig.height=4}
 plot(pcs.iris[,1:2], type='p', pch=15, col=col.code, xlab="PC1", ylab="PC2")
-legend("topright"
-     , col=c('red', 'blue', 'green')
-     , legend = c('setosa', 'versicolor', 'virginica')
+legend("bottomleft", col=c('red', 'blue', 'green'), legend = c('setosa', 'versicolor', 'virginica')
      , pch = 15
       )
 ```
