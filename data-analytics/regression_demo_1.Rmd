@@ -1,23 +1,16 @@
 ---
 title: "Modern Regression"
-subtitle: "Stepwise and Ridge"
 author: "Jyotishka Datta"
 date: "`r Sys.Date()`"
 output: 
   ioslides_presentation:
-    theme: journal
-    smaller: yes
-    logo: ../vt.png
-    transition: faster
+    theme: united
+    smaller: true 
+css: custom.css
 ---
 
 ```{r setup, include=FALSE}
-options(width=80)
-library(knitr)
-knitr::opts_chunk$set(echo = FALSE, warning = F, message = F, fig.asp = 0.6, cache = TRUE)
-knit_hooks$set(no.main = function(before, options, envir) {
-    if (before) par(mar = c(4.1, 4.1, 1.1, 1.1))  # smaller margin on top
-})
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, cache = TRUE)
 ```
 
 ## Source 
@@ -35,9 +28,29 @@ names(Hitters)
 dim(Hitters)
 ```
 
+## Variables {.smaller}
+
+- `AtBat`: Number of times at bat in 1986, `Hits`: Number of hits in 1986
+- `HmRun`: Number of home runs in 1986, `Runs`: Number of runs in 1986
+- `RBI`: Number of runs batted in in 1986, `Walks`: Number of walks in 1986.
+- `Years`: Number of years in the major leagues
+- `CAtBat`: Number of times at bat during his career
+- `CHits`: Number of hits during his career
+- `CHmRun`: Number of home runs during his career
+- `CRuns`: Number of runs during his career
+- `CRBI`: Number of runs batted in during his career
+- `CWalks`: Number of walks during his career
+- `League`: A factor with levels A and N indicating player's league at the end of 1986
+- `Division`: A factor with levels E and W indicating player's division at the end of 1986
+- `PutOuts`: Number of put outs in 1986
+- `Assists`: Number of assists in 1986
+- `Errors`: Number of errors in 1986
+- `Salary`: 1987 annual salary on opening day in thousands of dollars
+- `NewLeague`: A factor with levels A and N indicating player's league at the beginning of 1987
+
 ## Remove NA's
 
-Salary is missing for some players. The na.omit() function
+`Salary` is missing for some players. The `na.omit` function
 removes all of the rows that have missing values in any variable.
 
 ```{R, echo = T}
@@ -48,13 +61,15 @@ dim(Hitters)
 
 ## Best Subset Selection
 
+The `regsubsets()` function (part of the `leaps` library) performs best subset selection by identifying the best model that contains a given number of predictors, where best is quantified using RSS. 
+
 ```{r, echo = T}
 library(leaps)
 regfit.full=regsubsets(Salary~.,Hitters)
-#summary(regfit.full)
+summary(regfit.full)
 ```
 
-The `regsubsets()` function (part of the `leaps` library) performs best subset selection by identifying the best model that contains a given number of predictors, where best is quantified using RSS. 
+
 
 ## Best Subset Selection
 
@@ -62,21 +77,26 @@ By default, `regsubsets()` reports up to the best eight-variable model, which we
 
 ```{R, echo = T}
 regfit.full=regsubsets(Salary~.,data=Hitters,nvmax=19)
-reg.summary=summary(regfit.full)
+(reg.summary=summary(regfit.full))
 ```
 
 
 ## Best Subset Selection
 
-The `summary()` function also returns $R^2$, RSS, adjusted $R^2$, $C_p$, and BIC.
-We can examine these to try to select the best overall model.
+- The `summary()` function also returns $R^2$, RSS, adjusted $R^2$, $C_p$, and BIC.
+- We can examine these to try to select the best overall model.
 
 ```{r, echo = T}
-names(reg.summary)
-reg.summary$rsq
+#Performance measures
+  cbind( 
+    Cp     = summary(regfit.full)$cp,
+    r2     = summary(regfit.full)$rsq,
+    Adj_r2 = summary(regfit.full)$adjr2,
+    BIC    =summary(regfit.full)$bic
+)
 ```
 
-The $R^2$ values increase monotonically !
+- The $R^2$ values increase monotonically !
 
 ## Choosing the best model 
 
@@ -95,8 +115,7 @@ plot(regfit.full,scale="r2")
 
 ## Choosing the best model 
 
-Plotting RSS, adjusted $R^2$, $C_p$, and BIC for all of the models at once will
-help us decide which model to select:
+Plotting RSS, adjusted $R^2$, $C_p$, and BIC for all of the models at once will help us decide which model to select:
 
 ```{r, echo = F, eval = T}
 par(mfrow=c(2,2))
@@ -137,7 +156,7 @@ plot(regfit.full,scale="r2")
 
 ```{r, echo = T}
 regfit.fwd=regsubsets(Salary~.,data=Hitters,nvmax=19,method="forward")
-fwd.summary <- summary(regfit.fwd)
+(fwd.summary <- summary(regfit.fwd))
 ```
 
 
@@ -207,10 +226,72 @@ points(8,fwd.summary$bic[8],col="red",cex=2,pch=20)
 ## Different Models {.smaller}
 
 ```{r, echo = T}
-coef(regfit.full,7)
-coef(regfit.fwd,7)
-coef(regfit.bwd,7)
+coef(regfit.full,6)
+coef(regfit.fwd,6)
+coef(regfit.bwd,6)
 ```
+
+## Predictions from regsubsets
+
+```{r, echo = T}
+##Function to get predictions from the regsubset function 
+predict.regsubsets <- function(object, newdata, id,...){
+  form  <- as.formula(object$call[[2]])
+  mat   <- model.matrix(form, newdata)
+  coefi <- coef(object, id=id)
+  mat[, names(coefi)]%*%coefi
+}
+```
+
+- We can use this function to extract predictions from any step of these models. 
+
+- For example, we can check the predicted salary for the $i^{th}$ player by selecting the $i^{th}$ row.
+
+```{r, echo = T}
+i = sample(nrow(Hitters), size = 1)
+cbind(i, predict.regsubsets(regfit.full, newdata = Hitters[i,], id = 6))
+```
+
+
+## LOOCV 
+
+- Another option is to use cross-validation in this subset of model. Below, a leave-one-out cross-validation is used to choose the model with lowest MSE. 
+- The function `regsubset()` does not include a prediction function. 
+
+
+```{r, echo = TRUE}
+##jack-knife validation (leave-one-out)
+
+  #store the prediction error 
+  jk.errors <- matrix(NA, nrow(Hitters), 19) 
+  
+  for (k in 1:nrow(Hitters)){
+    #uses regsubsets in the data with 1 observation removed 
+    best.model.cv <- regsubsets(Salary ~.,                        data = Hitters[-k,],          #removes the kth obsv
+                        nvmax = 19) 
+
+    #Models with 1, 2 ,...19 predictors
+    for (i in 1:19){
+      #that was left out
+      pred <- predict(best.model.cv,                 #prediction in the obsv 
+                      Hitters[k,], 
+                      id=i)
+      jk.errors[k,i] <- (Hitters$Salary[k]-pred)^2       #error in the obsv 
+    }
+  }
+  
+  mse.models <- apply(jk.errors, 2, mean)            #MSE estimation 
+      plot(mse.models ,                              #Plot with MSEs
+       pch=19, type="b",
+       xlab="nr predictors",
+       ylab="MSE")
+
+```
+
+
+
+# Regularized Regression 
+
 
 ## Ridge Regression 
 

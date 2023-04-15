@@ -1,0 +1,134 @@
+---
+title: "Sparse Classification"
+author: "Jyotishka Data"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+      toc: true
+      number_sections: false
+      toc_float: true
+fontsize: 11pt
+geometry: margin=1in
+urlcolor: blue
+theme: united
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Sparse classification problem
+
+We will show that the same LASSO penalty can work for sparse classification problems as well.
+
+## Simulated example 
+
+We will start with a simulated example with $\beta$ having 5 non-zeros and rest zeros, with $n = 200, p = 50$ in a logistic regression set up, and evaluate the classification performance.
+
+```{r,echo = T, cache = T, message=FALSE, warning=FALSE}
+library(Matrix)
+set.seed(12345)
+
+logit.inv <- function(x){
+  1/(1+exp(-x))
+}
+
+## Generate data
+n=200;p=50
+p1 = 5
+beta <- c(rep(3,p1),rep(0,p-p1)) ## First p1 beta non-zero, remaining p-p1 zeros.
+
+x=scale(matrix(rnorm(n*p),n,p))
+eps=rnorm(n,mean=0,sd=0.1)
+
+fx = x %*% beta
+
+y=rbinom(n, size = 1, prob= logit.inv(fx+eps))
+
+train=sample(200,100) ## for supervised learning
+
+library(glmnet)
+
+## Cross validation to learn tuning parameter
+cv.out <- cv.glmnet(x = x, y = y, alpha = 1, subset = train, family = "binomial") # binomial for binary response
+plot(cv.out)
+title("Cross Validation",line=2.5)
+
+(bestlam =cv.out$lambda.min)
+
+y.pred=predict(cv.out,type ="class",s=bestlam, newx = x[-train,])
+
+y.obs <- y[-train]
+xtabs(~ y.obs +y.pred) ## Misclassification table.
+
+library(caret)
+confusionMatrix(data = as.factor(y.obs), reference = as.factor(y.pred))
+```
+
+
+
+## Sparse Classification 
+
+### Golub 1999 Data 
+
+This data set consists of 47 patients with acute lymphoblastic leukemia (ALL) and 25 patients with acute myeloid leukemia (AML). Each of the 72 patients had bone marrow samples obtained at the time of diagnosis. Gene expression measurements for the samples were taken using Affymetrix Hgu6800 chips, resulting in 7129 measurements per patient.
+
+Of the two diseases, AML has a considerably worse prognosis: only 26% survive at least 5 years following diagnosis, compared to 68% for ALL.
+
+## Install HDRM package (source of data)
+
+**Warning: the installation of packages and libraries will take some time when you run this for the first time ever. Then you can safely change the flag so that it does not install the package every time you run the R codes.**
+
+```{r, echo = T, cache = T, message=FALSE, warning=FALSE}
+
+installed_flag = F
+
+if(installed_flag == F){
+  if(!require(remotes)){
+  install.packages("remotes", dependencies = TRUE, repos = 'http://cran.rstudio.com')
+ }
+remotes::install_github("pbreheny/hdrm")
+}
+```
+
+
+```{r, echo = T, cache = T, message=FALSE, warning=FALSE}
+
+library(hdrm)
+downloadData(Golub1999)
+attachData(Golub1999)
+
+n = nrow(X)
+# Split data into train and test sets
+train_rows <- sample(1:n, n/2)
+X.train <- X[train_rows, ]
+X.test <- X[-train_rows, ]
+
+y.train <- y[train_rows]
+y.test <- y[-train_rows]
+
+dim(X.train)
+dim(X.test)
+
+length(y.train)
+
+length(y.test)
+
+library(glmnet)
+
+## Cross validation to learn tuning parameter
+cv.out <- cv.glmnet(x = X.train, y = y.train, alpha = 1, family = "binomial") # binomial for binary response
+plot(cv.out)
+title("Cross Validation",line=2.5)
+
+(bestlam =cv.out$lambda.1se)
+
+y.pred=predict(cv.out,type ="class",s=bestlam, newx = X.test)
+
+xtabs(~ y.test +y.pred) ## Misclassification table.
+
+library(caret)
+confusionMatrix(data = y.test, reference = as.factor(y.pred))
+```
+
+

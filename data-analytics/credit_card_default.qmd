@@ -236,7 +236,7 @@ plt.roc.logistic <- plot(ROCit_logistic, values = T)
 ## Other quantities in Caret 
 
 -  The Youden index can be used to calculate the optimal threshold.
-- The Youden index (Youden’s J statistics) is defined as 
+- Youden’s J statistics is defined as 
 
 $$
 J= \text{sensitivity} + \text{specificity} − 1 = TPR - FPR 
@@ -249,6 +249,11 @@ plt.roc.logistic$AUC
 plt.roc.logistic$`optimal Youden Index point`
 ```
 
+## Youden's J and Youden Index 
+
+```{r, echo = F, out.height = "500px", out.width = "500px"}
+knitr::include_graphics("ROC-curve-and-Youden-index-The-ROC-curve-red-line-is-the-dependency-of-true-positive.png")
+```
 
 ## Use this as cutoff 
 

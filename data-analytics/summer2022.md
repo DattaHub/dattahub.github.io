@@ -55,7 +55,8 @@ http://dattahub.github.io/data-analytics/lab_glmnet.html
 #### Resampling methods 
 
 1. Cross-validation: https://dattahub.github.io/data-analytics/crossvalidation.html 
-2. Bootstrap : https://dattahub.github.io/data-analytics/bootstrap_demo.html 
+2. Bootstrap : https://dattahub.github.io/data-analytics/bootstrap_demo.html
+
 
 #### Classification & KDE
 
