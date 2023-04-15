@@ -46,8 +46,8 @@ https://dattahub.github.io/data-analytics/06-data-visualization.html (notes)
 #### Modern Regression 
 
 1. Modern Regression 1: http://dattahub.github.io/data-analytics/regression_demo_1.html (adjusted $R^2$, AIC, BIC, stepwise procedures and Ridge)
-2. Modern Regression 2: http://dattahub.github.io/data-analytics/regression_demo_2.html
-3. Modern Regression 3: http://dattahub.github.io/stat5443/regression_demo_3.html
+2. Modern Regression 2: http://dattahub.github.io/data-analytics/regression_demo_2.1.html
+3. Modern Regression 3: http://dattahub.github.io/stat5443/regression_demo_3.1.html
 4. Lab on Shrinkage Methods: Ridge, Lasso etc.
 http://dattahub.github.io/data-analytics/lab_glmnet.html
 5. PCA, PCR demo: https://dattahub.github.io/data-analytics/demoPCA.html#1
@@ -60,16 +60,20 @@ http://dattahub.github.io/data-analytics/lab_glmnet.html
 
 #### Classification & KDE
 
+0. Challenger case study: https://dattahub.github.io/data-analytics/challenger_casestudy_ninja.html 
 1. Kernel Density: https://dattahub.github.io/data-analytics/kde_demo.html 
 2. Logistic demo: https://dattahub.github.io/data-analytics/logistic_demo.html (from last week)
 3. Deviance explained: https://dattahub.github.io/data-analytics/deviance_explained.html 
 4. Multiclass Logistic Regression : https://dattahub.github.io/data-analytics/logistic_other.html 
 5. LDA, QDA & KNN: https://dattahub.github.io/data-analytics/classification_demo.html#27 (# denotes page) 
+6. Credit card default example: https://dattahub.github.io/data-analytics/credit_card_default.html
+7. Sparse Classification: https://dattahub.github.io/data-analytics/sparse_classification.html 
+
 
 
 #### Trees, random forests etc.
 
-1. Trees, Bagging, Boosting: http://dattahub.github.io/data-analytics/tree_demo.html
+1. Trees, Bagging, Boosting: http://dattahub.github.io/data-analytics/tree_demo_2023.html
 
 #### Multile Testing
 
