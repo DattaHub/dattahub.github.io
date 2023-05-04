@@ -154,6 +154,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <section id="multivariate-t-example" class="level2">
 <h2 class="anchored" data-anchor-id="multivariate-t-example">Multivariate <span class="math inline">\(t\)</span> Example</h2>
+<p>As an example of a higher-dimensional integral, we look at a multivariate <span class="math inline">\(t\)</span> likelihood and a multivariate Gaussian prior with dimension <span class="math inline">\(d = 50\)</span>, following Polson and Scott (2014). The target integral is:</p>
+<p><span class="math display">\[
+    Z = \int_{\mathbb{R}^d} (1 + \frac{x^T x}{\nu})^{-\frac{\nu + d}{2}} (\frac{\tau}{2\pi})^{d/2} \exp \{-\tau x^T x / 2\} d x.
+\]</span></p>
+<p>This integral can be written in terms of Kummer’s confluent hypergeometric function of the second kind: <span class="math inline">\(Z = s^{a}U(a, b, s)\)</span>, where <span class="math inline">\(a = (\nu + d)/2\)</span>, <span class="math inline">\(b = \nu/2 + 1\)</span>, <span class="math inline">\(s = \nu \tau/2\)</span>. For the specific values used here: <span class="math inline">\(d = 50, \tau =1\)</span> and <span class="math inline">\(\nu = 2\)</span>, we can get: <span class="math inline">\(Z = U(26, 2, 1) = 1.95\times 10^{-29}\)</span>.</p>
+<p>We show the R codes for comparing QIS with naive Monte Carlo.</p>
 </section>
 <section id="estimation-by-qis-and-naive-mc" class="level2">
 <h2 class="anchored" data-anchor-id="estimation-by-qis-and-naive-mc">Estimation by QIS, and Naive MC</h2>
@@ -188,11 +194,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <section id="naive-monte-carlo" class="level3">
 <h3 class="anchored" data-anchor-id="naive-monte-carlo">Naive Monte Carlo</h3>
-<div class="cell" data-hash="QIS_MVT_cache/html/naive_cb0630fef8d4134790824bb382427313">
+<div class="cell" data-hash="QIS_MVT_cache/html/naive_ce76b061337c4cd6e2cea0dad82269f8">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test example</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Prior and Likelihood</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">90210</span>)</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>d <span class="ot">=</span> <span class="dv">50</span></span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>tau <span class="ot">=</span> <span class="dv">1</span></span>
@@ -208,29 +214,22 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(LaplacesDemon)</span>
 <span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co"># dtmvr &lt;- function(x, nu){</span></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">#   d = length(x)</span></span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">#   mu = rep(0,d)</span></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co">#   S = diag(d)</span></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co">#   return(exp(dmvt(x, mu, S, df=nu, log=T)))</span></span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>r <span class="ot">=</span> <span class="dv">200</span></span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co"># d = 50</span></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>mc.naive <span class="ot">=</span> <span class="cn">NULL</span></span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>verbose <span class="ot">=</span> <span class="cn">TRUE</span></span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>r){</span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">isTRUE</span>(verbose) <span class="sc">&amp;&amp;</span> i <span class="sc">%%</span> <span class="dv">10</span> <span class="sc">==</span> <span class="dv">0</span>)</span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"Iteration "</span>,i, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>  M <span class="ot">=</span> <span class="dv">10000</span></span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>  <span class="co"># X = rmvn(M, rep(0,d), eye(d))</span></span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>  Y <span class="ot">=</span> <span class="fu">numeric</span>(M)</span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>M){</span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    Y[j] <span class="ot">=</span> <span class="fu">dtmvr</span>(<span class="at">x =</span> <span class="fu">rnorm</span>(d, <span class="dv">0</span>, <span class="dv">1</span>), <span class="at">nu =</span> <span class="dv">2</span>)</span>
-<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>  mc.naive <span class="ot">=</span> <span class="fu">c</span>(mc.naive,<span class="fu">mean</span>(Y))</span>
-<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>r <span class="ot">=</span> <span class="dv">100</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>mc.naive <span class="ot">=</span> <span class="cn">NULL</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>verbose <span class="ot">=</span> <span class="cn">TRUE</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>r){</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">isTRUE</span>(verbose) <span class="sc">&amp;&amp;</span> i <span class="sc">%%</span> <span class="dv">10</span> <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"Iteration "</span>,i, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>  M <span class="ot">=</span> <span class="dv">10000</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>  <span class="co"># X = rmvn(M, rep(0,d), eye(d))</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>  Y <span class="ot">=</span> <span class="fu">numeric</span>(M)</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>M){</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    Y[j] <span class="ot">=</span> <span class="fu">dtmvr</span>(<span class="at">x =</span> <span class="fu">rnorm</span>(d, <span class="dv">0</span>, <span class="dv">1</span>), <span class="at">nu =</span> <span class="dv">2</span>)</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>  mc.naive <span class="ot">=</span> <span class="fu">c</span>(mc.naive,<span class="fu">mean</span>(Y))</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Iteration  10 
 Iteration  20 
@@ -241,69 +240,59 @@ Iteration  60
 Iteration  70 
 Iteration  80 
 Iteration  90 
-Iteration  100 
-Iteration  110 
-Iteration  120 
-Iteration  130 
-Iteration  140 
-Iteration  150 
-Iteration  160 
-Iteration  170 
-Iteration  180 
-Iteration  190 
-Iteration  200 </code></pre>
+Iteration  100 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(mc.naive)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 6.959908e-31</code></pre>
+<pre><code>[1] 4.538692e-31</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(mc.naive, <span class="at">breaks =</span> <span class="dv">30</span>, <span class="at">main =</span> <span class="st">"Naive Monte Carlo Estimates"</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v=</span>trueZ,<span class="at">col=</span><span class="st">"red"</span>,<span class="at">lwd=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="QIS_MVT_files/figure-html/naive-1.png" class="img-fluid" width="672"></p>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mc.naive)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+7.554e-33 3.820e-32 7.599e-32 4.539e-31 1.793e-31 2.362e-29 </code></pre>
 </div>
 </div>
 </section>
 <section id="quantile-importance-sampling" class="level3">
 <h3 class="anchored" data-anchor-id="quantile-importance-sampling">Quantile Importance Sampling</h3>
-<div class="cell" data-hash="QIS_MVT_cache/html/qis_fcbf6313e55b53c5cc2063b0023c81c4">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="do">## QIS </span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>N <span class="ot">=</span> <span class="dv">60</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>r <span class="ot">=</span> <span class="dv">200</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>mc.qis <span class="ot">=</span> <span class="cn">NULL</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>verbose <span class="ot">=</span> <span class="cn">TRUE</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>simu.grid.unif <span class="ot">=</span> <span class="fu">vertical.grid</span>(<span class="at">l=</span><span class="cn">NULL</span>,N,<span class="at">type =</span> <span class="st">"u"</span>)</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>r){</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">isTRUE</span>(verbose) <span class="sc">&amp;&amp;</span> i <span class="sc">%%</span> <span class="dv">10</span> <span class="sc">==</span> <span class="dv">0</span>)</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"Iteration "</span>,i, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  M <span class="ot">=</span> <span class="dv">10000</span></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># X = rmvn(M,rep(0,d), eye(d))</span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  Y <span class="ot">=</span> <span class="fu">numeric</span>(M)</span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>M){</span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    Y[j] <span class="ot">=</span> <span class="fu">dtmvr</span>(<span class="at">x =</span> <span class="fu">rnorm</span>(d, <span class="dv">0</span>, <span class="dv">1</span>), <span class="at">nu =</span> <span class="dv">2</span>)</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>  Y <span class="ot">=</span> <span class="fu">sort</span>(Y)</span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>  Lambda <span class="ot">=</span> <span class="fu">sQ</span>(simu.grid.unif,Y)</span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">=</span> simu.grid.unif</span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>  y <span class="ot">=</span> Lambda</span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Use a correction term at the boundary: -h^2/12*(f'(b)-f'(a))</span></span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>  <span class="co"># h  &lt;- x[2] - x[1]</span></span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ca &lt;- (y[2]-y[1]) / h</span></span>
-<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>  <span class="co"># cb &lt;- (y[N]-y[N-1]) / h</span></span>
-<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>  <span class="co"># YakoMC &lt;- trapz(x, y) - h^2/12 * (cb - ca)</span></span>
-<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>  YakoMC <span class="ot">&lt;-</span> <span class="fu">trapz</span>(x, y)</span>
-<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>  <span class="co"># mc.qis = c(mc.qis, trapz(simu.grid.unif,Lambda)) ## QIS Original </span></span>
-<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>  mc.qis <span class="ot">=</span> <span class="fu">c</span>(mc.qis, YakoMC) <span class="do">## QIS Corrected</span></span>
-<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-hash="QIS_MVT_cache/html/qis_e7a19d4b4dd2ea9ee37af5fde59dde0f">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">90210</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="do">## QIS </span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>N <span class="ot">=</span> <span class="dv">20</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co"># r = 100</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>mc.qis <span class="ot">=</span> <span class="cn">NULL</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>verbose <span class="ot">=</span> <span class="cn">TRUE</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>simu.grid.unif <span class="ot">=</span> <span class="fu">vertical.grid</span>(<span class="at">l=</span><span class="cn">NULL</span>,N,<span class="at">type =</span> <span class="st">"u"</span>)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>r){</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">isTRUE</span>(verbose) <span class="sc">&amp;&amp;</span> i <span class="sc">%%</span> <span class="dv">10</span> <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"Iteration "</span>,i, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  M <span class="ot">=</span> <span class="dv">10000</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># X = rmvn(M,rep(0,d), eye(d))</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>  Y <span class="ot">=</span> <span class="fu">numeric</span>(M)</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>M){</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    Y[j] <span class="ot">=</span> <span class="fu">dtmvr</span>(<span class="at">x =</span> <span class="fu">rnorm</span>(d, <span class="dv">0</span>, <span class="dv">1</span>), <span class="at">nu =</span> <span class="dv">2</span>)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>  Y <span class="ot">=</span> <span class="fu">sort</span>(Y)</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>  Lambda <span class="ot">=</span> <span class="fu">sQ</span>(simu.grid.unif,Y)</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">=</span> simu.grid.unif</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>  y <span class="ot">=</span> Lambda</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Use a correction term at the boundary: -h^2/12*(f'(b)-f'(a))</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>  <span class="co"># h  &lt;- x[2] - x[1]</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ca &lt;- (y[2]-y[1]) / h</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>  <span class="co"># cb &lt;- (y[N]-y[N-1]) / h</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>  <span class="co"># YakoMC &lt;- trapz(x, y) - h^2/12 * (cb - ca)</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>  YakoMC <span class="ot">&lt;-</span> <span class="fu">trapz</span>(x, y)</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>  <span class="co"># mc.qis = c(mc.qis, trapz(simu.grid.unif,Lambda)) ## QIS Original </span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>  mc.qis <span class="ot">=</span> <span class="fu">c</span>(mc.qis, YakoMC) <span class="do">## QIS Corrected</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Iteration  10 
 Iteration  20 
@@ -314,22 +303,21 @@ Iteration  60
 Iteration  70 
 Iteration  80 
 Iteration  90 
-Iteration  100 
-Iteration  110 
-Iteration  120 
-Iteration  130 
-Iteration  140 
-Iteration  150 
-Iteration  160 
-Iteration  170 
-Iteration  180 
-Iteration  190 
-Iteration  200 </code></pre>
+Iteration  100 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cbind</span>(<span class="fu">mean</span>(mc.qis), <span class="fu">mean</span>(mc.naive), trueZ)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-hash="QIS_MVT_cache/html/trimmed_mean_7e791000e9533ab2f760c51daf8bac72">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Trim top and bottom 2.5%</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>trim_ul <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">p =</span> <span class="fl">0.01</span>){</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>   x <span class="ot">&lt;-</span> x[x <span class="sc">&gt;=</span> <span class="fu">quantile</span>(x, p) <span class="sc">&amp;</span> x <span class="sc">&lt;=</span> <span class="fu">quantile</span>(x, <span class="dv">1</span><span class="sc">-</span>p)]</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>   <span class="fu">return</span>(x)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="fu">cbind</span>(<span class="fu">mean</span>(<span class="fu">trim_ul</span>(mc.qis, <span class="at">p =</span> <span class="fl">0.025</span>)), <span class="fu">mean</span>(<span class="fu">trim_ul</span>(mc.naive, <span class="at">p =</span> <span class="fl">0.025</span>)), trueZ)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                                      trueZ
-[1,] 2.866562e-29 6.959908e-31 1.944557e-29</code></pre>
+[1,] 7.845875e-29 1.820323e-31 1.944557e-29</code></pre>
 </div>
 </div>
 </section>
@@ -338,47 +326,81 @@ Iteration  200 </code></pre>
 <section id="graphically" class="level4">
 <h4 class="anchored" data-anchor-id="graphically">Graphically, …</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>mc.data <span class="ot">=</span> <span class="fu">rbind</span>(<span class="fu">data.frame</span>(<span class="at">MC =</span> mc.qis, <span class="at">method =</span> <span class="st">"QIS"</span>),</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                <span class="fu">data.frame</span>(<span class="at">MC =</span> mc.naive, <span class="at">method =</span> <span class="st">"Naive MC"</span>))</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>(plt <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(mc.data, <span class="fu">aes</span>(MC, <span class="at">fill =</span> method)) <span class="sc">+</span> </span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_histogram</span>(<span class="at">alpha=</span><span class="fl">0.75</span>, <span class="at">bins =</span> <span class="dv">30</span>, <span class="at">position=</span><span class="st">"identity"</span>,<span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">after_stat</span>(density)))<span class="sc">+</span></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_density</span>(<span class="at">alpha=</span><span class="fl">0.75</span>, <span class="at">stat=</span><span class="st">"density"</span>,<span class="at">position=</span><span class="st">"identity"</span>,<span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">after_stat</span>(density)))<span class="sc">+</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">expand_limits</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="fl">1e-33</span>,<span class="fl">1e-25</span>))<span class="sc">+</span></span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>        <span class="fu">geom_vline</span>(<span class="at">xintercept=</span>trueZ)<span class="sc">+</span><span class="fu">scale_x_log10</span>()<span class="sc">+</span></span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># coord_flip()+ </span></span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="fu">vars</span>(method), <span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">scales =</span> <span class="st">"free_y"</span>)<span class="sc">+</span></span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>()<span class="sc">+</span></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"QIS vs. Naive MC"</span>, <span class="at">subtitle =</span> <span class="st">"Multivariate t, MVN prior"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>mc.data <span class="ot">=</span> <span class="fu">rbind</span>(<span class="fu">data.frame</span>(<span class="at">MC =</span> <span class="fu">trim_ul</span>(mc.qis, <span class="at">p =</span> <span class="fl">0.025</span>), <span class="at">method =</span> <span class="st">"QIS"</span>),</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>                <span class="fu">data.frame</span>(<span class="at">MC =</span> <span class="fu">trim_ul</span>(mc.naive, <span class="at">p =</span> <span class="fl">0.025</span>), <span class="at">method =</span> <span class="st">"Naive MC"</span>))</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>(plt <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(mc.data, <span class="fu">aes</span>(MC, <span class="at">fill =</span> method)) <span class="sc">+</span> </span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_histogram</span>(<span class="at">alpha=</span><span class="fl">0.75</span>, <span class="at">bins =</span> <span class="dv">30</span>, <span class="at">position=</span><span class="st">"identity"</span>,<span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">after_stat</span>(density)))<span class="sc">+</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_density</span>(<span class="at">alpha=</span><span class="fl">0.75</span>, <span class="at">stat=</span><span class="st">"density"</span>,<span class="at">position=</span><span class="st">"identity"</span>,<span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">after_stat</span>(density)))<span class="sc">+</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">expand_limits</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="fl">1e-33</span>,<span class="fl">1e-25</span>))<span class="sc">+</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        <span class="fu">geom_vline</span>(<span class="at">xintercept=</span>trueZ)<span class="sc">+</span><span class="fu">scale_x_log10</span>()<span class="sc">+</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># coord_flip()+ </span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="fu">vars</span>(method), <span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">scales =</span> <span class="st">"free_y"</span>)<span class="sc">+</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>()<span class="sc">+</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"QIS vs. Naive MC"</span>, <span class="at">subtitle =</span> <span class="st">"Multivariate t, MVN prior"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="QIS_MVT_files/figure-html/graphics-1.png" class="img-fluid" width="672"></p>
 </div>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ggsave(paste0("~/R/Yakowitz/art/","qis_vs_naive_mvt",N,r,"d",d,".pdf"), plt, width = 9, height = 7, device = cairo_pdf)</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># ggsave(paste0("~/R/Yakowitz/art/","qis_vs_naive_mvt",N,r,"d",d,".eps"), plt, width = 9, height = 7, device = cairo_pdf)</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># ggsave(paste0("~/R/Yakowitz/art/","qis_vs_naive_mvt",N,r,"d",d,".png"), plt, width = 9, height = 7)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="numerically" class="level4">
 <h4 class="anchored" data-anchor-id="numerically">Numerically, …</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>mean.qis <span class="ot">&lt;-</span> <span class="fu">mean</span>(mc.qis); mean.naive <span class="ot">&lt;-</span> <span class="fu">mean</span>(mc.naive)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>mape.qis <span class="ot">&lt;-</span> <span class="fu">median</span>(<span class="fu">abs</span>((mc.qis)<span class="sc">-</span>(trueZ))<span class="sc">/</span>(trueZ))</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>mape.naive <span class="ot">&lt;-</span> <span class="fu">median</span>(<span class="fu">abs</span>(((mc.naive)<span class="sc">-</span>(trueZ))<span class="sc">/</span>(trueZ)))</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>rmse.qis <span class="ot">&lt;-</span> <span class="fu">sqrt</span>((<span class="fu">mean</span>((mc.qis)<span class="sc">-</span>(trueZ))<span class="sc">^</span><span class="dv">2</span>))</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>rmse.naive <span class="ot">&lt;-</span> <span class="fu">sqrt</span>((<span class="fu">mean</span>((mc.naive)<span class="sc">-</span>(trueZ))<span class="sc">^</span><span class="dv">2</span>))</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>perf <span class="ot">&lt;-</span> <span class="fu">rbind</span>((<span class="fu">cbind</span>(mean.qis,mean.naive)),</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>              (<span class="fu">cbind</span>(mape.qis, mape.naive)),</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>              (<span class="fu">cbind</span>(rmse.qis,rmse.naive)))</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(perf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"QIS"</span>, <span class="st">"Naive"</span>); <span class="fu">row.names</span>(perf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Mean"</span>, <span class="st">"MAPE"</span>, <span class="st">"RMSE"</span>)</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>perf</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>              QIS        Naive
-Mean 2.866562e-29 6.959908e-31
-MAPE 9.525504e-01 9.954250e-01
-RMSE 9.220049e-30 1.874958e-29</code></pre>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Numerical </span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>mean.qis <span class="ot">&lt;-</span> <span class="fu">mean</span>(mc.qis, <span class="at">trim =</span> <span class="fl">0.025</span>); mean.naive <span class="ot">&lt;-</span> <span class="fu">mean</span>(mc.naive,<span class="at">trim =</span> <span class="fl">0.025</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>median.qis <span class="ot">&lt;-</span> <span class="fu">median</span>(mc.qis); median.naive <span class="ot">&lt;-</span> <span class="fu">median</span>(mc.naive)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>mape.qis <span class="ot">&lt;-</span> <span class="fu">median</span>(<span class="fu">abs</span>((mc.qis)<span class="sc">-</span>(trueZ))<span class="sc">/</span>(trueZ))</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>mape.naive <span class="ot">&lt;-</span> <span class="fu">median</span>(<span class="fu">abs</span>(((mc.naive)<span class="sc">-</span>(trueZ))<span class="sc">/</span>(trueZ)))</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>rmse.qis <span class="ot">&lt;-</span> <span class="fu">sqrt</span>((<span class="fu">mean</span>((mc.qis<span class="sc">-</span>trueZ)<span class="sc">^</span><span class="dv">2</span>)))</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>rmse.naive <span class="ot">&lt;-</span> <span class="fu">sqrt</span>((<span class="fu">mean</span>((mc.naive<span class="sc">-</span>trueZ)<span class="sc">^</span><span class="dv">2</span>)))</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>perf <span class="ot">&lt;-</span> <span class="fu">rbind</span>((<span class="fu">cbind</span>(mean.qis,mean.naive)),</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>              (<span class="fu">cbind</span>(median.qis,median.naive)),</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>              (<span class="fu">cbind</span>(mape.qis, mape.naive)),</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>              (<span class="fu">cbind</span>(rmse.qis,rmse.naive)))</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(perf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"QIS"</span>, <span class="st">"Naive"</span>); <span class="fu">row.names</span>(perf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Mean"</span>, <span class="st">"Median"</span>,</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>                                                          <span class="st">"MAPE"</span>, <span class="st">"RMSE"</span>)</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(perf, <span class="at">format =</span> <span class="st">"html"</span>, <span class="at">digits =</span> <span class="dv">99</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+
+<table>
+ <thead>
+  <tr>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:right;"> QIS </th>
+   <th style="text-align:right;"> Naive </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Mean </td>
+   <td style="text-align:right;"> 8.672069e-29 </td>
+   <td style="text-align:right;"> 2.007210e-31 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Median </td>
+   <td style="text-align:right;"> 1.376328e-29 </td>
+   <td style="text-align:right;"> 7.598928e-32 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> MAPE </td>
+   <td style="text-align:right;"> 8.243520e-01 </td>
+   <td style="text-align:right;"> 9.960922e-01 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> RMSE </td>
+   <td style="text-align:right;"> 3.994507e-28 </td>
+   <td style="text-align:right;"> 1.913807e-29 </td>
+  </tr>
+</tbody>
+</table>
+
 </div>
 </div>
 </section>
