@@ -1,5 +1,5 @@
 ---
-title: "Quantile Importance Sampling <br> Demonstration"
+title: "Quantile Importance Sampling <br> Normal-Normal"
 author: "Jyotishka Datta"
 format: 
   html:
@@ -201,12 +201,13 @@ for(i in 1:r){
   Y = dnorm(X,mu1,sigma1) 
   Y = sort(Y)
   
-  value = nested_sampling(mu1,sigma1,mu2,sigma2,N,tol = 1e-7)$phi
-  simu.grid.exp = vertical.grid(length(value),N,"e")
-  Lambda = sQ(simu.grid.exp,Y)
-  mc.nested= c(mc.nested,-trapz(simu.grid.exp,Lambda)) ## Nested
-  mc.nested.rect = c(mc.nested.rect, -sum(value*diff(simu.grid.exp))) ## Rectangular sum.
-
+  value = nested_sampling(mu1,sigma1,mu2,sigma2,N,tol = 1e-7)
+  simu.grid = vertical.grid(length(value$phi),N,"e")
+  
+  # Lambda = sQ(simu.grid,Y)
+  mc.nested = c(mc.nested,-trapz(simu.grid[-1],value$phi)) ## Trapezoidal rule (Yakowitz)
+  
+  mc.nested.rect = c(mc.nested.rect, -sum((value$phi)*diff(simu.grid)))
 }
 
 mean(mc.nested.rect)
@@ -219,18 +220,45 @@ abline(v=trueZ,col="red",lwd=2)
 
 ```
 
+## Comparison 
+
+### Performance table 
 
 ```{r table}
-cat("QIS", sqrt(mean((mc.qis-trueZ)^2)),"\n",
-    "NS with Riemann", sqrt(mean((mc.nested.rect-trueZ)^2)),"\n",
-    "NS with Rectangular",
-sqrt(mean((mc.nested-trueZ)^2)),"\n",
-    "NS with Riemann",
-sqrt(mean((mc.nested.rect-trueZ)^2)),"\n",
-    "Naive",sqrt(mean((mc.naive-trueZ)^2)))
+### Comparison table
+
+## Numerical 
+
+mean.qis <- mean(mc.qis); 
+mean.naive <- mean(mc.naive)
+median.qis <- median(mc.qis); median.naive <- median(mc.naive)
+mape.qis <- median(abs((mc.qis)-(trueZ))/(trueZ))
+mape.naive <- median(abs(((mc.naive)-(trueZ))/(trueZ)))
+rmse.qis <- sqrt((mean((mc.qis-trueZ)^2)))
+rmse.naive <- sqrt((mean((mc.naive-trueZ)^2)))
+
+mean.nested <- mean(mc.nested); 
+mean.nested.rect <- mean(mc.nested.rect)
+median.nested <- median(mc.nested); median.nested.rect <- median(mc.nested.rect)
+mape.nested <- median(abs((mc.nested)-(trueZ))/(trueZ))
+mape.nested.rect <- median(abs(((mc.nested.rect)-(trueZ))/(trueZ)))
+rmse.nested <- sqrt((mean((mc.nested-trueZ)^2)))
+rmse.nested.rect <- sqrt((mean((mc.nested.rect-trueZ)^2)))
+
+perf <- rbind((cbind(mean.qis,mean.naive,mean.nested,mean.nested.rect)),
+              # (cbind(median.qis,median.naive)),
+              (cbind(mape.qis, mape.naive,mape.nested, mape.nested.rect)),
+              (cbind(rmse.qis,rmse.naive, rmse.nested, rmse.nested.rect)))
+
+colnames(perf) <- c("QIS", "Naive", "Nested-Rect", "Nested-Riemann"); 
+row.names(perf) <- c("Mean", "MAPE", "RMSE")
+
+library(kableExtra)
+kable(perf, format = "html") %>%
+  kable_styling()
 ```
 
-## Comparison 
+### Visual comparison 
 
 
 ```{r comparison}
@@ -240,11 +268,14 @@ mc.data = rbind(data.frame(MC = mc.qis, method = "QIS"),
                 data.frame(MC = mc.nested, method = "Nested - Riemann"),
                  data.frame(MC = mc.naive, method = "Classic MC"))
 
-(plt <- ggplot(mc.data, aes(MC, fill = method)) + 
+(norm.plt <- ggplot(mc.data, aes(MC, fill = method)) + 
     geom_histogram(alpha=0.75,binwidth = 0.005, position="identity",aes(y = ..density..))+
     geom_density(alpha=0.75,adjust = 1, stat="density",position="identity",aes(y = ..density..))+
-    geom_vline(xintercept=trueZ)+coord_flip()+
-    facet_grid(~method)+theme_bw()+
-    ggtitle(paste0("Monte Carlo: Yakowitz")))
+    geom_vline(xintercept=trueZ)+ #coord_flip()+
+    facet_wrap(vars(method), ncol = 2, scales = "fixed") + 
+    ggtitle(paste0("Monte Carlo: Yakowitz"))+
+    theme_bw()+
+    theme(legend.position = "bottom")
+)
 ```
 

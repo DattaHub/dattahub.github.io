@@ -1,5 +1,5 @@
 ---
-title: "QIS for Multivariate t"
+title: "Quantile Importance Sampling <br> Multivariate t"
 author: "Jyotishka Datta"
 format: 
   html:
@@ -217,7 +217,8 @@ colnames(perf) <- c("QIS", "Naive"); row.names(perf) <- c("Mean", "Median",
 library(knitr)
 library(kableExtra)
 
-kable(perf, format = "html", digits = 99)
+kable(perf, format = "html", digits = 99)  %>%
+  kable_styling()
 
 ```
 
