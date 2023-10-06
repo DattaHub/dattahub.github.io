@@ -1,0 +1,433 @@
+---
+title: "Final Project Ideas"
+subtitle: "Nonparametric Statistics <br> Fall 2020"
+author: "Jyotishka Datta"
+date: "October 31, 2020"
+output: 
+  ioslides_presentation:
+    theme: united
+    smaller: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache = TRUE)
+```
+
+<style>
+  .col2 {
+    columns: 2 200px;         /* number of columns and width in pixels*/
+    -webkit-columns: 2 200px; /* chrome, safari */
+    -moz-columns: 2 200px;    /* firefox */
+  }
+  .col3 {
+    columns: 3 100px;
+    -webkit-columns: 3 100px;
+    -moz-columns: 3 100px;
+  }
+</style>
+
+
+## Project Data-sets
+
+Possible Data Sets and Problems
+
+| Data Sets         | Problem Description                         |
+|-------------------|---------------------------------------------|
+| Prostate Cancer Data Set | Large-scale Simultaneous Hypothesis Testing |
+| Exit Poll Data  2016 and 2020  | Analyze Associations                        |
+
+
+## Today 
+
+1. This intro will show you how to read the two data-sets and get basic summary. It will also suggest some of the analysis that you can perform.
+2. You can use one of the methods taught in class (or try new methods - it's up to you (and your team)). 
+3. You do not need to present your work. Only submit a well-written report. 
+
+## Submission etc. 
+
+1. The final report should be at least 2 pages long but no upper limit. 
+2. The R codes used for the analysis and plot should be attached to the main report, either as a part of it or separately as Appendix.
+3. The report will be due by December 14, 2020, 5 pm central time.
+
+
+# Project 1: Multiple Nonparametric Testing: Gene Expression Data
+
+## Project 1: Analysing Genomic Data 
+
+-  Possible Inferential Goals: 
+
+  1. Visualize the data: e.g. compare the baseline expression values between two groups.
+  2. Carry out Multiple testing. 
+  3. We can carry out $p$ simultaneous tests for each of the variables: 
+
+## Large Scale Testing
+
+- Suppose for the $i^{th}$ variable $x_{i}$ the two group means are $\mu_{i,1}$ and $\mu_{i,2}$.
+$$
+H_{0i}: \mu_{i,1} = \mu_{i,2} \text{ vs. } H_{1i}: \mu_{i,1} \neq \mu_{i,2}
+$$
+- If $H_{0i}$ is true, the group means $\bar{x}_{i,1}$ and  $\bar{x}_{i,2}$ should be close. 
+- We can do an independent samples t-test for each of the $p$ variables.
+- **Multiplicity** !!
+
+## Example with Simulated Data {.small}
+
+
+```{r, echo = T}
+set.seed(123)
+n = 1000 ; p1 = 0.05
+z1 = rnorm(n*p1, 2, 1); z2 = rnorm(n*(1-p1),0, 1)
+z = c(z1,z2)
+hist(z, freq = F, ylim = c(0,0.7)); curve(dnorm, add = T)
+```
+
+## Testing 
+
+Suppose, $H_0: \mu = 0$ vs. $H_1: \mu \ne 0$ (Simple $Z$-test)
+```{r, echo = T}
+rawp = 2*(1 - pnorm(abs(z)))
+reject.indices <- 1*(rawp < 0.05)
+sum(reject.indices)
+true.indices = c(rep(1, n*p1), rep(0, n*(1-p1)))
+
+(table(true.indices,reject.indices))
+
+cat("number of false discoveries", sum((true.indices==0)&(reject.indices==1)))
+```
+
+## False rejection 
+
+- Naively comparing all $n$ P-values to the significance level $\alpha$ would mean that by purely random chance, $n \times \alpha$ of them will be falsely rejected. 
+
+- Why? 
+
+## False Discoveries 
+
+- Under the $H_0$, p-values are (1-CDF)'s, i.e. each $p_i \sim U(0,1)$, i.e. $P(p_i \le \alpha) = \alpha$. 
+
+- Probability of error = $\alpha$, Probability of not making an error = $1-\alpha$. 
+- Probability of not making an error in $m$ tests: $(1-\alpha)^m$. 
+
+- P(Making at least 1 error in $m$ tests) = $1-(1-\alpha)^m$.
+
+- P(Making at least 1 error in $m$ tests) is also called familywise error probability (FWEP).
+
+## How does this grow with $m$? 
+
+```{r, echo = T}
+m = (0:100)
+alpha = 0.05 
+FWEP = 1 - (1-alpha)^m 
+plot(m,FWEP,type = "l", ylab = "P(at least 1 false positive)")
+```
+
+
+## Example from Prostate Cancer {.build}
+
+- We will read the prostate cancer dataset from this website: [http://statweb.stanford.edu/~ckirby/brad/LSI/datasets-and-programs/datasets.html](http://statweb.stanford.edu/~ckirby/brad/LSI/datasets-and-programs/datasets.html).
+
+- This data-set has gene expression values for $6,033$ genes for 50 normal and 52 cancer patients (total 102 columns): labeled 1 and 2 for control and treatment.
+
+- Question: which genes are important? 
+
+
+## Load data
+
+**Read the instructions carefully*
+
+-  The datasets are RData files, with extension .RData. They need to be loaded into R using the "load" command. 
+
+-  To use alpha, for example, right-click on the link and select "Save link as...", which will open a dialog on your computer prompting you to save the file. Then load it in R with
+
+```{r, echo = T}
+load('prostatedata.RData')
+```
+
+## Dimensions 
+
+- As expected, this data-set has 6033 genes and 102 columns. 
+
+```{R, echo = T}
+dim(prostatedata)
+```
+
+- How do we find out which genes are important? 
+
+- Multiple testing !!
+
+## Many, many tests 
+
+- We want to carry out a hypothesis test for each gene, i.e. total 6,033 tests 
+
+ *  $H_{0i}$: i-th gene is not important. 
+ 
+ *  $H_{1i}$: i-th gene is important. 
+
+- This is equivalent to testing
+
+ *  $H_{0i}$: $\mu_{1i} = \mu_{2i}$, where $\mu_1$, $\mu_2$ are centers for groups 1 and 2. 
+ 
+ *  $H_{1i}$: $\mu_{1i} \ne \mu_{2i}$, where $\mu_1$, $\mu_2$ are centers for groups 1 and 2. 
+
+
+## Many, many tests 
+
+- Let's do a t-test for each gene. (R code below)
+
+```{r, echo = T}
+prostate_pvals = numeric(6033) ## empty vectors
+prostate_tvals = numeric(6033)
+
+for(i in 1:6033){
+  t_test <-  t.test(prostatedata[i,1:50],prostatedata[i,51:102], 
+                    paired = FALSE, var.equal = FALSE)
+  prostate_pvals[i] <-  t_test$p.value
+  prostate_tvals[i] <- t_test$statistic
+}
+```
+
+
+## Why t-test? 
+
+- You can do any tests for each gene e.g., two-sample t-test, **Wilcoxon rank-sum** test, Mann-Whitney test,  for each row of a data frame.
+- Should we use a t-test or a different test? 
+- How do you know? 
+
+## Visualize {.small}
+
+```{r, echo = F}
+teststat = prostate_tvals
+par(mfrow=c(1,2))
+qqnorm(teststat, ylim = c(-5,5))
+qqline(teststat)
+hist(teststat, breaks = 30, col = "red", freq = F, xlim = c(-5,5), ylim = c(0,0.5))
+curve(dnorm(x), lty = 2, lwd = 2, add=TRUE)
+curve(dnorm(x, mean = mean(teststat), sd = sd(teststat)), lty = 3, lwd = 2, add=TRUE)
+```
+
+- Histogram and N(0,1) density slightly different - a few interesting genes?
+
+
+## Multiple Testing Issues 
+
+- We have a large number of tests: 6033. If we use standard hypothesis testing at a 5% significance level, 5% of all tests will be falsely rejected (type 1 error) just by pure chance. 
+
+- We need some kind of multiplicity control. 
+
+- The most stringent is Bonferroni: Divide each $\alpha$ by the total number of tests $p = 6033$. 
+
+## Bonferroni 
+
+- Bonferroni's correction controls for the familywise error rate (FWER) instead of each $\alpha$. 
+$$
+FWER = P(\text{at least one false rejection}) \le \alpha 
+$$
+
+- Bonferroni leads to a stringent test, since $\alpha/p$ could be very small if we are carrying out a large number of $p$ tests simultaneously. 
+- In R, we can apply the `p.adjust` function for this task. 
+
+- `p.adjust` also has other useful methods such as "Benjamini-Hochberg False Discovery Rate control procedure".
+
+## Bonferroni 
+
+- $M$ hypothesis tests: $H_{0m}$ vs. $H_{1m}$ for $m = 1, \ldots, M$. 
+- Let $p_1, \ldots, p_M$ be the p-values for these $M$ tests. 
+- In our case $M = p$ (no. of genes)
+- Bonferroni method: 
+$$
+\text{Reject null hypothesis } H_{0m} \text{ if } p_m \le \frac{\alpha}{M}
+$$
+
+- Outcome: The probability of falsely rejecting any null hypothesis is less than or equal to $\alpha$.
+
+## Histograms of p-values 
+
+- **What does this tell you?** 
+
+```{r, fig.asp = 0.5}
+hist(prostate_pvals)
+```
+
+- Many small P-values, there might be a few significant genes. 
+
+## Further Analysis 
+
+- If we simply reject all genes with p-values less than $0.05$ we get too many !
+
+```{r, echo = T}
+sum(prostate_pvals<0.05)
+```
+
+- Let's try Bonferroni correction ! 
+
+## Enter Bonferroni 
+
+```{r, echo = T}
+rawp = prostate_pvals
+selected  <- p.adjust(rawp, method = "bonferroni") <0.05
+sum(selected)
+```
+
+- Bonferroni's correction leads to rejection of `r sum(selected)` tests !!
+
+- Too few !!
+
+## Solution 
+
+-  The solution to selecting too few genes is to choose a different multiple testing strategy that is less conservative. 
+
+-  To do this we have to slightly modify what we want to control. 
+
+-  It turns out that we can control the proportion of false rejections to achieve this. 
+
+-  This is called Benjamini--Hochberg multiple testing procedure. 
+
+## Benjamini-Hochberg {.smaller}
+
+- Let $M_0$ be the number of null hypotheses that are true, $M_0 = M - M_1$. 
+
+|           |$H_0$ acc |	$H_0$ rej | Total |
+|-----------|----------|------------|-------|
+|$H_0$ true |	U        | V          | $M_0$ |
+|$H_0$ false|	T        | S          | $M_1$ |
+|Total      |	M-R      | R          | $M$   |
+
+Define the false discovery proportion (FDP): 
+$$
+FDP = \begin{cases} 
+V/R \text{ if } R > 0 \\
+0 \text { otherwise}
+\end{cases}
+$$
+
+## Benjamini-Hochberg {.smaller}
+
+- $M$ hypothesis tests We order the p-values in increasing order.
+$p_{(1)} \le \ldots \le p_{(M)}$. 
+- *Benjamini-Hochberg Method* 
+    1.  For a given $\alpha$ find the largest $k$ such that
+$$
+p_{(k)} \le k \frac{\alpha}{M}
+$$
+    2.  Then reject all $H_{0m}$ for $m = 1, \ldots, k$.
+-  *Theorem* : 
+$$
+FDR = E(FDP) \le \frac{M_0}{M}\alpha \le \alpha
+$$
+-  *Outcome*: For a given significance level $\alpha$, the Benjamini Hochberg method bounds the false discovery rate.
+
+## Benjamini-Hochberg
+
+- The same R function `p.adjust` can apply the Benjamin-Hochberg correction with just one single change: "BH" instead of "bonferroni" as argument. 
+
+```{r, echo = T}
+rawp = prostate_pvals
+selected  <- p.adjust(rawp, method = "BH") <0.05
+sum(selected)
+```
+
+- Benjamini-Hochberg method leads to rejection of `r sum(selected)
+` tests - less stringent than Bonferroni.
+
+## Project tasks 
+
+1. Which non-parametric tests are suitable for this problem? 
+
+
+2. Apply the tests you think are suitable and obtain a large vector of p-values, then use `p.adjust` to apply both the Bonferroni and Benjamini-Hochberg tests. 
+
+3. What happens when you don't apply any multiplicity correction? 
+
+
+## A caution 
+
+- There are many different ways of doing the same analysis - we usually pick the one that gives us a reasonably accurate and yet meaningful answer. 
+
+- In real data, unlike in our numerical experiments, there is no ground truth ! 
+
+- For example, in a Statistical genetics study, your collaborator (a geneticist) might have some prior biological knowledge about which genes should be different, and that provides a way of checking validity. 
+
+
+# Project 2: Test of Association for Political Data
+
+## Project 2: Contingency tables
+
+- Some of the best examples of contingency tables come from Political data analysis. 
+
+- Example: Analyzing Exit Poll Data from CNN. Total number of respondents = 24537.
+
+|Party   | 18-24	| 25-29	| 30-39	| 40-49	| 50-64	| 65 and older |
+|--------|--------|-------|-------|-------|-------|--------------|
+|Clinton | 56%	  | 53%  	| 51% 	| 46% 	| 44%  	| 45%          |
+|Trump   |	35%	  | 39%   | 40% 	| 50%	  | 53%	  | 53%          |
+
+
+## Test for association {.smaller}
+
+```{r, echo = T, fig.height= 4}
+clinton = c(1374,1170,2127,2145,3239,1656)
+trump = c(859,861,1669,2331,3901,1951)
+elect16= rbind(clinton,trump)
+dimnames(elect16) = list(candidate = c("clinton","trump"), 
+                         agegp = c("18-24","25-29","30-39",
+                                   "40-49","50-64",">65"))
+barplot(elect16, beside=T, legend=T)
+```
+
+## Chi-square test 
+
+```{r, echo = T}
+chisq.test(elect16)
+```
+- We can reject the null hypothesis that the proportions are not equal across different age groups. 
+
+
+## Effect of Gender? 
+
+- We can also look at the effect of Gender!
+- The same CNN exit poll data : 24537 respondents. 
+
+|Party |clinton |	trump| others|
+|------|--------|------|-------|
+| male |	41%  	| 53%	 | 6%    |
+|female|	54%	  | 42%  |  4%   |
+
+## Use R {.smaller}
+
+```{r, echo = T, fig.height=4}
+gender <- matrix(c(4829,6242,707,6890,5359,510), byrow = T, ncol = 3)
+dimnames(gender) = list(gender = c("male","female"), 
+                        candidate = c("clinton","trump","others"))
+barplot(t(gender), beside=T, legend=T)
+```
+
+## Chi-square test of association 
+
+```{r, echo = TRUE}
+gender <- matrix(c(4829,6242,707,6890,5359,510), byrow = T, ncol = 3)
+dimnames(gender) = list(gender = c("male","female"), 
+                        candidate = c("clinton","trump","others"))
+prop.table(gender, 1)
+chisq.test(gender)
+```
+
+## Data source  
+
+Get the 2016 exit poll data from this CNN webpage:
+
+[https://www.cnn.com/election/2016/results/exit-polls](https://www.cnn.com/election/2016/results/exit-polls).
+
+and the 2020 exit poll data from another CNN webpage: 
+
+[https://www.cnn.com/election/2020/exit-polls/president/national-results](https://www.cnn.com/election/2020/exit-polls/president/national-results).
+
+## Project goals 
+
+1.  Which variables are interesting or important? 
+
+-  National or state-wise? Are the patterns different?
+-  Education / Ideology / Religion 
+
+2.  Can you identify at least one way in which the 2016 associations differed from 2020 associations based on the above data?
+
+3.  Can you also comment on why these results might differ from the ground reality? 

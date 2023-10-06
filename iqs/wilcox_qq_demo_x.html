@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Wilcoxon and Quantiles</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Jyotishka Datta" />
+    <link href="wilcox_qq_demo_x_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="wilcox_qq_demo_x_files/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Wilcoxon and Quantiles
+### Jyotishka Datta
+### September 7, 2018 (updated: 2020-09-11)
+
+---
+
+
+
+
+---
+
+## Today 
+
+-  Wilcoxon signed-rank test 
+-  How to handle ties 
+-  A univariate example 
+-  Quantiles 
+-  Q-Q plot (tests for normality)
+
+## Near future:
+
+-  Kolmogorov-Smirnov Test 
+-  Liliefors test for Normality
+-  Chi-square goodness of fit test
+
+---
+## Recap Wilcoxon Signed Rank Test 
+
+-  For Wilcoxon’s signed-rank test we would assign ranks to the absolute values of `\((x_1-\theta_0, \ldots, x_n - \theta_0)\)`. 
+
+- A rank of 1 to the value of `\((x_i - \theta_0)\)` which is smallest in absolute value.
+
+- A rank of `\(n\)` to the value of `\((x_i - \theta_0)\)` which is largest in absolute value.
+
+-  `\(SR_+\)` = the sum of the ranks associated with positive values of `\((x_i - \theta_0)\)` , `\(i = 1, \ldots, n\)`
+
+-  `\(SR_-\)` = the sum of the ranks associated with negative values of `\((x_i - \theta_0)\)` , `\(i = 1, \ldots, n\)`.
+
+---
+## Recap Wilcoxon Signed Rank Test
+
+-  Note: 
+
+`\(SR_+ + SR_- = 1 + 2 + \ldots + n = \frac{n(n+1)}{2}\)`
+
+(if you know one, then you know the other)
+
+- If `\(H_0\)` is true then `\(SR_+ \approx SR_- = n(n + 1)/4\)`.
+
+- If `\(H_0\)` is not true then either `\(SR_+\)` will be small ($SR_-$ large) or `\(SR_+\)` will be large ($SR_-$ small).
+- The sampling distribution (and hence the P-values) can be calculated under the null `\(H_0\)`.
+
+-  We can look up the P-values from a table (tedious) or use the R function `wilcox.test()`
+
+---
+## Recap Wilcoxon Signed Rank Test
+
+- For `\(n \ge 12\)`, use Normal approximation: 
+
+-  Mean = `\(n(n+1)/4\)` and standard deviation = `\(\sqrt{n(n+1)(2n+1)/24}\)`.
+
+[Normal tables are easy to look up + R function `pnorm`, `qnorm` etc.]
+
+---
+
+## Handling ties 
+
+-  Real data can have ties for practical reasons, such as rounding or measurement limitations. 
+
+- We use mid-ranks for tied observations. i.e. let this be our sample: 
+
+1, 1, 5, 5, 8, 8, 8 
+
+-  Let our hypothesized median is `\(H_0 : \theta_0 = 3\)`.
+
+-  Then the differences `\(d_i\)` are 
+
+−2, −2, 2, 2, 5, 5, 5, 
+
+i.e. the first four observations are tied in their absolute values, and the last three. 
+
+-  The mid-rank of ranks 1 to 4 is 2.5, the mid-rank of 5,6,7 is 6, 
+
+- the ranks corresponding to `\(\lvert d \rvert_{(i)}\)` are therefore 2.5, 2.5, 2.5, 2.5, 6, 6, 6. 
+
+
+-  **Show R example !**
+
+---
+## Wilcoxon Test with Ties 
+
+-  Will show you warning message ! 
+
+
+```r
+wilcox.test(c(-2, -2, 2, 2, 5, 5, 5), mu = 3)
+```
+
+```
+## Warning in wilcox.test.default(c(-2, -2, 2, 2, 5, 5, 5), mu = 3): cannot compute
+## exact p-value with ties
+```
+
+```
+## 
+## 	Wilcoxon signed rank test with continuity correction
+## 
+## data:  c(-2, -2, 2, 2, 5, 5, 5)
+## V = 12, p-value = 0.7977
+## alternative hypothesis: true location is not equal to 3
+```
+
+---
+## Suppress Warnings !
+
+-  We can suppress this warning message, but it's not recommended in practice
+
+
+```r
+suppressWarnings(wilcox.test(c(-2,-2,2,2,5,5,5),mu = 3))
+```
+
+```
+## 
+## 	Wilcoxon signed rank test with continuity correction
+## 
+## data:  c(-2, -2, 2, 2, 5, 5, 5)
+## V = 12, p-value = 0.7977
+## alternative hypothesis: true location is not equal to 3
+```
+
+---
+# A univariate example 
+
+We have percentage of water content in a field measured in different locations: 
+
+X = (5.6, 6.1, 6.3, 6.4, 6.5, 6.6, 7.0, 7.5, 7.9, 8.0, 8.0, 8.1, 8.1, 8.2, 8.4, 8.5, 8.7, 9.4, 14.3, 26.0)
+
+
+We test the hypothesis: 
+
+`\(H_0: \theta_0 = 9\)` vs. `\(H_1: \theta_0 &gt; 9\)`.
+
+
+---
+
+## Alternative testing methods?
+
+- Sign test (non-parametric)
+- Signed rank test (non-parametric)
+- One-sample `\(t\)`-test (parametric, assumes Normality)
+
+---
+## Univariate Example 
+
+
+```r
+x2 &lt;- c(5.6, 6.1, 6.3, 6.4, 6.5, 6.6, 7.0, 7.5, 7.9, 8.0,
+        8.0, 8.1, 8.1, 8.2, 8.4, 8.5, 8.7, 9.4, 14.3, 26.0)
+## Plot the density
+plot(density(x2), main = "Water Content")
+```
+
+![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+
+---
+## Wilcoxon Signed Rank Test 
+
+
+```r
+suppressWarnings(wilcox.test(x2, mu=9, conf.int=TRUE))
+```
+
+```
+## 
+## 	Wilcoxon signed rank test with continuity correction
+## 
+## data:  x2
+## V = 41, p-value = 0.01774
+## alternative hypothesis: true location is not equal to 9
+## 95 percent confidence interval:
+##  7.150075 8.500071
+## sample estimates:
+## (pseudo)median 
+##       7.810093
+```
+
+**P-value &lt; 0.05, so we reject the null hypothesis. 
+---
+## Sign Test 
+
+
+```r
+binom.test(sum(x2&gt;9),length(x2),alternative = "two.sided")
+```
+
+```
+## 
+## 	Exact binomial test
+## 
+## data:  sum(x2 &gt; 9) and length(x2)
+## number of successes = 3, number of trials = 20, p-value = 0.002577
+## alternative hypothesis: true probability of success is not equal to 0.5
+## 95 percent confidence interval:
+##  0.03207094 0.37892683
+## sample estimates:
+## probability of success 
+##                   0.15
+```
+
+**Again, P-value &lt; 0.05, so we reject the null hypothesis. 
+
+---
+## Parametric t-test 
+
+
+```r
+t.test(x2,alternative = "two.sided",mu=9)
+```
+
+```
+## 
+## 	One Sample t-test
+## 
+## data:  x2
+## t = -0.22154, df = 19, p-value = 0.827
+## alternative hypothesis: true mean is not equal to 9
+## 95 percent confidence interval:
+##   6.701535 10.858465
+## sample estimates:
+## mean of x 
+##      8.78
+```
+
+**But here, P-value &gt; 0.05, so we fail to reject the null hypothesis. 
+
+**Why? What went wrong?**
+
+---
+## Are the data normal?
+
+![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-7-1.png)&lt;!-- --&gt;
+
+---
+## Normality 
+
+You can always do these visual checks, but it's subjective !
+
+What appears "normal" to you, might not be "normal" to somebody else. 
+
+We need to "quantify" the deviation from normal distribution. 
+
+
+---
+
+&lt;img src="art/compare_tests.png" width="1704" /&gt;
+
+---
+&lt;img src="art/quantiles_1.png" width="1684" /&gt;
+
+---
+
+&lt;img src="art/quantiles_2.png" width="1673" /&gt;
+
+---
+
+&lt;img src="art/quantiles_3.png" width="1664" /&gt;
+
+---
+## Aside: `ggplot` makes nicer looking plots
+
+
+```r
+library(ggplot2)
+qplot(y=x2, x= 1, geom = "violin")+
+  geom_abline(slope=0,intercept = 9)+
+  theme_minimal()
+```
+
+![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-12-1.png)&lt;!-- --&gt;
+
+---
+class: middle
+count: false
+
+# Quantiles 
+
+---
+
+
+---
+## The ecdf() function in R 
+
+
+&lt;h3&gt;Description&lt;/h3&gt;
+
+&lt;p&gt;Compute an empirical cumulative distribution function, with several
+methods for plotting, printing and computing with such an
+&amp;ldquo;ecdf&amp;rdquo; object.
+&lt;/p&gt;
+
+
+&lt;h3&gt;Usage&lt;/h3&gt;
+
+&lt;pre&gt;
+ecdf(x)
+
+## S3 method for class 'ecdf'
+plot(x, ..., ylab="Fn(x)", verticals = FALSE,
+     col.01line = "gray70", pch = 19)
+
+## S3 method for class 'ecdf'
+print(x, digits= getOption("digits") - 2, ...)
+
+## S3 method for class 'ecdf'
+summary(object, ...)
+## S3 method for class 'ecdf'
+quantile(x, ...)
+&lt;/pre&gt;
+
+
+&lt;h3&gt;Arguments&lt;/h3&gt;
+
+&lt;table summary="R argblock"&gt;
+&lt;tr valign="top"&gt;&lt;td&gt;&lt;code&gt;x, object&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p&gt;numeric vector of the observations for &lt;code&gt;ecdf&lt;/code&gt;;  for
+the methods, an object inheriting from class &lt;code&gt;"ecdf"&lt;/code&gt;.&lt;/p&gt;
+&lt;/td&gt;&lt;/tr&gt;
+&lt;tr valign="top"&gt;&lt;td&gt;&lt;code&gt;...&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p&gt;arguments to be passed to subsequent methods, e.g.,
+&lt;code&gt;&lt;a href="plot.stepfun.html"&gt;plot.stepfun&lt;/a&gt;&lt;/code&gt; for the &lt;code&gt;plot&lt;/code&gt; method.&lt;/p&gt;
+&lt;/td&gt;&lt;/tr&gt;
+&lt;tr valign="top"&gt;&lt;td&gt;&lt;code&gt;ylab&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p&gt;label for the y-axis.&lt;/p&gt;
+&lt;/td&gt;&lt;/tr&gt;
+&lt;tr valign="top"&gt;&lt;td&gt;&lt;code&gt;verticals&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p&gt;see &lt;code&gt;&lt;a href="plot.stepfun.html"&gt;plot.stepfun&lt;/a&gt;&lt;/code&gt;.&lt;/p&gt;
+&lt;/td&gt;&lt;/tr&gt;
+&lt;tr valign="top"&gt;&lt;td&gt;&lt;code&gt;col.01line&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p&gt;numeric or character specifying the color of the
+horizontal lines at y = 0 and 1, see &lt;code&gt;&lt;a href="../../grDevices/html/colors.html"&gt;colors&lt;/a&gt;&lt;/code&gt;.&lt;/p&gt;
+&lt;/td&gt;&lt;/tr&gt;
+&lt;tr valign="top"&gt;&lt;td&gt;&lt;code&gt;pch&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p&gt;plotting character.&lt;/p&gt;
+&lt;/td&gt;&lt;/tr&gt;
+&lt;tr valign="top"&gt;&lt;td&gt;&lt;code&gt;digits&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p&gt;number of significant digits to use, see
+&lt;code&gt;&lt;a href="../../base/html/print.html"&gt;print&lt;/a&gt;&lt;/code&gt;.&lt;/p&gt;
+&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;
+
+
+&lt;h3&gt;Details&lt;/h3&gt;
+
+&lt;p&gt;The e.c.d.f. (empirical cumulative distribution function)
+&lt;i&gt;Fn&lt;/i&gt; is a step function with jumps &lt;i&gt;i/n&lt;/i&gt; at
+observation values, where &lt;i&gt;i&lt;/i&gt; is the number of tied observations
+at that value.  Missing values are ignored.
+&lt;/p&gt;
+&lt;p&gt;For observations
+&lt;code&gt;x&lt;/code&gt;&lt;i&gt;= (&lt;/i&gt;&lt;i&gt;x1,x2&lt;/i&gt;, ... &lt;i&gt;xn)&lt;/i&gt;,
+&lt;i&gt;Fn&lt;/i&gt; is the fraction of observations less or equal to &lt;i&gt;t&lt;/i&gt;,
+i.e.,
+&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;i&gt;
+    Fn(t) = #{xi &amp;lt;= t}/n  =  1/n sum(i=1,n) Indicator(xi &amp;lt;= t).&lt;/i&gt;&lt;/p&gt;
+
+&lt;p&gt;The function &lt;code&gt;plot.ecdf&lt;/code&gt; which implements the &lt;code&gt;&lt;a href="../../graphics/html/plot.default.html"&gt;plot&lt;/a&gt;&lt;/code&gt;
+method for &lt;code&gt;ecdf&lt;/code&gt; objects, is implemented via a call to
+&lt;code&gt;&lt;a href="plot.stepfun.html"&gt;plot.stepfun&lt;/a&gt;&lt;/code&gt;; see its documentation.
+&lt;/p&gt;
+
+
+&lt;h3&gt;Value&lt;/h3&gt;
+
+&lt;p&gt;For &lt;code&gt;ecdf&lt;/code&gt;, a function of class &lt;code&gt;"ecdf"&lt;/code&gt;, inheriting from the
+&lt;code&gt;"&lt;a href="stepfun.html"&gt;stepfun&lt;/a&gt;"&lt;/code&gt; class, and hence inheriting a
+&lt;code&gt;&lt;a href="stepfun.html"&gt;knots&lt;/a&gt;()&lt;/code&gt; method.
+&lt;/p&gt;
+&lt;p&gt;For the &lt;code&gt;summary&lt;/code&gt; method, a summary of the knots of &lt;code&gt;object&lt;/code&gt;
+with a &lt;code&gt;"header"&lt;/code&gt; attribute.
+&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;&lt;a href="quantile.html"&gt;quantile&lt;/a&gt;(obj, ...)&lt;/code&gt; method computes the same quantiles as
+&lt;code&gt;quantile(x, ...)&lt;/code&gt; would where &lt;code&gt;x&lt;/code&gt; is the original sample.
+&lt;/p&gt;
+
+
+&lt;h3&gt;Note&lt;/h3&gt;
+
+&lt;p&gt;The objects of class &lt;code&gt;"ecdf"&lt;/code&gt; are not intended to be used for
+permanent storage and may change structure between versions of &lt;span style="font-family: Courier New, Courier; color: #666666;"&gt;&lt;b&gt;R&lt;/b&gt;&lt;/span&gt; (and
+did at &lt;span style="font-family: Courier New, Courier; color: #666666;"&gt;&lt;b&gt;R&lt;/b&gt;&lt;/span&gt; 3.0.0).  They can usually be re-created by
+&lt;/p&gt;
+&lt;pre&gt;    eval(attr(old_obj, "call"), environment(old_obj))&lt;/pre&gt;
+&lt;p&gt;since the data used is stored as part of the object's environment.
+&lt;/p&gt;
+
+
+&lt;h3&gt;Author(s)&lt;/h3&gt;
+
+&lt;p&gt;Martin Maechler; fixes and new features by other R-core members.
+&lt;/p&gt;
+
+
+&lt;h3&gt;See Also&lt;/h3&gt;
+
+&lt;p&gt;&lt;code&gt;&lt;a href="stepfun.html"&gt;stepfun&lt;/a&gt;&lt;/code&gt;, the more general class of step functions,
+&lt;code&gt;&lt;a href="approxfun.html"&gt;approxfun&lt;/a&gt;&lt;/code&gt; and &lt;code&gt;&lt;a href="splinefun.html"&gt;splinefun&lt;/a&gt;&lt;/code&gt;.
+&lt;/p&gt;
+
+
+&lt;h3&gt;Examples&lt;/h3&gt;
+
+&lt;pre&gt;
+##-- Simple didactical  ecdf  example :
+x &amp;lt;- rnorm(12)
+Fn &amp;lt;- ecdf(x)
+Fn     # a *function*
+Fn(x)  # returns the percentiles for x
+tt &amp;lt;- seq(-2, 2, by = 0.1)
+12 * Fn(tt) # Fn is a 'simple' function {with values k/12}
+summary(Fn)
+##--&amp;gt; see below for graphics
+knots(Fn)  # the unique data values {12 of them if there were no ties}
+
+y &amp;lt;- round(rnorm(12), 1); y[3] &amp;lt;- y[1]
+Fn12 &amp;lt;- ecdf(y)
+Fn12
+knots(Fn12) # unique values (always less than 12!)
+summary(Fn12)
+summary.stepfun(Fn12)
+
+## Advanced: What's inside the function closure?
+ls(environment(Fn12))
+## "f"     "method" "na.rm"  "nobs"   "x"     "y"    "yleft"  "yright"
+utils::ls.str(environment(Fn12))
+stopifnot(all.equal(quantile(Fn12), quantile(y)))
+
+###----------------- Plotting --------------------------
+require(graphics)
+
+op &amp;lt;- par(mfrow = c(3, 1), mgp = c(1.5, 0.8, 0), mar =  .1+c(3,3,2,1))
+
+F10 &amp;lt;- ecdf(rnorm(10))
+summary(F10)
+
+plot(F10)
+plot(F10, verticals = TRUE, do.points = FALSE)
+
+plot(Fn12 , lwd = 2) ; mtext("lwd = 2", adj = 1)
+xx &amp;lt;- unique(sort(c(seq(-3, 2, length = 201), knots(Fn12))))
+lines(xx, Fn12(xx), col = "blue")
+abline(v = knots(Fn12), lty = 2, col = "gray70")
+
+plot(xx, Fn12(xx), type = "o", cex = .1)  #- plot.default {ugly}
+plot(Fn12, col.hor = "red", add =  TRUE)  #- plot method
+abline(v = knots(Fn12), lty = 2, col = "gray70")
+## luxury plot
+plot(Fn12, verticals = TRUE, col.points = "blue",
+     col.hor = "red", col.vert = "bisque")
+
+##-- this works too (automatic call to  ecdf(.)):
+plot.ecdf(rnorm(24))
+title("via  simple  plot.ecdf(x)", adj = 1)
+
+par(op)
+&lt;/pre&gt;
+
+&lt;hr /&gt;&lt;div style="text-align: center;"&gt;[Package &lt;em&gt;stats&lt;/em&gt; version 4.0.2 &lt;a href="00Index.html"&gt;Index&lt;/a&gt;]&lt;/div&gt;
+
+
+---
+class:middle
+
+# Convergence
+
+[https://jdatta.shinyapps.io/eCDFdemo/](https://jdatta.shinyapps.io/eCDFdemo/)
+
+---
+## Empirical CDF 
+
+.pull-left[
+
+```r
+set.seed(123)
+emp1 &lt;- ecdf(rnorm(20)) 
+emp2 &lt;- ecdf(rnorm(50)) 
+
+par(mfrow=c(1,2)) # Two panels
+
+x &lt;- seq(-3,3,length.out = 100)
+
+plot(emp1,main="n = 20")
+lines(x,pnorm(x))
+plot(emp2,main="n = 50")
+lines(x,pnorm(x))
+```
+]
+
+.pull-right[
+![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-15-1.png)&lt;!-- --&gt;
+]
+
+---
+## Q-Q Plots (One-sample)
+
+
+```r
+set.seed(12) # Reproducibility
+y &lt;- rnorm(100)
+qqnorm(y, ylim=c(-3,3), main = "Normal Q-Q Plot",
+       xlab = "Theoretical Quantiles", ylab = "Sample Quantiles")
+qqline(y, distribution = qnorm)
+```
+
+![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-16-1.png)&lt;!-- --&gt;
+
+---
+## Two samples same 
+
+
+```r
+z &lt;- rnorm(100)
+qqplot(y,z,main = "Two-sample Q-Q Plot",
+       xlab = "Sample 1 Quantiles", ylab = "Sample 2 Quantiles")
+abline(0, 1)
+```
+
+![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-17-1.png)&lt;!-- --&gt;
+
+---
+## Two samples different
+
+
+```r
+x = rnorm(10000,0,2); y = rnorm(10000,0,4)
+qqplot(x,y,main = "Two-sample Q-Q Plot",
+       xlab = "Sample 1 Quantiles", ylab = "Sample 2 Quantiles")
+abline(0, 1)
+```
+
+![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-18-1.png)&lt;!-- --&gt;
+
+
+---
+## A Common Mistake 
+
+
+```r
+x = rnorm(10000,0,2); y = rnorm(10000,0,4)
+qqplot(x,y,main = "Two-sample Q-Q Plot",
+       xlab = "Sample 1 Quantiles", ylab = "Sample 2 Quantiles")
+```
+
+![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-19-1.png)&lt;!-- --&gt;
+
+---
+## Histograms 
+
+
+```r
+hist(x,breaks=50,freq=F,col=rgb(1,0,0,0.5),xlim=c(-15,15))
+hist(y,breaks=50,freq=F,col=rgb(0,0,1,0.5),add=T)
+box()
+```
+
+![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-20-1.png)&lt;!-- --&gt;
+
+---
+## Or, Boxplots 
+
+
+```r
+boxplot(y,z)
+```
+
+![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-21-1.png)&lt;!-- --&gt;
+
+---
+## Even better, test a hypothesis 
+
+
+```r
+ks.test(rnorm(20),pnorm)
+```
+
+```
+## 
+## 	One-sample Kolmogorov-Smirnov test
+## 
+## data:  rnorm(20)
+## D = 0.24294, p-value = 0.1593
+## alternative hypothesis: two-sided
+```
+
+---
+## In our case 
+
+
+```r
+ks.test(x,y)
+```
+
+```
+## 
+## 	Two-sample Kolmogorov-Smirnov test
+## 
+## data:  x and y
+## D = 0.1691, p-value &lt; 2.2e-16
+## alternative hypothesis: two-sided
+```
+
+---
+## Next Time 
+
+-  We will dig deeper into these tests ! 
+-  Kolmogorov-Smirnov, Lilliefors, Chi-square GoF etc. 
+-  These are important as they tell you whether your data distribution is Normal, i.e. whether we should use nonparametric methods that do not assume Normality or parametric methods that assume Normality.
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create();
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

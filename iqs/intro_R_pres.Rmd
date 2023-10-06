@@ -1,0 +1,239 @@
+---
+title: "Introduction to R - II"
+author: "Jyotishka Datta"
+date: "January 30, 2017"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## apply, lapply, sapply, tapply 
+
+- You have some structured blob of data and you want to perform some operations by dimensions. 
+- e.g. calculate row-wise means or column-wise means 
+
+```{r, echo = TRUE}
+m <- matrix(data=cbind(rnorm(30, 0), rnorm(30, 2), rnorm(30, 5)), nrow=30, ncol=3)
+dim(m)
+apply(m, 2, mean)
+```
+
+## apply (contd.)
+
+- We can also calculate row-wise mean. 
+
+```{r, echo = TRUE}
+apply(m, 1, mean)
+```
+- Or, our own function: (how many negative numbers in each column?)
+```{r, echo = TRUE}
+apply(m, 2, function(x) length(x[x<0]))
+```
+
+## lapply and sapply 
+
+- traversing over a set of data like a list or vector, and calling the specified function for each item. 
+
+- Usage: lapply(alist, afunction) - applies afunction to all the elements of a list or vector, returns a list of
+the results. Example:
+
+```{r, echo = TRUE}
+cap.state.name <- lapply(state.name, toupper)
+head(cap.state.name, n = 3)
+```
+
+## sapply 
+
+- Similar to lapply, but returns a simpler data structure: either a vector or array.
+
+```{r, echo = TRUE}
+sapply(1:3, function(x) x^2)
+```
+
+- Remember: lapply is a list apply, sapply is simple lapply. 
+- Why do we care? apply, sapply, lapply are easier to read and sometimes faster than traditional for loops.
+
+
+## Functions 
+
+- Functions are blocks of code that allows R to be modular and facilitate code reuse.
+- An R programmer can define their own functions as follows:
+```{r, echo = TRUE, eval = FALSE}
+function_name <- function([arg1], [arg2], ...){
+#function code body
+}
+```
+- The function arguments are optional. Function arguments are the variables passed
+to the function, used by the function's code to perform calculations. A function can take no arguments.
+- A function can also return any R primitive or object using the return(object)
+statement.
+
+## Functions 
+
+-  Examples 
+```{r, echo = TRUE, eval = FALSE}
+# computes the mean of a vector of numbers
+mean <- function(a_vector) {
+s <- sum(a_vector)
+x <- s/length(a_vector)
+}
+```
+
+```{r, echo = TRUE, eval = FALSE}
+# checks to see if a string s starts with letter x
+startsWith <- function(x, s){
+if(x == substr(s, 0, 1){
+return(TRUE)
+}
+return(FALSE)
+}
+```
+
+## Functions 
+
+-  **Default arguments**
+-  Function arguments can be assigned default values as follows:
+```{r, echo = TRUE, eval = FALSE}
+sort_vector <- function(a_vector, ascending=TRUE){
+# sorting algorithm
+}
+```
+- When calling this function, the arguments given default values do not need to be specified. In this case, the defaults are used.
+- Example:
+```{r, echo = TRUE, eval = FALSE}
+sort_vector(a_vector) # returns a_vector in ascending order
+sort_vector(a_vector, FALSE) # returns a vector in descending order
+```
+
+## Functions 
+
+-  Variable Scoping
+-  Variables that are bound to an R primitive or object outside a function are called global variables, and are accessible everywhere in an R program.
+-  Example:
+```{r, echo = TRUE}
+x <- 5
+test <- function() {
+cat(x + 5)
+}
+test(); 
+```
+
+## Functions 
+
+-  Variables bound inside a function are only accessible within that function. These are called local variables. Example:
+```{r, echo = TRUE}
+x <- 10
+test <- function() {
+x <- 5
+cat(x + 20)
+}
+test() #prints 25
+cat(x + 20) #prints 30
+```
+-  **Note that the local variable assignment takes precedence inside the function test over the global assignment**.
+
+## Functions 
+
+-  R functions have no side effects-- they cannot change the value of global variables. Example:
+```{r, echo =  TRUE}
+x <- 10
+test <- function(z) {
+z <- z + 10
+cat(z)
+}
+test(x) #prints 20
+cat(x) #prints 10
+```
+-  **Note that x is still bound to 10 outside of test()**.
+
+## Merge sort {.smaller}
+- Merging arrays 
+```{r, echo = TRUE}
+mergearrays <- function(x,y){
+  m = length(x)
+  n = length(y)
+  if(m==0){
+    return(z = y)
+    }
+  if(n==0){
+    return(z = x)
+  }
+  if (x[1]<=y[1]){
+    return(z = c(x[1],mergearrays(x[-1],y)))
+  }else{
+    return(z = c(y[1],mergearrays(x,y[-1])))
+  }
+}
+
+x = c(1,2,3)
+y = c(2.5,3.5,4.5)
+mergearrays(x,y)
+```
+
+## Merge sort 
+- Use the merge arrays subroutine inside. 
+```{r, echo = TRUE}
+mergesort <- function(x){
+  n = length(x)
+  mid = floor(n/2)
+  if(n > 1){
+    return(mergearrays(mergesort(x[1:mid]),mergesort(x[(mid+1):n])))
+  }else{
+    return(x)
+  }
+}
+x = c(1,3,4,5,7,2)
+cat("Before sorting", x, "After sorting:", mergesort(x))
+```
+
+## Avoid for loops 
+```{r, echo = TRUE, eval = FALSE}
+system.time(expr)
+```
+
+Return CPU times that "expr" used. A numeric vector of length 5 containing 
+the user cpu, system cpu, elapsed, subproc1, subproc2 times. The subproc 
+times are the user and system cpu time used by child processes (and so 
+are usually zero).
+
+## Avoid for loops 
+
+```{R, echo = TRUE}
+system.time(for(i in 1:50) x<-mean(rnorm(1000)))
+```
+
+- The other way to get system time is using proc.time() function.
+- `proc.time' determines how much time (in seconds) the currently running R process already consumed. For example:
+
+```{r, echo = TRUE}
+now<-proc.time()
+for(i in 1:50) x<-mean(rnorm(1000))
+proc.time()-now
+```
+
+## Calculating mean {.smaller}
+
+```{r, echo = TRUE}
+x<-c(1:10000)
+sum<-0
+now<-proc.time()
+for(i in 1:10000){sum<-sum+x[i]}
+meanx<-sum/10000
+proc.time()-now
+```
+
+- Use vectorized arithmetic instead of loops:
+```{r, echo = TRUE}
+system.time(sum(x)/length(x))
+system.time(mean(x))
+```
+
+## Finer control 
+
+```{r, echo = TRUE}
+#install.packages("microbenchmark")
+library(microbenchmark)
+microbenchmark(sqrt(x),x^(0.5))
+```

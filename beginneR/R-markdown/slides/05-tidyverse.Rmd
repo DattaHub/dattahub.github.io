@@ -1,0 +1,68 @@
+---
+title: "Manipulating Data with Tidyverse"
+author: "Jyotishka Datta"
+date: "5/18/2019"
+output: 
+  html_document:
+      toc: true
+      number_sections: false
+fontsize: 12pt
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+Manipulating here means moving the same data into different arrangements without changing the actual values.
+
+In this tutorial, you'll learn how to do these things in a fast way that's easy to repeat using a set of software tools known as the "Tidyverse".
+
+The Tidyverse, a collection of R packages built around the foundational idea that data in a table should have one variable per column, one observation per row and only one value per cell.
+
+One of the packages in the Tidyverse is dplyr, which is a package for getting at parts of your data in a fast, easy-to-understand way that's easy to replicate. In this tutorial, we're going to learn about and practice using the six core "verbs" of data manipulation in the Tidyverse.
+
+> ## Learning Objectives
+>
+
+> By time you finish this tutorial, you will be able to take a data frame and:
+
+> * Use the pipe (%>%) to create a seamless workflow
+> * Use select() to select one or more columns
+> * Use filter() to select one or more rows
+> * Use mutate() to add new variables
+> * Use arrange() to change the order of rows
+> * Use summarize() to convert a variable to a single value
+> * Use group_by() to group sets of observations
+
+## Getting Ready 
+
+This will be pretty quick: we just need to read in the library we're going to use (tidyverse), then read in our data and put it in a data frame. We're going to read our data in using the read_csv() function rather than read.csv(), which will put it in a tibble.
+
+Tibble: A "modern take on data frames", it's bascially a data frame that is designed to be more user-friendly and avoid some of the defaults that lead to frequent bugs.
+
+For this tutorial, we're going to use an agricultural survey dataset that has information on more than 9500 families. It's not a huge dataset in terms of what you might encounter in industry, but it is large enough that interacting with it in a spreadsheet program would be a pain.
+
+```{r}
+# library we're going to use
+library(tidyverse)
+
+# read in that data
+farmData <- read_csv("data/herding-cats-small.csv")
+```
+
+Now that we've got our data frame read into R, let's take a peek at the first few rows.
+
+```{r}
+# print the first ten rows of our dataframe
+head(farmData, 10)
+```
+
+```{r}
+# get the number of rows and columns in our dataset
+dim(farmData)
+```
+
+

@@ -1,0 +1,329 @@
+---
+title: "Bootstrap"
+author: "Jyotishka Datta"
+date: "`r Sys.Date()`"
+output: ioslides_presentation
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Bootstrap using R 
+
+## Sampling distribution 
+
+- If the population distribution is known, we can sample from it many times to get an idea of the sampling distribution. 
+
+- Example: $X_i \sim N(\mu, \sigma^2), i = 1, \ldots, n$. 
+- Sampling distribution of $\bar{X}$ is $N(\mu, \sigma^2/n)$
+- Also, we can draw from normal many times, and plot the histogram of all the means. 
+
+## Sampling distribution Normal mean
+
+```{r, echo = TRUE, fig.height = 3}
+set.seed(123)
+x = rnorm(100,2,3)
+xbar.smpls = rep(NA, 1000)
+for (i in 1:1000)  xbar.smpls[i] = mean(rnorm(100,2,3))
+hist(xbar.smpls, freq = FALSE)
+curve(dnorm(x,mean=2,sd=3/10),add=T)
+```
+
+## Use of sampling distribution
+-  We can use the sampling distribution to get an idea about the fluctuation of the sample mean etc.
+- The true sampling mean should be 2, and true sampling std. dev. should be $\sigma/\sqrt{n}= 3/\sqrt(100) = 0.3$.
+
+```{r, echo = TRUE}
+mean(xbar.smpls)
+sd(xbar.smpls)
+```
+
+## Bootstrap 
+
+1.  If $F$ is completely unknown, we cannot generate random numbers from
+this distribution. 
+2.  $X_1, \ldots, X_n$ are the only realizations of $F$ known to us.
+The idea is to approximate $F$ by $\hat F$ based on $X_1, \ldots, X_n$.
+3.  Basic idea: Inference about a population from sample data, (sample $\rightarrow$ population), can be modeled by resampling the sample data and performing inference about a sample from resampled data, (resampled $\rightarrow$ sample).
+
+## Algorithm 
+
+1.  Data: $X_1, \ldots, X_n$. Test statistics $t_n$ (e.g. $\bar{X}$)
+2.  Draw $B$ samples $x_1^b, x_2^b, \ldots, x_n^b$ with replacement $b = 1, \ldots, B$ (there might be ties). This is called a **Bootstrap sample**!
+3.  For each of the $B$ samples calculate the statistic $t_n^b$.
+4.  Use these $B$ realizations of $t_n$ to compute whatever you want, e.g. 
+-   mean: $E(t_n) \approx 1/B \sum_b t_n^b$.
+-   variance: $Var(t_n) \approx 1/(B-1) \sum_b (t_n^b - \bar{t}_n)^2$.
+-   Empirical CDF $\hat{F}(t_n)$. 
+
+## Bootstrap in R - the sample() function 
+
+A major component of bootstrapping is being able to resample a given data set and in R the function which does this is the sample function.
+
+sample(x, size, replace, prob)
+
+-  The first argument is a vector containing the data set to be resampled or the indices of the data to be resampled.
+-  The size option specifies the sample size with the default being the size of the population being resampled.
+-  The replace option determines if the sample will be drawn with or without replacement where the default value is FALSE, i.e. without replacement. 
+-  The prob option takes a vector of length equal to the data set given in the first argument containing the probability of selection for each element of x. 
+
+## More on sampling - 1
+-  Using sample to generate a permutation of the sequence 1:10
+```{r, echo = TRUE}
+sample(10)
+```
+-  Bootstrap sample from the same sequence (ties)
+```{r, echo = TRUE}
+sample(10, replace=T)
+sample(10, replace=T)
+```
+
+## More on sampling - 2
+
+-  Boostrap sample from the same sequence with probabilities that favor the numbers 1-5
+```{r, echo = TRUE}
+prob1 <- c(rep(.15, 5), rep(.05, 5))
+prob1
+sample(10, replace=T, prob=prob1)
+```
+
+
+## Bootstrap in R 
+- Here is an R code for getting the bootstrap samples from the same $x$ that we saw before. 
+
+```{r, echo = TRUE, cache = TRUE, fig.height= 2}
+B = 5000
+theta.boot = rep(0, B)
+n = length(x)
+for (b in 1:B)  theta.boot[b] = mean(sample(x,replace=TRUE))
+
+```
+
+## Bootstrap mean and sd
+-  We can use the statistics calculated from the bootstrap distribution to get an idea about the fluctuation of the sample mean etc. when the true F is not known.
+
+```{r, echo = TRUE}
+mean(theta.boot)
+sd(theta.boot)
+```
+
+## The bootstrap distribution 
+
+```{r, echo = FALSE}
+hist(theta.boot, breaks = 30, col = rgb(0,1,0,0.5), freq = FALSE)
+hist(xbar.smpls, breaks = 30, col = rgb(0,0,1,0.5), freq = FALSE, add = TRUE)
+abline(v=mean(xbar.smpls),lty="dotted")
+abline(v=mean(theta.boot))
+```
+
+## Another Example - 0
+
+-  Taken entirely from [ATS UCLA website](http://www.ats.ucla.edu/stat/r/library/bootstrap.htm) 
+- In the following bootstrapping example we would like to obtain a standard error for the estimate of the median. 
+- We will use the lapply and sapply functions. 
+- lapply(X, FUN, ...): returns a list of the same length as X, each element of which is the result of applying FUN to the corresponding element of X.
+- sapply(X, FUN, ...) is a user-friendly version and wrapper of lapply by default returning a vector, matrix or, if simplify = "array", an array if appropriate.
+
+## Another Example - 1
+
+-  We want to calculating the standard error of the median for a data set created by taking 100 observations from a normal distribution with mean 5 and stdev 3. 
+-  We have rounded each observation to nearest integer!
+-  The distribution of median is not as `simple' as the mean.
+
+```{r, echo = TRUE}
+data <- round(rnorm(100, 5, 3))
+data[1:10]
+```
+
+## Another Example - 2
+- We will generate only 20 bootstrap samples. 
+- Show the first sample for demonstration. 
+
+```{r, echo = TRUE}
+resamples <- lapply(1:20, function(i)
+sample(data, replace = T))
+resamples[1]
+```
+
+## Another Example - 3
+
+- For each bootstrap samples, we will calculate the median. 
+- Now we have a bootstrap sample from the distribution of the sample median, and we can use it to calculate the standard deviation. 
+```{r, echo = T}
+r.median <- sapply(resamples, median)
+r.median
+sqrt(var(r.median))
+```
+
+## Another Example - 4
+
+```{r, echo = T}
+hist(r.median, freq = FALSE, col = rgb(0,1,0,0.5))
+```
+
+## Using package 
+
+```{r, echo = TRUE, warning = FALSE, message = FALSE}
+# Bootstrap 95% CI for R-Squared
+library(boot)
+# function to obtain R-Squared from the data 
+rsq <- function(formula, data, indices) {
+  d <- data[indices,] # allows boot to select sample 
+  fit <- lm(formula, data=d)
+  return(summary(fit)$r.square)
+} 
+# bootstrapping with 1000 replications 
+results <- boot(data=mtcars, statistic=rsq, 
+  	R=1000, formula=mpg~wt+disp)
+```
+
+
+## Using package 
+
+```{r, echo = TRUE} 
+# view results
+results
+```
+
+## Using package 
+
+You can also get them separately:
+```{r, echo = TRUE}
+(bs.median = results$t0)
+(bs.stderr = sqrt(var(results$t)))
+```
+
+## Plotting results 
+```{r, echo = TRUE}
+plot(results)
+```
+
+## Plotting results 
+```{r, echo = TRUE, fig.height = 3}
+df <- data.frame(x = results$t); x<- df$x
+library(ggplot2)
+ggplot(df, aes(x)) + geom_histogram(aes(y = ..density..), fill = "blue", alpha = 0.5)+geom_density()
+```
+
+## Law data example 
+
+```{r, echo = TRUE, fig.height=3}
+data(law, package = "bootstrap")
+library(ggplot2)
+qplot(LSAT, GPA, data = law)
+with(law, cor(LSAT, GPA))
+```
+
+## Sample with replacement 
+
+```{r, echo = TRUE}
+sample(nrow(law), replace = TRUE)
+
+sample(nrow(law), replace = TRUE)
+
+with(law[sample(nrow(law), replace = TRUE), ], cor(LSAT, GPA))
+
+with(law[sample(nrow(law), replace = TRUE), ], cor(LSAT, GPA))
+
+with(law[sample(nrow(law), replace = TRUE), ], cor(LSAT, GPA))
+```
+
+## Bootstrap (Long code)
+
+```{r, echo = TRUE, cache = TRUE}
+ptm <- proc.time()
+B <- 5000
+cor.boot <- rep(0,B)
+for (b in 1:B){
+  law.boot <- law[sample(nrow(law), replace = TRUE), ]
+  cor.boot[b] = cor(law.boot$LSAT, law.boot$GPA)
+}
+summary(cor.boot)
+proc.time()-ptm
+```
+
+
+## Bootstrap (Short code)
+
+```{r, echo = TRUE, cache = TRUE}
+ptm <- proc.time()
+B <- 5000
+cors <- replicate(B, {with(law[sample(nrow(law), replace = TRUE), ], 
+                           cor(LSAT, GPA))})
+summary(cors)
+proc.time()-ptm
+```
+
+- Slight gain in running time! Gets better with bigger data.
+
+## Plotting results 
+
+```{r, echo = TRUE, fig.height = 3}
+df <- data.frame(x = cors); x<- df$x
+library(ggplot2)
+ggplot(df, aes(x)) + geom_histogram(aes(y = ..density..), fill = "blue", alpha = 0.5)+geom_density()
+```
+
+## How many bootstrap samples do we need? 
+
+- We will perform Bootstrap sampling for different values of $B$, the number of Bootstrap samples and observe the fluctuation between bootstrap estimates for each choice. 
+- Our preferred $B$ should lead to a low variation.
+- We will show the standard loop-y code, which is not efficient and a fast code. 
+
+## Design 
+
+```{r, echo = TRUE, cache = TRUE}
+Bs <- rep(100 * (1:50), 3)
+Bs
+```
+
+## How many? (slow code) {.smaller}
+
+```{r, echo = TRUE, cache = TRUE}
+ptm <- proc.time()
+corsize2 = matrix(0,length(Bs),2)
+for (i in 1:length(Bs)){
+  b = Bs[i]
+  for (b in 1:B){
+   law.boot <- law[sample(nrow(law), replace = TRUE), ]
+   cor.boot[b] = cor(law.boot$LSAT, law.boot$GPA)
+  }
+  corsize2[i,] = c(b, mean(cor.boot))
+}
+colnames(corsize2) = c("B","cor")     
+proc.time()-ptm
+head(corsize2, n = 3)
+```
+
+## Fast code for Bootstrap sample size
+
+- The idea is to calculate the bootstrap correlation for each sample size from 100 to 5000, and replicate three times. 
+- The slow code uses a nested for loop, which is really inefficient. 
+- We can use a function called `ldply` that can avoid for loops altogether. 
+- ldply function : For each element of a list, apply function then combine results into a data frame.
+- Our list is values of B, for each B, we will calculate mean of correlation estimates for a bootstrap with B samples. 
+
+## How many? (Fast Code)
+
+```{r, echo = TRUE, cache= TRUE}
+ptm <- proc.time()
+library(plyr)
+corsize <- ldply(Bs, function(B){
+                 cors <- replicate(B,{with(law[sample(nrow(law), replace = TRUE),]                                      ,cor(LSAT, GPA))})
+                 c(B = B, cor = mean(cors))})
+head(corsize,n=3)
+proc.time()-ptm
+```
+
+## Plot
+
+- Plot the correlation estimates for each value of $B$ for three choices. 
+- As $B$ increases, fluctuation diminishes. 
+
+```{r,echo = TRUE, fig.height = 3}
+qplot(B, cor, data = corsize)
+```
+
+
+
+

@@ -1,0 +1,183 @@
+---
+title: "Chi-square Goodness of fit"
+author: "Jyotishka Datta"
+date: "September 12, 2018 | updated on `r Sys.Date()`"
+output: 
+  ioslides_presentation:
+    logo: uarklogo.png
+    css: mystyle.css
+    smaller: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Goodness of fit tests in R {.smaller}
+
+- This function is used for both the goodness of fit test and the test of independence, depending upon what kind of data you feed it. 
+
+```{r, echo = T, eval = F}
+chisq.test(x, y = NULL, correct = TRUE, p = rep(1/length(x), length(x)), 
+           rescale.p = FALSE)
+```
+
+-  If "x" is a numeric vector, a goodness of fit test will be done (or attempted), treating "x" as a vector of observed frequencies. 
+-  **If "x" is a 2-D array, or matrix, then it is assumed to be a contingency table of frequencies, and a test of independence will be done. (we shall learn this later!)**
+-  correct: continuity correction. 
+-  p: a vector of probabilities of the same length of x, default is 1/length(x). 
+-  rescale.p : The candidate distribution needs to be a pmf where its sum is 1. If you don't have the distribution normalized set rescale.p to TRUE.
+
+
+## Example 1 
+
+Professor Petris is teaching Stat 101, and the distribution of students in his classroom are as follows: There are 10 freshman in the sample, 15 sophomores, 22 juniors, and 28 seniors. Test the null hypothesis that freshman, sophomores, juniors, and seniors are equally represented among students signed up for Stat 101.
+
+The frequencies are $x = (10,15,22,28)$, and we want to test if
+$$
+H_0: p_1 = p_2 = p_3 = p_4 = 1/4 \text{ vs. }  \\
+H_1: \text{not all } p_i's \text{ are equal}
+$$
+
+
+## R command 
+
+```{r}
+chisq.test(c(10,15,22,28))
+```
+
+-  We don't need to specify the p vector, since by default the null is equal frequencies. 
+-  Chi-square statistics= 9.96. P-value = 0.01891 < 0.05, Reject null.
+-  What is the degrees of freedom? 
+
+## Example 1 (continued)
+
+Now suppose Professor Tipton thinks that the number of freshman and sophomores enrolled is each half the number of juniors and the number of seniors, i.e. proportions are: $p_0 = (1/6, 1/6, 1/3, 1/3)$.
+
+$$
+H_0: p_1 = p_2 = 1/6, p_3 = p_4 = 1/3 \text{ vs. } \\
+H_1: \text{not all } p_i 's \text{ are equal to the corresponding } p_{0i}'s.
+$$
+
+## R command 
+
+-  You need one more argument 
+
+```{r}
+null.probs = c(1/6,1/6,1/3,1/3)
+freqs = c(10,15,22,28)
+chisq.test(freqs, p=null.probs) ## must label p, it's not the second option. 
+```
+
+-  Chi-square statistics= 1.72. P-value: 0.6325. (Do not reject null). 
+-  Warning: since R doesn't expect "p" as the 2nd argument, you must explicitly mention `p = something '.
+
+
+## Two samples 
+
+-  We shall look at two samples more carefully later, but it does not hurt to mention at this point. 
+-  Data: $X_1, X_2, \ldots, X_n \sim F_1$, and $Y_1, Y_2, \ldots, Y_n \sim F_2$. 
+-  Test: $H_0: F_1 = F_2$ vs. $H_1: F_1 \neq F_2$. 
+-  Apply the same procedure, treat the proportions from one sample as the `true' null proportions. 
+
+
+## Example in R 
+
+```{r}
+new_freq = c(10,15,22,28)
+old_freq <- c(20,16,18,9)
+chisq.test(new_freq, p=old_freq/sum(old_freq))
+```
+
+## Use `rescale.p` option
+
+```{r}
+new_freq = c(10,15,22,28)
+old_freq <- c(20,16,18,9)
+chisq.test(new_freq, p=old_freq, rescale.p = TRUE)
+```
+
+
+## Chi-square test for Continuous data 
+
+-  Chi-square test can be adapted for continuous data if we create our own categories. 
+-  I will show you one example for the sake of completeness but for the sake of Stat 4033, we will use chi-square GoF test for discrete data and K-S and Lilliefors test for continuous data.
+
+## Testing equality of two distributions 
+
+-  Samples from a Gamma distribution. 
+
+```{r}
+num_of_samples = 1000
+x <- rgamma(num_of_samples, shape = 10, scale = 3)
+hist(x, breaks = 50, col = rgb(0,0,1,0.5))
+```
+
+
+## Now we add jitters 
+
+-  Small white noise to the data !
+
+```{R}
+hist(x, breaks = 50, col = rgb(0,0,1,0.5))
+x <- x + rnorm(length(x), mean=0, sd = .1) # add jitter
+p1 <- hist(x, breaks = 50, col = rgb(1,0,1,0.5), add = T)
+```
+
+## How to apply Chi-square? 
+
+-  We can use the bins of the histogram as the categories. 
+-  The probability of $X \sim \text{Gamma}(shape = \alpha, scale = \lambda)$ lying within a bin $(a,b]$ would be 
+$$
+P( X \in (a,b]) = F(b) - F(a), \\
+\Rightarrow P( X \in (a,b]) =  pgamma(b, \alpha, \lambda) - pgamma(a, \alpha, \lambda)
+$$
+- So we need the boundaries of the bins, and apply `pgamma` to them. 
+
+## This is how it's done 
+
+```{r, message = FALSE, warning = FALSE}
+## uncomment line 1 before running for the first time
+## install.packages("zoo")
+library('zoo')
+breaks_cdf <- pgamma(p1$breaks, shape=10, scale=3)
+(null.probs <- rollapply(breaks_cdf, 2, function(x) x[2]-x[1]))
+```
+
+
+## Barplot from a histogram? 
+
+```{r, fig.height=3}
+barplot(null.probs)
+```
+
+-  Basically, we have created a discrete pmf from a pdf for using chi-square test. 
+
+## Now test 
+
+```{r}
+chisq.test(p1$counts, p=null.probs, rescale.p=TRUE)
+```
+
+
+## Monte Carlo 
+
+-  The chi-square test needs to be run using Monte Carlo to make sure 
+its result is accurate enough. For use the Monte Carlo set `simulate.p.value` to `TRUE`. 
+-  You can also set the iteration number by set B.
+
+```{r}
+chisq.test(p1$counts, p=null.probs, rescale.p=TRUE, simulate.p.value=TRUE)
+```
+
+## Kolmogorov-Smirnov Test 
+
+-   Much simpler since there's no binning, only difference of two CDF's. 
+
+```{r}
+x <- rgamma(num_of_samples, shape = 10, scale = 3)
+y <- x + rnorm(length(x), mean=0, sd = .1) # add jitter
+ks.test(x,y)
+```
+
+

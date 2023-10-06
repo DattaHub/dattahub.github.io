@@ -1,0 +1,121 @@
+---
+title: "AARUG Workshop Takehome"
+subtitle: "Old Faithful Dataset"
+author: "your name here"
+date: "May 21, 2016"
+output: html_document
+---
+
+# Instructions
+
+This R Markdown document is the *optional* takehome portion of the Ann Arbor R User Group workshop.
+
+The takehome is organized as a series of tasks or questions followed by a R Markdown code chunk. Write code into the code chunk that will complete the task or answer the question. It is good practice to comment your code (using `#`). Also feel free to write additional documentation about your code or answer.
+
+#### Example: Use R as a calculator to add 3 and 7.
+
+```{r example}
+3 + 7  # add 3 and 7
+```
+
+The answer should be 10.
+
+```{r load packages, results='hide'}
+# if you are using any packages it is good practice to load them at the beginning
+```
+
+# Problems
+
+## Import the dataset
+
+Download the Old Faithful dataset from the [workshop page](http://annarborrusergroup.github.io/AARUG-R-workshop/).
+
+The `Old-Faithful.csv` dataset contains waiting times between eruptions and the duration of the eruption for the Old Faithful geyser in Yellowstone National Park, Wyoming, USA.
+
+#### Use the read.csv function to read in the dataset and assign it to a variable named `oldfaithful`.
+*Hint:* be sure the file is available from your current working directory.
+
+```{r import data}
+
+```
+
+#### Show the structure of the data using the `str()` function.
+
+```{r data structure}
+
+```
+
+#### Show how many rows and columns are in the dataset.
+
+```{r dimensions}
+
+```
+
+## Indexing and data manipulation
+
+#### Show rows 12-20 of the dataset using bracket indexing `[ ]`.
+
+```{r bracket indexing}
+
+```
+
+#### Get the `interval` column of the dataset using bracket indexing `[ ]`.
+
+```{r bracket indexing with characters}
+
+```
+
+#### Get the `dur.cat` variable out of the data using the `$` notation.
+
+```{r `$` indexing}
+
+```
+
+#### How many eruptions had a short duration?
+
+```{r number of short eruptions}
+
+```
+
+#### Create a new dataframe that contains only the eruptions with a short duration.
+
+```{r subset}
+
+```
+
+#### What is the average (mean) duration of the eruptions in your new dataframe?
+
+```{r average eruption duration}
+
+```
+
+#### What is the standard deviation of the eruptions in your new dataframe?
+*Hint:* Use the `sd()` function
+
+```{r eruption duration standard deviation}
+
+```
+
+## New functions
+
+This section introduces some new functions that we didn't discuss during the workshop. Remember that you can get documentation for a function by using `?` and the function name. For example `?summary` will give you the documentation for the `summary()` function.
+
+#### The function `table()` creates a summary table with the counts for each factor. Use `table()` to recalculate the number of short and long duration eruptions in the full dataset
+
+```{r table}
+
+```
+
+#### The function `unique()` returns the unique values of an object. Use `unique()` to get unique values for the `day` column.
+
+```{r unique}
+
+```
+
+#### The function `quantile()` calculates the quantiles for a numeric variable. Use `quantile()` to get the quantiles of eruption duration.
+
+```{r quantile}
+
+```
+
+***

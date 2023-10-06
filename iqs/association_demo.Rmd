@@ -1,0 +1,166 @@
+---
+title: "Tests for trends and association"
+author: "Jyotishka Datta"
+date: "`r Sys.Date()`"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Pearson's Correlation Coefficient 
+
+Let's look at the "cars" data available on R. 
+
+```{r, echo = TRUE}
+library(MASS)
+attach(cars)
+head(cars)
+```
+
+## Scatter plot
+
+The scatter plot has an upward trend indicating positive trend! 
+```{r, echo = F}
+require(stats); require(graphics)
+plot(cars, xlab = "Speed (mph)", ylab = "Stopping distance (ft)",
+     las = 1)
+title(main = "cars data")
+```
+
+## Best fit line 
+We can try to fit a straight line or a curve to the scatter plot 
+```{r, echo = F}
+require(stats); require(graphics)
+plot(cars, xlab = "Speed (mph)", ylab = "Stopping distance (ft)",
+     las = 1)
+lines(lowess(cars$speed, cars$dist, f = 2/3, iter = 3), col = "red")
+abline(lm(cars$dist ~ cars$speed),col="blue")
+title(main = "cars data")
+```
+
+## Correlation
+
+```{r,echo=T}
+cor(cars$speed,cars$dist)
+cor.test(cars$speed,cars$dist)
+```
+
+
+## Log transform?
+
+```{r,echo = T}
+plot(cars, xlab = "Speed (mph)", ylab = "Stopping distance (ft)",
+     las = 1, log = "xy")
+title(main = "cars data (logarithmic scales)")
+```
+
+## Does the correlation improve? 
+
+```{r,echo=TRUE}
+cor(log(cars$speed),log(cars$dist))
+cor.test(log(cars$speed),log(cars$dist))
+```
+
+## Remember 
+1.  $X$ and $Y$ independent $\Rightarrow$ $\rho_{X,Y} = 0$, but not the other way round, unless $X,Y$ are jointly normal. 
+2. Correlation $\not \Rightarrow$ Causation. There could be a **lurking** variable, causing a **spurious** relationship. 
+3. Lots of hilarious examples in 
+[Spurious Correlations Webpage](http://tylervigen.com/spurious-correlations)
+
+## Example {.smaller}
+
+- Here $\rho_{X,Y} = 0$, but $Y = X^2$, not independent, but not **linearly dependent**. 
+
+```{r, echo = T,fig.width = 4, fig.height=4,fig.align='center'}
+x = c(-5,-4,-3,-2,-1,1,2,3,4,5);y = x^2 
+cor(x,y)
+```
+```{r, echo = F,fig.width = 5, fig.height=4,fig.align='center'}
+plot(x,y,type="p")
+```
+
+
+# Spearman's correlation 
+
+## Motivation 
+
+-  Pearson's correlation coefficient measures only linear relationship. 
+
+```{r, echo=TRUE}
+x = seq(1,7)
+y = x^4
+cor(x,y)
+## same as cor(x,y,method="pearson")
+cor(x,y,method="pearson")
+```
+
+## Spearman's rank correlation 
+
+-  Spearman's rank correlation: replace X, Y with their ranks. 
+
+```{r, echo=TRUE}
+cor(rank(x),rank(y))
+## same as cor(x,y,method="spearman")
+cor(x,y,method="spearman")
+```
+-  Spearman's $r_s$ measure monotonic association. $r_s = 1$ means X is a monotonically increasing function of Y. 
+
+## Transformation invariance
+
+- Spearman's $r_s$ is preserved if we apply the same monotone order-preserving transformation to both $X$ and $Y$.
+- Example: Apply log transformation to cars data, Pearson's r will change, but Spearman's $r_s$ won't! 
+
+```{r,echo=T}
+cor(cars$speed,cars$dist)
+cor(log(cars$speed),log(cars$dist))
+```
+
+## Spearman's rank correlation 
+
+- As long as the transformation is monotone: $f(x) = log(x)$, $f(x) = x^2$.
+
+```{r,echo=T}
+cor(cars$speed,cars$dist,method="spearman")
+cor(log(cars$speed),log(cars$dist),method="spearman")
+cor((cars$speed)^2,(cars$dist)^2,method="spearman")
+```
+
+## Hypothesis test 
+
+```{r,echo=T}
+cor.test(cars$speed,cars$dist,method="spearman")
+```
+
+## Kendall's tau 
+
+Kendall's tau measures the association by measuring concordance or discordance in the data. If $p_c$ and $p_d$ denote the probability of concordance and discordance respectively: 
+then Kendall's coefficient $\tau$ is defined as: 
+$$
+\tau = p_c - p_d 
+$$
+
+
+## Kendall's tau {.smaller}
+
+Kendall's tau is related to Pearson's product-moment correlation coefficient as: 
+$$
+\tau = \frac{2}{\pi} \arcsin(\rho)
+$$
+
+```{r}
+x = seq(0,1,length.out = 100)
+tau = 2/pi*asin(x)
+plot(x,tau,type="l")
+lines(x,x,col="red")
+```
+
+## Kendall's tau 
+
+```{r,echo=T} 
+cor(cars$speed,cars$dist,method="kendall")
+cor(log(cars$speed),log(cars$dist),method="kendall")
+cor((cars$speed)^2,(cars$dist)^2,method="kendall")
+```
+

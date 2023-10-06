@@ -1,0 +1,257 @@
+---
+title: "Twitter Data Analysis"
+author: "Jyotishka Datta"
+date: "11/01/2018"
+output: 
+  pdf_document:
+      latex_engine: xelatex
+      toc: true
+      number_sections: true
+      fig_width: 5
+      fig_height: 4
+fontsize: 10pt
+geometry: margin=1in
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+library(data.table)
+library(tm)
+library(twitteR)
+```
+
+## Background
+
+- This is a preliminary analysis of twitter data from the timeline of Little Rock Police Department (USername: LRpolice) to explore the patterns of the tweets shared on their timeline. 
+
+- The analysis was done using many R packages, the key ones are `TwitteR`, `topicmodels`, and `sentiment`. Most of the analysis here were done using the R codes given in these tutorials:
+  1.  [Twitter Data Analysis with R](http://www.rdatamining.com/docs/twitter-analysis-with-r)
+  2.  [Twitter Authentication](http://thinktostart.com/twitter-authentification-with-r/).
+
+I will provide you codes for coming with the final dataset where you should have sentiment score and time to analyze the trend of a specific user of keyword. However, the codes are relevant for repeating this analysis at a general level, if you are interested. 
+  
+
+## Twitter Authentication
+
+The first step is authentication on Twitter. You will need a Twitter account for doing this as Twitter only allows real human users to download and analyse their data. 
+
+If none of the project members have a Twitter handle, let me know and I can supply you a downloaded dataset for any specific query or username. 
+
+Visit the second link above for authentication and follow the steps mentioned there:
+
+[Twitter Authentication](http://thinktostart.com/twitter-authentification-with-r/).
+
+```{r, echo = T, eval = F}
+install.packages(c("devtools", "rjson", "bit64", "httr"))
+#RESTART R session!
+library(devtools)
+install_github("twitteR", username="geoffjentry")
+library(twitteR)
+
+## Replace "YOUR_API_KEY" by the actual API key. 
+## Instructions on http://thinktostart.com/twitter-authentification-with-r/
+
+api_key <- 	"YOUR_API_KEY"
+api_secret <- "YOUR_API_SECRET"
+access_token <- "YOUR_ACCESS_TOKEN"
+access_token_secret <- "YOUR_ACCESS_TOKEN_SECRET"
+
+setup_twitter_oauth(api_key,api_secret)
+```
+
+
+## Data Download and cleaning 
+
+- The two most useful functions for scraping Twitter data are `userTimeline` and `searchTwitter`. 
+
+- The Twitter API allows one to pull **3,200** tweets from any user's timeline or keyword. We start by extracting **3200** tweets with the keywords 'EASPORTS'. (I used this because EA Sports has recently received a lot of backlash in Social Media over their Star Wars Battlefront game, but you can use **any** keyword you want!)
+
+
+```{r, echo = T, eval = F}
+library(twitteR)
+tweets <- searchTwitter("EA+SPORTS", n = 3200)
+(n.tweet <- length(tweets))
+tweets.df <- twListToDF(tweets)
+```
+
+Now we can convert the extracted tweets into a dataframe and access individual tweets by row numbers: 
+
+```{r, echo = T, eval = F}
+tweets.df <- twListToDF(tweets) # Make a dataframe
+save(tweets.df,file="easports_tweets.Rdata") # save data for lazy loading
+```
+
+If we save the tweets, we can also use lazy loading to do the analysis without extracting tweets every single time. 
+
+```{r, echo = T}
+load(file="easports_tweets.Rdata") # Lazy loading
+tweets.df[1, c("id", "created", "screenName", "replyToSN",
+                 "favoriteCount", "retweetCount", "longitude",  "latitude", "text")]
+```
+
+For example, we can print tweet number 1 and make text fit for slide width: 
+```{r, echo = T}
+writeLines(strwrap(tweets.df$text[1], 60))
+```
+
+
+## Data Cleaning 
+
+- The next step involves data cleaning, which involves the following basic steps: 
+  *  Convert to lower case
+  *  Remove URLs. 
+  *  Remove anything other than English letters or space
+  *  Remove stopwords
+  *  Remove extra whitespace
+
+- I will paste my codes here but if you don't want to mess with this, it should be fine to use as is. You can also copy-paste all of this into a single program file in R and run that file to get cleaned data.
+
+- I should also mention that data cleaning is a painful yet important step in natural lanuage processing. We usually keep cleaning until we get a somewhat noise free corpus, but it is subjective. 
+
+```{r, echo = T, eval = T}
+## Text Cleaning 
+library(tm)
+library(SnowballC)
+
+# build a corpus, and specify the source to be character vectors
+myCorpus <- Corpus(VectorSource(tweets.df$text))
+
+# remove URLs
+removeURL <- function(x) gsub("http[^[:space:]]*", "", x)
+myCorpus <- tm_map(myCorpus, content_transformer(removeURL))
+# remove anything other than English letters or space
+removeNumPunct <- function(x) gsub("[^[:alpha:][:space:]]*", "", x)
+myCorpus <- tm_map(myCorpus, content_transformer(removeNumPunct))
+# remove stopwords
+myStopwords <- c(setdiff(stopwords('english'), c("r", "big")),
+                 "use", "see", "used", "via", "amp")
+myCorpus <- tm_map(myCorpus, removeWords, myStopwords)
+# remove extra whitespace
+myCorpus <- tm_map(myCorpus, stripWhitespace)
+# convert to lower case
+myCorpus <- tm_map(myCorpus, content_transformer(tolower))
+
+# keep a copy for stem completion later
+myCorpusCopy <- myCorpus
+
+myCorpus <- tm_map(myCorpus, stemDocument) # stem words
+writeLines(strwrap(myCorpus[[190]]$content, 60))
+```
+
+- The last step in this replacing similar words by one unique word, usually plural ('players', 'games') by singular nouns ('player', 'game') such that these words do not counted separately in our analysis. **This depends on your search query a lot**. 
+
+```{r}
+replaceWord <- function(corpus, oldword, newword) {
+  tm_map(corpus, content_transformer(gsub),
+         pattern=oldword, replacement=newword)
+}
+myCorpus <- replaceWord(myCorpus, "players", "player")
+myCorpus <- replaceWord(myCorpus, "games", "game")
+```
+
+- Once we have a clean corpus, we create a term document matrix that gives the frequency of each term in a collection of documents (here tweets). This term-document matrix (or, TDM) is then analzed by suitable Statistical methods for finding associations or performing sentiment analyses. 
+
+```{r, echo = T, eval = T}
+tdm <- TermDocumentMatrix(myCorpus,control = list(wordLengths = c(1, Inf)))
+tdm
+save(tdm,file="easports_tdm.Rdata")
+```
+
+- People usually save these data-sets (tweetsdf, tdm) for future use because extraction takes time and you don't want to waste a lot of time every time you analyze a specific set of tweets. 
+
+```{R, echo = T, eval = T}
+rm(list=ls()) # clean your workspace
+load(file="easports_tdm.Rdata") # Lazy loading 
+load(file="easports_tweets.Rdata") # Lazy loading
+```
+
+## Frequent Terms 
+
+- Our first job is to print and visualize the frequent terms that gives an overall idea about the corpus. 
+
+```{r, echo = T, message=FALSE}
+library(tm)
+# inspect frequent words
+(freq.terms <- findFreqTerms(tdm, lowfreq = 200))
+```
+
+- The following figure is a barplot of the most frequent words in the last 3,200 tweets on President Trump's timeline. 
+
+```{r, eval = T, echo = F, message=FALSE}
+term.freq <- rowSums(as.matrix(tdm))
+term.freq <- subset(term.freq, term.freq >= 200)
+df <- data.frame(term = names(term.freq), freq = term.freq)
+library(ggplot2)
+ggplot(df, aes(x = reorder(term, -freq), y=freq)) + geom_bar(stat="identity") +
+  xlab("Terms") + ylab("Count") + coord_flip() +
+  theme(axis.text=element_text(size=10))
+```
+
+- Wordcloud gives a prettier picture to look at (of course with the same story).
+
+
+```{r, echo = F, eval = T, warning=FALSE}
+m <- as.matrix(tdm)
+# calculate the frequency of words and sort it by frequency
+word.freq <- sort(rowSums(m), decreasing = T)
+# colors
+library(RColorBrewer)
+pal <- brewer.pal(9, "BuGn")[-(1:4)]
+# plot word cloud
+library(wordcloud)
+wordcloud(words = names(word.freq), freq = word.freq, min.freq = 3,
+          random.order = F, colors = pal)
+```
+
+## Association Mining 
+
+- One might be interested in looking at keywords associated with certain words of interest such as "game": 
+
+```{r}
+# which words are associated with 'game'?
+findAssocs(tdm, "game", 0.2)
+```
+
+
+## Sentiment Analysis 
+
+- How are the sentiments associated with the extracted tweets. As the following table shows, they might be more positive than negative! 
+
+```{r, echo = T, message=FALSE}
+# library(sentiment)
+# sentiments <- sentiment(tweets.df$text)
+# table(sentiments$polarity)
+library(SentimentAnalysis)
+sentiments <- analyzeSentiment(tweets.df$text)
+sentiments$polarity <-convertToDirection(sentiments$SentimentQDAP)
+table(sentiments$polarity)
+
+```
+
+- We can also plot them by time to see how the sentiments have changed over time. This type of analysis is very commonly done with political candidates to estimate/predict their popularity and see what contributes to it. 
+
+
+```{r, echo = T, message = F}
+# sentiment plot
+
+sentiments$score <- 0
+sentiments$score[sentiments$polarity == "positive"] <- 1
+sentiments$score[sentiments$polarity == "negative"] <- -1
+sentiments$date <- as.IDate(tweets.df$created)
+result <- aggregate(score ~ date, data = sentiments, mean)
+plot(result, type = "l", ylab= "Mean sentiment", xlab = "Date")
+```
+
+# Project Goals: 
+
+1. Extract Twitter data using the code here with your choice of keyword or person. Use your imagination. Think what trends you want to analyze? Social movement / education / sports - anything is fine ! 
+
+2. I expect at least two different searches, keywords or personalities or trends and both types of trend tests + plots for each, but if you want to do more (one each), that would be even better. 
+
+3. Perform trend test for the tweets you have extracted. Plot the trends. The `trend test' tests trend over time, if you look at the total counts, can you use a nonparametric test to test if there were significantly more positive tweets than negative tweets (or vice versa)?
+
+4. Report your Statistical conclusion in terms of the story. 
+
+5. What else would be interesting to find out? (Open question).
+

@@ -1,0 +1,495 @@
+---
+title: "Chi-square test for association"
+author: "Jyotishka Datta"
+date: "November 9, 2018"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Source materials 
+ 
+- Music and Wine as well Pet ownership examples taken from an old introductory Stat class at Purdue. 
+- The shopping example is taken from the [tutorials by William B. King:](https://ww2.coastal.edu/kingw/statistics/R-tutorials/independ.html) 
+
+
+## Wine and Music 
+
+```{r, echo = TRUE}
+row1 = c(30,39,30)
+row2 = c(11,1,19)
+row3 = c(45,35,35)
+music.wine = rbind(row1,row2,row3)
+dimnames(music.wine) = list(wine = c("french","italian","other"),
+                            music=c("None","french","italian"))
+music.wine
+```
+
+## Examine marginal distributions..
+
+```{r, echo = TRUE}
+addmargins(music.wine)
+```
+
+## Examine conditional distributions...
+
+```{r, echo = TRUE}
+prop.table(music.wine, 1) 
+```
+
+## And finally a barplot...
+
+```{r, echo = TRUE}
+barplot(music.wine, beside = T)
+```
+
+## Okay, a better barplot !
+
+```{r, echo = TRUE}
+barplot(t(music.wine), beside=T, legend=T, ylim=c(0,100),
+        ylab="Observed frequencies in sample",
+        main="Frequency of Wine Purchase by Music")
+```
+
+## The Chi-square test
+
+```{r, echo = TRUE}
+chisq.test(music.wine)
+```
+
+
+## Pet ownership {.smaller}
+
+```{r, echo = TRUE}
+row1 = c(28,50)
+row2 = c(11,3)
+pet = rbind(row1,row2)
+dimnames(pet) = list(survival = c("alive","dead"),
+                            petownership=c("No","Yes"))
+addmargins(pet)
+prop.table(pet)
+```
+
+## Chi-square test {.smaller}
+
+```{r, echo = TRUE}
+chisq.test(pet)
+```
+
+**R applies the Yates' continuity correction automatically for 2x2 table. We can set it off, but we shouldn't. **
+```{r, echo = TRUE}
+chisq.test(pet, correct = F)
+```
+
+## Conclusion and validity
+- We have enough evidence to say that there is an association between pet ownership  	and patient status in the population.
+
+- It is appropriate to use the chi-square test because none of the cells have expected counts < 5.
+
+```{r, echo = TRUE}
+chisq.test(pet)$expected
+```
+
+## A Third Example 
+
+The following data are from a Stanford University study of the effectiveness of the antidepressant Celexa in the treatment of compulsive shopping. These data were found in Verzani (2005, p.262f), and the analysis here is similar to his. 
+
+                     outcome
+                 -----------------
+       treat     worse same better
+       ---------------------------
+       Celexa      2     3     7
+       placebo     2     8     2
+       ---------------------------
+       
+## Data in R 
+```{r, echo = TRUE}
+freqs = c(2, 2, 3, 8, 7, 2) # entered "down the columns"
+shopping = matrix(freqs, nrow=2) #fills down columns by default
+dimnames(shopping) = list(treatment=c("Celexa","placebo"),
+                             outcome=c("worse","same","better"))
+addmargins(prop.table(shopping))
+```
+
+## Chi-square test and its validity 
+
+```{r, echo = TRUE}
+chisq.test(shopping)
+```
+
+-  The chi square procedure produces a warning message when any of the expected frequencies fall below 5. 
+- The P-value is close to zero, so it's worth further investigation!
+
+## Small counts 
+```{r, echo = TRUE}
+chisq.test(shopping)$expected
+```
+
+- The P-value might not be accurate. 
+-  Options 1: p-value calculated by Monte Carlo simulation. 
+
+## Monte Carlo 
+-  Simulate the sampling distribution of the test statistic (in this case, chi squared) using Monte Carlo methods.
+
+```{r, echo = TRUE}
+chisq.test(shopping, simulate.p.value=T)
+```
+-  Another option is Fisher's exact test, that works for a 2x2 table. 
+-  In class, we will learn Fisher's exact test for 2x2 tables !
+-  The R function can do FET for larger than 2x2 tables, but the accuracy is a concern for large expected frequencies. 
+
+## Fisher's exact test 
+
+```{r, echo = T}
+fisher.test(shopping)
+```
+
+- Still a large P-value ! 
+- We should retain the null hypothesis, and "it doesn't look like we can fish up a signficant relationship here!"
+
+## Another Example {.smaller}
+
+Streissguth et al. (1984) investigated the effect of alcohol and nicotine consumption during pregnancy on the resulting children by examining the children's attention span and reaction time at age four. First, the 452 mothers in the study were classified as shown in Table 2.1 according to their levels of consumption of alcohol and nicotine. Test the null hypothesis of no association between levels of consumption.
+
+```{r, echo = FALSE} 
+row1 = c(105,7,11)
+row2 = c(58,5,13)
+row3 = c(84,37,42)
+row4 = c(37,16,17)
+alcohol = rbind(row1,row2,row3,row4)
+dimnames(alcohol) = list(alcohol = c("none","0.01-0.1","0.11-0.99","1.00 or more"), 
+                            nicotine = c("None","1-15", "16 or more"))
+alcohol
+```
+
+## Another Example (contd.) 
+```{r, echo = TRUE}
+chisq.test(alcohol, correct = F)
+```
+None of the cells have expected counts < 5.
+```{r, echo = TRUE}
+chisq.test(alcohol)$expected
+```
+
+## Association Measures 
+
+In R, use the package "vcd", function assocstats()
+
+In case of a 2-dimensional table, a list with components:
+
+| chisq_tests	| a 2 x 3 table with the chi-squared statistics |
+|-------------|-----------------------------------------------|
+| phi	| The absolute value of the phi coefficient (only defined for 2 x 2 tables)|
+| cont | The contingency coefficient |
+| cramer | Cramer's V |
+
+
+
+## Association Measures ~ Music & Wine
+
+```{r, echo = TRUE, cache=TRUE}
+#install.packages("vcd")
+library(vcd)
+assocstats(music.wine)
+```
+
+## Association Measures ~ Pet Ownership
+
+```{r, echo = TRUE, cache=TRUE}
+#install.packages("vcd")
+library(vcd)
+assocstats(pet)
+```
+R gives us $\phi$ because it is a 2x2 table.
+
+## Association Measures ~ Shopping
+
+```{r, echo = TRUE, cache=TRUE}
+#install.packages("vcd")
+library(vcd)
+assocstats(shopping)
+```
+
+## Association Measures 
+```{r, echo = TRUE, cache=TRUE}
+#install.packages("vcd")
+library(vcd)
+assocstats(alcohol)
+```
+
+## Examples of Contingency tables
+
+- Some of the best examples of contingency tables come from Political data analysis. 
+
+- Example: Analyzing Exit Poll Data from CNN. Total number of respondents = 24537.
+
+|Party   | 18-24	| 25-29	| 30-39	| 40-49	| 50-64	| 65 and older |
+|--------|--------|-------|-------|-------|-------|--------------|
+|Clinton | 56%	  | 53%  	| 51% 	| 46% 	| 44%  	| 45%          |
+|Trump   |	35%	  | 39%   | 40% 	| 50%	  | 53%	  | 53%          |
+
+
+## Test for association
+
+```{r, echo = T, fig.height= 4}
+clinton = c(1374,1170,2127,2145,3239,1656)
+trump = c(859,861,1669,2331,3901,1951)
+elect16= rbind(clinton,trump)
+dimnames(elect16) = list(candidate = c("clinton","trump"), 
+                         agegp = c("18-24","25-29","30-39","40-49","50-64",">65"))
+barplot(elect16, beside=T, legend=T)
+```
+
+## Chi-square test 
+
+```{r, echo = T}
+chisq.test(elect16)
+```
+- We can reject the null hypothesis that the proportions are not equal across different age groups. 
+
+
+## Effect of Gender? 
+
+- We can also look at the effect of Gender!
+- The same CNN exit poll data : 24537 respondents. 
+
+|Party |clinton |	trump| others|
+|------|--------|------|-------|
+| male |	41%  	| 53%	 | 6%    |
+|female|	54%	  | 42%  |  4%   |
+
+## Use R {.smaller}
+
+```{r, echo = T, fig.height=4}
+gender <- matrix(c(4829,6242,707,6890,5359,510), byrow = T, ncol = 3)
+dimnames(gender) = list(gender = c("male","female"), 
+                        candidate = c("clinton","trump","others"))
+barplot(t(gender), beside=T, legend=T)
+```
+
+## Chi-square test of association 
+
+```{r, echo = TRUE}
+gender <- matrix(c(4829,6242,707,6890,5359,510), byrow = T, ncol = 3)
+dimnames(gender) = list(gender = c("male","female"), 
+                        candidate = c("clinton","trump","others"))
+prop.table(gender, 1)
+chisq.test(gender)
+```
+
+
+
+## Lady tasting tea 
+
+```{r, echo = TRUE}
+tea<- matrix(c(3, 1, 1, 3), ncol= 2, 
+             dimnames = list(Truth = c("Tea","Milk" ),
+                        Lady_says = c("Tea first","Milk first")))
+tea
+```
+
+## Lady tasting tea : Fisher's Exact Test 
+
+```{r, echo = TRUE}
+fisher.test(tea)
+```
+
+
+## One-sided test 
+- Fisher's exact test can be one-sided or two-sided, based on the Odds ratio, which measures association for a 2x2 table, high odds ratio means higehr association. 
+
+```{r, echo = TRUE}
+fisher.test(tea, alternative = "greater")
+```
+
+## More examples 
+
+The data in table 1 come from an RCT comparing intramuscular
+magnesium injections with placebo for the treatment of chronic
+fatigue syndrome Of the 15 patients who had the intra-muscular
+magnesium injections 12 felt better (80 per cent) whereas, of the 17 on placebo,
+only three felt better (18 per cent). 
+
++---------------+---------------+--------------------+
+|               | Magnesium     | Placebo            |
++===============+===============+====================+
+| Felt Better   | 12            | 3                  |
++---------------+---------------+--------------------+
+| Fel worse     | 3             | 14                 |
++---------------+---------------+--------------------+
+
+
+## Using R 
+
+```{r, echo = TRUE}
+RCT <- matrix(c(12,3,3,14), ncol= 2, 
+             dimnames = list(Outcome = c("Better", "Worse" ),
+                        Medicine = c("Magnesium", "Placebo")))
+
+chisq.test(RCT)
+```
+
+## Validity 
+<div class="columns-2">
+```{r, echo = T}
+chisq.test(RCT)$expected
+```
+
+The expected counts are all more than 5 so a chi-sqaure approximation would be valid here, but, we can still do Fisher's exact test to get the exact P-value. 
+
+```{r, echo = T}
+fisher.test(RCT)
+```
+</div>
+
+## Statistical and Practical Significance
+- Statistical significance depends on sample size. 
+- Data on french skiers who took either Vitamin C or placebo, and either got a cold or not. 
+
+```{r, echo = TRUE}
+cold <- matrix(c(31,109,17,122), ncol= 2, 
+             dimnames = list(Outcome = c("Placebo", "Ascorbic Acid" ),
+                        Medicine = c("Cold", "No Cold")))
+cold
+```
+
+## Statistical and Practical Significance
+- Statistical significance depends on sample size. 
+
+```{r, echo = TRUE}
+cold <- matrix(c(31,109,17,122), ncol= 2, 
+             dimnames = list(Outcome = c("Placebo", "Ascorbic Acid" ),
+                        Medicine = c("Cold", "No Cold")))
+chisq.test(cold)
+```
+- Strong evidence against null.
+
+## Statistical and Practical Significance
+- Statistical significance depends on sample size. 
+- Now we  multiply each cell by 10. 
+```{r, echo = TRUE}
+cold <- matrix(c(310,1090,170,1220), ncol= 2, 
+             dimnames = list(Outcome = c("Placebo", "Ascorbic Acid" ),
+                        Medicine = c("Cold", "No Cold")))
+chisq.test(cold)
+```
+- VERY strong evidence against null - not because association has increased, but sample size is higher. 
+
+## Statistical and Practical Significance 
+- Statistical significance depends on sample size. 
+- Now we divide each cell by 10, and round up. 
+```{r, echo = TRUE}
+cold <- matrix(c(3,11, 2,12), ncol= 2, 
+             dimnames = list(Outcome = c("Placebo", "Ascorbic Acid" ),
+                        Medicine = c("Cold", "No Cold")))
+chisq.test(cold)
+```
+-  little or no evidence against independence, but is it because weak association or low sample size? 
+
+## Odds ratio 
+- Most common measure of association for a 2x2 table. 
+- Odds are The odds are ratios of probabilities of "success" and "failure" for a given row, or a ratio of conditional probabilities of the same conditional distribution.
+- Last example, odds of getting a cold versus not getting a cold, given he took placebo: 
+$$
+odds_1 = \frac{P( Z = cold | Y = placebo)}{P(Z = no cold | Y = placebo)}
+$$
+- odds of getting a cold versus not getting a cold, given he took Vit-C: 
+$$
+odds_2 = \frac{P( Z = cold | Y = Vit-C)}{P(Z = no cold | Y = Vit-C)}
+$$
+
+
+## Odds ratio {.smaller}
+
+-  If odds equal to 1, "success" and "failure" are equally likely.
+-  If odds > 1, then "success" is more likely than "failure".
+-  If odds < 1, then "success" is less likely than "failure".
+
+- Let "C" = cold, "NC" = no cold, "Pl" = Placebo, "VitC" = Vitamin C.
+
+The odds ratio, is the ratio of odds1 and odds2: 
+$$
+OR = \frac{P( Z = C | Y = Pl) \times P(Z = NC | Y = VitC)}{P(Z = NC | Y = Pl)\times P( Z = C | Y = VitC)}
+$$
+
+
+## Calculation 
+
+- Generalize: 2x2 table with two variables Y and Z, both binary. 
+
+
++---------------+---------------------+----------------------+
+|               | Z = 1               | Z = 2                |
++===============+=====================+======================+
+| Y = 1         | $n_{11}$,$\pi_{11}$ | $n_{12}$,$\pi_{12}$  |
++---------------+---------------+----------------------------+
+| Y = 2         | $n_{12}$,$\pi_{12}$ | $n_{22}$,$\pi_{22}$  |
++---------------+---------------------+----------------------+
+
+$$
+\theta = \mbox{Odds ratio} = \frac{\pi_{11}\pi_{22}}{\pi_{12}\pi_{21}}
+$$
+Natural estimate: 
+$$
+\hat{\theta} = \mbox{Estimated Odds ratio} = \frac{n_{11}n_{22}}{n_{12}n_{21}}
+$$
+
+## Interpretation: 
+
+-  Independence: $\theta = 1$
+-  Dependence: $\pi_{1|1} > \pi_{1|2}$ implies $\theta > 1$. Odds of success in row 1 is higher than odds of success in row 2. 
+- Or, $\pi_{1|1} < \pi_{1|2}$ implies $\theta < 1$. Odds of success in row 1 is lower than odds of success in row 2.
+
+
+## Odds ratio 
+
+- The odds ratio depends on the cell probabilities that doesn't change with sample size. 
+
+```{r, echo = TRUE}
+cold <- matrix(c(31,109,17,122), ncol= 2, 
+             dimnames = list(Outcome = c("Placebo", "Ascorbic Acid" ),
+                        Medicine = c("Cold", "No Cold")))
+OR = cold[1,1]*cold[2,2]/(cold[1,2]*cold[2,1]); cat(OR)
+
+cold <- matrix(c(310,1090,170,1220), ncol= 2, 
+             dimnames = list(Outcome = c("Placebo", "Ascorbic Acid" ),
+                        Medicine = c("Cold", "No Cold")))
+OR = cold[1,1]*cold[2,2]/(cold[1,2]*cold[2,1]); cat(OR)
+```
+
+## Interpretation 
+```{r, echo = FALSE}
+cold <- matrix(c(31,109,17,122), ncol= 2, 
+             dimnames = list(Outcome = c("Placebo", "Ascorbic Acid" ),
+                        Medicine = c("Cold", "No Cold")))
+cold
+```
+```{r, echo = TRUE}
+OR = cold[1,1]*cold[2,2]/(cold[1,2]*cold[2,1]); cat("Odds ratio", OR)
+```
+
+For our example, $OR = 2.04$ means that: 
+
+1.  the odds of getting a cold given a placebo are 2.04 times greater than the odds of given vitamin C.
+2.  the odds of getting a cold given vitamin C are 1/2.04 = 0.49 times the odds of getting cold given a placebo.
+3.   getting cold is less likely given vitamin C than given a placebo.
+
+## McNemar's test 
+
+```{r, echo = TRUE}
+sales.data <- matrix(c(5, 13, 4, 6), ncol= 2, 
+             dimnames = list(Before = c("Acceptable","Unacceptable" ),
+                         After = c("Acceptable","Unacceptable" )))
+sales.data
+mcnemar.test(sales.data , correct = FALSE)
+```
+
+## Exact McNemar's test
+
+```{r, echo = TRUE, warning=FALSE, message=FALSE}
+# install.packages("exact2x2")
+library(exact2x2)
+mcnemar.exact(sales.data)
+```

@@ -1,0 +1,716 @@
+---
+title: "Functions and attributes"
+author: "Jyotishka Datta"
+date: "updated: `r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+  css: mystyle.css
+lib_dir: libs
+nature:
+  highlightStyle: github
+highlightLines: true
+countIncrementalSlides: false
+---
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+options(
+  htmltools.dir.version = FALSE, # for blogdown
+  width=80
+)
+
+# library(emo)
+htmltools::tagList(rmarkdown::html_dependency_font_awesome())
+```
+
+
+---
+class: middle
+count: false
+
+# Functions
+
+---
+
+## Function Parts
+
+Functions are defined by two components: the arguments (`formals`) and the code (`body`). Functions are assigned names like any other object in R (using `=` or `<-`)
+
+```{r}
+gcd = function(long1, lat1, long2, lat2) {
+  R = 6371 # Earth mean radius in km
+  
+  # distance in km
+  acos(sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2) * cos(long2-long1)) * R
+}
+```
+
+---
+
+## Returning values
+
+There are two approaches to returning values from functions in R - explicit and implicit return values.
+
+--
+
+**Explicit** - using one or more `return` statements
+
+```{r}
+f = function(x) {
+  x + 1
+  return(x * x)
+}
+f(2)
+```
+
+--
+
+**Implicit** - return value of the last expression is returned.
+
+```{r}
+g = function(x) {
+  x + 1
+  x * x
+}
+g(3)
+```
+
+---
+
+## Returning multiple values
+
+If we want a function to return more than one value we can group things using either vectors or lists.
+
+```{r}
+f = function(x) {
+  c(x, x^2, x^3)
+}
+
+f(1:2)
+```
+
+```{r}
+g = function(x) {
+  list(x, "hello")
+}
+
+g(1:2)
+```
+
+---
+class: split-50
+
+## Argument names
+
+When defining a function we are also implicitly defining names for the arguments, when calling the function we can use these names to pass arguments in a alternative order.
+
+
+```{r}
+f = function(x, y, z) {
+  paste0("x=", x, " y=", y, " z=", z)
+}
+```
+
+.pull-left[
+```{r, error=TRUE}
+f(1, 2, 3)
+f(z=1, x=2, y=3)
+```
+]
+
+.pull-right[
+```{r, error=TRUE}
+f(y=2, 1, 3)
+f(y=2, 1, x=3)
+```
+]
+
+--
+
+.pad-top[
+
+```{r, error=TRUE}
+f(1, 2, 3, 4)
+f(1, 2, m=3)
+```
+
+]
+---
+
+## Argument defaults
+
+It is also possible to give function arguments default values, so that they don't need to be provided every time the function is called.
+
+```{r error=TRUE}
+f = function(x, y=1, z=1) {
+  paste0("x=", x, " y=", y, " z=", z)
+}
+```
+
+.pull-left[
+```{r error=TRUE}
+f(3)
+f(x=3)
+```
+]
+
+.pull-right[
+```{r error=TRUE}
+f(z=3, x=2)
+f(y=2, 2)
+```
+]
+
+--
+
+.pad-top[
+```{r, error=TRUE}
+f()
+```
+]
+
+---
+
+## Scope
+
+R has generous scoping rules, if it can't find a variable in the functions body, it will look for it in the next higher scope, and so on.
+
+```{r}
+y = 1
+f = function(x) {
+  x + y
+}
+
+f(3)
+```
+
+--
+
+.pad-top[]
+
+```{r}
+y = 1
+g = function(x) {
+  y = 2
+  x + y
+}
+
+g(3)
+```
+
+---
+
+Additionally, variables defined within a scope only persist for the duration of that scope, and do not overwrite variables at a higher scopes
+
+```{r}
+x = 1
+y = 1
+z = 1
+f = function() {
+    y = 2
+    g = function() {
+      z = 3
+      return(x + y + z)
+    }
+    return(g())
+}
+f()
+c(x,y,z)
+```
+
+---
+
+## Exercise 1 - scope
+
+What is the output of the following code? Explain why.
+
+```{r eval=FALSE}
+z = 1
+
+f = function(x, y, z) {
+  z = x+y
+
+  g = function(m = x, n = y) {
+    m/z + n/z
+  }
+
+  z * g()
+}
+
+f(1, 2, x = 3)
+```
+
+---
+
+## Operators as functions
+
+In R, operators are actually a special type of function - using backticks around the operator we can write them as functions.
+ 
+```{r}
+`+`
+typeof(`+`)
+```
+
+--
+
+.pad-top[]
+
+```{r}
+x = 4:1
+x + 2
+`+`(x, 2)
+```
+
+
+---
+
+## Getting Help
+
+Prefixing any function name with a `?` will open the related help file for that function.
+
+```{r, eval=FALSE}
+?`+`
+?sum
+```
+
+For functions not in the base package, you can generally see their implementation by entering the function name without parentheses (or using the `body` function).
+
+```{r}
+lm
+```
+
+---
+
+## Less Helpful Examples
+
+```{r}
+list
+
+`[`
+
+sum
+
+`+`
+```
+
+
+---
+class: middle
+count: false
+
+# Attributes
+
+---
+
+## Attributes
+
+Attributes are metadata that can be attached to objects in R. Some are special (e.g. `class`, `comment`, `dim`, `dimnames`, `names`, etc.) and change the way in which an object behaves in R.
+
+--
+
+Attributes are implemented as a named list that is attached to an object. They can be interacted with via the `attr` and `attributes` functions.
+
+```{r}
+(x = c(L=1,M=2,N=3))
+```
+
+--
+
+```{r}
+attributes(x)
+str(attributes(x))
+```
+
+---
+
+```{r}
+attr(x, "names") = c("A","B","C")
+x
+```
+
+--
+
+```{r}
+names(x)
+names(x) = c("Z","Y","X")
+x
+```
+
+--
+
+.pull-left[
+```{r}
+names(x) = 1:3
+x
+attributes(x)
+```
+]
+
+.pull-right[
+```{r}
+names(x) = c(TRUE, FALSE, TRUE)
+x
+attributes(x)
+```
+]
+
+---
+
+## Factors
+
+Factor objects are how R represents categorical data (e.g. a variable where there are a fixed # of possible outcomes).
+
+```{r}
+(x = factor(c("Sunny", "Cloudy", "Rainy", "Cloudy", "Cloudy")))
+```
+
+--
+
+```{r}
+str(x)
+```
+
+--
+
+```{r}
+typeof(x)
+```
+
+---
+
+## Composition
+
+A factor is just an integer vector with two attributes: `class = "factor"` and `levels`.
+
+```{r}
+x
+attributes(x)
+```
+
+--
+
+We can build our own factor from scratch using,
+
+```{r}
+y = c(3L, 1L, 2L, 1L, 1L)
+attr(y, "levels") = c("Cloudy", "Rainy", "Sunny")
+attr(y, "class") = "factor"
+y
+```
+
+---
+
+Knowning factors are stored as integers help explain some of their more interesting behaviors:
+
+```{r error=TRUE}
+x+1
+is.integer(x)
+as.integer(x)
+as.character(x)
+as.logical(x)
+```
+
+---
+class: middle
+count: false
+
+# S3 Object System
+
+---
+
+## `class`
+
+The `class` attribute is an additional layer to R's type hierarchy,
+
+<br/>
+
+```{r echo=FALSE}
+f = function(x) x^2
+x = factor("A")
+l = list(1, "A")
+```
+
+ value            |  `typeof()`      |  `mode()`      |  `class()`        
+:-----------------|:-----------------|:---------------|:---------------
+`TRUE`            | `r typeof(TRUE)` | `r mode(TRUE)` | `r class(TRUE)` 
+`1`               | `r typeof(1)`    | `r mode(1)`    | `r class(1)`    
+`1L`              | `r typeof(1L)`   | `r mode(1L)`   | `r class(1L)`   
+`"A"`             | `r typeof("A")`  | `r mode("A")`  | `r class("A")`  
+`NULL`            | `r typeof(NULL)` | `r mode(NULL)` | `r class(NULL)` 
+`list(1, "A")`    | `r typeof(l)`    | `r mode(l)`    | `r class(l)`  
+`factor("A")`     | `r typeof(x)`    | `r mode(x)`    | `r class(x)`  
+`function(x) x^2` | `r typeof(f)`    | `r mode(f)`    | `r class(f)`  
+
+
+---
+
+## S3 class specialization
+
+```{r}
+x = c("A","B","A","C")
+print( x )
+print( factor(x) )
+print( unclass( factor(x) ) )
+```
+
+--
+
+.pad-top[]
+
+```{r}
+print
+```
+
+---
+
+## Other examples
+
+.pull-left[
+```{r}
+mean
+t.test
+```
+]
+
+.pull-right[
+```{r}
+summary
+plot
+```
+]
+
+<br/>
+
+Not all base functions use this approach,
+
+```{r}
+sum
+```
+
+---
+
+## What is S3?
+
+<br/>
+
+> S3 is R’s first and simplest OO system. It is the only OO system used in the base and stats packages, and it’s the most commonly used system in CRAN packages. S3 is informal and ad hoc, but it has a certain elegance in its minimalism: you can’t take away any part of it and still have a useful OO system.
+
+>— Hadley Wickham, Advanced R
+
+.footnote[
+* S3 should not be confused with R's other object oriented systems: <br/>S4, Reference classes, and R6*.
+]
+
+---
+
+## What's going on?
+
+S3 objects and their related functions work using a very simple dispatch mechanism - a generic function is created whose sole job is to call the `UseMethod` function which then calls a class specialized function using the naming convention: `generic.class`.
+
+--
+
+We can see all of the specialized versions of the generic using the `methods` function.
+
+```{r}
+methods("plot")
+```
+
+---
+
+.small[
+```{r}
+methods("print")
+```
+]
+
+---
+
+```{r}
+print.factor
+```
+---
+
+```{r error=TRUE}
+print.integer
+```
+
+--
+
+.pad-top[]
+
+```{r}
+print.default
+```
+
+---
+
+## The other way
+
+If instead we have a class and want to know what specialized functions exist for that class, then we can again use the `methods` function with the `class` argument.
+
+```{r}
+methods(class="factor")
+```
+
+---
+
+## Adding methods
+
+```{r include=FALSE}
+rm(print.x)
+rm(print.y)
+```
+
+.pull-left[
+```{r}
+x = structure(c(1,2,3), class="class_A")
+x
+```
+]
+
+.pull-right[
+```{r}
+y = structure(c(6,5,4), class="class_B")
+y
+```
+]
+
+--
+
+<div>
+.pull-left[
+```{r}
+print.class_A = function(x) {
+  cat("Class A!\n")
+  print.default(unclass(x))
+}
+
+x
+```
+]
+
+.pull-right[
+```{r}
+print.class_B = function(x) {
+  cat("Class B!\n")
+  print.default(unclass(x))
+}
+
+y
+```
+]
+</div>
+
+--
+
+<div>
+.pull-left[
+```{r}
+class(x) = "class_B"
+x
+```
+]
+
+.pull-right[
+```{r}
+class(y) = "class_A"
+y
+```
+]
+</div>
+
+---
+
+## Defining a new S3 Generic
+
+```{r}
+shuffle = function(x) {
+  UseMethod("shuffle")
+}
+```
+
+--
+
+```{r}
+shuffle.default = function(x) {
+  stop("Class ", class(x), " is not supported by shuffle.\n", call. = FALSE)
+}
+```
+
+--
+
+```{r}
+shuffle.factor = function(f) {
+  factor( sample(as.character(f)), levels = sample(levels(f)) )
+}
+
+shuffle.integer = function(x) {
+  sample(x)
+}
+```
+
+--
+
+.pull-left[
+```{r error=TRUE}
+shuffle( 1:10 )
+shuffle( factor(c("A","B","C","A")) )
+```
+]
+
+.pull-right[
+```{r error=TRUE}
+shuffle( c(1, 2, 3, 4, 5) )
+shuffle( letters[1:5] )
+```
+]
+
+---
+
+## Exercise 2 - classes, modes, and types
+
+Below we have defined an S3 method called `report`, it is designed to return a message about the type/mode/class of an object passed to it.
+
+.pull-left[
+```{r}
+report = function(x) {
+  UseMethod("report")
+}
+
+report.default = function(x) {
+  "This class does not have a method defined."
+}
+```
+]
+
+.pull-right[
+```{r}
+report.integer = function(x) {
+ "I'm an integer!"
+}
+
+report.double = function(x) {
+  "I'm a double!"
+}
+
+report.numeric = function(x) {
+  "I'm a numeric!"
+}
+```
+]
+
+.pad-top[
+Try running the `report` function with different input types, what happens? <br/> 
+Now run `rm("report.integer")` in your console and try using the `report` <br/>
+function  again, what has changed? What does this tell us about S3, types, modes, <br/> 
+and classes?
+]
+
+
+---
+
+## Acknowledgments
+
+Above materials are derived in part from the following sources:
+
+* Hadley Wickham - [Advanced R](http://adv-r.had.co.nz/)
+* [R Language Definition](http://stat.ethz.ch/R-manual/R-devel/doc/manual/R-lang.html)

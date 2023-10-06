@@ -1,0 +1,10 @@
+base
+data.table
+NLP
+tm
+twitteR
+SnowballC
+ggplot2
+RColorBrewer
+wordcloud
+SentimentAnalysis
