@@ -22,7 +22,6 @@ library(learnr)
 
 ## The R syntax
 
-
 ## Creating objects
 
 ```{r, echo=FALSE, purl=TRUE}
@@ -93,6 +92,7 @@ In RStudio, typing `Alt + -` (push `Alt`, the key next to your space bar at the
 same time as the `-` key) will write ` <- ` in a single keystroke.
 
 ```{r try_assign, exercise = TRUE}
+
 my_object <- 
 my_object
 
