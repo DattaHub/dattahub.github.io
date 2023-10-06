@@ -1,0 +1,123 @@
+---
+title: Extending R with Packages and Literate Programming with RMarkdown
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+      toc: true
+      toc_float: true
+      number_sections: false
+fontsize: 12pt
+theme: united
+geometry: margin=1in
+urlcolor: blue
+---
+
+------------
+
+> ## Learning Objectives
+>
+> * Know what packages are and how to install them from CRAN
+> * Understand why literate programming is useful
+> * Create and edit an RMarkdown file
+> * Know how to manipulate some common chunk options
+
+------------
+
+# Packages
+
+Packages are bundles of code which extend the functionality of R.
+
+Anyone can make an R package, and anyone can install anyone else's R package (if they make it available). This is part of the beauty of open source, and using different R packages is essential to modern R workflows.
+
+You can get packages from many different places, but we'll focus on just the most common one: [CRAN](https://cran.r-project.org). CRAN is the Comprehensive R Archive Network, a global network of servers which make available for download a set of vetted R packages.
+
+The next section is about RMarkdown, a package, so we'll install that now.
+
+
+## Installation
+
+To download and install a package from CRAN, call the `install.packages` command on a string with the name of the desired package. You will get output describing the installation progress.
+
+```{r, eval = TRUE}
+options("install.lock"=FALSE)
+install.packages("rmarkdown", repos="http://cran.rstudio.com/")
+```
+
+You may be asked to choose a mirror; the RStudio mirror is a good choice as it will pick the nearest mirror automatically. This will also download and install packages which RMarkdown depends on.
+
+You only need to install a package once per machine, unless you need to update an already-installed package. Calling `install.packages` for an existing package will update it if there's a more recent version on CRAN than on your machine.
+
+You can view all of the installed packages using the `installed.packages` command. This will output a lot of information for each package, so if you only want a list of the installed package names, you can specify that you want the "Package" column. I like to look at this as a vector.
+
+```{r, eval = TRUE}
+head(as.vector(installed.packages()[,"Package"]))
+```
+
+
+## Loading
+
+Most packages need to be loaded into the current environment to be accessible. RMarkdown is specially integrated in RStudio in a way that avoids this, but in general we load packages with the `library` command:
+
+```{r, eval = F}
+library(rmarkdown)  # notice the lack of quotes
+```
+
+This will come up again later in the lesson on `dplyr`, an external package that _does_ need to be loaded.
+
+You can also view the packages that you have loaded into your workspace.
+
+```{r, eval = TRUE}
+head(.packages())
+```
+
+
+# R Markdown
+
+R Markdown is a special file format which allows us to combine text, code, _and the output of that code_ in a single file. This combination of explanation, code, and results is called _literate programming_ and is a powerful way to share research and data explorations.
+
+RMarkdown is an extended version of the Markdown (`.md`) file format, which is an easy way to make nicely formatted text documents without endlessly tinkering with the formatting (as you might with LaTeX). The software community loves Markdown because in addition to being straightforward, it has good support for formatting code, which can be a pain in other formats.
+
+RMarkdown takes this a step further by allowing you to _run_ the code in your document, and having the output appear below the code that made it.
+
+If you've used ipython/Jupyter notebooks before, R Markdown will feel similar. All the lessons in this workshop were created with R Markdown!
+
+
+## My First Rmd
+
+Rstudio makes it easy to create a new RMarkdown file, and it even starts with a demo file that shows off most of the basic features of the `Rmd` format. In the upper-left corner, click the "new file" icon and select RMarkdown. A window should appear to help you configure this file initially. There's a lot of options (R Markdown can do so much!), but for now, make sure your name is in the "Author" field, and change the "Title" to be something like "CMDA Assignment".
+
+Before we delve into what each of these pieces mean, let's "knit" the document so we can see what kind of output RMarkdown produces. Above the file, press the `knit` button, the one that looks like a ball of yarn.
+
+You should see a new pane open in RStudio that shows R "knitting" the document, and when it's done, a pop-up will appear showing the knitted output.
+
+This new output being displayed as an `html` file; look in the file browser pane, and you'll see a `.html` file next to your `.Rmd` file (may need to refresh), because RStudio automatically saved this output when the document finished knitting.
+
+Let's look at the individual pieces in this document:
+
+### Header
+This is the section at the top, with three dashes before and after. This lists some metadata about the object. The title, date, and author form the start of the output document, and the `output:` line instructs the knitting process to generate an html file.
+
+### Section Titles
+You can enlarge text be preceding it with one or more pound signs (`#`). This is mainly useful for organizing a document into sections. The more pound signs, the smaller the text, so when you make sub-section you should add at least one more pound sign than used in the parent sections' title.
+
+### Link
+You can make text clickable by including a link to a different website. An example can be found above, where we included a link to [CRAN](https://cran.r-project.org).
+
+There are two parts to creating linked text. The first part is including the text you want to see, surrounded by square brackets `[CRAN]`. Immediately after that, add the link surrounded by parentheses `(https://cran.r-project.org)`. The final product looks like `[CRAN](https://cran.r-project.org)`.
+
+### Bold/Italic Text
+The double-asterisks surrounding the word "Knit" in the second paragraph cause that piece of text to be bold. This phrase can be multiple words, but should not have spaces immediately on the inside of the asterisks. You can make text italix by similarly wrapping in underscores (`_`) or using single asterisks.
+
+### Code Chunks
+This is the real meat of the document! An R Markdown code chunk is a section which starts and ends with triple-backticks (\`, not `'`). After the initial set, the curly-bracketed section which starts with `{r` is what forces this to be ran as R code; without this piece, the section would get formatted like code, but would not be executed when knitting. The phrase after the `r` is the _chunk name_. Chunks do not need to be named, but no two chunks can have the same name. Naming chunks can help keep code organized and make it easier to track down the source of errors when they occur.
+
+#### Chunk Options
+As the second default section discusses, we can hide the code in a code chunk by placing a comma after out chunk name and setting an option `echo=FALSE`. The code will still execute, and its output will be inserted in the knitted document, but it will not be shown.
+
+Similarly, you can set `eval=FALSE` to avoid running a code chunk.
+
+
+## Digging Deeper
+There's a lot more to RMarkdown than just this; as the demo document shows, you can visit <http://rmarkdown.rstudio.com> to learn more.
+
+We'll be using R Markdown for the rest of this workshop to keep a running log of what we're learning. This will allow you to walk away with a knit document which has not only the code commands you've learned to use, but the output of those commands and some explanatory text. That's literate programming!
