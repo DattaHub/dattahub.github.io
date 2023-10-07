@@ -1,7 +1,12 @@
 ---
 title: Vectors and Data types
-output: learnr::tutorial
+output:
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
 runtime: shiny_prerendered
+description: >
+  We will start with a few basic pointers about R programming. We will talk   about concept of an `R` object, how to assign values to objects and the    fundamental idea of vectors and data types in R, and see basic functions. 
 ---
 
 ```{r setup, include = FALSE, echo = F, eval = T, cache = T}
@@ -21,6 +26,8 @@ library(learnr)
 ------------
 
 ## The R syntax
+
+We will start with a few basic pointers about R programming. We will talk about concept of an `R` object, how to assign values to objects and the fundamental idea of vectors and data types in R. 
 
 ## Creating objects
 
@@ -55,13 +62,14 @@ Now R is trying to run that sentence as a command, and it doesn't work. Now we'r
 
 **To get out of this type `Esc`. This will work whenever you're stuck with that `+` sign.**
 
-It's great that R is a glorified caluculator, but obviously we want to do more interesting things. 
-
-To do useful and interesting things, we need to assign _values_ to
-_objects_. To create objects, we need to give it a name followed by the
-assignment operator `<-` and the value we want to give it.
-
 ## Assignment operator
+
+It's great that R is a glorified calculator, but obviously we want to do more interesting things. 
+
+To do useful and interesting things, we need to assign _values_ to _objects_. 
+
+To create objects, we need to give it a name followed by the
+assignment operator `<-` and the value we want to give it.
 
 For instance, instead of adding 3 + 5, we can assign those
 values to objects and then add them.
@@ -93,18 +101,30 @@ same time as the `-` key) will write ` <- ` in a single keystroke.
 
 ```{r try_assign, exercise = TRUE}
 
+## assign a value to my_object
 my_object <- 
 my_object
 
+
+## assign another value to my_object2
 my_object2 <- 
 
+my_object2
+
+## add them 
 my_object + my_object2
+
+
 ```
 
 
 To view which objects we have stored in memory, we can use the `ls()` command
 
-```{r, purl=FALSE}
+```{r ls, exercise = TRUE}
+a <- 5
+b <- 3
+c <- a*b
+
 ls()
 ```
 
@@ -121,23 +141,19 @@ rm(a)
 
 ## Notes on objects
 
-Objects can be given any name such as `x`, `current_temperature`, or
-`subject_id`. You want your object names to be explicit and not too long. They
-cannot start with a number (`2x` is not valid but `x2` is). R is case sensitive
-(e.g., `my_data` is different from `My_data`). There are some names that
-cannot be used because they represent the names of fundamental functions in R
-(e.g., `if`, `else`, `for`, see
-[here](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Reserved.html)
-for a complete list). In general, even if it's allowed, it's best to not use
-other function names (e.g., `c`, `T`, `mean`, `data`, `df`, `weights`). In doubt
-check the help to see if the name is already in use. It's also best to avoid
-dots (`.`) within a variable name as in `my.dataset`. There are many functions
-in R with dots in their names for historical reasons, but because dots have a
-special meaning in R (for methods) and other programming languages, it's best to
-avoid them. It is also recommended to use nouns for variable names, and verbs
-for function names. It's important to be consistent in the styling of your code
-(where you put spaces, how you name variable, etc.). In R, two popular style
-guides are [Hadley Wickham's](http://adv-r.had.co.nz/Style.html) and
+Objects can be given any name such as `x`, `current_temperature`, or `subject_id`. You want your object names to be explicit and not too long. 
+
+Remember: 
+
+-  They cannot start with a number (`2x` is not valid but `x2` is). 
+-  R is case sensitive (e.g., `my_data` is different from `My_data`). 
+-  There are some names that cannot or should not be used because they represent the names of fundamental functions in R (e.g., `if`, `else`, `for`, see
+[here](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Reserved.html) for a complete list). In general, even if it's allowed, it's best to not use other function names (e.g., `c`, `T`, `mean`, `data`, `df`, `weights`). In doubt
+check the help to see if the name is already in use. 
+-  It's also best to avoid dots (`.`) within a variable name as in `my.dataset`. There are many functions in R with dots in their names for historical reasons, but because dots have a special meaning in R (for methods) and other programming languages, it's best to avoid them. 
+-  It is also recommended to use nouns for variable names, and verbs for function names. 
+
+It's important to be consistent in the styling of your code (where you put spaces, how you name variable, etc.). In R, two popular style guides are [Hadley Wickham's](http://adv-r.had.co.nz/Style.html) and
 [Google's](https://google-styleguide.googlecode.com/svn/trunk/Rguide.xml).
 
 When assigning a value to an object, R does not print anything. You can force to
@@ -149,39 +165,23 @@ print the value by using parentheses or by typing the name:
 The other key feature of R are functions. These are R's built in capabilities. Some examples of these are mathematical functions, like
 `sqrt` and `round`. You can also get functions from libraries (which we'll talk about in a bit), or even write your own. 
 
-## Functions and their arguments
+### Functions and their arguments
 
-Functions are "canned scripts" that automate something complicated or convenient
-or both.  Many functions are predefined, or become available when using the
-function `library()` (more on that later). A function usually gets one or more
-inputs called *arguments*. Functions often (but not always) return a *value*. A
-typical example would be the function `sqrt()`. The input (the argument) must be
-a number, and the return value (in fact, the output) is the square root of that
-number. Executing a function ('running it') is called *calling* the function. An
+Functions are "canned scripts" that automate something complicated or convenient or both.  Many functions are predefined, or become available when using the function `library()` (more on that later). A function usually gets one or more inputs called *arguments*. Functions often (but not always) return a *value*. A typical example would be the function `sqrt()`. The input (the argument) must be
+a number, and the return value (in fact, the output) is the square root of that number. Executing a function ('running it') is called *calling* the function. An
 example of a function call is:
 
 `sqrt(a)`
 
-Here, the value of `a` is given to the `sqrt()` function, the `sqrt()` function
-calculates the square root. This function is very simple, because it takes just one
-argument. 
+Here, the value of `a` is given to the `sqrt()` function, the `sqrt()` function calculates the square root. This function is very simple, because it takes just one argument. 
 
-The return 'value' of a function need not be numerical (like that of `sqrt()`),
-and it also does not need to be a single item: it can be a set of things, or
-even a data set. We'll see that when we read data files in to R. 
+The return 'value' of a function need not be numerical (like that of `sqrt()`), and it also does not need to be a single item: it can be a set of things, or even a data set. We'll see that when we read data files in to R. 
 
-Arguments can be anything, not only numbers or filenames, but also other
-objects. Exactly what each argument means differs per function, and must be
-looked up in the documentation (see below). If an argument alters the way the
-function operates, such as whether to ignore 'bad values', such an argument is
+Arguments can be anything, not only numbers or filenames, but also other objects. Exactly what each argument means differs per function, and must be looked up in the documentation (see below). If an argument alters the way the function operates, such as whether to ignore 'bad values', such an argument is
 sometimes called an *option*.
 
-Most functions can take several arguments, but many have so-called *defaults*.
-If you don't specify such an argument when calling the function, the function
-itself will fall back on using the *default*. This is a standard value that the
-author of the function specified as being "good enough in standard cases". An
-example would be what symbol to use in a plot. However, if you want something
-specific, simply change the argument yourself with a value of your choice.
+Most functions can take several arguments, but many have so-called *defaults*. If you don't specify such an argument when calling the function, the function itself will fall back on using the *default*. This is a standard value that the
+author of the function specified as being "good enough in standard cases". An example would be what symbol to use in a plot. However, if you want something specific, simply change the argument yourself with a value of your choice.
 
 Let's try a function that can take multiple arguments `round`.
 
@@ -189,10 +189,11 @@ Let's try a function that can take multiple arguments `round`.
 round(3.14159)
 ```
 
-We can see that we get `3`. That's because the default is to round
-to the nearest whole number. If we want more digits we can see 
-how to do that by getting information about the `round` function.
-We can use `args(round)` or look at the
+```{r pi, exercise = TRUE}
+round(pi)
+```
+
+We can see that we get `3`. That's because the default is to round to the nearest whole number. If we want more digits we can see how to do that by getting information about the `round` function. We can use `args(round)` or look at the
 help for this function using `?round`.
 
 ```{r, results='show'}
@@ -329,10 +330,9 @@ one_to_five[c(1, 3, 5)]
 one_to_five[-2]
 ```
 
-## Other data structures
+### Other data structures
 
-Vectors are one of the many **data structures** that R uses. Other important
-ones are lists (`list`), matrices (`matrix`), and data frames (`data.frame`) 
+Vectors are one of the many **data structures** that R uses. Other important ones are lists (`list`), matrices (`matrix`), and data frames (`data.frame`) 
 
 
 
