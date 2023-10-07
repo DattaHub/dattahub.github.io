@@ -138,6 +138,7 @@ mutate(cats, new_var_1 = age + weight, new_var_2 = age * weight)
 
 
 ## Pipes
+
 You'll often find yourself needing to use multiple functions in a row to organize some data that you're working on. This can sometimes lead to dense code that is difficult to read.
 
 ```{r}

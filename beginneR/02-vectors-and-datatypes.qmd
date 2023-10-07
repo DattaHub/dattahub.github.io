@@ -1,18 +1,17 @@
 ---
 title: Vectors and Data types
-output:
-  learnr::tutorial:
-    progressive: true
-    allow_skip: true
-runtime: shiny_prerendered
-description: >
-  We will start with a few basic pointers about R programming. We will talk   about concept of an `R` object, how to assign values to objects and the    fundamental idea of vectors and data types in R, and see basic functions. 
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+      toc: true
+      toc_float: true
+      number_sections: false
+      code-copy: true
+fontsize: 12pt
+theme: united
+geometry: margin=1in
+urlcolor: blue
 ---
-
-```{r setup, include = FALSE, echo = F, eval = T, cache = T}
-library(learnr)
-```
-
 
 ------------
 
@@ -37,7 +36,7 @@ We will start with a few basic pointers about R programming. We will talk about 
 
 You can get output from R simply by typing in math in the console
 
-```{r calculator, exercise = TRUE}
+```{r calculator, eval = FALSE}
 3 + 5
 12/7
 2*4
@@ -99,7 +98,10 @@ be used to specify the values of arguments in functions, see below.
 In RStudio, typing `Alt + -` (push `Alt`, the key next to your space bar at the
 same time as the `-` key) will write ` <- ` in a single keystroke.
 
-```{r try_assign, exercise = TRUE}
+> ### Challenge
+> Assign different values to different objects and add them. You can copy this code using the 'copy' button on the window, and paste on your R code.    
+
+```{r try_assign, eval = FALSE}
 
 ## assign a value to my_object
 my_object <- 
@@ -118,9 +120,11 @@ my_object + my_object2
 ```
 
 
-To view which objects we have stored in memory, we can use the `ls()` command
+To view which objects we have stored in memory, we can use the `ls()` command. We can also use `ls()` to clear our workspace. 
 
-```{r ls, exercise = TRUE}
+```{r ls}
+rm(list = ls()) ## clears workspace
+
 a <- 5
 b <- 3
 c <- a*b
@@ -133,8 +137,7 @@ To remove objects we can use the `rm()` command
 rm(a)
 ```
 
-### Exercise 
-
+> ### Challenge 
 - What happens if we change `a` and then re-add `a` and `b`?
 - Does it work if you just change `a` in the script and then add `a` and `b`? Did you still get the same answer after they changed `a`? If so, why do you think that might be?
 - We can also assign a + b to a new variable, `c`. How would you do this?
@@ -189,7 +192,10 @@ Let's try a function that can take multiple arguments `round`.
 round(3.14159)
 ```
 
-```{r pi, exercise = TRUE}
+> ### Remark
+> `R` knows $\pi$! You can directly call `pi` to get the true value of the irrational number $\pi$.
+
+```{r pi, eval = FALSE}
 round(pi)
 ```
 

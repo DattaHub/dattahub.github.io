@@ -102,7 +102,7 @@ ggplot(cats) +
                size = 3)
 ```
 
-##Scales
+## Scales
 
 Scales control the mapping between data and aesthetics.
 
