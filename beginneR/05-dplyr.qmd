@@ -1,5 +1,5 @@
 ---
-title: Herding cats with dplyr
+title: Data wrangling dplyr
 date: "`r Sys.Date()`"
 output: 
   html_document:
@@ -46,8 +46,27 @@ Unlike the `rmarkdown` package, we'll be using `dplyr` in the console. In order 
 library("dplyr")
 ```
 
-You only need to install a package once per computer, but you need to load it
-every time you open a new R session and want to use that package.
+You only need to install a package once per computer, but you need to load it every time you open a new R session and want to use that package.
+
+## Read the cats data
+
+We read the `cats` data-set for this lesson. If you have already read it, during the last session, it's in your environment. If not, please run either of the two following lines of codes in your R console. One is for reading file from your hard-disk the other is for directly reading from the internet. 
+
+
+### From a file saved in your hard disk 
+
+```{r}
+## reading from hard-disk
+cats <- read.csv("data/herding-cats-small.csv")
+```
+
+### From an URL hosting the dataset 
+
+```{r}
+cats <- read.csv("https://raw.githubusercontent.com/AnnArborRUserGroup/AARUG-R-workshop/gh-pages/data/herding-cats-small.csv")
+
+```
+
 
 ## Subsetting Data
 
