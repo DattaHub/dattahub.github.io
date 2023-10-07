@@ -37,4 +37,10 @@ This was originally a repository for a Beginner's R Workshop that was offered at
 
 The codes are not original or written by me, these are curated from a number of different sources including the excellent tutorials provided by the Ann Arbor R users' group, based on the [Software Carpentry](http://datacarpentry.org), [Rachel's R turorial](https://www.kaggle.com/rtatman/rachael-s-r-tutorials/notebook) and JD's own intro stats teaching materials. 
 
+## More links 
+
+1.  [More open source data-sets](https://vincentarelbundock.github.io/Rdatasets/datasets.html)
+
+2.  [Summarizing data tutorial](https://learnr-examples.shinyapps.io/ex-data-summarise)
+
 
