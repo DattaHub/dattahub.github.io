@@ -6,6 +6,7 @@ output:
       toc: true
       toc_float: true
       number_sections: false
+      theme: united
 ---
 
 
@@ -20,24 +21,67 @@ output:
 
 ------------
 
-# Setup
+## Reading external data
 
-The file required for this lesson can be downlaoded by clicking on this [link](./data/herding-cats-small.csv) 
+Now, we will start looking at data-sets. There are many ways of reading external datasets into `R` but we will review three different ways. 
 
-- Move the downloaded file into the directory for this workshop
+## From `R` package 
 
-To view your current working directory use the `getwd()` command
+-  Reading data that is already in an `R` package. Sometimes you need to install a package, and sometimes it is already pre-installed in R. If you type `data()` into your console, you'll see a list of datasets. 
+
+```{r}
+data()
+```
+
+We can choose any one of them to work on, e.g. the `mtcars` data.
+
+```{r}
+# 1. Loading 
+data("mtcars")
+# 2. Print
+head(mtcars)
+```
+
+
+## From an URL 
+
+You can also read a CSV file directly from an URL where it is hosted. For example, here is a historical dataset collected by John Arbuthnot (1710). From the [data page](https://www.openintro.org/data/index.php?data=arbuthnot), we can read the details: 
+
+> "John Arbuthnot (1710) used these time series data to carry out the first   known significance test. During every one of the 82 years, there were      more male christenings than female christenings. As Arbuthnot wondered,    we might also wonder if this could be due to chance, or whether it meant   the birth ratio was not actually 1:1."
+
+```{r}
+arbuthnot <- read.csv("https://www.openintro.org/data/csv/arbuthnot.csv")
+
+head(arbuthnot)
+```
+
+## Now you try! 
+
+Read this data-set from the american community survey: [https://www.openintro.org/data/index.php?data=acs12](https://www.openintro.org/data/index.php?data=acs12). Scroll to the bottom of the page for the link to the CSV. 
+
+## Reading an external CSV file 
+
+The third option is reading a spreadsheet or an excel file from your computer's hard disk. The file required for this lesson can be downlaoded by clicking on this [link](./data/herding-cats-small.csv). 
+
+- Move the downloaded file into the directory for this workshop. 
+
+- To view your current working directory use the `getwd()` command.
 
 ```{r, eval=FALSE, echo=FALSE}
 getwd()
 ```
 
-To set you working directory, use the `setwd()` command. We want to set the working directory to the location of our project. For example: 
+Working directory is a file path that sets the location of any files you save from R, datasets you import into R, etc. This is your default file path. The function to set your working directory is: `setwd(<PATH>)`.
+
+To set you working directory, use the `setwd()` command. We want to set the working directory to the location of our project. 
+
+For example: 
+
 ```{r, eval=FALSE}
 setwd("~/GitHub/BeginneR/R codes")
 ```
 
-# Looking at data
+### Looking at data
 
 You are now ready to load the data. We are going to use the R function  `read.csv()` to load the data file into memory (as a `data.frame`). In this case, our data is in a sub-directory called "data". 
 
@@ -45,17 +89,14 @@ You are now ready to load the data. We are going to use the R function  `read.cs
 cats <- read.csv(file = 'data/herding-cats-small.csv')
 ```
 
-This statement doesn't produce any output because assignment doesn't display
-anything. If we want to check that our data has been loaded, we can print the
-variable's value: `cats`.
+
+This statement doesn't produce any output because assignment doesn't display anything. If we want to check that our data has been loaded, we can print the variable's value: `cats`.
 
 ```{r}
 cats
 ```
 
-However, if our dataset was larger, we probably wouldn't want to print the whole
-thing to our console. Instead, we can use the `head` command to view the first six
-lines or the `View` command to open the dataset in a spreadsheet-like viewer. 
+However, if our dataset was larger, we probably wouldn't want to print the whole thing to our console. Instead, we can use the `head` command to view the first six lines or the `View` command to open the dataset in a spreadsheet-like viewer. 
 
 ```{r, eval=FALSE}
 head(cats)
@@ -65,32 +106,31 @@ View(cats)
 We've just done two very useful things.         
 1. We've read our data in to R, so now we can work with it in R           
 2. We've created a data frame (with the `read.csv` command) the 
-standard way R works with data.        
+standard way R works with data.  
 
 # What are data frames?
 
-`data.frame` is the _de facto_ data structure for most tabular data and what we
-use for statistics and plotting.
+`data.frame` is the _de facto_ data structure for most tabular data and what we use for statistics and plotting.
 
-A `data.frame` is actually a `list` of vectors of identical lengths. Each vector
-represents a column, and each vector can be of a different data type (e.g.,
-characters, integers, factors). The `str()` function is useful to inspect the
-data types of the columns.
+A `data.frame` is actually a `list` of vectors of identical lengths. Each vector represents a column, and each vector can be of a different data type (e.g., characters, integers, factors). The `str()` function is useful to inspect the data types of the columns.
 
-A `data.frame` can be created by the functions `read.csv()` or `read.table()`, in
-other words, when importing spreadsheets from your hard drive (or the web).
+A `data.frame` can be created by the functions `read.csv()` or `read.table()`, in other words, when importing spreadsheets from your hard drive (or the web).
 
-By default, `data.frame` converts (= coerces) columns that contain characters
-(i.e., text) into the `factor` data type. Depending on what you want to do with
-the data, you may want to keep these columns as `character`. To do so,
-`read.csv()` and `read.table()` have an argument called `stringsAsFactors` which
-can be set to `FALSE`:
+By default, `data.frame` does not convert (= coerces) columns that contain characters (i.e., text) into the `factor` data type. Depending on what you want to do with the data, you may want to keep these columns as `character`. To do so, `read.csv()` and `read.table()` have an argument called `stringsAsFactors` which can be set to `TRUE`:
 
-Let's now check the structure of this `data.frame` in more details with the
-function `str()`:
+
+## Oscars data 
+
+We will now read a data-frame on Oscar winners! This is available on [this link](https://www.openintro.org/data/index.php?data=oscars), with details as follows:
+
+>  "Best actor and actress Oscar winners from 1929 to 2018. Note: Although there have been only 84 Oscar ceremonies until 2012, there are 85 male winners and 85 female winners because ties happened on two occasions (1933 for the best actor and 1969 for the best actress)."
+
+Let's now check the structure of this `data.frame` in more details with the function `str()`:
 
 ```{r}
-str(cats)
+oscars <- read.csv("https://www.openintro.org/data/csv/oscars.csv", 
+                   stringsAsFactors = TRUE)
+str(oscars)
 ```
 
 # Inspecting `data.frame` objects
@@ -124,87 +164,80 @@ objects besides `data.frame`.
 ## Indexing `data.frame` objects
 
 
-Our cats data frame has rows and columns (it has 2 dimensions), if we want to
-extract some specific data from it, we need to specify the "coordinates" we want
-from it. Row numbers come first, followed by column numbers (i.e. [row, column]).
+Our oscars data frame has rows and columns (it has 2 dimensions), if we want to extract some specific data from it, we need to specify the "coordinates" we want from it. Row numbers come first, followed by column numbers (i.e. [row, column]).
 
 ```{r eval=FALSE}
-cats[1, 2]   # first element in the 2nd column of the data frame
-cats[1, 6]   # first element in the 6th column
-cats[1:3, 7] # first three elements in the 7th column
-cats[3, ]    # the 3rd element for all columns
-cats[, 7]    # the entire 7th column
-head_meta <- cats[1:6, ] # Row 1-6 which is the same as head
+oscars[1, 2]   # first element in the 2nd column of the data frame
+oscars[1, 6]   # first element in the 6th column
+oscars[1:3, 7] # first three elements in the 7th column
+oscars[10, ]    # the 3rd element for all columns
+oscars[, 7]    # the entire 7th column
 ```
 
 
 For larger datasets, it can be tricky to remember the column number that
-corresponds to a particular variable. (Are species names in column 5 or 7? oh,
-right... they are in column 6). In some cases, in which column the variable will
-be can change if the script you are using adds or removes columns. It's
-therefore often better to use column names to refer to a particular variable,
-and it makes your code easier to read and your intentions clearer.
+corresponds to a particular variable. (Are birth places in column 5 or 7? oh, right... they are in column 6). In some cases, in which column the variable will be can change if the script you are using adds or removes columns. It's therefore often better to use column names to refer to a particular variable, and it makes your code easier to read and your intentions clearer.
 
 You can do operations on a particular column, by selecting it using the `$`
 sign. In this case, the entire column is a vector. You can use
-`names(cats)` or `colnames(cats)` to remind yourself of the column names.
-For instance, to extract all the cats' weight information from our dataset:
+`names(oscars)` or `colnames(oscars)` to remind yourself of the column names. For instance, to extract all the oscar winners' age at the time of win information from our dataset:
 
 ```{r}
-cats$weight
+colnames(oscars)
+oscars$age
+oscars$birth_y
 ```
 
-In some cases, you may way to select more than one column. You can do this using
-the square brackets, passing in a vector of the columns to select. Suppose we wanted weight and coat information:
+In some cases, you may way to select more than one column. You can do this using the square brackets, passing in a vector of the columns to select. Suppose we wanted birth place and age information for the first 10 years. 
 
 ```{r}
-cats[ , c("weight", "coat")]
+oscars[1:10 , c("name", "age", "birth_pl", "age")]
 ```
 
-You can even access columns by column name _and_ select specific rows of interest. For example, if we wanted the weight and coat of just rows
+You can even access columns by column name _and_ select specific rows of interest. For example, if we wanted the  birth place and age of just rows
 4 through 7, we could do:
 
 ```{r}
-cats[4:7, c("weight", "coat")]
+oscars[4:7, c("age", "birth_pl")]
 ```
 
-We can can also use logical statements to select and filter items from a `data.frame`. For example, to select all rows with black cats we could use the following statement
+We can can also use logical statements to select and filter items from a `data.frame`. For example, to select all rows with oscar winners from Virginia or winners at age 22 we could use the following statement
 
 ```{r}
-cats[cats$coat == "black", ]
+oscars[oscars$birth_pl == "Virginia", ]
 
+oscars[oscars$age == 22, ]
 ```
 
 let's break this down a bit. The logical statement in the brackets returns a vector of `TRUE` and `FALSE` values. 
 
 ```{r}
-cats$coat == "black"
+oscars$birth_pl == "Virginia"
 ```
 
 These `booleans` allow us to select which records we want from our `data.frame`
 
 Another way to do this is with the function `which()`. `which()` finds the indexes of records meeting a logical statement
 ```{r}
-which(cats$coat == "black")
-
+which(oscars$birth_pl == "Virginia")
 ```
 
 So, we could also write 
 ```{r}
-cats[which(cats$coat == "black"), ]
+oscars[which(oscars$birth_pl == "Virginia"), ]
 ```
 But that's getting really long and ugly. R is already considered somewhat of an ugly duckling among programming languages, so no reason to play into the stereotype.
 
 We can combine logical statements and index statements
 ```{r}
-cats[cats$coat == "black", c("coat", "weight")]
-
+oscars[oscars$birth_pl == "Virginia", c("name", "birth_pl", "age")]
 ```
 
 Finally, we can use `&`, the symbol for "and", and `|`, the symbol for "or", to make logical statements.
 
 ```{r}
-cats[cats$coat == "black" & cats$roamer == "no", ]
+# oscars$birth_pl == "Virginia" & oscars$award == "Best actor"
+oscars[oscars$birth_pl == "Virginia" & oscars$award == "Best actor", ]
 
 ```
 This statement selects all records with black cats that also like string
@@ -221,7 +254,7 @@ like strings.
 
 In the data frame we just imported, let's do 
 ```{r}
-str(cats)
+str(oscars)
 ```
 
 We can see the names of the multiple columns. And, we see that 
@@ -236,8 +269,8 @@ You can check this by using the function `levels()`, and check the
 number of levels using `nlevels()`:
 
 ```{r}
-levels(cats$coat)
-nlevels(cats$coat)
+levels(oscars$birth_pl)
+nlevels(oscars$birth_pl)
 ```
 
 Sometimes, the order of the factors does not matter, other times you might want
