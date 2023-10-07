@@ -5,6 +5,7 @@ output:
   html_document:
       toc: true
       number_sections: false
+      code-copy: true
 fontsize: 11pt
 geometry: margin=1in
 urlcolor: blue

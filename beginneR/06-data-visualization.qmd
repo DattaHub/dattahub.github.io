@@ -6,6 +6,7 @@ output:
       toc: true
       toc_float: true
       number_sections: false
+      code-copy: true
       fontsize: 12pt
       theme: united
       geometry: margin=1in
@@ -91,16 +92,58 @@ Examples include:
 * linetype
 * size
 
+### Scatterplot 
+
 To start, we will add position for the x- and y-axis since geom_point requires mappings for x and y, all others are optional.
 
 ```{r, fig.align='center'}
 ggplot(cats) +
     geom_point(aes(x = age, y = weight),
-               color = "red",
-               alpha = 0.5,
-               shape = 1,
+               fill = "blue",
                size = 3)
 ```
+
+### Barplot 
+
+A bar-plot is just for looking at the frequency of one categorical variable, such as `coat`. 
+
+```{r, fig.align='center'}
+ggplot(cats) +
+    geom_bar(aes(x = coat))
+```
+
+### Boxplot 
+
+Now, you need a **categorical** variable (such as coat color) on your X-axis and a **numerical** variable (such as weight) on your y-axis. 
+
+
+```{r, fig.align='center'}
+ggplot(cats) +
+    geom_boxplot(aes(x = coat, y = weight))
+```
+
+> ## Challenge 
+Recall the ACS 2012 data-set again. If you haven't done the previous part, you can read it as follows: 
+
+```{r}
+acs <- read.csv("https://www.openintro.org/data/csv/acs12.csv")
+```
+
+> Create a boxplot for educational status verus annual income. Comment on what you see. Then create a scatterplot for age vs. income. 
+
+```{r, fig.align='center'}
+#| echo: true
+#| code-fold: true
+#| code-summary: "expand for full code"
+
+ggplot(acs) +
+    geom_boxplot(aes(x = edu, y = income))
+
+ggplot(acs) +
+    geom_point(aes(x = age, y = income)) 
+```
+
+
 
 ## Scales
 
@@ -147,6 +190,27 @@ ggplot(cats) +
 ```
 
 Here we have two panels one for each factor level of `coat`. The panels are layed out in columns because the expression `. ~ coat` 
+
+
+> ## Challenge 
+Recall the ACS 2012 data-set again. If you haven't done the previous part, you can read it as follows: 
+
+```{r}
+acs <- read.csv("https://www.openintro.org/data/csv/acs12.csv")
+```
+
+> Create a a scatterplot for age vs. income but facet using gender using `theme_bw` as your theme.
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "expand for full code"
+
+ggplot(acs) +
+    geom_point(aes(x = age, y = income)) +
+    facet_grid(. ~ gender) +
+    theme_bw()
+```
 
 ## Writing figures to file
 

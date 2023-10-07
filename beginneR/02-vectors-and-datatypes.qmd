@@ -133,7 +133,7 @@ ls()
 ```
 
 To remove objects we can use the `rm()` command
-```{r, purl=FALSE}
+```{r, eval=FALSE}
 rm(a)
 ```
 

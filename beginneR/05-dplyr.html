@@ -500,6 +500,53 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 # … with abbreviated variable names ¹​wander_dist, ²​centered_weight</code></pre>
 </div>
 </div>
+<blockquote class="blockquote">
+<h3 id="challenge" class="anchored">Challenge</h3>
+<ol type="1">
+<li>Read the American Community Survey Data (2012) from <a href="https://www.openintro.org/data/index.php?data=acs12">https://www.openintro.org/data/index.php?data=acs12</a>. Use the <code>read.csv</code> function taught before. 2. Look at the structure of the data-set by using the <code>str</code> function.</li>
+<li>Calculate the mean annual income (<code>income</code>) by gender (<code>gender</code>) and birth quarter (<code>birth_qrtr</code>).</li>
+<li>What other variables could be of interest?</li>
+</ol>
+</blockquote>
+<div class="cell">
+<details>
+<summary>expand for full code</summary>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>acs <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"https://www.openintro.org/data/csv/acs12.csv"</span>)</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(acs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>  income         employment hrs_work  race age gender citizen time_to_work
+1  60000 not in labor force       40 white  68 female     yes           NA
+2      0 not in labor force       NA white  88   male     yes           NA
+3     NA               &lt;NA&gt;       NA white  12 female     yes           NA
+4      0 not in labor force       NA white  17   male     yes           NA
+5      0 not in labor force       NA white  77 female     yes           NA
+6   1700           employed       40 other  35 female     yes           15
+     lang married         edu disability   birth_qrtr
+1 english      no     college         no jul thru sep
+2 english      no hs or lower        yes jan thru mar
+3 english      no hs or lower         no oct thru dec
+4   other      no hs or lower         no oct thru dec
+5   other      no hs or lower        yes jul thru sep
+6   other     yes hs or lower        yes jul thru sep</code></pre>
+</div>
+<details>
+<summary>expand for full code</summary>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>acs <span class="sc">%&gt;%</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(birth_qrtr) <span class="sc">%&gt;%</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">mean_income =</span> <span class="fu">mean</span>(income, <span class="at">na.rm =</span> T))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 2
+  birth_qrtr   mean_income
+  &lt;chr&gt;              &lt;dbl&gt;
+1 apr thru jun      22576.
+2 jan thru mar      26095.
+3 jul thru sep      25950.
+4 oct thru dec      19917.</code></pre>
+</div>
+</div>
 </section>
 </section>
 </section>

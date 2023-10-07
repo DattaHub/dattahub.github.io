@@ -7,6 +7,11 @@ output:
       toc_float: true
       number_sections: false
       theme: united
+      code-copy: true
+fontsize: 12pt
+theme: united
+geometry: margin=1in
+urlcolor: blue
 ---
 
 
@@ -55,9 +60,19 @@ arbuthnot <- read.csv("https://www.openintro.org/data/csv/arbuthnot.csv")
 head(arbuthnot)
 ```
 
-## Now you try! 
+> ### Challenge
 
-Read this data-set from the american community survey: [https://www.openintro.org/data/index.php?data=acs12](https://www.openintro.org/data/index.php?data=acs12). Scroll to the bottom of the page for the link to the CSV. 
+Read this data-set from the american community survey: [https://www.openintro.org/data/index.php?data=acs12](https://www.openintro.org/data/index.php?data=acs12). Scroll to the bottom of the page for the link to the CSV.
+
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "expand for full code"
+
+acs <- read.csv("https://www.openintro.org/data/csv/acs12.csv")
+head(acs)
+```
 
 ## Reading an external CSV file 
 
@@ -178,9 +193,7 @@ oscars[, 7]    # the entire 7th column
 For larger datasets, it can be tricky to remember the column number that
 corresponds to a particular variable. (Are birth places in column 5 or 7? oh, right... they are in column 6). In some cases, in which column the variable will be can change if the script you are using adds or removes columns. It's therefore often better to use column names to refer to a particular variable, and it makes your code easier to read and your intentions clearer.
 
-You can do operations on a particular column, by selecting it using the `$`
-sign. In this case, the entire column is a vector. You can use
-`names(oscars)` or `colnames(oscars)` to remind yourself of the column names. For instance, to extract all the oscar winners' age at the time of win information from our dataset:
+You can do operations on a particular column, by selecting it using the `$` sign. In this case, the entire column is a vector. You can use `names(oscars)` or `colnames(oscars)` to remind yourself of the column names. For instance, to extract all the oscar winners' age at the time of win information from our dataset:
 
 ```{r}
 colnames(oscars)
@@ -240,7 +253,24 @@ Finally, we can use `&`, the symbol for "and", and `|`, the symbol for "or", to 
 oscars[oscars$birth_pl == "Virginia" & oscars$award == "Best actor", ]
 
 ```
-This statement selects all records with black cats that also like string
+This statement selects all records with oscar winners who were born in Virginia and won in the "best actor" category. 
+
+> ### Challenge 
+1.  Select all actors who won an oscar over the age of 50 and born in "New York". 
+2.  Can you modify the code to select only wins in the "Best actor" category? 
+
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "expand for full code"
+
+oscars[oscars$age>50 & oscars$birth_pl == "New York", ]
+
+
+oscars[oscars$age>50 & oscars$birth_pl == "New York" & oscars$award == "Best actor", ]
+
+```
 
 ## Factors
 
