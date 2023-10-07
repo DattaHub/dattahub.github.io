@@ -4,6 +4,12 @@ This is an `R` workshop for first-time `R` users, and no prior programming exper
 
 ## Set-up, R codes etc.
 
+**First things first, you will need to install R and RStudio.**
+
+Here is an excellent tutorial that takes you step-by-step through this: [https://learnr-examples.shinyapps.io/ex-setup-r/](https://learnr-examples.shinyapps.io/ex-setup-r/)
+
+Once you have both of them installed on your local machine, you are ready to take this tutorial. 
+
 If you want to download the entire set of just the R codes, or the R-markdown files for creating the HTML files or the PDF versions, you can download the entire folder from Github: [https://github.com/DattaHub/BeginneR](https://github.com/DattaHub/BeginneR). Click on the blue "<>Code" button on the top-right corner and click "local" to see the download as zip file option. 
 
 The following topics are covered. 

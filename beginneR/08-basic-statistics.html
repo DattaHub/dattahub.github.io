@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2023-10-06">
+<meta name="dcterms.date" content="2023-10-07">
 
 <title>Common Statistical Techniques in R</title>
 <style>
@@ -91,7 +91,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 6, 2023</p>
+      <p class="date">October 7, 2023</p>
     </div>
   </div>
   
@@ -505,26 +505,26 @@ weight      -0.2509641 0.09484151 -2.646141 8.141576e-03</code></pre>
 <span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(cats_cluster)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>List of 9
- $ cluster     : int [1:400] 3 3 3 3 1 2 3 1 1 3 ...
- $ centers     : num [1:3, 1:3] 0.902 -0.654 -0.621 -0.455 -0.479 ...
+ $ cluster     : int [1:400] 2 2 2 2 3 1 2 3 3 2 ...
+ $ centers     : num [1:3, 1:3] -0.654 -0.621 0.902 -0.479 1.416 ...
   ..- attr(*, "dimnames")=List of 2
   .. ..$ : chr [1:3] "1" "2" "3"
   .. ..$ : chr [1:3] "scale_weight" "scale_wander" "scale_age"
  $ totss       : num 1197
- $ withinss    : num [1:3] 187 163 144
+ $ withinss    : num [1:3] 163 144 187
  $ tot.withinss: num 494
  $ betweenss   : num 703
- $ size        : int [1:3] 166 135 99
- $ iter        : int 4
+ $ size        : int [1:3] 135 99 166
+ $ iter        : int 3
  $ ifault      : int 0
  - attr(*, "class")= chr "kmeans"</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>cats_cluster<span class="sc">$</span>centers</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  scale_weight scale_wander  scale_age
-1    0.9019205   -0.4551119  0.7941463
-2   -0.6537444   -0.4787674 -0.8643999
-3   -0.6208415    1.4159815 -0.1528717</code></pre>
+1   -0.6537444   -0.4787674 -0.8643999
+2   -0.6208415    1.4159815 -0.1528717
+3    0.9019205   -0.4551119  0.7941463</code></pre>
 </div>
 </div>
 <hr>

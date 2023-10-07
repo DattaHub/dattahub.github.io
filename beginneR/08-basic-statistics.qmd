@@ -2,7 +2,7 @@
 title: "Common Statistical Techniques in R"
 date: "`r Sys.Date()`"
 output: 
-  pdf_document:
+  html_document:
       toc: true
       number_sections: false
 fontsize: 11pt
@@ -169,7 +169,7 @@ glm_summary$aic
 
 We can also use the model objects to predict on unobserved values.  We just need to pass a data frame with all of the terms used in the original model to the `predict` function.  The `predict` function will return values in a few different ways.  The default value of the `type` argument is "link" and will return things on the same scale as the linear predictors.  This is often not what we want.  If we pass "response" to the `type` argument, we'll get predicted values on the same scale as the response.  In the logistic case, this is the predicted probability.
 
-```{r}
+```{r, echo = T}
 new_cats <- data.frame(wander_dist = c(0.15, 0.10, 0.05),
                        weight = c(2, 6, 12))
 new_cats
@@ -185,7 +185,7 @@ predicted_probs
 
 We can then predict whether each cat is a roamer or not based on the predicted probabilty from our model.  We need to assign a cut-off probability.
 
-```{r}
+```{r, echo = T}
 new_cats$predicted_prob <- predicted_probs
 new_cats <- new_cats %>% mutate(roamer = ifelse(predicted_prob > 0.5, 'yes', 'no'))
 
@@ -201,7 +201,7 @@ ggplot(cats, aes(x = weight, y = wander_dist, color = roamer, group = roamer)) +
 
 Another popular machine learning technique is k-means clustering.  It seeks to group your data into a fixed number of clusters based on a measure of distance.  An important pre-processing step to clustering is the center and scale your data.
 
-```{r}
+```{r, echo = T}
 cats <- cats %>% 
   mutate(scale_weight = scale(weight),
          scale_wander = scale(wander_dist),
@@ -212,7 +212,7 @@ cats <- cats %>%
 
 We use the `kmeans` function to perform the clustering, and need to pass it a data frame, the number of centers we want, and another argument `nstart`, which helps get around some numerical issues if the algorithm gets stuck in a local extrema.
 
-```{r}
+```{r, echo = T}
 cats_cluster <- 
   kmeans(x = cats %>% select(scale_weight, scale_wander, scale_age), 
          centers = 3,
@@ -225,7 +225,7 @@ cats_cluster$centers
 
 We can use `ggplot` to visualize the clusters.
 
-```{r}
+```{r, echo = TRUE}
 cats$cluster <- factor(cats_cluster$cluster)
 cluster_centers <- as.data.frame(cats_cluster$centers)
 
