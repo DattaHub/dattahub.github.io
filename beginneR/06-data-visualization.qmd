@@ -143,8 +143,6 @@ ggplot(acs) +
     geom_point(aes(x = age, y = income)) 
 ```
 
-
-
 ## Scales
 
 Scales control the mapping between data and aesthetics.
