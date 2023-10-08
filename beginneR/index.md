@@ -1,5 +1,8 @@
 # R introduction: A Beginner's Workshop
 
+![](believeR.png)
+(**Artwork by [@allison_horst](https://allisonhorst.com/)**)
+
 This is an `R` workshop for first-time `R` users, and no prior programming experience is required to follow along. The source materials are collected from various sources. We also use a lot of open source data-sets for this workshop, some from `R` packages and some from the wonderful [OpenIntro website](https://www.openintro.org/data/index.php). The OpenIntro webpage is also an excellent source of finding open data sets for different types of data science or statistics course or educational purposes. 
 
 ## Set-up, R codes etc.
