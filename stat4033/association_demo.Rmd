@@ -1,13 +1,22 @@
 ---
-title: "Tests for trends and association"
+title: "Tests for Association"
+subtitle: "Pearson's, Spearman's and Kendall's"
 author: "Jyotishka Datta"
-date: "`r Sys.Date()`"
-output: ioslides_presentation
+date: "Updated: `r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+  css: mystyle.css
+lib_dir: libs
+nature:
+  highlightStyle: github
+highlightLines: true
+countIncrementalSlides: false
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
+
 
 ## Pearson's Correlation Coefficient 
 
@@ -19,9 +28,11 @@ attach(cars)
 head(cars)
 ```
 
+---
 ## Scatter plot
 
 The scatter plot has an upward trend indicating positive trend! 
+
 ```{r, echo = F}
 require(stats); require(graphics)
 plot(cars, xlab = "Speed (mph)", ylab = "Stopping distance (ft)",
@@ -29,8 +40,10 @@ plot(cars, xlab = "Speed (mph)", ylab = "Stopping distance (ft)",
 title(main = "cars data")
 ```
 
+---
 ## Best fit line 
-We can try to fit a straight line or a curve to the scatter plot 
+We can try to fit a straight line or a curve to the scatter plot. The best-fitting curve looks somewhat linear and shows an upward trend. 
+
 ```{r, echo = F}
 require(stats); require(graphics)
 plot(cars, xlab = "Speed (mph)", ylab = "Stopping distance (ft)",
@@ -40,7 +53,10 @@ abline(lm(cars$dist ~ cars$speed),col="blue")
 title(main = "cars data")
 ```
 
+---
 ## Correlation
+
+The R functions you need are `cor` and `cor.test`. The latter does the $t$-test for testing $H_0: \rho = 0$. 
 
 ```{r,echo=T}
 cor(cars$speed,cars$dist)
@@ -48,14 +64,16 @@ cor.test(cars$speed,cars$dist)
 ```
 
 
+---
 ## Log transform?
 
-```{r,echo = T}
+```{r,echo = T, fig.height = 5}
 plot(cars, xlab = "Speed (mph)", ylab = "Stopping distance (ft)",
      las = 1, log = "xy")
 title(main = "cars data (logarithmic scales)")
 ```
 
+---
 ## Does the correlation improve? 
 
 ```{r,echo=TRUE}
@@ -63,13 +81,17 @@ cor(log(cars$speed),log(cars$dist))
 cor.test(log(cars$speed),log(cars$dist))
 ```
 
-## Remember 
+---
+## Remember the properties 
+
 1.  $X$ and $Y$ independent $\Rightarrow$ $\rho_{X,Y} = 0$, but not the other way round, unless $X,Y$ are jointly normal. 
-2. Correlation $\not \Rightarrow$ Causation. There could be a **lurking** variable, causing a **spurious** relationship. 
-3. Lots of hilarious examples in 
+2.  Correlation is always between -1 and +1, with the extreme values indicating perfect linear relationship. 
+3. Correlation $\not \Rightarrow$ Causation. There could be a **lurking** variable, causing a **spurious** relationship. 
+4. Lots of hilarious examples in 
 [Spurious Correlations Webpage](http://tylervigen.com/spurious-correlations)
 
-## Example {.smaller}
+---
+## Example 
 
 - Here $\rho_{X,Y} = 0$, but $Y = X^2$, not independent, but not **linearly dependent**. 
 
@@ -81,12 +103,16 @@ cor(x,y)
 plot(x,y,type="p")
 ```
 
+---
+class: inverse, center, middle
 
 # Spearman's correlation 
 
+
+---
 ## Motivation 
 
--  Pearson's correlation coefficient measures only linear relationship. 
+-  Pearson's correlation coefficient measures only linear relationship. Here $y = x^4$: a perfect montonically increasing relationship but the Pearson's correlation is still not 1. 
 
 ```{r, echo=TRUE}
 x = seq(1,7)
@@ -96,6 +122,7 @@ cor(x,y)
 cor(x,y,method="pearson")
 ```
 
+---
 ## Spearman's rank correlation 
 
 -  Spearman's rank correlation: replace X, Y with their ranks. 
@@ -107,6 +134,7 @@ cor(x,y,method="spearman")
 ```
 -  Spearman's $r_s$ measure monotonic association. $r_s = 1$ means X is a monotonically increasing function of Y. 
 
+---
 ## Transformation invariance
 
 - Spearman's $r_s$ is preserved if we apply the same monotone order-preserving transformation to both $X$ and $Y$.
@@ -117,6 +145,7 @@ cor(cars$speed,cars$dist)
 cor(log(cars$speed),log(cars$dist))
 ```
 
+---
 ## Spearman's rank correlation 
 
 - As long as the transformation is monotone: $f(x) = log(x)$, $f(x) = x^2$.
@@ -127,35 +156,48 @@ cor(log(cars$speed),log(cars$dist),method="spearman")
 cor((cars$speed)^2,(cars$dist)^2,method="spearman")
 ```
 
+---
 ## Hypothesis test 
 
 ```{r,echo=T}
 cor.test(cars$speed,cars$dist,method="spearman")
 ```
 
+
+---
 ## Kendall's tau 
 
-Kendall's tau measures the association by measuring concordance or discordance in the data. If $p_c$ and $p_d$ denote the probability of concordance and discordance respectively: 
-then Kendall's coefficient $\tau$ is defined as: 
+-   Kendall's tau measures the association by measuring concordance or discordance in the data. 
+
+-  If $p_c$ and $p_d$ denote the probability of concordance and discordance respectively: then Kendall's coefficient $\tau$ is defined as: 
+
 $$
 \tau = p_c - p_d 
 $$
 
+-  Since $p_c + p_d = 1$, you can also write $\tau$ in terms of only $p_c$ or $p_d$. 
 
-## Kendall's tau {.smaller}
+
+---
+## Kendall's tau 
 
 Kendall's tau is related to Pearson's product-moment correlation coefficient as: 
+
 $$
 \tau = \frac{2}{\pi} \arcsin(\rho)
 $$
 
-```{r}
+- Here's the functional relationship. 
+
+```{r,fig.height = 5}
 x = seq(0,1,length.out = 100)
 tau = 2/pi*asin(x)
 plot(x,tau,type="l")
 lines(x,x,col="red")
 ```
 
+
+---
 ## Kendall's tau 
 
 ```{r,echo=T} 
@@ -164,3 +206,77 @@ cor(log(cars$speed),log(cars$dist),method="kendall")
 cor((cars$speed)^2,(cars$dist)^2,method="kendall")
 ```
 
+---
+## In class example 
+
+```{r, echo = T}
+x = c(1,	5,	9,	7,	4,	6,	8,	2,	3)
+y = c(4,	3,	6,	8,	2,	7,	9,	1,	5)
+cor(x,y, method = "spearman")
+cor.test(x,y, method = "spearman")
+```
+
+---
+## In class example 
+
+How good is the  normal approximation?
+
+```{r, echo = T}
+x = c(1,5,9,7,4,6,8,2,3)
+y = c(4,3,6,8,2,7,9,1,5)
+n = length(x)
+r_s = cor(x,y, method = "spearman")
+(normal.p.value = 2*(1 - pnorm(sqrt(length(x)-1)*r_s)))
+(t.p.value = 2*(1 - pt((r_s*sqrt(n-2))/sqrt(1-r_s^2),df = n-2)))
+```
+
+- The exact P-value is 0.03687. Which one is closer? 
+
+---
+## In class example 
+
+```{r, echo = T}
+x = c(1,	5,	9,	7,	4,	6,	8,	2,	3)
+y = c(4,	3,	6,	8,	2,	7,	9,	1,	5)
+cor.test(x,y, method = "kendall")
+```
+
+---
+## In class example 
+
+Using the Normal approximation: 
+$$
+Z = 3 \sqrt{n(n-1)}\tau/\sqrt{2(2n+5)}
+$$
+
+```{r, echo = T}
+x = c(1,5,9,7,4,6,8,2,3)
+y = c(4,3,6,8,2,7,9,1,5)
+n = length(x)
+T = cor(x,y, method = "kendall")
+Z = 3*sqrt(n*(n-1))*T/sqrt(2*(2*n+5))
+normal.p.value = 2*(1 - pnorm(Z))
+cat("P value = ", normal.p.value, "\n")
+```
+
+- Exact P-value = 0.04462. (See last slide.)
+
+---
+## Divorce Example - Mann's Test (Kendall's)  
+
+```{r,echo = TRUE}
+year = seq(1945,1985,by=5)
+divorce.rate = c(3.5,	2.6,	2.3,	2.2,	2.5,	3.6,
+                 4.8,	5.2,	5)
+cor.test(year,divorce.rate, method = "kendall")
+```
+
+---
+## Divorce Example - Daniel's Test (Spearman's)
+
+```{r,echo = TRUE}
+year = seq(1945,1985,by=5)
+divorce.rate = c(3.5,	2.6,	2.3,	2.2,	2.5,	3.6,	
+                 4.8,	5.2,	5)
+cor.test(year,divorce.rate, method = "spearman")
+```
