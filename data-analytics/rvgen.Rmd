@@ -162,7 +162,7 @@ $$
 ks.test(x,pnorm)
 ```
 
--  Stat 4033: "If $F_0$ is not fully specified, `ks.test` does not work." But we won't run into that here. 
+-  "If $F_0$ is not fully specified, `ks.test` does not work" ... but we won't run into that here. 
 
 
 ## Generating from the Uniform disk 
