@@ -1,0 +1,1759 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Logic and functions in R</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Jyotishka Datta" />
+    <script src="logic_and_functions_in_R_files/header-attrs/header-attrs.js"></script>
+    <link href="logic_and_functions_in_R_files/remark-css/default.css" rel="stylesheet" />
+    <link href="logic_and_functions_in_R_files/remark-css/default-fonts.css" rel="stylesheet" />
+    <link href="logic_and_functions_in_R_files/font-awesome/css/all.min.css" rel="stylesheet" />
+    <link href="logic_and_functions_in_R_files/font-awesome/css/v4-shims.min.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Logic and functions in R
+]
+.author[
+### Jyotishka Datta
+]
+.date[
+### 2020/01/24 (updated: 2024-09-10)
+]
+
+---
+
+
+
+
+---
+class: middle
+count: false
+
+# (Almost) Everything is a Vector
+
+---
+  
+## Types of vectors
+  
+  The fundamental building block of data in R are vectors (collections of related values, objects, other data structures, etc).
+
+&lt;br/&gt;
+  
+  R has two fundamental vector classes:
+  
+  * Vectors (atomic vectors) 
+
+- collections of values that are all of the *same* type (e.g. all logical values, all numbers, or all character strings).
+
+* Lists (generic vectors)
+
+- collections of *any* type of R object, even other lists (meaning they can have a hierarchical/tree-like structure).
+
+---
+  
+## Atomic Vectors
+  
+  R has six atomic vector types: 
+  
+|  typeof    |   mode    | storage.mode 
+|:-----------|:----------|:-------------
+| logical    | logical   | logical      
+| double     | numeric   | double       
+| integer    | numeric   | integer      
+| character  | character | character    
+| complex    | complex   | complex      
+| raw        | raw       | raw          
+
+&lt;br/&gt;
+  
+For now we'll mainly worry about the first type, we'll discuss the following three next time (last two almost never come up).
+
+---
+count: false
+
+# Conditionals
+
+---
+  
+  ## Logical (boolean) operations
+  
+|  Operator  |  Operation    |  Vectorized? 
+|:-----------|:--------------|:-------------
+| &lt;code&gt;x &amp;#124; y&lt;/code&gt;    |  or           |   Yes        
+| `x &amp; y`    |  and          |   Yes        
+| `!x`       |  not          |   Yes        
+| &lt;code&gt;x &amp;#124;&amp;#124; y&lt;/code&gt; |  or           |   No         
+| `x &amp;&amp; y`   |  and          |   No         
+|`xor(x,y)`  |  exclusive or |   Yes        
+
+
+---
+class: split-50
+
+## Vectorized?
+
+
+```r
+x = c(TRUE,FALSE,TRUE)
+y = c(FALSE,TRUE,TRUE)
+```
+
+.pull-left[
+
+```r
+  x | y
+```
+
+```
+## [1] TRUE TRUE TRUE
+```
+
+```r
+  x || y
+```
+
+```
+## Warning in x || y: 'length(x) = 3 &gt; 1' in coercion to 'logical(1)'
+```
+
+```
+## [1] TRUE
+```
+]
+
+.pull-right[
+
+```r
+  x &amp; y
+```
+
+```
+## [1] FALSE FALSE  TRUE
+```
+
+```r
+  x &amp;&amp; y
+```
+
+```
+## Warning in x &amp;&amp; y: 'length(x) = 3 &gt; 1' in coercion to 'logical(1)'
+
+## Warning in x &amp;&amp; y: 'length(x) = 3 &gt; 1' in coercion to 'logical(1)'
+```
+
+```
+## [1] FALSE
+```
+]
+
+
+---
+class: split-50
+
+## Length coercion
+
+
+```r
+x = c(TRUE,FALSE,TRUE)
+y = c(TRUE)
+z = c(FALSE,TRUE)
+```
+
+.pull-left[
+
+```r
+  x | y
+```
+
+```
+## [1] TRUE TRUE TRUE
+```
+
+```r
+  y | z
+```
+
+```
+## [1] TRUE TRUE
+```
+]
+
+.pull-right[
+ 
+ ```r
+  x &amp; y
+ ```
+ 
+ ```
+ ## [1]  TRUE FALSE  TRUE
+ ```
+ 
+ ```r
+  y &amp; z
+ ```
+ 
+ ```
+ ## [1] FALSE  TRUE
+ ```
+]
+
+
+```r
+x | z
+```
+
+```
+## Warning in x | z: longer object length is not a multiple of shorter object
+## length
+```
+
+```
+## [1] TRUE TRUE TRUE
+```
+
+---
+  
+## Comparisons
+  
+ Operator  |  Comparison                |  Vectorized?
+:-----------|:---------------------------|:-----------------
+`x &lt; y`    |  less than                 |  Yes
+`x &gt; y`    |  greater than              |  Yes
+`x &lt;= y`   |  less than or equal to     |  Yes
+`x &gt;= y`   |  greater than or equal to  |  Yes
+`x != y`   |  not equal to              |  Yes
+`x == y`   |  equal to                  |  Yes
+`x %in% y` |  contains                  |  Yes (for `x`)
+
+
+---
+class: split-50
+
+## Comparisons
+
+
+```r
+x = c("A","B","C")
+z = c("A")
+```
+
+.pull-left[
+
+```r
+  x == z
+```
+
+```
+## [1]  TRUE FALSE FALSE
+```
+
+```r
+  x != z
+```
+
+```
+## [1] FALSE  TRUE  TRUE
+```
+
+```r
+  x &gt; z
+```
+
+```
+## [1] FALSE  TRUE  TRUE
+```
+]
+
+.pull-right[
+
+```r
+  x %in% z
+```
+
+```
+## [1]  TRUE FALSE FALSE
+```
+
+```r
+  z %in% x
+```
+
+```
+## [1] TRUE
+```
+]
+
+---
+  
+## Conditional Control Flow
+  
+Conditional execution of code blocks is achieved via `if` statements. 
+
+*Note that `if` statements are **not** vectorized.*
+  
+
+```r
+x = c(3,1)
+
+if (3 %in% x)
+  "Here!"
+```
+
+```
+## [1] "Here!"
+```
+
+```r
+if (x &gt;= 2)
+  "Now Here!"
+```
+
+```
+## Error in if (x &gt;= 2) "Now Here!": the condition has length &gt; 1
+```
+
+---
+class: split-50
+
+## Collapsing logical vectors
+
+There are a couple of helper functions for collapsing a logical vector down to a single value: `any`, `all`
+
+
+```r
+x = c(3,4)
+```
+
+.pull-left[
+
+```r
+  any(x &gt;= 2)
+```
+
+```
+## [1] TRUE
+```
+
+```r
+  all(x &gt;= 2)
+```
+
+```
+## [1] TRUE
+```
+]
+
+.pull-right[
+
+```r
+  !any(x &gt;= 2)
+```
+
+```
+## [1] FALSE
+```
+
+```r
+  if (any(x &gt;= 2))
+    print("Now There!")
+```
+
+```
+## [1] "Now There!"
+```
+]
+
+
+---
+  
+## Nesting Conditionals
+  
+
+```r
+x = 3
+if (x &lt; 0) {
+  "Negative"
+} else if (x &gt; 0) {
+  "Positive"
+} else {
+  "Zero"
+}
+```
+
+```
+## [1] "Positive"
+```
+
+
+```r
+x = 0
+if (x &lt; 0) {
+  "Negative"
+} else if (x &gt; 0) {
+  "Positive"
+} else {
+  "Zero"
+}
+```
+
+```
+## [1] "Zero"
+```
+
+---
+class: middle
+count: false
+
+# Error Checking
+
+---
+  
+## `stop` and `stopifnot`
+  
+Often we want to validate user input or function arguments - if our assumptions are not met then we often want to report the error and stop execution. 
+
+
+```r
+ok = FALSE
+if (!ok)
+  stop("Things are not ok.")
+```
+
+```
+## Error in eval(expr, envir, enclos): Things are not ok.
+```
+
+```r
+stopifnot(ok)
+```
+
+```
+## Error: ok is not TRUE
+```
+
+*Note - an error (like the one generated by `stop`) will prevent an RMarkdown document from compiling unless `error=TRUE` is set for that code block.*
+  
+---
+  
+## Style choices
+  
+
+```r
+# Do stuff
+if (condition_one) {
+  ##
+  ## Do stuff
+  ##
+} else if (condition_two) {
+  ##
+  ## Do other stuff
+  ##
+} else if (condition_error) {
+  stop("Condition error occured")
+}
+```
+
+---
+  
+## Style choices
+
+
+```r
+# Do stuff better
+if (condition_error) {
+  stop("Condition error occured")
+}
+
+if (condition_one) {
+  ##
+  ## Do stuff
+  ##
+} else if (condition_two) {
+  ##
+  ## Do other stuff
+  ##
+}
+```
+
+### Ultimately, it's subjective !
+
+---
+  
+## Exercise 1
+  
+  Write a set of conditional(s) that satisfies the following requirements,
+
+* If `x` is greater than 3 and `y` is less than or equal to 3 then print "Hello world!"
+
+* Otherwise if `x` is greater than 3 print "!dlrow olleH"
+
+* If `x` is less than or equal to 3 then print "Something else ..."
+
+* Stop execution if x is odd and y is even and report an error, don't print any of the text strings above.
+
+
+Test out your code by trying various values of `x` and `y`.
+
+
+---
+class: middle
+count: false
+
+# Loops
+
+---
+
+## `for` loops
+
+Simplest, and most common type of loop in R - given a vector iterate through the elements and evaluate the code block for each.
+
+
+
+```r
+for(x in 1:10)
+{
+  cat(x^2,"")
+}
+```
+
+```
+## 1 4 9 16 25 36 49 64 81 100
+```
+
+
+```r
+for(y in list(1:3, LETTERS[1:7], c(TRUE,FALSE)))
+{
+  cat(length(y),"")
+}
+```
+
+```
+## 3 7 2
+```
+
+---
+
+## `while` loops
+
+Repeat until the given condition is **not** met (i.e. evaluates to `FALSE`)
+
+
+```r
+i = 1
+res = rep(NA,10)
+
+while (i &lt;= 10) {
+  res[i] = i^2
+  i = i+1
+}
+
+res
+```
+
+```
+##  [1]   1   4   9  16  25  36  49  64  81 100
+```
+
+---
+
+## `repeat` loops
+
+Repeat until `break`
+
+
+```r
+i = 1
+res = rep(NA,10)
+
+repeat {
+  res[i] = i^2
+  i = i+1
+  if (i &gt; 10)
+    break
+}
+
+res
+```
+
+```
+##  [1]   1   4   9  16  25  36  49  64  81 100
+```
+
+---
+class: split-50
+
+## Special keywords - `break` and `next`
+
+These are special actions that only work *inside* of a loop
+
+* `break` - ends the current *loop* (inner-most)
+* `next` - ends the current *iteration*
+
+.pull-left[
+
+```r
+for(i in 1:10) {
+    if (i %% 2 == 0)
+        break
+    cat(i,"")
+}
+```
+
+```
+## 1
+```
+]
+
+.pull-right[
+
+```r
+for(i in 1:10) {
+    if (i %% 2 == 0)
+        next
+    cat(i,"")
+}
+```
+
+```
+## 1 3 5 7 9
+```
+]
+
+
+---
+class: split-50
+
+## Some helper functions
+
+Often we want to use a loop across the indexes of an object and not the elements themselves. There are several useful functions to help you do this: `:`, `length`, `seq`, `seq_along`, `seq_len`, etc.
+
+
+```r
+4:7
+```
+
+```
+## [1] 4 5 6 7
+```
+
+```r
+seq(4,7,by=1)
+```
+
+```
+## [1] 4 5 6 7
+```
+
+```r
+seq_along(4:7)
+```
+
+```
+## [1] 1 2 3 4
+```
+
+```r
+seq_len(length(4:7))
+```
+
+```
+## [1] 1 2 3 4
+```
+
+---
+
+## Exercise 2
+
+Below is the list of primes between 2 and 100:
+```
+2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 
+43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97
+```
+
+If you were given the vector `x = c(3, 4, 12, 19, 23, 48, 50, 61, 63, 78)`, write out the R code necessary to print only the values of `x` that are *not* prime (without using subsetting or the `%in%` operator). 
+
+Your code should use *nested* loops to iterate through the vector of primes and `x`.
+
+---
+class: middle, bottom, segue
+
+
+## Next we will look at functions
+
+source: [https://r4ds.hadley.nz/functions.html](https://r4ds.hadley.nz/functions.html)
+
+---
+
+## When to use functions
+
+The goal of a function should be to encapsulate a *small* *reusable* piece of code.
+
+* Name should make it clear what the function does (think in terms of simple verbs).
+
+* Functionality should be simple enough to be quickly understood.
+
+* The smaller and more modular the code the easier it will be to reuse elsewhere.
+
+* Better to change code in one location than code everywhere.
+
+---
+## When to use ...
+
+Writing a function has four big advantages over using copy-and-paste:
+
+-  You can give a function an evocative name that makes your code easier to understand.
+
+-  As requirements change, you only need to update code in one place, instead of many.
+
+-  You eliminate the chance of making incidental mistakes when you copy and paste (i.e. updating a variable name in one place, but not in another).
+
+-  It makes it easier to reuse work from project-to-project, increasing your productivity over time.
+
+Rule-of-thumb: did you copy-paste a block of code more than twice? 
+
+---
+## What does this do?
+
+
+```r
+df &lt;- tibble::tibble(
+  a = rnorm(10),
+  b = rnorm(10),
+  c = rnorm(10),
+  d = rnorm(10)
+)
+
+df$a &lt;- (df$a - min(df$a, na.rm = TRUE)) / 
+  (max(df$a, na.rm = TRUE) - min(df$a, na.rm = TRUE))
+df$b &lt;- (df$b - min(df$b, na.rm = TRUE)) / 
+  (max(df$b, na.rm = TRUE) - min(df$a, na.rm = TRUE))
+df$c &lt;- (df$c - min(df$c, na.rm = TRUE)) / 
+  (max(df$c, na.rm = TRUE) - min(df$c, na.rm = TRUE))
+df$d &lt;- (df$d - min(df$d, na.rm = TRUE)) / 
+  (max(df$d, na.rm = TRUE) - min(df$d, na.rm = TRUE))
+```
+
+
+---
+## Error in copy-paste
+
+You might be able to puzzle out that this rescales each column to have a range from 0 to 1. 
+
+But did you spot the mistake? I made an error when copying-and-pasting the code for df$b: I forgot to change an a to a b. 
+
+Extracting repeated code out into a function is a good idea because it prevents you from making this type of mistake.
+
+---
+## What does this do?
+
+
+```r
+df &lt;- tibble::tibble(
+  a = rnorm(10),
+  b = rnorm(10),
+  c = rnorm(10),
+  d = rnorm(10)
+)
+
+df$a &lt;- (df$a - min(df$a, na.rm = TRUE)) / 
+  (max(df$a, na.rm = TRUE) - min(df$a, na.rm = TRUE))
+df$b &lt;- (df$b - min(df$b, na.rm = TRUE)) /            #&lt;&lt;
+  (max(df$b, na.rm = TRUE) - min(df$a, na.rm = TRUE)) #&lt;&lt;
+df$c &lt;- (df$c - min(df$c, na.rm = TRUE)) / 
+  (max(df$c, na.rm = TRUE) - min(df$c, na.rm = TRUE))
+df$d &lt;- (df$d - min(df$d, na.rm = TRUE)) / 
+  (max(df$d, na.rm = TRUE) - min(df$d, na.rm = TRUE))
+```
+
+---
+## Write a function
+
+To write a function you need to first analyse the code. How many inputs does it have?
+
+
+```r
+(df$a - min(df$a, na.rm = TRUE))/(max(df$a, na.rm = TRUE) - min(df$a, na.rm = TRUE))
+```
+
+```
+##  [1] 0.5588751 0.4694925 0.9657175 0.6430406 0.8089664 1.0000000 0.9179391
+##  [8] 0.3294634 0.0000000 0.4179355
+```
+
+-  Why is `TRUE` not an input? 
+
+-  To make the inputs more clear, it’s a good idea to rewrite the code using temporary variables with general names. Here this code only requires a single numeric vector, so I’ll call it x:
+
+
+```r
+x &lt;- df$a
+(x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+```
+
+```
+##  [1] 0.5588751 0.4694925 0.9657175 0.6430406 0.8089664 1.0000000 0.9179391
+##  [8] 0.3294634 0.0000000 0.4179355
+```
+
+---
+## Redundancy?
+
+There is some duplication in this code. We’re computing the range of the data three times, so it makes sense to do it in one step:
+
+
+```r
+rng &lt;- range(x, na.rm = TRUE)
+(x - rng[1]) / (rng[2] - rng[1])
+```
+
+```
+##  [1] 0.5588751 0.4694925 0.9657175 0.6430406 0.8089664 1.0000000 0.9179391
+##  [8] 0.3294634 0.0000000 0.4179355
+```
+
+Pulling out intermediate calculations into named variables is a good practice because it makes it more clear what the code is doing. 
+
+---
+## Turn this into a function
+
+Now that I’ve simplified the code, and checked that it still works, I can turn it into a function:
+
+
+```r
+rescale01 &lt;- function(x) {
+  rng &lt;- range(x, na.rm = TRUE)
+  (x - rng[1]) / (rng[2] - rng[1])
+}
+rescale01(c(0, 5, 10))
+```
+
+```
+## [1] 0.0 0.5 1.0
+```
+
+---
+## Use with earlier example
+
+We can simplify the original example now that we have a function:
+
+
+```r
+df$a &lt;- rescale01(df$a)
+df$b &lt;- rescale01(df$b)
+df$c &lt;- rescale01(df$c)
+df$d &lt;- rescale01(df$d)
+```
+
+Compare this with the original block of code. 
+
+
+---
+## Change easily 
+
+Another advantage of functions is that if our requirements change, we only **need to make the change in one place**.
+
+For example, we might discover that some of our variables include infinite values, and `rescale01()` fails:
+
+
+```r
+x &lt;- c(1:10, Inf)
+rescale01(x)
+```
+
+```
+##  [1]   0   0   0   0   0   0   0   0   0   0 NaN
+```
+
+Because we’ve extracted the code into a function, we only need to make the fix in one place:
+
+
+```r
+rescale01 &lt;- function(x) {
+  rng &lt;- range(x, na.rm = TRUE, finite = TRUE)
+  (x - rng[1]) / (rng[2] - rng[1])
+}
+rescale01(x)
+```
+
+```
+##  [1] 0.0000000 0.1111111 0.2222222 0.3333333 0.4444444 0.5555556 0.6666667
+##  [8] 0.7777778 0.8888889 1.0000000       Inf
+```
+
+---
+## Exercise 
+
+- Why is `TRUE` not a parameter to `rescale01()`? What would happen if `x` contained a single missing value, and `na.rm` was FALSE?
+
+- In the second variant of `rescale01()`, infinite values are left unchanged. Rewrite `rescale01()` so that `-Inf` is mapped to 0, and `Inf` is mapped to 1.
+
+- Write your own functions to compute the skewness of a numeric vector. Skewness is defined as: 
+
+$$
+Skew(x) = \frac{\frac{1}{n-2}\sum_{i=1}^{n}(x_i - \bar{x})^3}{Var(x)^{3/2}}
+$$
+Compare with the function skewness in library moments.
+
+
+```r
+# calculate skewness in r
+## Install this package if it's already not installed 
+# install.packages("moments")
+library(moments)
+
+skewness(x)
+```
+
+```
+## [1] NaN
+```
+
+---
+class: middle, inverse
+
+
+## Now, we will dissect the structure of a function in R
+
+source: [https://statprog-s1-2020.github.io/](https://statprog-s1-2020.github.io/)
+
+---
+## Functions 
+
+- Functions are blocks of code that allows R to be modular and facilitate code reuse.
+- An R programmer can define their own functions as follows:
+
+```r
+function_name &lt;- function([arg1], [arg2], ...){
+#function code body
+}
+```
+
+- The function arguments are optional. Function arguments are the variables passed to the function, used by the function's code to perform calculations. A function can take no arguments.
+- A function can also return any R primitive or object using the `return(object)` statement.
+
+---
+## Function arguments 
+
+Functions have named arguments which potentially have default values.
+
+The _formal arguments_ are the arguments included in the
+function definition
+
+The `formals` function returns a list of all the formal
+arguments of a function 
+
+Not every function call in R makes use of all the formal
+arguments
+
+Function arguments can be missing or might have default
+values
+
+---
+## Argument matching 
+
+R functions arguments can be matched positionally or by name. So the following calls to `sd` are all equivalent.
+
+
+```r
+mydata &lt;- rnorm(100)
+ sd(mydata)
+```
+
+```
+## [1] 1.029569
+```
+
+```r
+ sd(x = mydata)
+```
+
+```
+## [1] 1.029569
+```
+
+```r
+ sd(x = mydata, na.rm = FALSE)
+```
+
+```
+## [1] 1.029569
+```
+
+```r
+ sd(na.rm = FALSE, x = mydata)
+```
+
+```
+## [1] 1.029569
+```
+
+```r
+ sd(na.rm = FALSE, mydata)
+```
+
+```
+## [1] 1.029569
+```
+
+**But don't mess around with the order too much!**
+
+
+---
+## Examples 
+
+-  Examples of two different functions 
+
+
+```r
+# computes the mean of a vector of numbers
+mean &lt;- function(a_vector) {
+s &lt;- sum(a_vector)
+x &lt;- s/length(a_vector)
+}
+```
+
+
+```r
+# checks to see if a string s starts with letter x
+startsWith &lt;- function(x, s){
+if(x == substr(s, 0, 1){
+return(TRUE)
+}
+return(FALSE)
+}
+```
+
+---
+## Anatomy of a function
+
+-  **Default arguments**
+-  Function arguments can be assigned default values as follows:
+
+
+```r
+sort_vector &lt;- function(a_vector, ascending=TRUE){
+# sorting algorithm
+}
+```
+- When calling this function, the arguments given default values do not need to be specified. In this case, the defaults are used.
+- Example:
+
+```r
+sort_vector(a_vector) # returns a_vector in ascending order
+sort_vector(a_vector, FALSE) # returns a vector in descending order
+```
+
+---
+## "Scope" of a variable 
+
+-  Variable Scoping
+-  Variables that are bound to an R primitive or object outside a function are called global variables, and are accessible everywhere in an R program.
+-  Example:
+
+```r
+x &lt;- 5
+test &lt;- function() {
+cat(x + 5)
+}
+test(); 
+```
+
+```
+## 10
+```
+
+- Here 'x' is a "GLOBAL" variable - accessible from anywhere. 
+---
+
+## "Scope" (contd.)
+
+-  Variables bound inside a function are only accessible within that function. These are called local variables. Example:
+
+```r
+x &lt;- 10
+test &lt;- function() {
+x &lt;- 5
+cat(x + 20)
+}
+test() #prints 25
+```
+
+```
+## 25
+```
+
+```r
+cat(x + 20) #prints 30
+```
+
+```
+## 30
+```
+-  **Note that the local variable assignment takes precedence inside the function test over the global assignment**.
+---
+
+## Side effects 
+
+-  R functions have no side effects-- they cannot change the value of global variables. Example:
+
+```r
+x &lt;- 10
+test &lt;- function(z) {
+z &lt;- z + 10
+cat(z)
+}
+test(x) #prints 20
+```
+
+```
+## 20
+```
+
+```r
+cat(x) #prints 10
+```
+
+```
+## 10
+```
+-  **Note that x is still bound to 10 outside of test()**.
+
+---
+class: middle
+count: false
+
+# More about Functions
+
+---
+
+## Function Parts
+
+Functions are defined by two components: the arguments (`formals`) and the code (`body`). Functions are assigned names like any other object in R (using `=` or `&lt;-`)
+
+
+```r
+gcd = function(long1, lat1, long2, lat2) {
+  R = 6371 # Earth mean radius in km
+  
+  # distance in km
+  acos(sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2) * cos(long2-long1)) * R
+}
+```
+
+---
+
+## Returning values
+
+There are two approaches to returning values from functions in R - explicit and implicit return values.
+
+--
+
+**Explicit** - using one or more `return` statements
+
+
+```r
+f = function(x) {
+  x + 1
+  return(x * x)
+}
+f(2)
+```
+
+```
+## [1] 4
+```
+
+--
+
+**Implicit** - return value of the last expression is returned.
+
+
+```r
+g = function(x) {
+  x + 1
+  x * x
+}
+g(3)
+```
+
+```
+## [1] 9
+```
+
+---
+
+## Returning multiple values
+
+If we want a function to return more than one value we can group things using either vectors or lists.
+
+
+```r
+f = function(x) {
+  c(x, x^2, x^3)
+}
+
+f(1:2)
+```
+
+```
+## [1] 1 2 1 4 1 8
+```
+
+
+```r
+g = function(x) {
+  list(x, "hello")
+}
+
+g(1:2)
+```
+
+```
+## [[1]]
+## [1] 1 2
+## 
+## [[2]]
+## [1] "hello"
+```
+
+---
+class: split-50
+
+## Argument names
+
+When defining a function we are also implicitly defining names for the arguments, when calling the function we can use these names to pass arguments in a alternative order.
+
+
+
+```r
+f = function(x, y, z) {
+  paste0("x=", x, " y=", y, " z=", z)
+}
+```
+
+.pull-left[
+
+```r
+f(1, 2, 3)
+```
+
+```
+## [1] "x=1 y=2 z=3"
+```
+
+```r
+f(z=1, x=2, y=3)
+```
+
+```
+## [1] "x=2 y=3 z=1"
+```
+]
+
+.pull-right[
+
+```r
+f(y=2, 1, 3)
+```
+
+```
+## [1] "x=1 y=2 z=3"
+```
+
+```r
+f(y=2, 1, x=3)
+```
+
+```
+## [1] "x=3 y=2 z=1"
+```
+]
+
+--
+
+.pad-top[
+
+
+```r
+f(1, 2, 3, 4)
+```
+
+```
+## Error in f(1, 2, 3, 4): unused argument (4)
+```
+
+```r
+f(1, 2, m=3)
+```
+
+```
+## Error in f(1, 2, m = 3): unused argument (m = 3)
+```
+
+]
+---
+
+## Argument defaults
+
+It is also possible to give function arguments default values, so that they don't need to be provided every time the function is called.
+
+
+```r
+f = function(x, y=1, z=1) {
+  paste0("x=", x, " y=", y, " z=", z)
+}
+```
+
+.pull-left[
+
+```r
+f(3)
+```
+
+```
+## [1] "x=3 y=1 z=1"
+```
+
+```r
+f(x=3)
+```
+
+```
+## [1] "x=3 y=1 z=1"
+```
+]
+
+.pull-right[
+
+```r
+f(z=3, x=2)
+```
+
+```
+## [1] "x=2 y=1 z=3"
+```
+
+```r
+f(y=2, 2)
+```
+
+```
+## [1] "x=2 y=2 z=1"
+```
+]
+
+--
+
+.pad-top[
+
+```r
+f()
+```
+
+```
+## Error in paste0("x=", x, " y=", y, " z=", z): argument "x" is missing, with no default
+```
+]
+
+---
+
+## Scope
+
+R has generous scoping rules, if it can't find a variable in the functions body, it will look for it in the next higher scope, and so on.
+
+
+```r
+y = 1
+f = function(x) {
+  x + y
+}
+
+f(3)
+```
+
+```
+## [1] 4
+```
+
+--
+
+.pad-top[]
+
+
+```r
+y = 1
+g = function(x) {
+  y = 2
+  x + y
+}
+
+g(3)
+```
+
+```
+## [1] 5
+```
+
+---
+
+Additionally, variables defined within a scope only persist for the duration of that scope, and do not overwrite variables at a higher scopes
+
+
+```r
+x = 1
+y = 1
+z = 1
+f = function() {
+    y = 2
+    g = function() {
+      z = 3
+      return(x + y + z)
+    }
+    return(g())
+}
+f()
+```
+
+```
+## [1] 6
+```
+
+```r
+c(x,y,z)
+```
+
+```
+## [1] 1 1 1
+```
+
+---
+
+## Exercise - scope
+
+What is the output of the following code? Explain why.
+
+
+```r
+z = 1
+
+f = function(x, y, z) {
+  z = x+y
+
+  g = function(m = x, n = y) {
+    m/z + n/z
+  }
+
+  z * g()
+}
+
+f(1, 2, x = 3)
+```
+
+---
+
+## Operators as functions
+
+In R, operators are actually a special type of function - using backticks around the operator we can write them as functions.
+ 
+
+```r
+`+`
+```
+
+```
+## function (e1, e2)  .Primitive("+")
+```
+
+```r
+typeof(`+`)
+```
+
+```
+## [1] "builtin"
+```
+
+--
+
+.pad-top[]
+
+
+```r
+x = 4:1
+x + 2
+```
+
+```
+## [1] 6 5 4 3
+```
+
+```r
+`+`(x, 2)
+```
+
+```
+## [1] 6 5 4 3
+```
+
+
+---
+
+## Getting Help
+
+Prefixing any function name with a `?` will open the related help file for that function.
+
+
+```r
+?`+`
+?sum
+```
+
+For functions not in the base package, you can generally see their implementation by entering the function name without parentheses (or using the `body` function).
+
+
+```r
+lm
+```
+
+```
+## function (formula, data, subset, weights, na.action, method = "qr", 
+##     model = TRUE, x = FALSE, y = FALSE, qr = TRUE, singular.ok = TRUE, 
+##     contrasts = NULL, offset, ...) 
+## {
+##     ret.x &lt;- x
+##     ret.y &lt;- y
+##     cl &lt;- match.call()
+##     mf &lt;- match.call(expand.dots = FALSE)
+##     m &lt;- match(c("formula", "data", "subset", "weights", "na.action", 
+##         "offset"), names(mf), 0L)
+##     mf &lt;- mf[c(1L, m)]
+##     mf$drop.unused.levels &lt;- TRUE
+##     mf[[1L]] &lt;- quote(stats::model.frame)
+##     mf &lt;- eval(mf, parent.frame())
+##     if (method == "model.frame") 
+##         return(mf)
+##     else if (method != "qr") 
+##         warning(gettextf("method = '%s' is not supported. Using 'qr'", 
+##             method), domain = NA)
+##     mt &lt;- attr(mf, "terms")
+##     y &lt;- model.response(mf, "numeric")
+##     w &lt;- as.vector(model.weights(mf))
+##     if (!is.null(w) &amp;&amp; !is.numeric(w)) 
+##         stop("'weights' must be a numeric vector")
+##     offset &lt;- model.offset(mf)
+##     mlm &lt;- is.matrix(y)
+##     ny &lt;- if (mlm) 
+##         nrow(y)
+##     else length(y)
+##     if (!is.null(offset)) {
+##         if (!mlm) 
+##             offset &lt;- as.vector(offset)
+##         if (NROW(offset) != ny) 
+##             stop(gettextf("number of offsets is %d, should equal %d (number of observations)", 
+##                 NROW(offset), ny), domain = NA)
+##     }
+##     if (is.empty.model(mt)) {
+##         x &lt;- NULL
+##         z &lt;- list(coefficients = if (mlm) matrix(NA_real_, 0, 
+##             ncol(y)) else numeric(), residuals = y, fitted.values = 0 * 
+##             y, weights = w, rank = 0L, df.residual = if (!is.null(w)) sum(w != 
+##             0) else ny)
+##         if (!is.null(offset)) {
+##             z$fitted.values &lt;- offset
+##             z$residuals &lt;- y - offset
+##         }
+##     }
+##     else {
+##         x &lt;- model.matrix(mt, mf, contrasts)
+##         z &lt;- if (is.null(w)) 
+##             lm.fit(x, y, offset = offset, singular.ok = singular.ok, 
+##                 ...)
+##         else lm.wfit(x, y, w, offset = offset, singular.ok = singular.ok, 
+##             ...)
+##     }
+##     class(z) &lt;- c(if (mlm) "mlm", "lm")
+##     z$na.action &lt;- attr(mf, "na.action")
+##     z$offset &lt;- offset
+##     z$contrasts &lt;- attr(x, "contrasts")
+##     z$xlevels &lt;- .getXlevels(mt, mf)
+##     z$call &lt;- cl
+##     z$terms &lt;- mt
+##     if (model) 
+##         z$model &lt;- mf
+##     if (ret.x) 
+##         z$x &lt;- x
+##     if (ret.y) 
+##         z$y &lt;- y
+##     if (!qr) 
+##         z$qr &lt;- NULL
+##     z
+## }
+## &lt;bytecode: 0x000001b8c64670f8&gt;
+## &lt;environment: namespace:stats&gt;
+```
+
+---
+
+## Less Helpful Examples
+
+
+```r
+list
+```
+
+```
+## function (...)  .Primitive("list")
+```
+
+```r
+`[`
+```
+
+```
+## .Primitive("[")
+```
+
+```r
+sum
+```
+
+```
+## function (..., na.rm = FALSE)  .Primitive("sum")
+```
+
+```r
+`+`
+```
+
+```
+## function (e1, e2)  .Primitive("+")
+```
+
+---
+# Acknowledgments
+
+Above materials are derived in part from the following sources:
+  
+* Colin Rundell's slides. 
+* Hadley Wickham - [Advanced R](http://adv-r.had.co.nz/)
+* [R Language Definition](http://stat.ethz.ch/R-manual/R-devel/doc/manual/R-lang.html)
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create();
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

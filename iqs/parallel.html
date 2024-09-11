@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introduction to parallel computing</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Jyotishka Datta" />
+    <meta name="date" content="2024-09-10" />
+    <script src="parallel_files/header-attrs-2.25/header-attrs.js"></script>
+    <link href="parallel_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="parallel_files/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Introduction to parallel computing
+]
+.author[
+### Jyotishka Datta
+]
+.date[
+### 2024-09-10
+]
+
+---
+
+class: center, middle, inverse
+count: false
+
+# Parallel 
+
+---
+## A gentle start to parallel computing 
+
+- Parallel processing breaks up your task, splits it among multiple processors, and puts the components back together.
+- Useful and easy if you have a task that can be split up, especially without the different parts needing to "talk to" each other.
+- On your typical computer, implementing parallel processing in R might speed up your program by a factor of 2 to 4.
+- If you have access to clusters on the web, many many "cores".
+
+---
+## How do I know if I can apply these ideas? 
+
+- Parallel processing works best when you have a task that has to be completed many times, but each repeat is independent.
+- For instance, if you are repreating a simulation, and in each case are drawing new parameters from a distribution, that is an easily parallelizable task.
+- A good rule of thumb is that if you can wrap your task in an apply function or one of its variants, it's a good option for parallelization. 
+- In fact most implementations of parallel processing in R are versions of apply.
+
+
+---
+## What happens?
+
+- When you run a task in parallel, your computer "dispatches" each task to a CPU core. 
+- This dispatching adds computational overhead. 
+- So, it's usually best to try to minimize the number of dispatches. 
+- In most cases you are going to have a small number of computing cores relative to your tasks. A powerful laptop or desktop will have 2, 4, or 8 cores, and even the most powerful Amazon virtual machine has 88.
+
+---
+## Introduction to doParallel
+
+- We will first write a super simple R code to explain the mechanism of parallel processing using `doParallel`. 
+
+- We use `Sys.sleep()` function that puts the system to sleep for a specified time but run it parallely. If we're doing this in parallel with more than or equal to 2 clusters the system should take around 1 second, not 2. 
+
+
+```r
+n = as.numeric(Sys.getenv("NUMBER_OF_PROCESSORS")) # on Windows
+require(doParallel)
+cl &lt;- makeCluster(n)
+registerDoParallel(cl)
+ptm &lt;- proc.time()
+foreach(i=1:2) %dopar% {Sys.sleep(1)}
+proc.time()-ptm
+```
+
+---
+## Output of the snippet 
+
+- Here is the output! (The list has four `NULL` values because the function is not returning anything, it's just waiting for 1 second at each processor.)
+
+
+```r
+n = as.numeric(Sys.getenv("NUMBER_OF_PROCESSORS")) # on Windows
+require(doParallel)
+cl &lt;- makeCluster(n)
+registerDoParallel(cl)
+ptm &lt;- proc.time()
+foreach(i=1:2) %dopar% {Sys.sleep(1)}
+```
+
+```
+## [[1]]
+## NULL
+## 
+## [[2]]
+## NULL
+```
+
+```r
+proc.time()-ptm
+```
+
+```
+##    user  system elapsed 
+##    0.11    0.00    1.27
+```
+
+
+---
+## Sequential counterpart 
+
+- This should take 2 seconds as no parallelism is being done. 
+
+
+```r
+z=vector('list',2)
+z=1:2
+#Four pauses of one second each.
+system.time(lapply(z, function(x) Sys.sleep(1)))
+```
+
+```
+##    user  system elapsed 
+##    0.02    0.00    2.04
+```
+
+---
+## Hello, world !
+
+- This is our "Hello, world" program for parallel computing. 
+- It tests that everything is installed and set up properly, **but don't expect it to run faster than a sequential for loop, because it won't**! 
+-  With small tasks, the overhead of scheduling the task and returning the result
+can be greater than the time to execute the task itself, resulting in poor performance. 
+
+
+---
+## We will see a non-trivial example 
+
+- Non-trivial examples need sophisticated Statistical methods, and I haven't covered these yet. So don't worry at all if you don't understand any of it. I just want to show you an example of the advantage of using parallel processing. 
+
+- How long does it take to do 10,000 Bootstrap iterations using 2 cores?
+
+
+---
+## Bootstrapping GLM 
+
+
+```r
+x &lt;- iris[which(iris[,5] != "setosa"), c(1,5)]
+str(x)
+```
+
+```
+## 'data.frame':	100 obs. of  2 variables:
+##  $ Sepal.Length: num  7 6.4 6.9 5.5 6.5 5.7 6.3 4.9 6.6 5.2 ...
+##  $ Species     : Factor w/ 3 levels "setosa","versicolor",..: 2 2 2 2 2 2 2 2 2 2 ...
+```
+
+- Logistic Regression: predict species using sepal.length.
+- Want the distribution of parameter estimates.
+- Fit the model repeatedly (like 10k times) for observations randomly sampled with replacements.
+- Gives us Bootstrap distribution. 
+- Cover Bootstrap in greater details towards the end. 
+
+---
+## Bootstrap using parallel 
+
+
+```r
+x &lt;- iris[which(iris[,5] != "setosa"), c(1,5)]
+trials &lt;- 10000
+ptime &lt;- system.time({
+r &lt;- foreach(icount(trials), .combine=cbind) %dopar% {
+  ind &lt;- sample(100, 100, replace=TRUE)
+  result1 &lt;- glm(x[ind,2]~x[ind,1], family=binomial(logit))
+  coefficients(result1)
+}
+})
+ptime
+```
+
+```
+##    user  system elapsed 
+##    7.46    1.19   11.59
+```
+
+
+---
+## Sequential counter-part 
+
+
+```r
+stime &lt;- system.time({
+r &lt;- foreach(icount(trials), .combine=cbind) %do% {
+  ind &lt;- sample(100, 100, replace=TRUE)
+  result1 &lt;- glm(x[ind,2]~x[ind,1], family=binomial(logit))
+  coefficients(result1)
+}
+})
+stime
+```
+
+```
+##    user  system elapsed 
+##   49.83    0.42   50.47
+```
+
+
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create();
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

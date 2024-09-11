@@ -21,12 +21,12 @@ local({r <- getOption("repos"); r["CRAN"] <- "http://R.research.att.com"; option
 
 # Bootstrap using R 
 
----
-## Bootstrap vs. CV 
+<!-- --- -->
+<!-- ## Bootstrap vs. CV  -->
 
--  Cross-validation: provides estimates of the (test) error
+<!-- -  Cross-validation: provides estimates of the (test) error -->
 
-- The Bootstrap: provides the (standard) error of estimates
+<!-- - The Bootstrap: provides the (standard) error of estimates -->
 
 ---
 ## Bootstrap 
