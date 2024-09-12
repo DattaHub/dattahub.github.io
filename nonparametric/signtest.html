@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Sign test</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Jyotishka Datta" />
+    <script src="libs/header-attrs-2.19/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Sign test
+]
+.subtitle[
+## Formula and Codes
+]
+.author[
+### Jyotishka Datta
+]
+
+---
+
+class: inverse, center, middle
+
+## Nonparametric tests
+
+"... which is what you do when you don't believe the assumptions for the classical tests we have learned so far." 
+
+[Charlie Geyer]
+
+
+---
+## Nonparametric tests 
+
+-   What happens when we have a non-Gaussian sample?  
+-   **Remember**: The sampling distribution of the mean (or the difference between means for the independent samples t-test) should be approximately normally distributed. 
+-   This assumption is not about the raw data being normally distributed, but rather about the means being so. 
+-  Given the Central Limit Theorem, this assumption can be relaxed when the sample size is large.
+
+
+---
+## Example: Bimodal distributions
+
+.pull-left[
+
+- Generate samples: 60% from N(3, 1) and 40% from N(7, 1)
+
+
+```r
+set.seed(123) # Set seed for reproducibility
+n &lt;- 1000  # number of samples
+samples &lt;- c(rnorm(0.6 * n, 3,1), 
+             rnorm(0.4 * n, 7,1))
+```
+]
+
+
+.pull-right[
+
+```r
+hist(samples)
+```
+
+![](signtest_files/figure-html/unnamed-chunk-2-1.png)&lt;!-- --&gt;
+]
+
+---
+## Sign test 
+
+- **Idea**: median divides any sample distribution into two equal halves. 
+
+-  If the true median is `\(\mu_0\)`, then approximately half the samples would exceed `\(\mu_0\)` and half will fall below it. 
+
+- This is true irrespective of the distribution of your raw data or your sampling distribution. 
+
+
+&lt;img src="signtest_files/figure-html/unnamed-chunk-3-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+## Mean &gt; Median 
+
+- If you check what proportion of observations fall below the median or mean, you will roughly see that median divides into two equal halves but mean does not. 
+
+
+```r
+samples &lt;- c(rnorm(0.6 * n, 3,1), 
+             rnorm(0.4 * n, 7,1))
+(mean((samples &lt;= median(samples))))
+```
+
+```
+## [1] 0.5
+```
+
+```r
+(mean((samples &lt;= mean(samples))))
+```
+
+```
+## [1] 0.577
+```
+---
+## Right skewed 
+
+- Similar phenomenon for samples from a right-skewed distribution, e.g. exponential distribution with `\(\lambda = 5\)`. 
+
+
+```r
+samples &lt;- rexp(1000, rate = 5)
+(mean((samples &lt;= median(samples))))
+```
+
+```
+## [1] 0.5
+```
+
+```r
+(mean((samples &lt;= mean(samples))))
+```
+
+```
+## [1] 0.642
+```
+
+&lt;img src="signtest_files/figure-html/unnamed-chunk-6-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+## Recap: Binomial Distribution
+
+-  Represents a sequence of independent coin tossing experiment. 
+-  Suppose a coin with probability `\(p\)`; `\(0&lt;p &lt;1\)` for heads in a single trial is tossed independently a pre-specified `\(n\)` times, `\(n \geq 1\)`. 
+-  Let `\(X\)` be the number of times in the `\(n\)` tosses that a head is obtained. Then the pmf of `\(X\)` is:
+
+$$
+P(X = x) = {n \choose x} p^x (1-p)^{n-x}, x = 0,1,\ldots, n
+$$
+
+-  Binomial is sum of `\(n\)` independent Bernoulli trials. 
+
+- If `\(X \sim \text{Bin}(n,p)\)`. Mean `\(E(X) = np\)`, Variance: `\(V(X) = np(1-p)\)`. 
+
+---
+## Sign-test 
+
+-   **Data**: `\(x_1, \ldots, x_n \stackrel{IID}{\sim} F\)` with median `\(M\)`.
+
+-   **Null hypothesis:** `\(M = \mu_0\)` and **Alternative:** `\(M \ne \mu_0\)` or `\(M &gt; \mu_0\)` or `\(M &lt; \mu_0\)`.
+
+-   Test statistic: `\(S\)` = the number of observations that exceed `\(\mu_0\)`.
+
+-   Strategy: Reject the null if `\(S\)` is too big or too small (depending on the alternative).
+
+-   If `\(H_0\)`: `\(M = \mu_0\)` is true we would expect 50% of the observations to be above `\(\mu_0\)`, and 50% of the observations to be below `\(\mu_0\)`.
+
+-   Observe: `\(S = \sum_{i=1}^{n} 1(X_i &gt; \mu_0)\)`, and `\(P(X_i &gt; \mu_0 \mid H_0) = 1/2\)` for each `\(i\)`. 
+
+-  Question: What is the distribution of each `\(X_i\)`, and `\(S\)`?                         
+---
+## Sign test 
+
+- Binomial is sum of `\(n\)` independent Bernoulli trials. 
+-  `\(X_i \sim \text{Bernoulli}(p)\)` for `\(i = 1, \ldots, n\)`, then `\(X = \sum_{i=1}^{n} X_i \sim \text{Bin}(n, p)\)`.
+
+&gt;- The sign-test statistic `\(S\)` has a binomial distribution
+
+&gt;- `\(S \sim \text{Bin}(n,p)\)`, where `\(p\)`  = the probability that an observation is greater than `\(\mu_0\)`. 
+
+--
+
+-  In particular, if `\(H_0\)` is true then `\(S\)` will have a binomial distribution: `\(S \sim \text{Bin}(n, 1/2)\)`.
+
+-  If `\(X \sim \text{Bin}(n,p)\)`. Mean `\(E(X) = np\)`, Variance: `\(V(X) = np(1-p)\)`. 
+
+- What are the mean and variance of `\(S\)` under `\(H_0\)`? 
+
+--
+
+-  Under `\(H_0: p = 1/2\)`, `\(E(S) = \frac{n}{2}\)` and `\(V(S) = \frac{n}{4}\)`. 
+-  Intuitively, if `\(S\)` is too far away from `\(n/2\)`, `\(H_0\)` must be rejected. 
+---
+## Sign test 
+
+-   Hypothesized median = `\(\mu_0\)`.
+-   Test statistics: `\(S\)` = number of observations greater than `\(\mu_0\)`. 
+-   Observed value of `\(S\)` = `\(S_{obs}\)`.
+-   Compute the P-value:
+
+$$
+`\begin{equation}
+	\text{P-value} = \begin{cases}
+	P(S \ge S_{obs}) \; \text{ if } H_A: \mu &gt; \mu_0 \text{ or } \mu &lt; \mu_0\\
+	2 P(S \ge S_{obs}) \; \text{ if } H_A: \mu \neq \mu_0
+	\end{cases}
+\end{equation}`
+$$
+
+-   Under the null: `\(H_0: \mu = \mu_0\)`: `\(S \sim \text{Bin}(n, 1/2)\)`.
+-   We can use exact binomial probability calculations using CDF of a `\(\text{Bin}(n, 1/2)\)` distribution, i.e. a `pbinom` function. 
+-   We can use R, there is `binom.test` function. 
+
+---
+## Cholesterol data
+
+
+```r
+cholesterol &lt;- read.csv("cholesterol.csv")
+str(cholesterol)
+```
+
+```
+## 'data.frame':	10 obs. of  4 variables:
+##  $ Case     : int  1 2 3 4 5 6 7 8 9 10
+##  $ Initial  : int  240 237 264 233 236 234 264 241 261 256
+##  $ Final    : int  228 222 262 224 240 237 264 219 252 254
+##  $ Reduction: int  12 15 2 9 -4 -3 0 22 9 2
+```
+
+```r
+(S &lt;- sum(cholesterol$Reduction&gt;0)) ## test stat
+```
+
+```
+## [1] 7
+```
+-  The test statistics is `\(S =\)` 7. 
+
+-  We need to find out what is the probability that a `\(Bin(10, 0.5)\)` random variable takes a value higher than 7. s
+
+---
+## P-value 
+
+- Once again, we use the `pbinom` for calculating the tail probabilities. 
+
+
+```r
+S &lt;- sum(cholesterol$Reduction&gt;=0)
+n &lt;- length(cholesterol$Reduction)
+
+(pval &lt;- (1-pbinom(S-1, size = n, prob= 0.5)))
+```
+
+```
+## [1] 0.0546875
+```
+
+- This is larger than our usual 5% threshold. 
+
+---
+## R function 
+
+- As we showed in class, `R` also has a function `binom.test()` 
+
+
+```r
+S &lt;- sum(cholesterol$Reduction&gt;=0)
+n &lt;- length(cholesterol$Reduction)
+binom.test(S, n, alternative = "greater")
+```
+
+```
+## 
+## 	Exact binomial test
+## 
+## data:  S and n
+## number of successes = 8, number of trials = 10, p-value = 0.05469
+## alternative hypothesis: true probability of success is greater than 0.5
+## 95 percent confidence interval:
+##  0.4930987 1.0000000
+## sample estimates:
+## probability of success 
+##                    0.8
+```
+
+---
+## CLT 
+
+-  We can use CLT to obtain a large-sample approximation. 
+
+-  There is a caveat: CLT kicks in after a certain sample size, so if your sample size is too small, then this approximation could be off. 
+
+![DeMoivre-Laplace CLT](clt-1.png)
+
+---
+## CLT for sign test 
+
+-  The demoivre-Laplace CLT tells us that if `\(X \sim \text{Bin}(n, p)\)`, then we can approximate the `\(\le\)`-type probability `\(P(X \le k)\)` as:
+$$
+`\begin{align}
+P(X \le k) &amp; = P \left( \frac{X- np}{\sqrt{np(1-p)}} \le \frac{k- np}{\sqrt{np(1-p)}} \right) \\
+ &amp; \approx \Phi\left(\frac{k- np}{\sqrt{np(1-p)}} \right)
+\end{align}`
+$$
+
+
+-  In DeMoivre-Laplace CLT, we are using a continuous distribution to approximate a discrete distribution taking only integer values.
+
+-  The quality of the approximation improves, sometimes dramatically, if we fill up the gaps between the successive integers. 
+
+---
+## CLT for sign test 
+
+-  To approximate `\(P(X \le k)\)` we expand the domain of the event to `\(k + 1/2\)` and approximate `\(P(X \le k)\)` as:
+$$
+P(X \le k) \approx \Phi\left(\frac{k + 1/2- np}{\sqrt{np(1-p)}} \right)
+$$
+
+
+-  This adjusted normal approximation is called **a normal approximation with a continuity correction**. 
+
+---
+## CLT for sign test 
+
+-  Sign test uses a test-statistics `\(S \sim \text{Bin}(n, 1/2)\)` under the null hypothesis. 
+
+-  Suppose the alternative is one-sided: `\(H_A: \mu &gt; \mu_0\)`. 
+
+-  If `\(n \ge 12\)`, the P-value can be approximated as: 
+
+$$
+`\begin{equation}
+p = 1 - \Phi(\frac{S_{obs}-0.5 - 0.5n}{\sqrt{0.25n}}) 
+\end{equation}`
+$$
+
+
+-  Therefor for `\(n \ge 12\)`, the rejection rule would be:
+
+-  Reject `\(H_0\)` if `\(S_{obs} \ge 0.5n + 0.5 + z_{\alpha}\times \sqrt{0.25 n}\)`, where `\(z_{\alpha}\)` is the `\(\alpha^{th}\)` percentile of `\(N(0,1)\)`, i.e. 
+
+$$
+`\begin{equation}
+P(Z \ge z_{\alpha}) = \alpha, \; z_{0.025} = 1.96, \; z_{0.05} = 1.64. 
+\end{equation}`
+$$
+---
+## Try for cholesterol data 
+
+Now if we use CLT to calculate the P-value:
+
+First, p-value = `\(P_{S \sim \text{Bin}(10,1/2)} (S \ge 8)\)`.
+
+Applying CLT formula:
+$$
+`\begin{align}
+p_{CLT} &amp; = 1 - \Phi\left(\frac{S_{obs}-0.5 - 0.5n}{\sqrt{0.25 n}} \right) \\
+&amp; = 1 - \Phi\left(\frac{8-0.5 - 5}{\sqrt{0.25\times 10}} \right) = 1 - \Phi(1.58) = 0.0569.
+\end{align}`
+$$
+
+-  Compare this approximate P-value with the original (p = 0.0547). 
+
+-  Quite close even though `\(n\)` is only 10. 
+
+
+```r
+Z &lt;- (S-0.5-0.5*n)/(sqrt(0.25*n))
+(p &lt;- 1 - pnorm(Z))
+```
+
+```
+## [1] 0.05692315
+```
+---
+## Simulation based p-value 
+
+- We can also use simulation to calculate the P-value.
+
+- We can simulate a **large** number of samples from the null distribution of the test statistics and see what proportion of observations falls beyond the observed test statistics. 
+
+- The null distribution of `\(S\)` is `\(\text{Binomial}(n = 10, 1/2)\)`. 
+
+
+```r
+set.seed(12345)
+null.samples &lt;- rbinom(10000, size = 10, 1/2)
+(pval.mc &lt;- mean((null.samples&gt;=S)))
+```
+
+```
+## [1] 0.0524
+```
+- You can see that it's quite close to the original P-value. 
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
