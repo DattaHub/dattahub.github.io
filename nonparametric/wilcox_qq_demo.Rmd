@@ -1,0 +1,273 @@
+---
+title: "Wilcoxon and Quantiles"
+author: "Jyotishka Datta"
+date: "September 7, 2018 (updated: `r Sys.Date()`)"
+output:     
+  ioslides_presentation:
+    smaller: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+## Wilcoxon signed-rank test 
+
+-  The main `R` function is called `wilcox.test`. 
+
+>  Performs one- and two-sample Wilcoxon tests on vectors of data; the latter is also known as `Mann-Whitney` test.
+
+-  Look at the help page for `wilcox.test` first.
+
+```{r, eval = FALSE, echo = T}
+?wilcox.test
+```
+
+
+## Arguments in `wilcox.test`
+
+-  `x` and `y` input for the data values. If you have only `x` or if you have both `x` and `y` along with `paired = T` it will perform the one-sample Wilcoxon signed rank test. 
+
+-   For paired data, it will calculate the difference, i.e. $y = x - y$ before running the test. 
+
+-   Do not use `paired = F` for one-sample test. It will perform a two sample test, which we will cover later. 
+
+-  The other useful arguments are `alternative`, `exact`, and `correct`. 
+
+- `alternative` indicates whether you want to do a two-sided or one-sided test. (Usually clear from the problem.)
+
+-  `exact`: whether you want exact p-values or CLT based (use `exact = F` for CLT.)
+
+-  `correct`: to go with `exact = F` (do you want continuity correction. Always do `correct = T` for `exact = F`)
+
+## Example 1 (from slides: hypnotic susceptibility)
+
+-  Cooper et al. (1967). Objective: to test the hypothesis of no change in hypnotic susceptibility versus the alternative that hypnotic susceptibility can be increased with training. 
+
+-  Hypnotic susceptibility is a measurement of how easily a person can be hypnotized. (paired data).
+
+-  We want to test: $H_0: \mu_{after-before} = 0$ vs. $H_1: \mu_{after-before} > 0$ (one-sided.)
+
+```{r}
+before = c(10.5, 19.5, 7.5, 4.0, 4.5, 2.0)
+after = c(18.5, 24.5, 11, 2.5, 5.5, 3.5)
+
+(D = after - before)
+```
+
+
+
+## Example 1 (from slides: hypnotic susceptibility)
+
+-  We use `alternative = "greater" because we want to test if "after" is more than "before". 
+
+-  The warning message says that the p-value you see is a CLT-based because of the ties. 
+
+```{r}
+wilcox.test(D, alternative="greater")
+```
+## Another example 
+
+-  This is from the 'Intro to Nonparametrics' notes. 
+
+-  No warning message because no ties here. 
+
+```{r}
+x = c(3.7, -4.7, 6.5, -6.9, -7.8, 8.7, 9.1, 10.1, 10.8, 13.6, 14.4, 15.6, 20.2, 22.4, 23.5)
+
+wilcox.test(x, exact = TRUE)
+```
+
+## Another example (contd.)
+
+-  Now, let's do this with `exact = FALSE`
+
+```{r}
+x = c(3.7, -4.7, 6.5, -6.9, -7.8, 8.7, 9.1, 10.1, 10.8, 13.6, 14.4, 15.6, 20.2, 22.4, 23.5)
+
+wilcox.test(x, exact = FALSE, correct = TRUE)
+```
+
+## Using CLT (manually)
+
+- We can use the `pnorm` along with the mean and variance formulae:
+
+```{r}
+V = 109 ## from R output
+n = length(x)
+
+mu = n*(n+1)/4
+sig = sqrt(n*(n+1)*(2*n+1)/24)
+
+Z = (V-mu-0.5)/sig ## continuity correction
+
+(pval = 2*(1-pnorm(Z)))
+```
+
+
+## Wilcoxon Test with Ties 
+
+-  Will show you warning message ! 
+
+```{r}
+wilcox.test(c(-2, -2, 2, 2, 5, 5, 5), mu = 3)
+```
+
+
+## Suppress Warnings !
+
+-  We can suppress this warning message, but it's not recommended in practice
+
+```{r}
+suppressWarnings(wilcox.test(c(-2,-2,2,2,5,5,5),mu = 3))
+```
+
+
+## Another Example 
+
+```{r, fig.height = 3}
+x2 <- c(5.6, 6.1, 6.3, 6.4, 6.5, 6.6, 7.0, 7.5, 7.9, 8.0,
+        8.0, 8.1, 8.1, 8.2, 8.4, 8.5, 8.7, 9.4, 14.3, 26.0)
+## Plot the density
+plot(density(x2), main = "Water Content")
+```
+
+## Wilcoxon Signed Rank Test 
+
+```{R}
+suppressWarnings(wilcox.test(x2, mu=9, conf.int=TRUE))
+```
+
+
+## Sign Test 
+
+```{r}
+binom.test(sum(x2>9),length(x2),alternative = "two.sided")
+```
+
+## Parametric t-test 
+
+```{R}
+t.test(x2,alternative = "two.sided",mu=9)
+```
+
+## Make a nice looking plot 
+
+```{R, message = FALSE, Warnings = FALSE}
+library(ggplot2)
+qplot(y=x2, x= 1, geom = "violin")+geom_abline(slope=0,intercept = 9)
+```
+
+# Quantiles 
+
+
+## The ecdf() function in R {.smaller}
+
+```{r, echo = FALSE, results = "asis"}
+static_help <- function(pkg, topic, out, links = tools::findHTMLlinks()) {
+  pkgRdDB = tools:::fetchRdDB(file.path(find.package(pkg), 'help', pkg))
+  force(links)
+  tools::Rd2HTML(pkgRdDB[[topic]], out, package = pkg,
+                 Links = links, no_links = is.null(links))
+}
+tmp <- tempfile()
+static_help("stats", "ecdf", tmp)
+out <- readLines(tmp)
+headfoot <- grep("body", out)
+cat(out[(headfoot[1] + 5):(headfoot[2] - 1)], sep = "\n")
+```
+
+## Convergence
+
+[https://jdatta.shinyapps.io/eCDFdemo/](https://jdatta.shinyapps.io/eCDFdemo/)
+
+
+## Empirical CDF {.smaller}
+
+```{r}
+set.seed(123)
+emp1 <- ecdf(rnorm(20)) # E-CDF of 20 samples from N(0,1)
+emp2 <- ecdf(rnorm(50)) # E-CDF of 20 samples from N(0,1)
+```
+
+```{r, echo = F}
+par(mfrow=c(1,2)) # Two panels
+x <- seq(-3,3,length.out = 100) # grid of values from -3 to 3
+plot(emp1,verticals = TRUE,lwd = 2,main="n = 20")
+lines(x,pnorm(x))
+plot(emp2,verticals = TRUE,lwd = 2,main="n = 50")
+lines(x,pnorm(x))
+```
+
+## Q-Q Plots (One-sample)
+
+```{r}
+set.seed(12) # Reproducibility
+y <- rnorm(100)
+qqnorm(y, ylim=c(-3,3), main = "Normal Q-Q Plot",
+       xlab = "Theoretical Quantiles", ylab = "Sample Quantiles",
+       plot.it = TRUE)
+qqline(y, distribution = qnorm)
+```
+
+## Two samples same 
+
+```{r}
+z <- rnorm(100)
+qqplot(y,z,main = "Two-sample Q-Q Plot",
+       xlab = "Sample 1 Quantiles", ylab = "Sample 2 Quantiles")
+abline(0, 1)
+```
+
+
+## Two samples different
+
+```{R, fig.height = 3.5}
+x = rnorm(10000,0,2); y = rnorm(10000,0,4)
+qqplot(x,y,main = "Two-sample Q-Q Plot",
+       xlab = "Sample 1 Quantiles", ylab = "Sample 2 Quantiles")
+abline(0, 1)
+```
+
+## A Common Mistake 
+
+```{R, fig.height = 3.5}
+x = rnorm(10000,0,2); y = rnorm(10000,0,4)
+qqplot(x,y,main = "Two-sample Q-Q Plot",
+       xlab = "Sample 1 Quantiles", ylab = "Sample 2 Quantiles")
+```
+
+## Histograms 
+
+```{R}
+hist(x,breaks=50,freq=F,col=rgb(1,0,0,0.5),xlim=c(-15,15))
+hist(y,breaks=50,freq=F,col=rgb(0,0,1,0.5),add=T)
+box()
+```
+
+## Or, Boxplots 
+
+```{R}
+boxplot(y,z)
+```
+
+## Even better, test a hypothesis 
+
+```{r}
+ks.test(rnorm(20),pnorm)
+```
+
+## In our case 
+
+```{r}
+ks.test(x,y)
+```
+
+## Next Time 
+
+-  We will dig deeper into these tests ! 
+-  Kolmogorov-Smirnov, Lilliefors, Chi-square GoF etc. 
+-  These are important as they tell you whether your data distribution is Normal, i.e. whether we should use nonparametric methods that do not assume Normality or parametric methods that assume Normality. 
+
+

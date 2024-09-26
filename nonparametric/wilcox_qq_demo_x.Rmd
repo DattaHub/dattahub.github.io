@@ -1,0 +1,468 @@
+---
+title: "Wilcoxon and Quantiles"
+author: "Jyotishka Datta"
+date: "Updated: `r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+  css: mystyle.css
+lib_dir: libs
+nature:
+  highlightStyle: github
+highlightLines: true
+countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+
+## Today 
+
+-  Wilcoxon signed-rank test 
+-  How to handle ties 
+-  A univariate example 
+-  Quantiles 
+-  Q-Q plot (tests for normality)
+
+## Near future:
+
+-  Kolmogorov-Smirnov Test 
+-  Liliefors test for Normality
+-  Chi-square goodness of fit test
+
+---
+## Wilcoxon signed rank test 
+
+- Suppose we have independent and identically distributed data $X_1, X_2, \ldots, X_n$ from some symmetric continuous distribution. That is, our assumptions are: 
+
+    -  independence
+    -  identical distribution
+    -  continuity
+    -  symmetry
+
+- There are no other assumptions. In particular, we do not assume any particular shape for the distribution of the data. Any symmetric continuous distribution whatsoever will do.
+
+---
+## Difference with sign test 
+
+-   Note that the assumptions are exactly the same as for the sign test with the addition of **symmetry**. 
+
+-   Note also that the assumptions are nearly the same as for
+the t-test except that for the t we must strengthen the assumption of symmetry to an assumption of **normality**. 
+
+-  Thus the assumptions that are different for the three tests are:
+
+Test | Assumptions
+------------- | -------------
+sign test     | any continuous distribution
+signed rank test | any symmetric continuous distribution
+t test | any normal distribution
+
+
+-  The other assumptions IID are the same for all three tests. 
+-  Clearly the sign test has the weakest assumptions (assumes the least), the t test has the strongest assumptions (assumes the most), and the Wilcoxon signed rank test is in the middle.
+
+---
+## Symmetry 
+
+-  How limiting is the assumption of symmetry?
+
+-  It's quite limiting. 
+
+-  Numerous data sets clearly show a skewness. 
+
+-  For these skewed distributions, the Wilcoxon test isn't reliable, but the sign test remains valid.
+
+---
+## Idea
+
+-  So, you're trying to test if the median of a dataset is equal to $\theta_0$. 
+
+- Let $Y_i = (X_i - \theta_0)$ and let $R_i$ be the ranks of the $Y_i$'s. 
+
+- Under the null hypothesis (i.e. median is really $\theta_0$) the distribution of the $R_i$'s are known. 
+- And the sign is equally likely to be plus or minus because of the symmetry assumption. 
+
+- The absolute values of the ranks are just $1$ to $n$ for a sample of size $n$. 
+
+
+---
+## Wilcoxon Signed Rank Test 
+
+-  For Wilcoxon’s signed-rank test we would assign ranks to the absolute values of $(x_1-\theta_0, \ldots, x_n - \theta_0)$. 
+
+- A rank of 1 to the value of $(x_i - \theta_0)$ which is smallest in absolute value.
+
+- A rank of $n$ to the value of $(x_i - \theta_0)$ which is largest in absolute value.
+
+-  $SR_+$ = the sum of the ranks associated with positive values of $(x_i - \theta_0)$ , $i = 1, \ldots, n$
+
+-  $SR_-$ = the sum of the ranks associated with negative values of $(x_i - \theta_0)$ , $i = 1, \ldots, n$.
+
+- The distribution of $SR_+$ is not a brand name distribution but can be calculated easily.
+
+-  It is officially called the null distribution of the **Wilcoxon signed rank test statistic**
+and is calculated by the R function `psignrank`.
+
+---
+## Recap Wilcoxon Signed Rank Test
+
+-  Note: 
+
+$SR_+ + SR_- = 1 + 2 + \ldots + n = \frac{n(n+1)}{2}$
+
+(if you know one, then you know the other)
+
+- If $H_0$ is true then $SR_+ \approx SR_- = n(n + 1)/4$.
+
+- If $H_0$ is not true then either $SR_+$ will be small ($SR_-$ large) or $SR_+$ will be large ($SR_-$ small).
+
+- The sampling distribution (and hence the P-values) can be calculated under the null $H_0$.
+
+-  We can look up the P-values from a table (tedious) or use the R function `wilcox.test()`
+
+---
+## Recap Wilcoxon Signed Rank Test
+
+- For $n \ge 12$, use Normal approximation: 
+
+-  Mean = $n(n+1)/4$ and standard deviation = $\sqrt{n(n+1)(2n+1)/24}$.
+
+- R function `pnorm`, `qnorm` etc.
+
+- Normal tables are also available widely and easy to look up.
+
+---
+
+## Handling ties 
+
+-  Real data can have ties for practical reasons, such as rounding or measurement limitations. 
+
+- We use mid-ranks for tied observations. i.e. let this be our sample: 
+
+1, 1, 5, 5, 8, 8, 8 
+
+-  Let our hypothesized median is $H_0 : \theta_0 = 3$.
+
+-  Then the differences $d_i$ are 
+
+−2, −2, 2, 2, 5, 5, 5, 
+
+i.e. the first four observations are tied in their absolute values, and the last three. 
+
+-  The mid-rank of ranks 1 to 4 is 2.5, the mid-rank of 5,6,7 is 6, 
+
+- the ranks corresponding to $\lvert d \rvert_{(i)}$ are therefore 2.5, 2.5, 2.5, 2.5, 6, 6, 6. 
+
+
+-  **Show R example !**
+
+---
+## Wilcoxon Test with Ties 
+
+-  Will show you warning message ! 
+
+```{r}
+wilcox.test(c(-2, -2, 2, 2, 5, 5, 5), mu = 3)
+```
+
+---
+## Suppress Warnings !
+
+-  We can suppress this warning message, but it's not recommended in practice
+
+```{r}
+suppressWarnings(wilcox.test(c(-2,-2,2,2,5,5,5),mu = 3))
+```
+
+---
+## Cholesterol data 
+
+- Cholesterol measurements from 10 patients before and after a treatment. 
+
+- Your interest is in the `Reduction` column. 
+
+```{r}
+cholesterol <- read.csv("cholesterol.csv")
+wilcox.test(cholesterol$Reduction, mu = 0)
+```
+
+---
+# A univariate example 
+
+We have percentage of water content in a field measured in different locations: 
+
+X = (5.6, 6.1, 6.3, 6.4, 6.5, 6.6, 7.0, 7.5, 7.9, 8.0, 8.0, 8.1, 8.1, 8.2, 8.4, 8.5, 8.7, 9.4, 14.3, 26.0)
+
+
+We test the hypothesis: 
+
+$H_0: \theta_0 = 9$ vs. $H_1: \theta_0 > 9$.
+
+
+---
+
+## Alternative testing methods?
+
+- Sign test (non-parametric)
+- Signed rank test (non-parametric)
+- One-sample $t$-test (parametric, assumes Normality)
+
+---
+## Univariate Example 
+
+```{r, fig.height = 3}
+x2 <- c(5.6, 6.1, 6.3, 6.4, 6.5, 6.6, 7.0, 7.5, 7.9, 8.0,
+        8.0, 8.1, 8.1, 8.2, 8.4, 8.5, 8.7, 9.4, 14.3, 26.0)
+## Plot the density
+plot(density(x2), main = "Water Content")
+```
+
+---
+## Wilcoxon Signed Rank Test 
+
+```{R}
+suppressWarnings(wilcox.test(x2, mu=9, conf.int=TRUE))
+```
+
+**P-value < 0.05, so we reject the null hypothesis. 
+
+---
+## CLT approximation 
+
+- For $n \ge 12$, use Normal approximation: with mean = $n(n+1)/4$ and standard deviation = $\sqrt{n(n+1)(2n+1)/24}$.
+
+```{r}
+W <- wilcox.test(x2, mu = 9)
+V <- drop(W$statistic)
+n = length(x2)
+m = n*(n + 1)/4
+s = sqrt(n*(n+1)*(2*n+1)/24)
+
+(pval <- 2*(1-pnorm(abs((V-m)/s))))
+```
+- Q: why did we use `abs()`
+---
+## Sign Test 
+
+```{r}
+binom.test(sum(x2>9),length(x2),alternative = "two.sided")
+```
+
+**Again, P-value < 0.05, so we reject the null hypothesis. 
+
+---
+## Parametric t-test 
+
+```{R}
+t.test(x2,alternative = "two.sided", mu=9)
+```
+
+**But here, P-value > 0.05, so we fail to reject the null hypothesis. 
+
+**Why? What went wrong?**
+
+---
+## Are the data normal?
+
+```{r, echo = F}
+x2 <- c(5.6, 6.1, 6.3, 6.4, 6.5, 6.6, 7.0, 7.5, 7.9, 8.0, 8.0, 8.1, 8.1, 8.2, 8.4, 8.5, 8.7, 9.4, 14.3, 26.0)
+x = seq(0, 30, length.out = 1000)
+plot(x,dnorm(x, mean = mean(x2), sd = sd(x2)), type = "l", ylim = c(0,0.3))
+## Plot the density
+lines(density(x2), main = "Water Content", col = "blue")
+legend(15, 0.25, c("Data distribution", "Normal Curve"), col = c("blue", "black"), lty = c(1,1))
+
+```
+
+---
+## Normality 
+
+You can always do these visual checks, but it's subjective !
+
+What appears "normal" to you, might not be "normal" to somebody else. 
+
+We need to "quantify" the deviation from normal distribution. 
+
+
+---
+
+```{r, echo = F, fig.retina = 1}
+knitr::include_graphics("art/compare_tests.png")
+```
+
+---
+```{r, echo = F, fig.retina = 1}
+knitr::include_graphics("art/quantiles_1.png")
+```
+
+---
+
+```{r, echo = F}
+knitr::include_graphics("art/quantiles_2.png")
+```
+
+---
+
+```{r, echo = F}
+knitr::include_graphics("art/quantiles_3.png")
+```
+
+---
+## Aside: `ggplot` makes nicer looking plots
+
+```{R, message = FALSE, Warnings = FALSE, fig.asp = 0.6}
+library(ggplot2)
+ggplot(y=x2, x= 1) + geom_violin(aes(y = x2, x = 1))+
+  geom_abline(slope=0,intercept = 9)+
+  theme_bw()
+```
+
+---
+class: middle
+count: false
+
+# Quantiles 
+
+---
+
+
+---
+## The ecdf() function in R 
+
+```{r, echo = FALSE, results = "asis"}
+static_help <- function(pkg, topic, out, links = tools::findHTMLlinks()) {
+  pkgRdDB = tools:::fetchRdDB(file.path(find.package(pkg), 'help', pkg))
+  force(links)
+  tools::Rd2HTML(pkgRdDB[[topic]], out, package = pkg,
+                 Links = links, no_links = is.null(links))
+}
+tmp <- tempfile()
+static_help("stats", "ecdf", tmp)
+out <- readLines(tmp)
+headfoot <- grep("body", out)
+cat(out[(headfoot[1] + 5):(headfoot[2] - 1)], sep = "\n")
+```
+
+
+---
+class:middle
+
+# Convergence
+
+[https://jdatta.shinyapps.io/eCDFdemo/](https://jdatta.shinyapps.io/eCDFdemo/)
+
+---
+## Empirical CDF 
+
+.pull-left[
+```{r, eval = F}
+set.seed(123)
+emp1 <- ecdf(rnorm(20)) 
+emp2 <- ecdf(rnorm(50)) 
+
+par(mfrow=c(1,2)) # Two panels
+
+x <- seq(-3,3,length.out = 100)
+
+plot(emp1,main="n = 20")
+lines(x,pnorm(x))
+plot(emp2,main="n = 50")
+lines(x,pnorm(x))
+```
+]
+
+.pull-right[
+```{r, echo = F}
+emp1 <- ecdf(rnorm(20)) # E-CDF of 20 samples from N(0,1)
+emp2 <- ecdf(rnorm(50)) # E-CDF of 20 samples from N(0,1)
+par(mfrow=c(1,2)) # Two panels
+x <- seq(-3,3,length.out = 100) # grid of values from -3 to 3
+plot(emp1,verticals = TRUE,lwd = 2,main="n = 20")
+lines(x,pnorm(x))
+plot(emp2,verticals = TRUE,lwd = 2,main="n = 50")
+lines(x,pnorm(x))
+```
+]
+
+---
+## Q-Q Plots (One-sample)
+
+```{r, fig.asp = 0.6}
+set.seed(12) # Reproducibility
+y <- rnorm(100)
+qqnorm(y, ylim=c(-3,3), main = "Normal Q-Q Plot",
+       xlab = "Theoretical Quantiles", ylab = "Sample Quantiles")
+qqline(y, distribution = qnorm)
+```
+
+---
+## Two samples same 
+
+```{r, fig.asp = 0.6}
+z <- rnorm(100)
+qqplot(y,z,main = "Two-sample Q-Q Plot",
+       xlab = "Sample 1 Quantiles", ylab = "Sample 2 Quantiles")
+abline(0, 1)
+```
+
+---
+## Two samples different
+
+```{R, fig.height = 3.5}
+x = rnorm(10000,0,2); y = rnorm(10000,0,4)
+qqplot(x,y,main = "Two-sample Q-Q Plot",
+       xlab = "Sample 1 Quantiles", ylab = "Sample 2 Quantiles")
+abline(0, 1)
+```
+
+
+---
+## A Common Mistake 
+
+```{R, fig.height = 3.5}
+x = rnorm(10000,0,2); y = rnorm(10000,0,4)
+qqplot(x,y,main = "Two-sample Q-Q Plot",
+       xlab = "Sample 1 Quantiles", ylab = "Sample 2 Quantiles")
+```
+
+---
+## Histograms 
+
+```{R}
+hist(x,breaks=50,freq=F,col=rgb(1,0,0,0.5),xlim=c(-15,15))
+hist(y,breaks=50,freq=F,col=rgb(0,0,1,0.5),add=T)
+box()
+```
+
+---
+## Or, Boxplots 
+
+```{R}
+boxplot(y,z)
+```
+
+---
+## Even better, test a hypothesis 
+
+```{r}
+ks.test(rnorm(20),pnorm)
+```
+
+---
+## In our case 
+
+```{r}
+ks.test(x,y)
+```
+
+---
+## Next Time 
+
+-  We will dig deeper into these tests ! 
+-  Kolmogorov-Smirnov, Lilliefors, Chi-square GoF etc. 
+-  These are important as they tell you whether your data distribution is Normal, i.e. whether we should use nonparametric methods that do not assume Normality or parametric methods that assume Normality. 
+
+

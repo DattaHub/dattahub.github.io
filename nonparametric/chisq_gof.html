@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Chi-square tests</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Jyotishka Datta" />
+    <script src="chisq_gof_files/header-attrs-2.25/header-attrs.js"></script>
+    <link href="chisq_gof_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="chisq_gof_files/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Chi-square tests
+]
+.author[
+### Jyotishka Datta
+]
+.date[
+### Updated: 2024-09-26
+]
+
+---
+
+
+
+
+## Goals for today 
+
+
+-  We will first talk about the `\(\chi^2\)` distribution and some of its properties here. 
+
+-  Then we will talk about two different tests or two uses. 
+
+-  The first is for testing hypothesis about the population variance `\(\sigma^2\)`. 
+
+-  The second is our focus today: for testing goodness of fit. 
+
+---
+
+## Chi-sqaure distribution 
+
+- The chi-squared distribution (also chi-square or `\(\chi^2\)`) with `\(k\)` degrees of freedom is the distribution of a sum of the squares of `\(k\)` independent standard normal random variables.
+
+- As usual, R has four helper functions:
+- `dchisq`: for density, `pchisq`: CDF, `qchisq`: quantile and `rchisq`: random numbers. 
+
+---
+## Sample generation 
+
+- We can use `rchisq` to generate samples from the `\(\chi^2\)` distribution. The only parameter we will specify is the `df`: degrees of freedom. 
+
+
+```r
+chisq.sim &lt;- rchisq(1000, df = 5)
+hist(chisq.sim, freq = F)
+curve(dchisq(x,df=5), add = T)
+```
+
+![](chisq_gof_files/figure-html/unnamed-chunk-1-1.png)&lt;!-- --&gt;
+
+---
+## `\(\chi^2_k\)` is sum of squares of `\(k\)` standard normals
+
+
+```r
+chisq.sim = NULL
+for(i in 1:1000){
+  x &lt;- rnorm(5)
+  chisq.sim = c(chisq.sim, sum(x*x))
+}
+hist(chisq.sim, freq = F)
+curve(dchisq(x, df = 5), add = T)
+```
+
+![](chisq_gof_files/figure-html/unnamed-chunk-2-1.png)&lt;!-- --&gt;
+
+
+---
+## Implication
+
+-  This sum of squares of normals has an implication. 
+
+-  First, if `\(Y \sim N(0,1)\)`, `\(Y^2 \sim \chi^2_{1}\)`
+-  Equivalently,  `\(Y \sim N(\mu, \sigma)\)`, `\(((Y-\mu)/\sigma)^2 \sim \chi^2_{1}\)`
+
+-  Second, if `\(Y_1, Y_2, \ldots, Y_n \sim N(0,1)\)`, 
+we can say `\(\sum_{i=1}^{n} Y_i^2 \sim \chi^2_n\)`. 
+
+---
+## Chi-square test for sample variance
+
+- Recall that our unbiased estimator for `\(\sigma^2\)` is:
+$$
+s^2 = \frac{1}{n-1} \sum_{i=1}^{n} (y_i - \bar{y})^2
+$$
+
+-  It turns out that the distribution of `\((n-1)s^2/\sigma^2\)` follows a `\(\chi^2\)` distribution with `\((n-1)\)` degrees of freedom. 
+
+- The proof is easy. 
+
+---
+## Proof 
+
+$$
+`\begin{align}
+Y_i &amp; \sim N(\mu, \sigma^2), \; i = 1, 2, \ldots, n \\
+\Rightarrow &amp; \sum_{i=1}^{n}((Y_i-\mu)/\sigma)^2 \sim \chi^2_{n} \\
+\Rightarrow \frac{1}{\sigma^2}&amp;\left[ \sum_{i=1}^{n}\{(Y_i-\bar{Y})^2 + (\bar{Y}-\mu)^2 \}\right] \sim \chi^2_{n} \\
+\Rightarrow  \frac{1}{\sigma^2} &amp;\left[ (n-1) s^2 + n(\bar{Y}-\mu)^2 \}\right] \sim \chi^2_{n} \\
+\Rightarrow &amp; \frac{(n-1)s^2}{\sigma^2} + \underbrace{\left\{ \frac{(\bar{Y}-\mu)}{\sigma/\sqrt{n}} \right\}^2}_{\chi^2_1} \sim \chi^2_{n} \\
+\Rightarrow &amp; \frac{(n-1)s^2}{\sigma^2} \sim \chi^2_{n-1}
+\end{align}`
+$$
+---
+## We can use for testing 
+
+-  Show with simulated data from Normal distribution with `\(\sigma = 2\)`. 
+
+-  To test generate samples from `\(\chi^2_{n-1}\)`, get candidate `\(s^2\)` values by `\(s^2 \sim \sigma^2/(n-1) \chi^2_{n-1}\)`.
+
+-  Plot generated data and observed `\(\bar{y}\)`. 
+
+
+```r
+set.seed(12345)
+## one sample versus mu=0
+y &lt;- rnorm(20, mean = 0, sd = 2)
+ybar &lt;- mean(y)
+s2 &lt;- var(y)
+n &lt;- length(y)
+mu &lt;- 0
+N &lt;- 100000
+sigma2 &lt;- (n-1)*s2 / rchisq(N, n-1)
+ybars &lt;- rnorm(N, mu, sqrt(sigma2/n))
+hist(ybars)
+abline(v=ybar)
+```
+
+
+---
+## We can use for testing 
+
+
+```r
+set.seed(12345)
+## one sample versus mu=0
+y &lt;- rnorm(20, mean = 0, sd = 2)
+ybar &lt;- mean(y)
+s2 &lt;- var(y)
+n &lt;- length(y)
+mu &lt;- 0
+N &lt;- 100000
+sigma2 &lt;- (n-1)*s2 / rchisq(N, n-1)
+ybars &lt;- rnorm(N, mu, sqrt(sigma2/n))
+hist(ybars)
+abline(v=ybar)
+```
+
+![](chisq_gof_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
+---
+class: inverse, center, middle
+
+## Goodness-of-fit tests
+
+---
+## Goodness of fit 
+
+-  The chi-square goodness of fit tests have a different purpose! 
+
+-  They are used for testing whether a discrete data fits a probability distribution! 
+
+-  But, they stem from the idea that for a frequency (or contingency) table, with number of observations of type `\(i\)` being `\(O_i\)` and expected frequency being `\(E_i\)`, 
+
+- `\(\sum_{i=1}^{k} \frac{(O_i - E_i)^2}{E_i} \sim \chi^2_{k-1}\)`
+
+-  This is an 'asymptotic' result and it follows from a careful application of CLT. First proved by Karl Pearson. 
+
+
+---
+## Goodness of fit tests in R 
+
+- This function is used for both the goodness of fit test and the test of independence, depending upon what kind of data you feed it. 
+
+
+```r
+chisq.test(x, y = NULL, correct = TRUE, p = rep(1/length(x), length(x)), 
+           rescale.p = FALSE)
+```
+
+-  If "x" is a numeric vector, a goodness of fit test will be done (or attempted), treating "x" as a vector of observed frequencies. 
+-  If "x" is a 2-D array, or matrix, then it is assumed to be a contingency table of frequencies, and a test of independence will be done. (we shall learn this later!)
+
+---
+## `chisq.test` arguments 
+
+
+```r
+chisq.test(x, y = NULL, correct = TRUE, p = rep(1/length(x), length(x)), 
+           rescale.p = FALSE)
+```
+
+-  `correct`: continuity correction. 
+-  `p`: a vector of probabilities of the same length of x, default is 1/length(x). 
+-  `rescale.p` : The candidate distribution needs to be a valid probability mass function such that the sum of `\(p_i\)`'s is equal to 1. 
+-   If you don't have the distribution normalized set `rescale.p` to `TRUE`.
+
+
+---
+## Example 1 
+
+Professor A is teaching Stat 101, and the distribution of students in his classroom are as follows: There are 10 freshman in the sample, 15 sophomores, 22 juniors, and 28 seniors. Test the null hypothesis that freshman, sophomores, juniors, and seniors are equally represented among students signed up for Stat 101.
+
+The frequencies are `\(x = (10,15,22,28)\)`, and we want to test if
+
+$$
+`\begin{gather*}
+H_0: \; p_1 = p_2 = p_3 = p_4 = 1/4 \\
+\text{ vs. }  \\
+H_1: \; \text{not all } p_i's \text{ are equal}
+\end{gather*}`
+$$
+
+---
+## R command 
+
+
+```r
+chisq.test(c(10,15,22,28))
+```
+
+```
+## 
+## 	Chi-squared test for given probabilities
+## 
+## data:  c(10, 15, 22, 28)
+## X-squared = 9.96, df = 3, p-value = 0.01891
+```
+
+-  We don't need to specify the p vector, since by default the null is equal frequencies. 
+-  Chi-square statistics= 9.96. P-value = 0.01891 &lt; 0.05, Reject null.
+-  What is the degrees of freedom? 
+
+
+---
+## Example 1 (continued)
+
+Now suppose Professor B thinks that the number of freshman and sophomores enrolled is each half the number of juniors and the number of seniors, i.e. proportions are: `\(p_0 = (1/6, 1/6, 1/3, 1/3)\)`.
+
+$$
+`\begin{gather*}
+H_0: \; p_1 = p_2 = 1/6, p_3 = p_4 = 1/3 \\
+\text{ vs. } \\
+H_1: \; \text{not all } p_i s \text{ are equal to the corresponding } p_{0i}s.
+\end{gather*}`
+$$
+
+---
+## R command 
+
+-  You need one more argument `p` to specify the non-uniform probabilities. 
+
+
+```r
+null.probs = c(1/6,1/6,1/3,1/3)
+freqs = c(10,15,22,28)
+chisq.test(freqs, p=null.probs) ## must label p, it's not the second option. 
+```
+
+```
+## 
+## 	Chi-squared test for given probabilities
+## 
+## data:  freqs
+## X-squared = 1.72, df = 3, p-value = 0.6325
+```
+
+-  Chi-square statistics= 1.72. P-value: 0.6325. (Do not reject null). 
+-  **Warning**: since R doesn't expect "p" as the 2nd argument, you must explicitly mention `p = ...`.
+
+---
+class: inverse, center, middle
+
+## Two-samples goodness-of-fit tests
+
+---
+## Two samples 
+
+-  We shall look at two samples more carefully later, but it does not hurt to mention at this point. 
+-  Data: `\(X_1, X_2, \ldots, X_n \sim F_1\)`, and `\(Y_1, Y_2, \ldots, Y_n \sim F_2\)`. 
+-  Test: `\(H_0: F_1 = F_2\)` vs. `\(H_1: F_1 \neq F_2\)`. 
+-  Apply the same procedure, treat the proportions from one sample as the 'true' null proportions. 
+
+
+---
+
+## Example in R 
+
+
+```r
+new_freq = c(10,15,22,28)
+old_freq &lt;- c(20,16,18,9)
+chisq.test(new_freq, p=old_freq/sum(old_freq))
+```
+
+```
+## 
+## 	Chi-squared test for given probabilities
+## 
+## data:  new_freq
+## X-squared = 36.773, df = 3, p-value = 5.141e-08
+```
+
+---
+## Use `rescale.p` option
+
+
+```r
+new_freq = c(10,15,22,28)
+old_freq &lt;- c(20,16,18,9)
+chisq.test(new_freq, p=old_freq, rescale.p = TRUE)
+```
+
+```
+## 
+## 	Chi-squared test for given probabilities
+## 
+## data:  new_freq
+## X-squared = 36.773, df = 3, p-value = 5.141e-08
+```
+
+
+---
+## Chi-square test for Continuous data 
+
+-  Chi-square test can be adapted for continuous data if we create our own categories. 
+
+-  I will show you one example for the sake of completeness but for the sake of this class, we will use chi-square GoF test for discrete data and K-S and Lilliefors test for continuous data.
+
+---
+## Testing equality of two distributions 
+
+-  Samples from a Gamma distribution. 
+
+
+```r
+num_of_samples = 1000
+x &lt;- rgamma(num_of_samples, shape = 10, scale = 3)
+hist(x, breaks = 50, col = rgb(0,0,1,0.5))
+```
+
+![](chisq_gof_files/figure-html/unnamed-chunk-11-1.png)&lt;!-- --&gt;
+
+---
+## Now we add jitters 
+
+-  Small white noise to the data !
+
+
+```r
+hist(x, breaks = 50, col = rgb(0,0,1,0.5))
+x &lt;- x + rnorm(length(x), mean=0, sd = .1) # add jitter
+p1 &lt;- hist(x, breaks = 50, col = rgb(1,0,1,0.5), add = T)
+```
+
+![](chisq_gof_files/figure-html/unnamed-chunk-12-1.png)&lt;!-- --&gt;
+
+---
+## How to apply Chi-square? 
+
+-  We can use the bins of the histogram as the categories.
+
+-  The probability of `\(X \sim \text{Gamma}(shape = \alpha, scale = \lambda)\)` lying within a bin `\((a,b]\)` would be:
+
+$$
+`\begin{align*}
+P( X \in (a,b]) &amp; = F(b) - F(a), \\
+\Rightarrow P( X \in (a,b]) &amp; =  pgamma(b, \alpha, \lambda) - pgamma(a, \alpha, \lambda)
+\end{align*}`
+$$
+- So we need the boundaries of the bins, and apply the cdf `pgamma` to them. 
+
+---
+## This is how it's done 
+
+
+```r
+## uncomment line 1 before running for the first time
+## install.packages("zoo")
+library('zoo')
+breaks_cdf &lt;- pgamma(p1$breaks, shape=10, scale=3)
+(null.probs &lt;- rollapply(breaks_cdf, 2, function(x) x[2]-x[1]))
+```
+
+```
+##  [1] 3.572084e-03 5.411436e-03 7.741366e-03 1.054301e-02 1.375888e-02
+##  [6] 1.729721e-02 2.103987e-02 2.485246e-02 2.859506e-02 3.213253e-02
+## [11] 3.534322e-02 3.812565e-02 4.040280e-02 4.212410e-02 4.326528e-02
+## [16] 4.382664e-02 4.382998e-02 4.331473e-02 4.233382e-02 4.094936e-02
+## [21] 3.922873e-02 3.724098e-02 3.505391e-02 3.273165e-02 3.033292e-02
+## [26] 2.790988e-02 2.550742e-02 2.316299e-02 2.090665e-02 1.876153e-02
+## [31] 1.674433e-02 1.486609e-02 1.313291e-02 1.154671e-02 1.010604e-02
+## [36] 8.806730e-03 7.642576e-03 6.605895e-03 5.688019e-03 4.879715e-03
+## [41] 4.171520e-03 3.554019e-03 3.018050e-03 2.554858e-03 2.156207e-03
+## [46] 1.814448e-03 1.522557e-03 1.274148e-03 1.063466e-03 8.853653e-04
+## [51] 7.352804e-04 6.091856e-04 5.035529e-04 4.153084e-04 3.417876e-04
+## [56] 2.806923e-04 2.300490e-04 1.881706e-04 1.536208e-04 1.251810e-04
+## [61] 1.018217e-04 8.267555e-05 6.701468e-05 5.422991e-05 4.381303e-05
+## [66] 3.534123e-05 2.846373e-05
+```
+
+
+---
+## Barplot from a histogram? 
+
+
+```r
+barplot(null.probs)
+```
+
+![](chisq_gof_files/figure-html/unnamed-chunk-14-1.png)&lt;!-- --&gt;
+
+-  Basically, we have created a discrete pmf from a pdf for using chi-square test. 
+
+---
+
+## Now test 
+
+
+```r
+chisq.test(p1$counts, p=null.probs, rescale.p=TRUE)
+```
+
+```
+## Warning in chisq.test(p1$counts, p = null.probs, rescale.p = TRUE): Chi-squared
+## approximation may be incorrect
+```
+
+```
+## 
+## 	Chi-squared test for given probabilities
+## 
+## data:  p1$counts
+## X-squared = 79.89, df = 66, p-value = 0.1169
+```
+
+
+---
+## Monte Carlo 
+
+-  The chi-square test needs to be run using Monte Carlo to make sure its result is accurate enough. For use the Monte Carlo set `simulate.p.value` to `TRUE`. 
+-  You can also set the iteration number by set B.
+
+
+```r
+chisq.test(p1$counts, p=null.probs, rescale.p=TRUE, simulate.p.value=TRUE)
+```
+
+```
+## 
+## 	Chi-squared test for given probabilities with simulated p-value (based
+## 	on 2000 replicates)
+## 
+## data:  p1$counts
+## X-squared = 79.89, df = NA, p-value = 0.1869
+```
+
+
+---
+## Kolmogorov-Smirnov Test 
+
+- As I said a few slides back, the chi-square tests are not ideal for testing equality of distributions for continuous data and there is a much better alternative called the Kolmogorov--Smirnov test. 
+
+-   Much simpler since there's no binning, only the absolute difference of two CDFs. 
+
+
+```r
+x &lt;- rgamma(num_of_samples, shape = 10, scale = 3)
+y &lt;- x + rnorm(length(x), mean=0, sd = .1) # add jitter
+ks.test(x,y)
+```
+
+```
+## 
+## 	Asymptotic two-sample Kolmogorov-Smirnov test
+## 
+## data:  x and y
+## D = 0.007, p-value = 1
+## alternative hypothesis: two-sided
+```
+
+-  We will learn about this later! 
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create();
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
