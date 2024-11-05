@@ -163,50 +163,7 @@ cor((cars$speed)^2,(cars$dist)^2,method="spearman")
 cor.test(cars$speed,cars$dist,method="spearman")
 ```
 
-- Clearly, the p-value is very small, so you would reject the null hypothesis, and conclude  that there is a statistically significant monotonic relationship between the speed and distance. 
 
----
-## CLT 
-
-For using large sample approximation (CLT) for the Spearman's rank correlation you can use a Z-test or t-test. 
-
-$$
-\begin{gather}
-    	 \text{[For Z-test]}  \quad E_{H_0}(r_s)  = 0, V_{H_0}(r_s) = \frac{1}{n-1} \\
-    	\Rightarrow Z = \frac{r_s}{\sqrt{V(r_s)}} = \sqrt{n-1} \times r_s \sim N(0,1) \;\\
-       \text{[For t-test]} \quad t = \frac{r_s \sqrt{n-2}}{\sqrt{1-r_s^2}} \sim t_{(n-2)\; d.f.} \;
-\end{gather}
-$$
-
-
----
-## CLT (Z-test)
-
--  We plug in the formula for $Z$-score to calculate a p-value. 
-
-```{r, echo = T}
-r_s = cor(cars$speed,cars$dist,method="spearman")
-n = length(cars$speed)
-Z = sqrt(n-1)*r_s
-(pval.ztest <- 2*(1-pnorm(Z)))
-```
-
--  Again, the p-value is very small, reject $H_0$ in favor of strong monotonic relationship. 
----
-## CLT (t-test)
-
--  We plug in the formula for $Z$-score to calculate a p-value. 
-
-```{r, echo = T}
-r_s = cor(cars$speed,cars$dist,method="spearman")
-n = length(cars$speed)
-tstat = sqrt(n-2)*r_s/(sqrt(1-r_s^2))
-(pval.ttest <- 2*(1-pt(tstat, df = n-2)))
-```
-
--  Again, the p-value is very small, reject $H_0$ in favor of strong monotonic relationship. 
-
-- Note that the t-test p-value is very close to the p-value returned by the `cor.test`. 
 ---
 ## Kendall's tau 
 
