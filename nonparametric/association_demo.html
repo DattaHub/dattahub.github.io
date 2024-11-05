@@ -4,7 +4,7 @@
     <title>Tests for Association</title>
     <meta charset="utf-8" />
     <meta name="author" content="Jyotishka Datta" />
-    <script src="association_demo_files/header-attrs-2.25/header-attrs.js"></script>
+    <script src="association_demo_files/header-attrs-2.28/header-attrs.js"></script>
     <link href="association_demo_files/remark-css-0.0.1/default.css" rel="stylesheet" />
     <link href="association_demo_files/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
   </head>
@@ -22,7 +22,7 @@ class: center, middle, inverse, title-slide
 ### Jyotishka Datta
 ]
 .date[
-### Updated: 2023-11-07
+### Updated: 2024-11-04
 ]
 
 ---
@@ -36,7 +36,7 @@ class: center, middle, inverse, title-slide
 Let's look at the "cars" data available on R. 
 
 
-```r
+``` r
 library(MASS)
 attach(cars)
 head(cars)
@@ -71,7 +71,7 @@ We can try to fit a straight line or a curve to the scatter plot. The best-fitti
 The R functions you need are `cor` and `cor.test`. The latter does the `\(t\)`-test for testing `\(H_0: \rho = 0\)`. 
 
 
-```r
+``` r
 cor(cars$speed,cars$dist)
 ```
 
@@ -79,7 +79,7 @@ cor(cars$speed,cars$dist)
 ## [1] 0.8068949
 ```
 
-```r
+``` r
 cor.test(cars$speed,cars$dist)
 ```
 
@@ -102,7 +102,7 @@ cor.test(cars$speed,cars$dist)
 ## Log transform?
 
 
-```r
+``` r
 plot(cars, xlab = "Speed (mph)", ylab = "Stopping distance (ft)",
      las = 1, log = "xy")
 title(main = "cars data (logarithmic scales)")
@@ -114,7 +114,7 @@ title(main = "cars data (logarithmic scales)")
 ## Does the correlation improve? 
 
 
-```r
+``` r
 cor(log(cars$speed),log(cars$dist))
 ```
 
@@ -122,7 +122,7 @@ cor(log(cars$speed),log(cars$dist))
 ## [1] 0.8562385
 ```
 
-```r
+``` r
 cor.test(log(cars$speed),log(cars$dist))
 ```
 
@@ -155,7 +155,7 @@ cor.test(log(cars$speed),log(cars$dist))
 - Here `\(\rho_{X,Y} = 0\)`, but `\(Y = X^2\)`, not independent, but not **linearly dependent**. 
 
 
-```r
+``` r
 x = c(-5,-4,-3,-2,-1,1,2,3,4,5);y = x^2 
 cor(x,y)
 ```
@@ -177,7 +177,7 @@ class: inverse, center, middle
 -  Pearson's correlation coefficient measures only linear relationship. Here `\(y = x^4\)`: a perfect montonically increasing relationship but the Pearson's correlation is still not 1. 
 
 
-```r
+``` r
 x = seq(1,7)
 y = x^4
 cor(x,y)
@@ -187,7 +187,7 @@ cor(x,y)
 ## [1] 0.8903055
 ```
 
-```r
+``` r
 ## same as cor(x,y,method="pearson")
 cor(x,y,method="pearson")
 ```
@@ -202,7 +202,7 @@ cor(x,y,method="pearson")
 -  Spearman's rank correlation: replace X, Y with their ranks. 
 
 
-```r
+``` r
 cor(rank(x),rank(y))
 ```
 
@@ -210,7 +210,7 @@ cor(rank(x),rank(y))
 ## [1] 1
 ```
 
-```r
+``` r
 ## same as cor(x,y,method="spearman")
 cor(x,y,method="spearman")
 ```
@@ -227,7 +227,7 @@ cor(x,y,method="spearman")
 - Example: Apply log transformation to cars data, Pearson's r will change, but Spearman's `\(r_s\)` won't! 
 
 
-```r
+``` r
 cor(cars$speed,cars$dist)
 ```
 
@@ -235,7 +235,7 @@ cor(cars$speed,cars$dist)
 ## [1] 0.8068949
 ```
 
-```r
+``` r
 cor(log(cars$speed),log(cars$dist))
 ```
 
@@ -249,7 +249,7 @@ cor(log(cars$speed),log(cars$dist))
 - As long as the transformation is monotone: `\(f(x) = log(x)\)`, `\(f(x) = x^2\)`.
 
 
-```r
+``` r
 cor(cars$speed,cars$dist,method="spearman")
 ```
 
@@ -257,7 +257,7 @@ cor(cars$speed,cars$dist,method="spearman")
 ## [1] 0.8303568
 ```
 
-```r
+``` r
 cor(log(cars$speed),log(cars$dist),method="spearman")
 ```
 
@@ -265,7 +265,7 @@ cor(log(cars$speed),log(cars$dist),method="spearman")
 ## [1] 0.8303568
 ```
 
-```r
+``` r
 cor((cars$speed)^2,(cars$dist)^2,method="spearman")
 ```
 
@@ -277,7 +277,7 @@ cor((cars$speed)^2,(cars$dist)^2,method="spearman")
 ## Hypothesis test 
 
 
-```r
+``` r
 cor.test(cars$speed,cars$dist,method="spearman")
 ```
 
@@ -298,7 +298,60 @@ cor.test(cars$speed,cars$dist,method="spearman")
 ## 0.8303568
 ```
 
+- Clearly, the p-value is very small, so you would reject the null hypothesis, and conclude  that there is a statistically significant monotonic relationship between the speed and distance. 
 
+---
+## CLT 
+
+For using large sample approximation (CLT) for the Spearman's rank correlation you can use a Z-test or t-test. 
+
+$$
+`\begin{gather}
+    	 \text{[For Z-test]}  \quad E_{H_0}(r_s)  = 0, V_{H_0}(r_s) = \frac{1}{n-1} \\
+    	\Rightarrow Z = \frac{r_s}{\sqrt{V(r_s)}} = \sqrt{n-1} \times r_s \sim N(0,1) \;\\
+       \text{[For t-test]} \quad t = \frac{r_s \sqrt{n-2}}{\sqrt{1-r_s^2}} \sim t_{(n-2)\; d.f.} \;
+\end{gather}`
+$$
+
+
+---
+## CLT (Z-test)
+
+-  We plug in the formula for `\(Z\)`-score to calculate a p-value. 
+
+
+``` r
+r_s = cor(cars$speed,cars$dist,method="spearman")
+n = length(cars$speed)
+Z = sqrt(n-1)*r_s
+(pval.ztest &lt;- 2*(1-pnorm(Z)))
+```
+
+```
+## [1] 6.154747e-09
+```
+
+-  Again, the p-value is very small, reject `\(H_0\)` in favor of strong monotonic relationship. 
+---
+## CLT (t-test)
+
+-  We plug in the formula for `\(Z\)`-score to calculate a p-value. 
+
+
+``` r
+r_s = cor(cars$speed,cars$dist,method="spearman")
+n = length(cars$speed)
+tstat = sqrt(n-2)*r_s/(sqrt(1-r_s^2))
+(pval.ttest &lt;- 2*(1-pt(tstat, df = n-2)))
+```
+
+```
+## [1] 8.837375e-14
+```
+
+-  Again, the p-value is very small, reject `\(H_0\)` in favor of strong monotonic relationship. 
+
+- Note that the t-test p-value is very close to the p-value returned by the `cor.test`. 
 ---
 ## Kendall's tau 
 
@@ -324,14 +377,14 @@ $$
 
 - Here's the functional relationship. 
 
-![](association_demo_files/figure-html/unnamed-chunk-14-1.png)&lt;!-- --&gt;
+![](association_demo_files/figure-html/unnamed-chunk-16-1.png)&lt;!-- --&gt;
 
 
 ---
 ## Kendall's tau 
 
 
-```r
+``` r
 cor(cars$speed,cars$dist,method="kendall")
 ```
 
@@ -339,7 +392,7 @@ cor(cars$speed,cars$dist,method="kendall")
 ## [1] 0.6689901
 ```
 
-```r
+``` r
 cor(log(cars$speed),log(cars$dist),method="kendall")
 ```
 
@@ -347,7 +400,7 @@ cor(log(cars$speed),log(cars$dist),method="kendall")
 ## [1] 0.6689901
 ```
 
-```r
+``` r
 cor((cars$speed)^2,(cars$dist)^2,method="kendall")
 ```
 
@@ -359,7 +412,7 @@ cor((cars$speed)^2,(cars$dist)^2,method="kendall")
 ## In class example 
 
 
-```r
+``` r
 x = c(1,	5,	9,	7,	4,	6,	8,	2,	3)
 y = c(4,	3,	6,	8,	2,	7,	9,	1,	5)
 cor(x,y, method = "spearman")
@@ -369,7 +422,7 @@ cor(x,y, method = "spearman")
 ## [1] 0.7166667
 ```
 
-```r
+``` r
 cor.test(x,y, method = "spearman")
 ```
 
@@ -391,7 +444,7 @@ cor.test(x,y, method = "spearman")
 How good is the  normal approximation?
 
 
-```r
+``` r
 x = c(1,5,9,7,4,6,8,2,3)
 y = c(4,3,6,8,2,7,9,1,5)
 n = length(x)
@@ -403,7 +456,7 @@ r_s = cor(x,y, method = "spearman")
 ## [1] 0.04265838
 ```
 
-```r
+``` r
 (t.p.value = 2*(1 - pt((r_s*sqrt(n-2))/sqrt(1-r_s^2),df = n-2)))
 ```
 
@@ -417,7 +470,7 @@ r_s = cor(x,y, method = "spearman")
 ## In class example 
 
 
-```r
+``` r
 x = c(1,	5,	9,	7,	4,	6,	8,	2,	3)
 y = c(4,	3,	6,	8,	2,	7,	9,	1,	5)
 cor.test(x,y, method = "kendall")
@@ -444,7 +497,7 @@ Z = 3 \sqrt{n(n-1)}\tau/\sqrt{2(2n+5)}
 $$
 
 
-```r
+``` r
 x = c(1,5,9,7,4,6,8,2,3)
 y = c(4,3,6,8,2,7,9,1,5)
 n = length(x)
@@ -464,7 +517,7 @@ cat("P value = ", normal.p.value, "\n")
 ## Divorce Example - Mann's Test (Kendall's)  
 
 
-```r
+``` r
 year = seq(1945,1985,by=5)
 divorce.rate = c(3.5,	2.6,	2.3,	2.2,	2.5,	3.6,
                  4.8,	5.2,	5)
@@ -487,7 +540,7 @@ cor.test(year,divorce.rate, method = "kendall")
 ## Divorce Example - Daniel's Test (Spearman's)
 
 
-```r
+``` r
 year = seq(1945,1985,by=5)
 divorce.rate = c(3.5,	2.6,	2.3,	2.2,	2.5,	3.6,	
                  4.8,	5.2,	5)
