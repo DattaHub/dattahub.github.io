@@ -218,67 +218,6 @@ library(vcd)
 assocstats(alcohol)
 ```
 
-## Examples of Contingency tables
-
-- Some of the best examples of contingency tables come from Political data analysis. 
-
-- Example: Analyzing Exit Poll Data from CNN. Total number of respondents = 24537.
-
-|Party   | 18-24	| 25-29	| 30-39	| 40-49	| 50-64	| 65 and older |
-|--------|--------|-------|-------|-------|-------|--------------|
-|Clinton | 56%	  | 53%  	| 51% 	| 46% 	| 44%  	| 45%          |
-|Trump   |	35%	  | 39%   | 40% 	| 50%	  | 53%	  | 53%          |
-
-
-## Test for association
-
-```{r, echo = T, fig.height= 4}
-clinton = c(1374,1170,2127,2145,3239,1656)
-trump = c(859,861,1669,2331,3901,1951)
-elect16= rbind(clinton,trump)
-dimnames(elect16) = list(candidate = c("clinton","trump"), 
-                         agegp = c("18-24","25-29","30-39","40-49","50-64",">65"))
-barplot(elect16, beside=T, legend=T)
-```
-
-## Chi-square test 
-
-```{r, echo = T}
-chisq.test(elect16)
-```
-- We can reject the null hypothesis that the proportions are not equal across different age groups. 
-
-
-## Effect of Gender? 
-
-- We can also look at the effect of Gender!
-- The same CNN exit poll data : 24537 respondents. 
-
-|Party |clinton |	trump| others|
-|------|--------|------|-------|
-| male |	41%  	| 53%	 | 6%    |
-|female|	54%	  | 42%  |  4%   |
-
-## Use R {.smaller}
-
-```{r, echo = T, fig.height=4}
-gender <- matrix(c(4829,6242,707,6890,5359,510), byrow = T, ncol = 3)
-dimnames(gender) = list(gender = c("male","female"), 
-                        candidate = c("clinton","trump","others"))
-barplot(t(gender), beside=T, legend=T)
-```
-
-## Chi-square test of association 
-
-```{r, echo = TRUE}
-gender <- matrix(c(4829,6242,707,6890,5359,510), byrow = T, ncol = 3)
-dimnames(gender) = list(gender = c("male","female"), 
-                        candidate = c("clinton","trump","others"))
-prop.table(gender, 1)
-chisq.test(gender)
-```
-
-
 ## Lady tasting tea 
 
 ```{r, echo = TRUE}
