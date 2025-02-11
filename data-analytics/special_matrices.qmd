@@ -1,0 +1,152 @@
+---
+title: "Special matrices"
+author: "Jyotishka Datta"
+format: 
+  html: 
+      theme: united
+      fontsize: 11pt
+---
+
+## Three special matrices 
+
+We will commonly encounter three special matrices in multivariate statistics class. They are, namely,
+
+-   the dispersion matrix $\mathbf{S}$, or the variance-covariance matrix.
+-   the correlation matrix $\mathbf{R}$, and
+-   the distance matrix $\mathbf{D}$.
+
+For this notes, we only consider the sample versions (or the "empirical") dispersion or correlation matrices but we keep in the back of mind that there are population versions of them. For example, the sample dispersion matrix can be a good estimator of the population dispersion matrix, and so on. 
+
+We also denote the data-matrix or what is sometimes called the design matrix as a $n \times p$ matrix. If we have $p$ predictors on $n$ subjects, we can denote the data as a $n \times p$ matrix $\bf{X}$.
+
+$$
+X = \begin{bmatrix} x_{11} & x_{12} & \ldots & x_{1p} \\
+x_{21} & x_{22} & \ldots & x_{2p} \\
+\ldots & \ldots & \vdots & \ldots \\
+x_{n1} & x_{n2} & \ldots &x_{np} 
+\end{bmatrix} = \begin{pmatrix} \mathbf{x}_1 | \mathbf{x_2} | \cdots | \mathbf{x}_p \end{pmatrix}.
+$$
+
+The $j^{th}$ column stores the observations for the $j^{th}$ predictor variable and is denoted by $\mathbf{x}_j$ or using matrix notation $x_{.,j}$. The mean vector or centroid is the vector of length $p$ where each component is the mean of a predictor variable, and it could be written as:
+
+$$ \bar{\bf x} = \begin{pmatrix} \bar{x}_1 \\ \bar{x}_2 \\ \vdots \\ \bar{x}_p \end{pmatrix} \in \mathbb{R}^p$$
+The three matrices are easily defined by their $(i,j)$-th entries, viz., $s_{ij}, r_{ij}$ and $d_{ij}$, for the dispersion, correlation and the distance matrix, respectively. If we denote the $i^{th}$ column of $X$ 
+
+The three special matrices are then defined as follows:
+
+\begin{align*}
+s_{ij} & = \mathrm{Cov}(x_{.,i}, x_{.,j}) = \frac{1}{n-1}\sum_{k=1}^{n} (x_{ki}-\bar{x}_i)(x_{kj}-\bar{x}_j)\\
+r_{ij} &=  \mathrm{Corr}(x_{.,i}, x_{.,j}) = \frac{s_{ij}}{\sqrt{s_{ii} s_{jj}}} \\
+d_{ij} & = \mathrm{distance}(x_{i,.}, x_{j,.}). 
+\end{align*}
+
+It's easy to see that the diagonal elements of the dispersion matrix are $s_{ii} = Var(X_i)$, variance of the $i^{th}$ predictor variable or the $i^{th}$ column. The diagonal elements of the correlation matrix are always 1, correlation of $X_i$ with itself. Similarly, the diagonals of a distance matrix are always $0$. 
+
+It's also easy to see that if take any non-zero vector $\mathbf{a} = (a_1, \ldots, a_p)$ and consider the linear combination $\mathbf{a}^T \mathbf{x} = a_1 X_1 + \cdots + a_p X_p$. Then, variance of $\mathbf{a}^T \mathbf{x}$ is given by $\mathbf{a}^T \mathbf{S} \mathbf{a}$, and since variance is always non-negative (positive if the random variable is not degenerate, i.e. not a fixed constant), we can show that the $S$ matrix is also positive definite (or at least non-negative definite).
+
+Recall that a square matrix $\mathbf{A}$ is said to be positive definite if for every non-zero vector $\mathbf{x}$ we have:
+
+$$
+\mathbf{x^T A x} > 0
+$$
+
+and non-negative definite if $\mathbf{x^T A x} \ge 0$. We also know that an useful property of positive definite matrices is all of their eigenvalues are real and positive. We also know these two useful properties of eigenvalues: 
+
+$$
+\begin{gather}
+{\rm trace}(A) = \sum_{i} a_{ii} = \sum_{i=1}^{n}{\lambda_i}., \text{ and } {\rm Det}(A) = \lambda_1 \cdots \lambda_n.
+\end{gather}
+$$
+
+This would imply a bunch of easy-to-verify properties: 
+
+1. Let the eigen-decomposition of the dispersion matrix be: $\mathbf{S = B \Lambda B^T}$, where $\Lambda$ is a diagonal matrix with eigenvalues $\lambda_1, \ldots, \lambda_p$, and the $\mathbf{B}$ matrix is made up of eigenvectors in each of the columns. The matrix of eigenvectors is also orthogonal, i.e. $\mathbf{B B^T = I}$ and $\mathbf{B^T B = I}$, so, we could also write the eigendecomposition as $\mathbf{S = B \Lambda B^{-1}}$. 
+
+
+2.  The positive definite-ness of $\mathbf{S}$ would imply that we can order the eigenvalues (and relabel if necessary) so that, we have $\lambda_1 \ge \ldots\ge \lambda_p > 0$. From the relationships between trace, determinant and the eigenvalues, we can say that for the dispersion matrix, the sum of eigenvalues is equal to its trace, i.e. 
+
+$$
+\sum_{i=1}^{p} \lambda_i = \sum_{i=1}^{p} s_{ii} = \sum_{i=1}^{p} \text{Var}(X_i),\quad \text{and} \quad \prod_{i=1}^{p} \lambda_i = \text{Det}(\mathbf{S}) = \text{Generalized variance}.
+$$
+3. Similarly, one can show that the sum of eigenvalues for the sample correlation matrix is equal to $p$, the number of variables and  the product should be equal to 1. 
+
+### R codes 
+
+We can check these properties easily in `R`. We look at the environmental dataset in lattice library. 
+
+We first look at the eigen-decomposition of the covariance matrix, obtained by `cov`.
+
+```{r}
+library(lattice)
+data(environmental)
+dat <-environmental
+(ax <- eigen(cov(dat)))
+```
+Now, check that the matrix of eigenvectors is orthogonal:
+
+```{r}
+ax$vectors %*% t(ax$vectors)
+```
+The diagonals are 1 and the off-diagonals are either 0 or very, very small (order of $10^{-19}$ due to rounding errors.)
+
+Now, check that the sum of eigen-values is same as the sum of variances, i.e., sum of the diagonal elements of the variance-covariance matrix.
+
+```{R}
+sum(ax$values)
+
+sum(diag(cov(dat)))
+```
+
+### Standardization: centering and scaling 
+
+We are familiar with the idea of standardization. 
+Suppose, we observe univariate data, say, $X_1, X_2, \ldots, X_n$ with a finite mean $\bar{X}$ and variance $s^2$, i.e., standard deviation $s$. We can think of  standardized values given by:
+$$
+Z_i = \frac{X_i - \bar{X}}{s}, i =1, \ldots, n. 
+$$
+These observatiosn will satisfy: $\bar{Z} = 0$ and $Var(Z) = \frac{1}{n-1}\sum (Z_i - \bar{Z})^2 = 1$.
+
+Now, recall the formula for sample correlation from observations: $X_1, \ldots, X_n$ and $Y_1, \ldots, Y_n$.
+
+$$
+\begin{align*}
+r & = \frac{\frac{1}{n-1}\sum_{i=1}^{n} (X_i - \bar{X})(Y_i - \bar{Y})}{\sqrt{\frac{1}{n-1}\sum_{i=1}^{n} (X_i - \bar{X})^2} \sqrt{\frac{1}{n-1}\sum_{i=1}^{n} (Y_i - \bar{Y})^2}} \\ 
+& = \frac{1}{n-1}\sum_{i=1}^{n} \frac{(X_i - \bar{X})}{s_x} \times \frac{(Y_i - \bar{Y})}{s_Y}.
+\end{align*}
+$$
+where, $s_X, s_Y$ are the sample standard deviations of $X$ and $Y$ samples.
+
+So, another way of calculating correlation is thiking of correlation as the covariance when the $X$ and $Y$ variables have been standardized, as shown below:
+
+```{r}
+cor(dat$ozone, dat$radiation)
+
+cov(scale(dat$ozone),scale(dat$radiation))
+```
+### Standardizing in more than one-dimensions
+
+In multivariate data, standardization can be done as follows:
+
+1.  First create the centered matrix $X^c$, where $X^c_{ij} = x_{ij} - \bar{x}_j$. So, we can first create the means matrix and subtract from the original $X$ matrix. 
+
+2.  Let $D$ be a $p \times p$ diagonal matrix with the standard deviations on the diagonals, i.e. $d_{ii} = s_i$. 
+
+3.  Then, the standardized data would be: 
+$$
+Z = X^c D^{-1}
+$$
+
+
+### Standardizing in `R`
+
+We can use the `scale` function, and `apply`. 
+
+```{r}
+scaled_dat <- scale(dat)
+
+apply(scaled_dat, 2, mean)
+apply(scaled_dat, 2, sd)
+```
+
+
+Why do we care? We'll see soon, that it's better to scale the data before applying eigendecomposition to find the principal components. 
