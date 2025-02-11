@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Two-sample t-test</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Jyotishka Datta" />
+    <script src="2samplet_files/header-attrs-2.20/header-attrs.js"></script>
+    <link href="2samplet_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="2samplet_files/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Two-sample t-test
+]
+.author[
+### Jyotishka Datta
+]
+.date[
+### Updated: 2024-10-15
+]
+
+---
+
+
+
+
+## Birth-weight Data 
+
+-  Source: https://www.openintro.org/data/index.php?data=births14 
+
+-  Description: Every year, the US releases to the public a large data set containing information on births recorded in the country. This data set has been of interest to medical researchers who are studying the relation between habits and practices of expectant mothers and the birth of their children. This is a random sample of 1,000 cases from the data set released in 2014.
+
+
+
+```r
+birth &lt;- read.csv("https://www.openintro.org/data/csv/births14.csv")
+dim(birth)
+```
+
+```
+## [1] 1000   13
+```
+
+-  Only consider the complete cases i.e. rows without any missing values. 
+
+
+```r
+birth &lt;- birth[complete.cases(birth),]
+```
+
+---
+## Structure 
+
+
+```r
+str(birth)
+```
+
+```
+## 'data.frame':	794 obs. of  13 variables:
+##  $ fage          : int  34 36 37 32 32 37 29 30 29 30 ...
+##  $ mage          : int  34 31 36 31 26 36 24 32 26 34 ...
+##  $ mature        : chr  "younger mom" "younger mom" "mature mom" "younger mom" ...
+##  $ weeks         : int  37 41 37 36 39 36 40 39 39 42 ...
+##  $ premie        : chr  "full term" "full term" "full term" "premie" ...
+##  $ visits        : int  14 12 10 12 14 10 13 15 11 14 ...
+##  $ gained        : int  28 41 28 48 45 20 65 25 22 40 ...
+##  $ weight        : num  6.96 8.86 7.51 6.75 6.69 6.13 6.74 8.94 9.12 8.91 ...
+##  $ lowbirthweight: chr  "not low" "not low" "not low" "not low" ...
+##  $ sex           : chr  "male" "female" "female" "female" ...
+##  $ habit         : chr  "nonsmoker" "nonsmoker" "nonsmoker" "nonsmoker" ...
+##  $ marital       : chr  "married" "married" "married" "married" ...
+##  $ whitemom      : chr  "white" "white" "not white" "white" ...
+```
+
+---
+## Hypothesis
+
+-  Q: Is the mean birth weigth same across smoker and nonsmokers?
+
+
+```r
+boxplot(weight ~ habit, data = birth)
+```
+
+![](2samplet_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
+
+---
+## Plot the densities
+
+
+```r
+library(ggplot2)
+ggplot(birth, aes(x = weight, group = habit, fill = habit)) + geom_density(alpha = 0.5) + theme_minimal()
+```
+
+![](2samplet_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
+
+---
+## Hypothesis
+
+-  Q: Is the mean birth weigth same across male and female children?
+
+
+```r
+boxplot(weight ~ sex, data = birth)
+```
+
+![](2samplet_files/figure-html/unnamed-chunk-6-1.png)&lt;!-- --&gt;
+
+---
+## Plot the densities
+
+
+```r
+library(ggplot2)
+ggplot(birth, aes(x = weight, group = sex, fill = sex)) + geom_density(alpha = 0.5) + theme_minimal()
+```
+
+![](2samplet_files/figure-html/unnamed-chunk-7-1.png)&lt;!-- --&gt;
+
+
+---
+## T-test (Equal Variance)
+
+
+
+```r
+x&lt;- birth$weight[birth$habit =="nonsmoker"]
+y &lt;- birth$weight[birth$habit =="smoker"]
+t.test(x,y, alternative = "greater", var.equal = T)
+```
+
+```
+## 
+## 	Two Sample t-test
+## 
+## data:  x and y
+## t = 4.5821, df = 792, p-value = 2.672e-06
+## alternative hypothesis: true difference in means is greater than 0
+## 95 percent confidence interval:
+##  0.4817562       Inf
+## sample estimates:
+## mean of x mean of y 
+##  7.306544  6.554516
+```
+
+---
+## T-test (Equal Variance, Using formula)
+
+
+
+```r
+t.test(weight ~ habit, data = birth, alternative = "greater", var.equal = T)
+```
+
+```
+## 
+## 	Two Sample t-test
+## 
+## data:  weight by habit
+## t = 4.5821, df = 792, p-value = 2.672e-06
+## alternative hypothesis: true difference in means between group nonsmoker and group smoker is greater than 0
+## 95 percent confidence interval:
+##  0.4817562       Inf
+## sample estimates:
+## mean in group nonsmoker    mean in group smoker 
+##                7.306544                6.554516
+```
+
+
+---
+## Manually?
+
+
+```r
+s1=sd(x)
+s2=sd(y)
+m=length(x)
+n=length(y)
+ntotal=m+n
+spooled=sqrt(((m-1)*(s1^2))+((n-1)*(s2^2)))/sqrt(ntotal-2)
+spooled
+```
+
+```
+## [1] 1.240811
+```
+
+```r
+tm=mean(x)-mean(y)
+tval=tm/(spooled*sqrt((1/m)+(1/n)))
+tval
+```
+
+```
+## [1] 4.58215
+```
+
+```r
+(pval = 1 - pt(tval, df = ntotal-2))
+```
+
+```
+## [1] 2.672421e-06
+```
+
+---
+## T-test (Unequal Variance)
+
+-  Pay attention to the value of `t`, `df` and `p-value` in the output. 
+
+
+```r
+x&lt;- birth$weight[birth$habit =="nonsmoker"]
+y &lt;- birth$weight[birth$habit =="smoker"]
+t.test(x,y, alternative = "greater", var.equal = F)
+```
+
+```
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  x and y
+## t = 3.5993, df = 66.935, p-value = 0.0003033
+## alternative hypothesis: true difference in means is greater than 0
+## 95 percent confidence interval:
+##  0.4035308       Inf
+## sample estimates:
+## mean of x mean of y 
+##  7.306544  6.554516
+```
+
+
+---
+## Manual calculation for unequal variance 
+
+-  The `df` calculation is a little tricky! See notes. 
+
+
+```r
+s1=sd(x)
+s2=sd(y)
+m=length(x)
+n=length(y)
+tm=mean(x)-mean(y)
+tval=tm/(sqrt((s1^2/m)+(s2^2/n)))
+tval
+```
+
+```
+## [1] 3.599276
+```
+
+```r
+(df = ((s1^2/m)+(s2^2/n))^2/(1/(m-1)*(s1^2/m)^2+1/(n-1)*(s2^2/n)^2))
+```
+
+```
+## [1] 66.93501
+```
+
+```r
+(pval = 1 - pt(tval, df = df))
+```
+
+```
+## [1] 0.0003032835
+```
+
+
+---
+## Exercise 
+
+-   Test if there is any difference in birth-weights for male and female born babies? 
+
+-   Test if the weights are normally distributed? 
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create();
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
