@@ -1,0 +1,616 @@
+---
+title: One-sample t test and sign test
+subtitle: Formula and Codes
+author: Jyotishka Datta
+date: 
+fontsize: 10pt
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+class: inverse, center, middle
+
+# Get Started
+
+---
+
+## Hypothesis testing
+
+$H_0$: Null hypothesis is a tentative assumption about a population parameter.
+
+$H_1$: Alternative hypothesis is what the test is attempting to establish.
+    
+-  $H_0: \mu = \mu_o$ vs $H_1: \mu < \mu_o$ (one-tail test, lower-tail)
+-  $H_0: \mu = \mu_o$ vs $H_1: \mu > \mu_o$ (one-tail test, upper-tail)
+-  $H_0: \mu = \mu_o$ vs $H_1: \mu \neq \mu_o$ (two-tail test)
+
++  Case 1: $\sigma^2$ is **known** 
+
+    $z=\frac{\overline{x}-\mu_o}{\frac{\sigma}{\sqrt{n}}} \sim N(0,1)$
+    
++  Case 2: $\sigma^2$ is **unknown**
+
+    $t=\frac{\overline{x}-\mu_o}{\frac{s}{\sqrt{n}}} \sim t_{n-1 d.f.}$
+
+---
+## Type 1 and Type 2 errors 
+
+-  **Whenever you are testing null hypothesis in classical statistics, you are subject to two different types of errors: Type I and Type II errors:**
+
+-  Type I error:  rejecting $H_0$ when $H_0$ is true  (false discovery)
+-  Type II error not rejecting $H_0$ with $H_0$ is false (false non-discovery)
+
+- We often denote these two probabilities by the symbols $\alpha$ and $\beta$. 
+
+>-  $P(\textrm{Type I error}) = \alpha$
+>-  $P(\textrm{Type II error}) = \beta$
+
+-  **Power** is the probability of rejecting $H_0$, when $H_0$ is false.
+-  $\rm{Power} = 1-\beta$
+
+-  Usually, we fix the $\alpha$ at a pre-fixed level such as 5% and use a test that gives us the maximum power (or minimum $\beta$). 
+
+-  This is often used in choosing between different available tests. 
+	
+
+---
+## Back to $t$-test 
+
+-  The idea behind t-test is the following:
+
+-  $y_1$, $y_2$,..., $y_n$ are random samples from a population with mean $\mu$ and variance $\sigma^2$.
+
+-  We can estimate them using these unbiased estimators:
+
+- $\overline{y} = \frac{\sum_{i=1}^{n}y_i}{n}$
+
+- $s^2 = \frac{\sum_{i=1}^{n}(y_i-\overline{y})^2}{n-1} = \frac{\sum_{i=1}^{n}y_i^2-n\overline{y}^2}{n-1}$
+
+---
+## Distribution of $\bar{y}$ and $s^2$
+
+- If true mean is $\mu_0$:
+
+
+$$
+\begin{align}
+\bar{y} & \sim N(\mu_0, \frac{\sigma^2}{n}) \\
+\frac{(n-1)s^2}{\sigma^2} & \sim \chi^2_{(n-1) \; d.f.} \; \text{or} \; 
+\sigma^2 \sim \frac{(n-1)s^2}{\chi^2_{(n-1) \; d.f.} } \\
+\Rightarrow \frac{\bar{y}-\mu_0}{s/{\sqrt{n}}} & \sim t_{(n-1) \; d.f.}
+\end{align}
+$$
+
+- Recall: a $\chi^2$ random variable with $k$ degrees of freedom can be interpreted as (or arise as) a sum of squares of $k$ independent $N(0,1)$ random variables. 
+
+- Also, $t$-distribution arises as a ratio of Normal and the square root of chi-square and is a heavier tailed distribution than Normal. 
+
+---
+## Side note: how does $t$ look like 
+
+.pull-left[
+-  Recall we can generate random samples from the $t$ distribution by using `rt` function. 
+
+-  Here is a comparison of histogram from $t_5$ with samples from a $N(0,1)$ distribution. Notice how $t$ has heavier tails. 
+
+- Here is the formula for the density:
+
+$$
+\begin{equation}
+f(t | \nu) = \frac{\Gamma\left(\frac{\nu + 1}{2}\right)}{\sqrt{\nu \pi} \, \Gamma\left(\frac{\nu}{2}\right)} \left(1 + \frac{t^2}{\nu}\right)^{-\frac{\nu + 1}{2}}
+\end{equation}
+$$
+
+]
+
+.pull-right[
+```{r}
+set.seed(123)
+t_samples <- rt(n = 1000, df = 5)
+z_samples <- rnorm(n = 1000)
+
+hist(z_samples, freq = F, col = rgb(1,0,0,0.5), main = "t(5) vs. N(0,1)")
+hist(t_samples, freq = F,col = rgb(1,1,0,0.5), add = T)
+```
+]
+
+
+---
+## Constructing the test 
+
+-  We will start with a fake (simulated) data and then look at a real data. 
+
+-  To test whether things are working correctly, simulated data is often the best way to check. 
+
+-  We generate a sample of size 20 from a Normal distribution with mean $\mu = 1$ and $\sigma = 1$. 
+
+```{r}
+set.seed(12345)
+y <- rnorm(n = 20, mean = 1, sd = 1)
+```
+
+---
+## Calculate the test statistics 
+
+-  Recall the formula for $t$-test statistics: 
+
+$$
+\begin{equation}
+  \frac{\bar{y}-\mu_{0}}{s/\sqrt{n}} \sim t_{(n-1)}
+\end{equation}
+$$
+
+- Here $\mu_0$ is the hypothesized mean, i.e. your null hypothesis is $H_0: \mu = \mu_0$. In our case, $\mu_0 = 0$. 
+
+- Repeat in `R`: 
+
+```{r}
+n <- length(y)
+ybar <- mean(y)
+s2 <- var(y)
+
+(t_stat <- ybar/(sqrt(s2/n)))
+```
+
+---
+
+## Is this a likely value? 
+
+-  If the sample is indeed from a null distribution, i.e. $N(0,1)$ then this test statistics should be somewhere in the middle of a $t_{n-1}$ density plot. 
+
+- Let us check where it falls!
+
+```{r, fig.asp = 0.6}
+set.seed(12345)
+null_pts <- rt(1000, df = n-1)
+hist(null_pts, freq = F, xlim = c(-20,20))
+abline(v = t_stat)
+```
+
+---
+
+## P-value 
+
+-  The histogram with a vertical line for the observed test statistics is a good visual check but often we need a number to show 'how far' the observed test statistics is from the null. 
+
+- The p-value for two-sided t-test is:
+
+
+$$
+\begin{align}
+\text{Two-sided P-value} & = 2 \times P(|t_{n-1}| > t_{observed}) \\
+& = 2 \times (1 - P(t_{n-1} \le t_{observed}))
+\end{align}
+$$
+- In `R`, we have: 
+
+```{r}
+2*(1-pt(q = t_stat, df = n-1))
+```
+
+- This is quite small, suggesting evidence against the null. 
+
+---
+## Simulation based p-value 
+
+-  We can use simulation to calculate this p-value, too. 
+-  We can simulate a **large** number of samples from the null distribution of the test statistics and see what proportion of observations falls beyond the observed test statistics. 
+
+- The null distribution of $t_{observed}$ is $t_{n-1}$ under the null hypothesis. 
+
+```{r}
+set.seed(123)
+null.samples <- rt(100000, df = n-1)
+(pval.mc <- mean((abs(null.samples)>t_stat)))
+
+format(pval.mc, nsmall = 8, scientific = F)
+```
+
+---
+## Pre-canned function 
+
+- Check the value of `t`, `df`, `p-value` on this output and match with your previous calculation. 
+
+```{r}
+t.test(y)
+```
+
+---
+## The Confidence Intervals
+
+-  The confidence intervals are given by this general formulae:
+
+$$
+\text{estimate} \pm (1-\alpha)\% \text{quantile} \times \text{standard error}
+$$
+
+-  In the case of t-test, the formula for $(1-\alpha)$% CI should be:
+
+$$
+\bar{y} \pm (1-\alpha/2)\% \text{quantile of } t_{n-1} \times s/\sqrt{n}
+$$
+- The quantile function is given by:
+
+```{r}
+alpha = 0.05
+
+(qt(p = 1-alpha/2, df = n-1))
+
+```
+- Now, calculate the 95% CI for the given data $y$. It should match the answer from the `t.test`. 
+
+---
+## Answer 
+
+- Here is the `R` code: 
+
+```{r}
+alpha = 0.05 
+
+(lower.ci <- (mean(y)- qt(p = 1-alpha/2, df = n-1)*sqrt(s2/n)))
+
+(upper.ci <- mean(y) + qt(p = 1-alpha/2, df = n-1)*sqrt(s2/n))
+```
+
+- Match with the `t.test` output! 
+
+- Note that the CI does not contain zero. This can be used for testing as well. If CI contains zero, we fail to reject and if it does not, we reject the null. 
+
+
+---
+## Your turn: repeat with a real data 
+
+-  Download the `cholesterol` data from Canvas. Save it in the same folder as your R code. 
+
+- This gives the cholesterol measurements from 10 patients before and after a treatment. 
+
+- Your interest is in the `Reduction` column. 
+
+```{r}
+cholesterol <- read.csv("cholesterol.csv")
+str(cholesterol)
+```
+
+-  Perform a t-test for testing if the mean reduction is zero, without using the `t.test` function. 
+
+
+---
+class: inverse, center, middle 
+
+## Next: Sign test
+
+---
+class: inverse, center, middle
+
+## Nonparametric tests
+
+"... which is what you do when you don't believe the assumptions for the classical tests we have learned so far." 
+
+[Charlie Geyer]
+
+
+---
+## Nonparametric tests 
+
+-   What happens when we have a non-Gaussian sample?  
+-   **Remember**: The sampling distribution of the mean (or the difference between means for the independent samples t-test) should be approximately normally distributed. 
+-   This assumption is not about the raw data being normally distributed, but rather about the means being so. 
+-  Given the Central Limit Theorem, this assumption can be relaxed when the sample size is large.
+
+
+---
+## Example: Bimodal distributions
+
+.pull-left[
+
+- Generate samples: 60% from N(3, 1) and 40% from N(7, 1)
+
+```{r}
+set.seed(123) # Set seed for reproducibility
+n <- 1000  # number of samples
+samples <- c(rnorm(0.6 * n, 3,1), 
+             rnorm(0.4 * n, 7,1))
+```
+]
+
+
+.pull-right[
+```{R}
+hist(samples)
+```
+]
+
+---
+## Sign test 
+
+- **Idea**: median divides any sample distribution into two equal halves. 
+
+-  If the true median is $\mu_0$, then approximately half the samples would exceed $\mu_0$ and half will fall below it. 
+
+- This is true irrespective of the distribution of your raw data or your sampling distribution. 
+
+
+```{r, echo = F, warning = F, fig.align = 'center', fig.height=4}
+# Load necessary libraries
+library(ggplot2)
+# Calculate median
+med <- median(samples)
+
+# Assign colors based on the relation with the median
+colors <- ifelse(samples <= med, "blue", "red")
+
+# Plot histogram with ggplot2
+ggplot(data.frame(samples, colors), aes(x = samples, fill = colors)) +
+  geom_vline(xintercept = med) +
+  geom_vline(xintercept = mean(samples), linetype = "dashed") +
+  geom_histogram(binwidth = 0.5, position = "identity", alpha = 0.75) +
+  labs(title = "Solid line is the median, dashed line is the mean",
+       x = "Value",
+       y = "Frequency") +
+  theme_minimal()
+```
+
+---
+## Mean > Median 
+
+- If you check what proportion of observations fall below the median or mean, you will roughly see that median divides into two equal halves but mean does not. 
+
+```{r}
+samples <- c(rnorm(0.6 * n, 3,1), 
+             rnorm(0.4 * n, 7,1))
+(mean((samples <= median(samples))))
+(mean((samples <= mean(samples))))
+```
+---
+## Right skewed 
+
+- Similar phenomenon for samples from a right-skewed distribution, e.g. exponential distribution with $\lambda = 5$. 
+
+```{r}
+samples <- rexp(1000, rate = 5)
+(mean((samples <= median(samples))))
+(mean((samples <= mean(samples))))
+```
+
+```{r, echo = F, warning = F, fig.align = 'center', fig.height=3}
+# Calculate median
+med <- median(samples)
+# Assign colors based on the relation with the median
+colors <- ifelse(samples <= med, "blue", "red")
+
+# Plot histogram with ggplot2
+ggplot(data.frame(samples, colors), aes(x = samples, fill = colors)) +
+  geom_vline(xintercept = med) +
+  geom_vline(xintercept = mean(samples), linetype = "dashed") +
+  geom_histogram(bins = 50, position = "identity", alpha = 0.75) +
+  labs(title = "Solid line is the median, dashed line is the mean",
+       x = "Value",
+       y = "Frequency") +
+  theme_minimal()
+```
+
+---
+## Recap: Binomial Distribution
+
+-  Represents a sequence of independent coin tossing experiment. 
+-  Suppose a coin with probability $p$; $0<p <1$ for heads in a single trial is tossed independently a pre-specified $n$ times, $n \geq 1$. 
+-  Let $X$ be the number of times in the $n$ tosses that a head is obtained. Then the pmf of $X$ is:
+
+$$
+P(X = x) = {n \choose x} p^x (1-p)^{n-x}, x = 0,1,\ldots, n
+$$
+
+-  Binomial is sum of $n$ independent Bernoulli trials. 
+
+- If $X \sim \text{Bin}(n,p)$. Mean $E(X) = np$, Variance: $V(X) = np(1-p)$. 
+
+---
+## Sign-test 
+
+-   **Data**: $x_1, \ldots, x_n \stackrel{IID}{\sim} F$ with median $M$.
+
+-   **Null hypothesis:** $M = \mu_0$ and **Alternative:** $M \ne \mu_0$ or $M > \mu_0$ or $M < \mu_0$.
+
+-   Test statistic: $S$ = the number of observations that exceed $\mu_0$.
+
+-   Strategy: Reject the null if $S$ is too big or too small (depending on the alternative).
+
+-   If $H_0$: $M = \mu_0$ is true we would expect 50% of the observations to be above $\mu_0$, and 50% of the observations to be below $\mu_0$.
+
+-   Observe: $S = \sum_{i=1}^{n} 1(X_i > \mu_0)$, and $P(X_i > \mu_0 \mid H_0) = 1/2$ for each $i$. 
+
+-  Question: What is the distribution of each $X_i$, and $S$?                         
+---
+## Sign test 
+
+- Binomial is sum of $n$ independent Bernoulli trials. 
+-  $X_i \sim \text{Bernoulli}(p)$ for $i = 1, \ldots, n$, then $X = \sum_{i=1}^{n} X_i \sim \text{Bin}(n, p)$.
+
+>- The sign-test statistic $S$ has a binomial distribution
+
+>- $S \sim \text{Bin}(n,p)$, where $p$  = the probability that an observation is greater than $\mu_0$. 
+
+--
+
+-  In particular, if $H_0$ is true then $S$ will have a binomial distribution: $S \sim \text{Bin}(n, 1/2)$.
+
+-  If $X \sim \text{Bin}(n,p)$. Mean $E(X) = np$, Variance: $V(X) = np(1-p)$. 
+
+- What are the mean and variance of $S$ under $H_0$? 
+
+--
+
+-  Under $H_0: p = 1/2$, $E(S) = \frac{n}{2}$ and $V(S) = \frac{n}{4}$. 
+-  Intuitively, if $S$ is too far away from $n/2$, $H_0$ must be rejected. 
+---
+## Sign test 
+
+-   Hypothesized median = $\mu_0$.
+-   Test statistics: $S$ = number of observations greater than $\mu_0$. 
+-   Observed value of $S$ = $S_{obs}$.
+-   Compute the P-value:
+
+$$
+\begin{equation}
+	\text{P-value} = \begin{cases}
+	P(S \ge S_{obs}) \; \text{ if } H_A: \mu > \mu_0 \text{ or } \mu < \mu_0\\
+	2 P(S \ge S_{obs}) \; \text{ if } H_A: \mu \neq \mu_0
+	\end{cases}
+\end{equation}
+$$
+
+-   Under the null: $H_0: \mu = \mu_0$: $S \sim \text{Bin}(n, 1/2)$.
+-   We can use exact binomial probability calculations using CDF of a $\text{Bin}(n, 1/2)$ distribution, i.e. a `pbinom` function. 
+-   We can use R, there is `binom.test` function. 
+
+---
+## Cholesterol data
+
+```{r}
+cholesterol <- read.csv("cholesterol.csv")
+str(cholesterol)
+(S <- sum(cholesterol$Reduction>0)) ## test stat
+```
+-  The test statistics is $S =$ `r S`. 
+
+-  We need to find out what is the probability that a $Bin(10, 0.5)$ random variable takes a value higher than `r S`. 
+
+---
+## P-value 
+
+- Once again, we use the `pbinom` for calculating the tail probabilities. 
+
+```{r}
+S <- sum(cholesterol$Reduction>=0)
+n <- length(cholesterol$Reduction)
+
+(pval <- (1-pbinom(S-1, size = n, prob= 0.5)))
+
+```
+
+- This is larger than our usual 5% threshold. 
+
+---
+## R function 
+
+- As we showed in class, `R` also has a function `binom.test()` 
+
+```{r}
+S <- sum(cholesterol$Reduction>=0)
+n <- length(cholesterol$Reduction)
+binom.test(S, n, alternative = "greater")
+```
+
+---
+## CLT 
+
+-  We can use CLT to obtain a large-sample approximation. 
+
+-  There is a caveat: CLT kicks in after a certain sample size, so if your sample size is too small, then this approximation could be off. 
+
+![DeMoivre-Laplace CLT](clt-1.png)
+
+---
+## CLT for sign test 
+
+-  The demoivre-Laplace CLT tells us that if $X \sim \text{Bin}(n, p)$, then we can approximate the $\le$-type probability $P(X \le k)$ as:
+$$
+\begin{align}
+P(X \le k) & = P \left( \frac{X- np}{\sqrt{np(1-p)}} \le \frac{k- np}{\sqrt{np(1-p)}} \right) \\
+ & \approx \Phi\left(\frac{k- np}{\sqrt{np(1-p)}} \right)
+\end{align}
+$$
+
+
+-  In DeMoivre-Laplace CLT, we are using a continuous distribution to approximate a discrete distribution taking only integer values.
+
+-  The quality of the approximation improves, sometimes dramatically, if we fill up the gaps between the successive integers. 
+
+---
+## CLT for sign test 
+
+-  To approximate $P(X \le k)$ we expand the domain of the event to $k + 1/2$ and approximate $P(X \le k)$ as:
+$$
+P(X \le k) \approx \Phi\left(\frac{k + 1/2- np}{\sqrt{np(1-p)}} \right)
+$$
+
+
+-  This adjusted normal approximation is called **a normal approximation with a continuity correction**. 
+
+---
+## CLT for sign test 
+
+-  Sign test uses a test-statistics $S \sim \text{Bin}(n, 1/2)$ under the null hypothesis. 
+
+-  Suppose the alternative is one-sided: $H_A: \mu > \mu_0$. 
+
+-  If $n \ge 12$, the P-value can be approximated as: 
+
+$$
+\begin{equation}
+p = 1 - \Phi(\frac{S_{obs}-0.5 - 0.5n}{\sqrt{0.25n}}) 
+\end{equation}
+$$
+
+
+-  Therefor for $n \ge 12$, the rejection rule would be:
+
+-  Reject $H_0$ if $S_{obs} \ge 0.5n + 0.5 + z_{\alpha}\times \sqrt{0.25 n}$, where $z_{\alpha}$ is the $\alpha^{th}$ percentile of $N(0,1)$, i.e. 
+
+$$
+\begin{equation}
+P(Z \ge z_{\alpha}) = \alpha, \; z_{0.025} = 1.96, \; z_{0.05} = 1.64. 
+\end{equation}
+$$
+---
+## Try for cholesterol data 
+
+Now if we use CLT to calculate the P-value:
+
+First, p-value = $P_{S \sim \text{Bin}(10,1/2)} (S \ge 8)$.
+
+Applying CLT formula:
+$$
+\begin{align}
+p_{CLT} & = 1 - \Phi\left(\frac{S_{obs}-0.5 - 0.5n}{\sqrt{0.25 n}} \right) \\
+& = 1 - \Phi\left(\frac{8-0.5 - 5}{\sqrt{0.25\times 10}} \right) = 1 - \Phi(1.58) = 0.0569.
+\end{align}
+$$
+
+-  Compare this approximate P-value with the original (p = 0.0547). 
+
+-  Quite close even though $n$ is only 10. 
+
+```{r}
+Z <- (S-0.5-0.5*n)/(sqrt(0.25*n))
+(p <- 1 - pnorm(Z))
+```
+---
+## Simulation based p-value 
+
+- We can also use simulation to calculate the P-value.
+
+- We can simulate a **large** number of samples from the null distribution of the test statistics and see what proportion of observations falls beyond the observed test statistics. 
+
+- The null distribution of $S$ is $\text{Binomial}(n = 10, 1/2)$. 
+
+```{R}
+set.seed(12345)
+null.samples <- rbinom(10000, size = 10, 1/2)
+(pval.mc <- mean((null.samples>=S)))
+```
+- You can see that it's quite close to the original P-value. 
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,65 @@
+---
+title: "Syllabus and Tutorials (Stat 4033)"
+author: "Jyotishka Datta"
+date: "August 31, 2020"
+output: 
+  html_document:
+    css: "mystyle.css"
+    toc: true
+    toc_float: true
+nature:
+  highlightStyle: github
+highlightLines: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Nonparametric Statistics 
+
+A better name for this topic is distribution-free Statistics, as we would like to call it. Here are some of the R tutorials in markdown format that I have written for this class. 
+
+Most of these examples were collected from various sources / books etc. and I have tried to give credits for each of them. However, if you notice something with a missing citation or you think should not be here, please let me know at [jd033@uark.edu](mailto:jd033@uark.edu). 
+
+This website is for class purposes only. 
+
+## Syllabus 
+
+1.  Motivation for Nonparametric methods. 
+2.  Review of univariate probability & central limit theorem. 
+3.  Review of parametric inference: Point & interval estimation and Hypothesis testing (P-value). 
+4.  Tests of randomness**
+5.  Tests of goodness of fit (Chi square goodness-of-fit tests. Kolmogorov-Smirnov goodness-of-fit tests, Lilliefors test for Normality). 
+6.  One-sample and paired-sample procedures (Sign test & the Wilcoxon signed-rank test, normal approximation and continuity correction, calculation of exact P-values). 
+7.  Two-sample problem: Location model, scale model, Permutation test, The Wilcoxon rank-sum test /Mann-Whitney U test, Discuss K-S test for two samples, Calculation of exact P-value and normal approximation. (Equivalence of rank-sum & Mann-Whitney U test). Distribution-free property of Kolmogorov-Smirnov Test Statistics and Asymptotic distribution (Brownian Bridge). 
+8.  Test for scale model: Siegel-Tukey & similar tests*
+**Additional topics**: Linear rank tests, van der Waerden test, Asymptotic Relative Efficiency, Randomized Test. 
+9.  Tests of equality of K distributions (Kruskal-Wallis one-way ANOVA)
+10.  Various nonparametric measures of association (Kendall's $\tau$, Spearman's $\rho$). 
+11.  Measures of association in multiple classifications.
+12.  Bootstrap & other resampling techniques*
+13.  Analysis of count data*
+
+
+### Apps for fundamental concepts in probability 
+
+1.  [Empirical CDF converges to true CDF](https://jdatta.shinyapps.io/eCDFdemo/)
+2.  [Demoivre-Laplace Central Limit Theorem](https://jdatta.shinyapps.io/demoivre/)
+
+### Beyond basics: Introduction to a few topics in R
+
+1.  [apply, sapply, lapply and functions in R](http://dattahub.github.io/stat4033/intro_R_pres.html)
+2.  [Updated introduction to advanced topics in R. It's basically the 2.0 version of (1) above](http://dattahub.github.io/stat4033/intro_R_pres_new.html)
+2.  [Matrix Example in R, introduction to parallel computing](http://dattahub.github.io/stat5443/matrix_R.html)
+
+### R Demos 
+
+1.  Quantile transformation, Random Variable Generation using QT, QQplot and Goodness of fit [Examples in R](http://dattahub.github.io/stat4033/rvgen.html)
+2. Wilcoxon signed rank test and QQplots/GoF demo [Examples](http://dattahub.github.io/stat4033/wilcox_qq_demo.html)
+3.  One way Analysis of Variance (ANOVA): [Examples in R](http://dattahub.github.io/stat4033/anova_examples_doc.html)
+4.  ANOVA in R Demo in [ioslides presentation](http://dattahub.github.io/stat4033/aovexamples.html).
+5.  Tests for trends and associations [R Examples](http://dattahub.github.io/stat4033/association_demo.html#1), [More examples](http://dattahub.github.io/stat4033/association_examples.html#1)
+6.  Bootstrap [R Examples](http://dattahub.github.io/stat4033/bootstrap_demo.html#1)
+7.  Chi-square tests [R Examples](http://dattahub.github.io/stat4033/chisqdemo.html#1)
+8.  Kernel Density Estimation [R Examples](http://dattahub.github.io/stat4033/kde_demo.html#1)

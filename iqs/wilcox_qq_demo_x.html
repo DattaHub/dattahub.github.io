@@ -4,6 +4,7 @@
     <title>Wilcoxon and Quantiles</title>
     <meta charset="utf-8" />
     <meta name="author" content="Jyotishka Datta" />
+    <script src="wilcox_qq_demo_x_files/header-attrs-2.25/header-attrs.js"></script>
     <link href="wilcox_qq_demo_x_files/remark-css-0.0.1/default.css" rel="stylesheet" />
     <link href="wilcox_qq_demo_x_files/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
   </head>
@@ -11,16 +12,21 @@
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
+.title[
 # Wilcoxon and Quantiles
+]
+.author[
 ### Jyotishka Datta
-### September 7, 2018 (updated: 2020-09-11)
+]
+.date[
+### Updated: 2024-09-26
+]
 
 ---
 
 
 
 
----
 
 ## Today 
 
@@ -37,7 +43,63 @@ class: center, middle, inverse, title-slide
 -  Chi-square goodness of fit test
 
 ---
-## Recap Wilcoxon Signed Rank Test 
+## Wilcoxon signed rank test 
+
+- Suppose we have independent and identically distributed data `\(X_1, X_2, \ldots, X_n\)` from some symmetric continuous distribution. That is, our assumptions are: 
+
+    -  independence
+    -  identical distribution
+    -  continuity
+    -  symmetry
+
+- There are no other assumptions. In particular, we do not assume any particular shape for the distribution of the data. Any symmetric continuous distribution whatsoever will do.
+
+---
+## Difference with sign test 
+
+-   Note that the assumptions are exactly the same as for the sign test with the addition of **symmetry**. 
+
+-   Note also that the assumptions are nearly the same as for
+the t-test except that for the t we must strengthen the assumption of symmetry to an assumption of **normality**. 
+
+-  Thus the assumptions that are different for the three tests are:
+
+Test | Assumptions
+------------- | -------------
+sign test     | any continuous distribution
+signed rank test | any symmetric continuous distribution
+t test | any normal distribution
+
+
+-  The other assumptions IID are the same for all three tests. 
+-  Clearly the sign test has the weakest assumptions (assumes the least), the t test has the strongest assumptions (assumes the most), and the Wilcoxon signed rank test is in the middle.
+
+---
+## Symmetry 
+
+-  How limiting is the assumption of symmetry?
+
+-  It's quite limiting. 
+
+-  Numerous data sets clearly show a skewness. 
+
+-  For these skewed distributions, the Wilcoxon test isn't reliable, but the sign test remains valid.
+
+---
+## Idea
+
+-  So, you're trying to test if the median of a dataset is equal to `\(\theta_0\)`. 
+
+- Let `\(Y_i = (X_i - \theta_0)\)` and let `\(R_i\)` be the ranks of the `\(Y_i\)`'s. 
+
+- Under the null hypothesis (i.e. median is really `\(\theta_0\)`) the distribution of the `\(R_i\)`'s are known. 
+- And the sign is equally likely to be plus or minus because of the symmetry assumption. 
+
+- The absolute values of the ranks are just `\(1\)` to `\(n\)` for a sample of size `\(n\)`. 
+
+
+---
+## Wilcoxon Signed Rank Test 
 
 -  For Wilcoxon’s signed-rank test we would assign ranks to the absolute values of `\((x_1-\theta_0, \ldots, x_n - \theta_0)\)`. 
 
@@ -48,6 +110,11 @@ class: center, middle, inverse, title-slide
 -  `\(SR_+\)` = the sum of the ranks associated with positive values of `\((x_i - \theta_0)\)` , `\(i = 1, \ldots, n\)`
 
 -  `\(SR_-\)` = the sum of the ranks associated with negative values of `\((x_i - \theta_0)\)` , `\(i = 1, \ldots, n\)`.
+
+- The distribution of `\(SR_+\)` is not a brand name distribution but can be calculated easily.
+
+-  It is officially called the null distribution of the **Wilcoxon signed rank test statistic**
+and is calculated by the R function `psignrank`.
 
 ---
 ## Recap Wilcoxon Signed Rank Test
@@ -61,6 +128,7 @@ class: center, middle, inverse, title-slide
 - If `\(H_0\)` is true then `\(SR_+ \approx SR_- = n(n + 1)/4\)`.
 
 - If `\(H_0\)` is not true then either `\(SR_+\)` will be small ($SR_-$ large) or `\(SR_+\)` will be large ($SR_-$ small).
+
 - The sampling distribution (and hence the P-values) can be calculated under the null `\(H_0\)`.
 
 -  We can look up the P-values from a table (tedious) or use the R function `wilcox.test()`
@@ -72,7 +140,9 @@ class: center, middle, inverse, title-slide
 
 -  Mean = `\(n(n+1)/4\)` and standard deviation = `\(\sqrt{n(n+1)(2n+1)/24}\)`.
 
-[Normal tables are easy to look up + R function `pnorm`, `qnorm` etc.]
+- R function `pnorm`, `qnorm` etc.
+
+- Normal tables are also available widely and easy to look up.
 
 ---
 
@@ -143,6 +213,38 @@ suppressWarnings(wilcox.test(c(-2,-2,2,2,5,5,5),mu = 3))
 ```
 
 ---
+## Cholesterol data 
+
+- Cholesterol measurements from 10 patients before and after a treatment. 
+
+- Your interest is in the `Reduction` column. 
+
+
+```r
+cholesterol &lt;- read.csv("cholesterol.csv")
+wilcox.test(cholesterol$Reduction, mu = 0)
+```
+
+```
+## Warning in wilcox.test.default(cholesterol$Reduction, mu = 0): cannot compute
+## exact p-value with ties
+```
+
+```
+## Warning in wilcox.test.default(cholesterol$Reduction, mu = 0): cannot compute
+## exact p-value with zeroes
+```
+
+```
+## 
+## 	Wilcoxon signed rank test with continuity correction
+## 
+## data:  cholesterol$Reduction
+## V = 38, p-value = 0.07505
+## alternative hypothesis: true location is not equal to 0
+```
+
+---
 # A univariate example 
 
 We have percentage of water content in a field measured in different locations: 
@@ -174,7 +276,7 @@ x2 &lt;- c(5.6, 6.1, 6.3, 6.4, 6.5, 6.6, 7.0, 7.5, 7.9, 8.0,
 plot(density(x2), main = "Water Content")
 ```
 
-![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
 
 ---
 ## Wilcoxon Signed Rank Test 
@@ -199,6 +301,36 @@ suppressWarnings(wilcox.test(x2, mu=9, conf.int=TRUE))
 ```
 
 **P-value &lt; 0.05, so we reject the null hypothesis. 
+
+---
+## CLT approximation 
+
+- For `\(n \ge 12\)`, use Normal approximation: with mean = `\(n(n+1)/4\)` and standard deviation = `\(\sqrt{n(n+1)(2n+1)/24}\)`.
+
+
+```r
+W &lt;- wilcox.test(x2, mu = 9)
+```
+
+```
+## Warning in wilcox.test.default(x2, mu = 9): cannot compute exact p-value with
+## ties
+```
+
+```r
+V &lt;- drop(W$statistic)
+n = length(x2)
+m = n*(n + 1)/4
+s = sqrt(n*(n+1)*(2*n+1)/24)
+
+(pval &lt;- 2*(1-pnorm(abs((V-m)/s))))
+```
+
+```
+##          V 
+## 0.01688093
+```
+- Q: why did we use `abs()`
 ---
 ## Sign Test 
 
@@ -228,7 +360,7 @@ binom.test(sum(x2&gt;9),length(x2),alternative = "two.sided")
 
 
 ```r
-t.test(x2,alternative = "two.sided",mu=9)
+t.test(x2,alternative = "two.sided", mu=9)
 ```
 
 ```
@@ -252,7 +384,7 @@ t.test(x2,alternative = "two.sided",mu=9)
 ---
 ## Are the data normal?
 
-![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-7-1.png)&lt;!-- --&gt;
+![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-9-1.png)&lt;!-- --&gt;
 
 ---
 ## Normality 
@@ -285,12 +417,19 @@ We need to "quantify" the deviation from normal distribution.
 
 ```r
 library(ggplot2)
-qplot(y=x2, x= 1, geom = "violin")+
-  geom_abline(slope=0,intercept = 9)+
-  theme_minimal()
 ```
 
-![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-12-1.png)&lt;!-- --&gt;
+```
+## Warning: package 'ggplot2' was built under R version 4.2.3
+```
+
+```r
+ggplot(y=x2, x= 1) + geom_violin(aes(y = x2, x = 1))+
+  geom_abline(slope=0,intercept = 9)+
+  theme_bw()
+```
+
+![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-14-1.png)&lt;!-- --&gt;
 
 ---
 class: middle
@@ -315,8 +454,7 @@ methods for plotting, printing and computing with such an
 
 &lt;h3&gt;Usage&lt;/h3&gt;
 
-&lt;pre&gt;
-ecdf(x)
+&lt;pre&gt;&lt;code class='language-R'&gt;ecdf(x)
 
 ## S3 method for class 'ecdf'
 plot(x, ..., ylab="Fn(x)", verticals = FALSE,
@@ -329,40 +467,40 @@ print(x, digits= getOption("digits") - 2, ...)
 summary(object, ...)
 ## S3 method for class 'ecdf'
 quantile(x, ...)
-&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;
 
 
 &lt;h3&gt;Arguments&lt;/h3&gt;
 
-&lt;table summary="R argblock"&gt;
-&lt;tr valign="top"&gt;&lt;td&gt;&lt;code&gt;x, object&lt;/code&gt;&lt;/td&gt;
+&lt;table&gt;
+&lt;tr style="vertical-align: top;"&gt;&lt;td&gt;&lt;code&gt;x, object&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;
 &lt;p&gt;numeric vector of the observations for &lt;code&gt;ecdf&lt;/code&gt;;  for
 the methods, an object inheriting from class &lt;code&gt;"ecdf"&lt;/code&gt;.&lt;/p&gt;
 &lt;/td&gt;&lt;/tr&gt;
-&lt;tr valign="top"&gt;&lt;td&gt;&lt;code&gt;...&lt;/code&gt;&lt;/td&gt;
+&lt;tr style="vertical-align: top;"&gt;&lt;td&gt;&lt;code&gt;...&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;
 &lt;p&gt;arguments to be passed to subsequent methods, e.g.,
-&lt;code&gt;&lt;a href="plot.stepfun.html"&gt;plot.stepfun&lt;/a&gt;&lt;/code&gt; for the &lt;code&gt;plot&lt;/code&gt; method.&lt;/p&gt;
+&lt;code&gt;&lt;a href="../../stats/help/plot.stepfun.html"&gt;plot.stepfun&lt;/a&gt;&lt;/code&gt; for the &lt;code&gt;plot&lt;/code&gt; method.&lt;/p&gt;
 &lt;/td&gt;&lt;/tr&gt;
-&lt;tr valign="top"&gt;&lt;td&gt;&lt;code&gt;ylab&lt;/code&gt;&lt;/td&gt;
+&lt;tr style="vertical-align: top;"&gt;&lt;td&gt;&lt;code&gt;ylab&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;
 &lt;p&gt;label for the y-axis.&lt;/p&gt;
 &lt;/td&gt;&lt;/tr&gt;
-&lt;tr valign="top"&gt;&lt;td&gt;&lt;code&gt;verticals&lt;/code&gt;&lt;/td&gt;
+&lt;tr style="vertical-align: top;"&gt;&lt;td&gt;&lt;code&gt;verticals&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;
-&lt;p&gt;see &lt;code&gt;&lt;a href="plot.stepfun.html"&gt;plot.stepfun&lt;/a&gt;&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;see &lt;code&gt;&lt;a href="../../stats/help/plot.stepfun.html"&gt;plot.stepfun&lt;/a&gt;&lt;/code&gt;.&lt;/p&gt;
 &lt;/td&gt;&lt;/tr&gt;
-&lt;tr valign="top"&gt;&lt;td&gt;&lt;code&gt;col.01line&lt;/code&gt;&lt;/td&gt;
+&lt;tr style="vertical-align: top;"&gt;&lt;td&gt;&lt;code&gt;col.01line&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;
 &lt;p&gt;numeric or character specifying the color of the
 horizontal lines at y = 0 and 1, see &lt;code&gt;&lt;a href="../../grDevices/html/colors.html"&gt;colors&lt;/a&gt;&lt;/code&gt;.&lt;/p&gt;
 &lt;/td&gt;&lt;/tr&gt;
-&lt;tr valign="top"&gt;&lt;td&gt;&lt;code&gt;pch&lt;/code&gt;&lt;/td&gt;
+&lt;tr style="vertical-align: top;"&gt;&lt;td&gt;&lt;code&gt;pch&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;
 &lt;p&gt;plotting character.&lt;/p&gt;
 &lt;/td&gt;&lt;/tr&gt;
-&lt;tr valign="top"&gt;&lt;td&gt;&lt;code&gt;digits&lt;/code&gt;&lt;/td&gt;
+&lt;tr style="vertical-align: top;"&gt;&lt;td&gt;&lt;code&gt;digits&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;
 &lt;p&gt;number of significant digits to use, see
 &lt;code&gt;&lt;a href="../../base/html/print.html"&gt;print&lt;/a&gt;&lt;/code&gt;.&lt;/p&gt;
@@ -373,34 +511,35 @@ horizontal lines at y = 0 and 1, see &lt;code&gt;&lt;a href="../../grDevices/htm
 &lt;h3&gt;Details&lt;/h3&gt;
 
 &lt;p&gt;The e.c.d.f. (empirical cumulative distribution function)
-&lt;i&gt;Fn&lt;/i&gt; is a step function with jumps &lt;i&gt;i/n&lt;/i&gt; at
-observation values, where &lt;i&gt;i&lt;/i&gt; is the number of tied observations
+&lt;code class="reqn"&gt;F_n&lt;/code&gt; is a step function with jumps &lt;code class="reqn"&gt;i/n&lt;/code&gt; at
+observation values, where &lt;code class="reqn"&gt;i&lt;/code&gt; is the number of tied observations
 at that value.  Missing values are ignored.
 &lt;/p&gt;
 &lt;p&gt;For observations
-&lt;code&gt;x&lt;/code&gt;&lt;i&gt;= (&lt;/i&gt;&lt;i&gt;x1,x2&lt;/i&gt;, ... &lt;i&gt;xn)&lt;/i&gt;,
-&lt;i&gt;Fn&lt;/i&gt; is the fraction of observations less or equal to &lt;i&gt;t&lt;/i&gt;,
+&lt;code&gt;x&lt;/code&gt;&lt;code class="reqn"&gt;= (&lt;/code&gt;&lt;code class="reqn"&gt;x_1,x_2&lt;/code&gt;, ... &lt;code class="reqn"&gt;x_n)&lt;/code&gt;,
+&lt;code class="reqn"&gt;F_n&lt;/code&gt; is the fraction of observations less or equal to &lt;code class="reqn"&gt;t&lt;/code&gt;,
 i.e.,
 &lt;/p&gt;
-&lt;p style="text-align: center;"&gt;&lt;i&gt;
-    Fn(t) = #{xi &amp;lt;= t}/n  =  1/n sum(i=1,n) Indicator(xi &amp;lt;= t).&lt;/i&gt;&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;code class="reqn"&gt;F_n(t) = \#\{x_i\le t\}\ / n
+               = \frac1 n\sum_{i=1}^n \mathbf{1}_{[x_i \le t]}.&lt;/code&gt;
+&lt;/p&gt;
 
 &lt;p&gt;The function &lt;code&gt;plot.ecdf&lt;/code&gt; which implements the &lt;code&gt;&lt;a href="../../graphics/html/plot.default.html"&gt;plot&lt;/a&gt;&lt;/code&gt;
 method for &lt;code&gt;ecdf&lt;/code&gt; objects, is implemented via a call to
-&lt;code&gt;&lt;a href="plot.stepfun.html"&gt;plot.stepfun&lt;/a&gt;&lt;/code&gt;; see its documentation.
+&lt;code&gt;&lt;a href="../../stats/help/plot.stepfun.html"&gt;plot.stepfun&lt;/a&gt;&lt;/code&gt;; see its documentation.
 &lt;/p&gt;
 
 
 &lt;h3&gt;Value&lt;/h3&gt;
 
 &lt;p&gt;For &lt;code&gt;ecdf&lt;/code&gt;, a function of class &lt;code&gt;"ecdf"&lt;/code&gt;, inheriting from the
-&lt;code&gt;"&lt;a href="stepfun.html"&gt;stepfun&lt;/a&gt;"&lt;/code&gt; class, and hence inheriting a
-&lt;code&gt;&lt;a href="stepfun.html"&gt;knots&lt;/a&gt;()&lt;/code&gt; method.
+&lt;code&gt;"&lt;a href="../../stats/help/stepfun.html"&gt;stepfun&lt;/a&gt;"&lt;/code&gt; class, and hence inheriting a
+&lt;code&gt;&lt;a href="../../stats/help/knots.html"&gt;knots&lt;/a&gt;()&lt;/code&gt; method.
 &lt;/p&gt;
 &lt;p&gt;For the &lt;code&gt;summary&lt;/code&gt; method, a summary of the knots of &lt;code&gt;object&lt;/code&gt;
 with a &lt;code&gt;"header"&lt;/code&gt; attribute.
 &lt;/p&gt;
-&lt;p&gt;The &lt;code&gt;&lt;a href="quantile.html"&gt;quantile&lt;/a&gt;(obj, ...)&lt;/code&gt; method computes the same quantiles as
+&lt;p&gt;The &lt;code&gt;&lt;a href="../../stats/help/quantile.html"&gt;quantile&lt;/a&gt;(obj, ...)&lt;/code&gt; method computes the same quantiles as
 &lt;code&gt;quantile(x, ...)&lt;/code&gt; would where &lt;code&gt;x&lt;/code&gt; is the original sample.
 &lt;/p&gt;
 
@@ -424,15 +563,14 @@ did at &lt;span style="font-family: Courier New, Courier; color: #666666;"&gt;&l
 
 &lt;h3&gt;See Also&lt;/h3&gt;
 
-&lt;p&gt;&lt;code&gt;&lt;a href="stepfun.html"&gt;stepfun&lt;/a&gt;&lt;/code&gt;, the more general class of step functions,
-&lt;code&gt;&lt;a href="approxfun.html"&gt;approxfun&lt;/a&gt;&lt;/code&gt; and &lt;code&gt;&lt;a href="splinefun.html"&gt;splinefun&lt;/a&gt;&lt;/code&gt;.
+&lt;p&gt;&lt;code&gt;&lt;a href="../../stats/help/stepfun.html"&gt;stepfun&lt;/a&gt;&lt;/code&gt;, the more general class of step functions,
+&lt;code&gt;&lt;a href="../../stats/help/approxfun.html"&gt;approxfun&lt;/a&gt;&lt;/code&gt; and &lt;code&gt;&lt;a href="../../stats/help/splinefun.html"&gt;splinefun&lt;/a&gt;&lt;/code&gt;.
 &lt;/p&gt;
 
 
 &lt;h3&gt;Examples&lt;/h3&gt;
 
-&lt;pre&gt;
-##-- Simple didactical  ecdf  example :
+&lt;pre&gt;&lt;code class='language-R'&gt;##-- Simple didactical  ecdf  example :
 x &amp;lt;- rnorm(12)
 Fn &amp;lt;- ecdf(x)
 Fn     # a *function*
@@ -468,7 +606,7 @@ plot(F10)
 plot(F10, verticals = TRUE, do.points = FALSE)
 
 plot(Fn12 , lwd = 2) ; mtext("lwd = 2", adj = 1)
-xx &amp;lt;- unique(sort(c(seq(-3, 2, length = 201), knots(Fn12))))
+xx &amp;lt;- unique(sort(c(seq(-3, 2, length.out = 201), knots(Fn12))))
 lines(xx, Fn12(xx), col = "blue")
 abline(v = knots(Fn12), lty = 2, col = "gray70")
 
@@ -484,9 +622,10 @@ plot.ecdf(rnorm(24))
 title("via  simple  plot.ecdf(x)", adj = 1)
 
 par(op)
-&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;
 
-&lt;hr /&gt;&lt;div style="text-align: center;"&gt;[Package &lt;em&gt;stats&lt;/em&gt; version 4.0.2 &lt;a href="00Index.html"&gt;Index&lt;/a&gt;]&lt;/div&gt;
+&lt;hr /&gt;&lt;div style="text-align: center;"&gt;[Package &lt;em&gt;stats&lt;/em&gt; version 4.2.1 &lt;a href="00Index.html"&gt;Index&lt;/a&gt;]&lt;/div&gt;
+&lt;/div&gt;
 
 
 ---
@@ -518,7 +657,7 @@ lines(x,pnorm(x))
 ]
 
 .pull-right[
-![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-15-1.png)&lt;!-- --&gt;
+![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-17-1.png)&lt;!-- --&gt;
 ]
 
 ---
@@ -533,7 +672,7 @@ qqnorm(y, ylim=c(-3,3), main = "Normal Q-Q Plot",
 qqline(y, distribution = qnorm)
 ```
 
-![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-16-1.png)&lt;!-- --&gt;
+![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-18-1.png)&lt;!-- --&gt;
 
 ---
 ## Two samples same 
@@ -546,7 +685,7 @@ qqplot(y,z,main = "Two-sample Q-Q Plot",
 abline(0, 1)
 ```
 
-![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-17-1.png)&lt;!-- --&gt;
+![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-19-1.png)&lt;!-- --&gt;
 
 ---
 ## Two samples different
@@ -559,7 +698,7 @@ qqplot(x,y,main = "Two-sample Q-Q Plot",
 abline(0, 1)
 ```
 
-![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-18-1.png)&lt;!-- --&gt;
+![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-20-1.png)&lt;!-- --&gt;
 
 
 ---
@@ -572,7 +711,7 @@ qqplot(x,y,main = "Two-sample Q-Q Plot",
        xlab = "Sample 1 Quantiles", ylab = "Sample 2 Quantiles")
 ```
 
-![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-19-1.png)&lt;!-- --&gt;
+![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-21-1.png)&lt;!-- --&gt;
 
 ---
 ## Histograms 
@@ -584,7 +723,7 @@ hist(y,breaks=50,freq=F,col=rgb(0,0,1,0.5),add=T)
 box()
 ```
 
-![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-20-1.png)&lt;!-- --&gt;
+![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-22-1.png)&lt;!-- --&gt;
 
 ---
 ## Or, Boxplots 
@@ -594,7 +733,7 @@ box()
 boxplot(y,z)
 ```
 
-![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-21-1.png)&lt;!-- --&gt;
+![](wilcox_qq_demo_x_files/figure-html/unnamed-chunk-23-1.png)&lt;!-- --&gt;
 
 ---
 ## Even better, test a hypothesis 
@@ -606,7 +745,7 @@ ks.test(rnorm(20),pnorm)
 
 ```
 ## 
-## 	One-sample Kolmogorov-Smirnov test
+## 	Exact one-sample Kolmogorov-Smirnov test
 ## 
 ## data:  rnorm(20)
 ## D = 0.24294, p-value = 0.1593
@@ -623,7 +762,7 @@ ks.test(x,y)
 
 ```
 ## 
-## 	Two-sample Kolmogorov-Smirnov test
+## 	Asymptotic two-sample Kolmogorov-Smirnov test
 ## 
 ## data:  x and y
 ## D = 0.1691, p-value &lt; 2.2e-16
@@ -635,7 +774,9 @@ ks.test(x,y)
 
 -  We will dig deeper into these tests ! 
 -  Kolmogorov-Smirnov, Lilliefors, Chi-square GoF etc. 
--  These are important as they tell you whether your data distribution is Normal, i.e. whether we should use nonparametric methods that do not assume Normality or parametric methods that assume Normality.
+-  These are important as they tell you whether your data distribution is Normal, i.e. whether we should use nonparametric methods that do not assume Normality or parametric methods that assume Normality. 
+
+
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
@@ -679,6 +820,19 @@ if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
     deleted = true;
   });
 })();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
 (function() {
   "use strict"
   // Replace <script> tags in slides area to make them executable

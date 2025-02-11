@@ -1,0 +1,744 @@
+---
+title: "Matrix Operations in R"
+author: "Jyotishka Datta"
+date: "`r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+  css: mystyle.css
+  lib_dir: libs
+nature:
+  highlightStyle: github
+  highlightLines: true
+  countIncrementalSlides: false
+---
+
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+```
+
+```{css, echo=FALSE}
+pre {
+  background: #FFBB33;
+  max-width: 100%;
+  overflow-x: scroll;
+}
+```
+
+---
+## About this Chapter
+- Not a comprehensive survey of linear algebra.
+
+
+---
+## Scalars
+- A scalar is a single number.
+- Examples: integers, real numbers, rational numbers.
+- Denoted using italic font: $a, n, x$.
+- In `R`, (almost) everything is a vector.
+
+```{r}
+a <- 3 
+a
+```
+
+- `a` is a scalar but R treats it as a length-1 vector
+
+```{r}
+a[1]
+length(a)
+is.vector(a)
+```
+
+---
+## Vectors
+- A vector is a 1-D array of numbers.
+- Notation: $\mathbf{x} = \begin{bmatrix} x_1 \\ x_2 \\ \vdots \\ x_n \end{bmatrix}$.
+- Represent points in space. 
+- Usual notation $\mathbf{a} \in \mathbb{R}^n$.
+
+---
+## R Example: Vectors
+
+-  We can use `c` function to create vectors in `R`, or use pre-defined functions like `seq`. 
+
+```{r}
+v <- seq(2,8,2)
+v
+length(v)
+is.vector(v)
+w <- 4:1
+w
+```
+
+---
+## Vector arithmetic 
+
+- We can add two vectors $\bf{x}$ and $\bf{y}$ using the same notation `x + y`.
+ 
+```{r}
+v + w
+```
+-  The inner product of a vector is defined as $\bf{x}^T \bf{x} = \sum_i x_i^2$, and can be calculated as: 
+
+```{r}
+crossprod(v)
+```
+-  Notice the `crossprod` function returns a 1 × 1 matrix, not a scalar.
+
+---
+## Componentwise product vs `crossprod`
+
+-  Similarly, the cross-product $\bf{x}^T \bf{y}$ can be done by:
+
+```{r}
+crossprod(v,w)
+```
+
+-  The `*` operation for vectors performs a component-wise product of vectors:
+
+```{r}
+v*w
+```
+
+
+---
+## Outer product 
+
+The outer product ${\bf x} {\bf x}^T$ is an $n \times n$ matrix. This is computed using the `%o%` operator:
+
+```{r}
+v %o% v
+```
+
+- Notice how `R` prints the matrix values, bordered by a useful index notation.
+
+```{r}
+(v %o%v)[,3]
+```
+
+
+## Matrices
+
+- A matrix is a 2-D array of numbers.
+- Notation: $A \in \mathbb{R}^{m \times n}$.
+- Example:
+  $$ A = \begin{bmatrix} a_{1,1} & a_{1,2} \\ a_{2,1} & a_{2,2} \end{bmatrix} $$
+  
+-  Obviously, $a_{ij}$ or $a_{i,j}$ denotes the element on the $i^{th}$ row and $j^{th}$ column.
+
+## Data matrix   
+
+- We usually express "data" in matrix language, for example, if we have $p$ predictors on $n$ subjects, we can denote the data as a $n \times p$ matrix $\bf{X}$.
+
+$$
+X = \begin{bmatrix} x_{11} & x_{12} & \ldots & x_{1p} \\
+x_{21} & x_{22} & \ldots & x_{2p} \\
+\ldots & \ldots & \vdots & \ldots \\
+x_{n1} & x_{n2} & \ldots &x_{np} 
+\end{bmatrix}
+$$
+- The mean vector or centroid could be written as:
+
+$$ \bar{\bf x} = \begin{pmatrix} \bar{x}_1 \\ \bar{x}_2 \\ \vdots \\ \bar{x}_n \end{pmatrix} \in \mathbb{R}^n$$
+
+## R Example: Matrices
+
+
+```{r}
+data(mtcars)
+head(mtcars)
+dim(mtcars)
+```
+
+## Matrices  
+
+- To arrange values into a matrix, we use the `matrix()` function:
+
+```{r, echo = TRUE}
+A <- matrix(1 : 6, nrow = 2, ncol = 3)
+A
+```
+
+- Individual entries can be referred to using a pair of indices. For example, the element in the second row, third column can be printed as:
+
+```{r, echo = TRUE}
+A[2, 3]
+```
+
+## Rows, Columns 
+-  An entire row or column can be retrieved by specifying its index and leaving the other index empty:
+
+```{r, echo = TRUE}
+A[2, ]
+```
+-  Similarly to the way R works with vectors, you can use negative indices to exclude row or colums of a matrix:
+
+```{r, echo = TRUE}
+A[-2,]
+```
+
+## Matrix indices 
+
+- Note how the values 1,2,3,4,5,6 are used to create the matrix: the first two are used to fill the first column, then the next two to fill the second column, and so on.
+
+- R allows matrices to be indexed by a single number, e.g.,
+
+```{r, echo = TRUE}
+A[5]
+```
+- The fifth element of a is the fifth element of the vector obtained by "unrolling" the matrix, column by column. 
+
+## Fill by row 
+
+-  Sometimes you need to fill a matrix row by row, instead than column by column. 
+-  You can change the default behavior as follows:
+
+```{R,echo = TRUE}
+A <- matrix(1 : 6, nrow = 2, ncol = 3, byrow = TRUE)
+A
+```
+
+## Matrix Transpose {.smaller}
+
+- The transpose of a matrix $A$ is denoted as $A^T$.
+- Example:
+  $$ A = \begin{bmatrix} a_{1,1} & a_{1,2} & a_{1,3} \\ a_{2,1} & a_{2,2} & a_{2,3} \end{bmatrix} \Rightarrow  A^T = \begin{bmatrix} a_{1,1} & a_{2,1} \\ a_{1,2} & a_{2,2} \\ a_{1,3} & a_{2,3} \end{bmatrix} $$
+
+-  You can think of transpose as mirror image across the main diagonal. Rows of $A$ become columns of $A^T$ and vice versa. 
+
+-  Useful: $(A B)^T = B^T A^T$. 
+
+-  $A$ is called a symmetric matrix if $A^T = A$. 
+
+## R Example: Matrix Transpose
+
+```{r}
+matrix_A <- matrix(c(1, 2, 3, 4), nrow=2, ncol=2)
+print(matrix_A)
+t_A <- t(matrix_A)
+print(t_A)
+```
+
+-  The `t()` function takes transpose of a vector, into an $1 \times n$ matrix, so you could also do `crossprod` this way:
+
+```{r}
+t(v)%*%w
+```
+
+
+## Matrix Multiplication
+
+- If $A \in \mathbb{R}^{m \times n}$ and $B \in \mathbb{R}^{n \times p}$, then $C = AB$ is defined.
+- Each element: $c_{i,j} = \sum_{k} a_{i,k} b_{k,j}$.
+
+
+![](matrixmultiplication.png){width="10%"}
+
+
+## R Example: Matrix Multiplication
+
+- Matrix multiplication in R is performed by the operator %*%. For example,
+
+```{r}
+A <- matrix(c(1, 2, 3, 4), nrow=2)
+B <- matrix(c(2, 0, 1, 2), nrow=2)
+C <- A %*% B
+print(C)
+```
+
+## Multiplication  
+
+- Matrices must conform, i.e. multiplication must make sense !
+
+```{r, echo = TRUE}
+A <- matrix(c(1, 2, 0, 1), 2)
+B <- matrix(c(1, 3, 3, 1, 4, 5), nr = 2)
+A
+B
+```
+
+```{r, error = TRUE}
+A %*% B
+
+```
+
+
+## Multiplication  
+
+-  $A$ is a $2 \times 2$ matrix and $B$ is a $2 \times 3$ matrix, so $AB$ can be computed but not $BA$!
+
+```{r, echo = TRUE, error = TRUE}
+B %*% A
+dim(A)
+dim(B)
+```
+
+## Multiplication 
+
+-  With $A$ and $B$ defined as above the matrix product $BA$ in not defined, but the product $B^T A$ is ($B^T$ denotes the transpose of $B$). 
+- The transpose of a matrix can be obtained with the function `t()`.
+```{r, echo = TRUE}
+t(B) %*% A
+```
+
+## Crossprod
+
+-  A much more efficient way of computing the same matrix product is via the function `crossprod()`.
+```{r, echo = TRUE}
+all.equal(crossprod(B, A), t(B) %*% A)
+```
+- A similar function, tcrossprod(), computes the matrix product $AB^T$ whenever the product is well defined.
+
+## Exercise (Try at home)  
+
+- Consider the matrix
+```{r, echo = TRUE}
+X <- cbind(1, seq(-1, 1, length = 5))
+X
+```
+- Use crossprod() and tcrossprod() to find $X^T X$ and $X X^T$. 
+- Note the dimensions of the resulting matrices.
+
+
+## Identity Matrix
+
+- The identity matrix $I_n$ satisfies $I_n x = x$ for any $x$.
+- Example:
+  $$ I_3 = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} $$
+```{r}
+I3 <- diag(3)
+print(I3)
+```
+
+
+
+
+## Special matrices 
+
+-  *Triangular* Upper triangular when $A_{ij} = 0$ for $i<j$, elements above diagonal are zero. Similarly, lower triangular when $A_{ij} = 0$ for $i>j$. 
+-   *Diagonal and tridiagonal* Diagonal matrices have all non-diagonal entries zero ($A_{ij}=0$ for $i \ne j$) and tridiagonal matrices have $A_{ij}=0$ for $|i-j|>1$.
+-   *Positive definite* $A$ symmetric with $x^{T}A x > 0$ for all $x \ne 0$
+-   *Orthogonal* $A^{T}A = I$.
+
+## The `diag` function 
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+-  The `diag` function can be used to both build diagonal matrices as well as extract the diagonal elements of an existing matrix.
+
+```{r}
+t(matrix(1 : 16, 4, 4))
+```
+
+:::
+
+::: {.column width="50%"}
+
+```{r}
+diag(t(matrix(1 : 16, 4, 4)))
+```
+
+- Put another `diag` if you want the diagnoal elements as a diagonal matrix. 
+
+```{r}
+diag(diag(t(matrix(1 : 16, 4, 4))))
+```
+
+:::
+
+::::
+
+## Diagonals {.smaller}
+
+- We have seen `rbind()` and `cbind()` before. 
+
+```{r}
+rbind(1:4, 2:5)
+```
+
+- e.g. We can use `cbind()` to construct a 3 x 3 Hilbert matrix. The (i, j) entry is
+$1/(i + j - 1).$
+
+```{r, echo = TRUE}
+H3 <- 1 / cbind(1 : 3, 2 : 4, 3 : 5)
+H3
+```
+
+- The Hilbert matrices are canonical examples of ill-conditioned matrices, being notoriously difficult to use in numerical computation. 
+
+## Diagonals and Determinants
+
+- The determinant of a square matrix can be obtained with `det()`.
+
+```{r, echo = TRUE}
+det(H3)
+```
+- For a diagonal matrix determinant is the product of the diagonal elements. 
+
+```{r}
+A = diag(1:4)
+A
+det(A)
+```
+
+
+## Triangular 
+
+-  The functions `lower.tri()` and `upper.tri()` can be used to obtain the lower and upper triangular parts of matrices. 
+
+-  The output of the functions is a matrix of logical elements, with TRUE representing the relevant triangular elements. For example,
+
+```{r, echo = TRUE}
+lower.tri(H3)
+```
+
+## Triangular 
+
+- A typical use of these functions is to set the upper or lower triangular part of a matrix to zero, thus constructing a triangular matrix.
+
+```{r, echo = TRUE}
+Htri <- H3
+Htri[lower.tri(Htri)] <- 0
+Htri
+```
+
+
+## Eigendecomposition
+
+Aneigenvectorof a square matrix A is a nonzero vector v such that multiplication by A alters only the scale of v:
+
+-  Eigenvector $v$: $Av = \lambda v$.
+
+-  The scalar $\lambda$ is known as the eigenvalue corresponding to this eigenvector.
+
+
+## Eigen-decomposition
+
+-  Suppose that a matrix $\mathbf{A}$ has $n$ linearly independent eigenvectors $\{\mathbf{v}^{(1)}, \ldots, \mathbf{v}^{(n)}\}$ with corresponding eigenvalues 
+$\{\lambda_1, \ldots, \lambda_n\}$. 
+
+-  We may concatenate all the eigenvectors to 
+form a matrix $\mathbf{V}$ with one eigenvector per column: 
+$\mathbf{V} = [\mathbf{v}^{(1)}, \ldots, \mathbf{v}^{(n)}]$. 
+
+-  Likewise, we can 
+concatenate the eigenvalues to form a vector $\boldsymbol{\lambda} = [\lambda_1, 
+\ldots, \lambda_n]^\top$. 
+
+-  The eigendecomposition of $\mathbf{A}$ is then given by
+
+$$
+\mathbf{A} = \mathbf{V} \, \mathrm{diag}(\boldsymbol{\lambda}) \, \mathbf{V}^{-1}.
+$$
+## Effect of eigenvectors 
+
+![](eigenvector.png){width="60%"}
+
+## R Example: Eigendecomposition
+
+```{r}
+A <- matrix(c(3, 1, 1, 3), nrow=2)
+eigen_A <- eigen(A)
+print(eigen_A)
+```
+
+## Singular Value Decomposition (SVD)
+
+- Similar to eigendecomposition but more general.
+- Every real matrixhas an SVD: $A = UDV^T$.
+- Used in dimensionality reduction, pseudoinverse computation.
+
+## R Example: SVD
+
+```{r}
+svd_A <- svd(A)
+print(svd_A)
+```
+
+
+## Trace Operator
+- The trace of a square matrix is the sum of its diagonal elements.
+- Notation: $\text{Tr}(A) = \sum_{i} A_{i,i}$.
+- Useful in matrix calculus and optimization.
+
+## R Example: Trace
+```{r}
+tr_A <- sum(diag(A))
+print(tr_A)
+```
+
+## Matrix inversion
+
+- The inverse of a matrix can be found using `solve()`:
+
+```{r, echo = TRUE}
+Ainv <- solve(A)
+Ainv
+all.equal(Ainv %*% A, diag(2))
+```
+
+## Linear systems
+
+-  Many common problems in Statistics require solving a linear system of equations:
+
+$$
+A x = b. \label{eq:ls}
+$$
+
+
+-  Examples: Least squares normal equations for linear regression: $(X^{T}X)\beta = X^{T}y$ 
+
+-  or the stationary distribution of a Markov chain $\pi P = \pi$, where $\sum \pi = 1$. 
+
+
+## Linear systems
+
+- A typical linear model can be written in matrix form as: 
+
+$$
+\begin{bmatrix}
+        y_1 \\ y_2 \\ ... \\ y_n
+    \end{bmatrix} = 
+    \begin{bmatrix}
+        x_{11} & x_{12} & ... & x_{1p} \\ x_{21} & x_{22} & ... & x_{2p} \\ ... & ... & ... & ...\\ x_{n1} & x_{n2} & ... & x_{np}
+    \end{bmatrix} \times \begin{bmatrix} \beta_1 \\ \beta_2 \\ \vdots \\ \beta_p \end{bmatrix}
+$$
+
+## Ordinary least squares 
+
+
+- The ordinary least squares (OLS) method is used to estimate the $p\times 1$ parameter vector $\boldsymbol{\beta}$ of the linear regression model $\mathbf{Y}=\mathbf{X}\boldsymbol{\beta}$.
+
+-  The estimator $\boldsymbol{\hat{\beta}_{\text{OLS}}}$ is defined as:
+
+$$
+\begin{equation*}
+    \boldsymbol{\hat \beta}_{\text{OLS}} = \underset{\boldsymbol{\beta}\in\mathbb{R}^p}{\operatorname{argmin}} \lVert \mathbf{Y}-\mathbf{X}\boldsymbol{\beta} \rVert ^2 = \underset{\boldsymbol{\beta}\in\mathbb{R}^p}{\operatorname{argmin}}\hspace{1mm}(\mathbf{Y}-\mathbf{X}\boldsymbol{\beta})'(\mathbf{Y}-\mathbf{X}\boldsymbol{\beta})
+\end{equation*}
+$$
+## Ordinary least squares 
+
+
+-  That is, $\boldsymbol{\hat \beta}_{\text{OLS}}$ is the choice of $\boldsymbol{\beta}$ that minimizes the squared norm of the deviation (error) between the observed values contained in $\mathbf{Y}$ and the estimated values contained in $\mathbf{X}\boldsymbol{\beta}$. 
+
+## Ordinary least squares 
+
+-  To derive $\boldsymbol{\hat \beta}_{\text{OLS}}$, let $f=(\mathbf{Y}-\mathbf{X}\boldsymbol{\beta})'(\mathbf{Y}-\mathbf{X}\boldsymbol{\beta})$. Expanding $f$ yields:
+
+$$
+\begin{align*}
+    f &= \mathbf{Y'Y}-\boldsymbol{\beta}'\mathbf{X'Y}-\mathbf{Y'X}\boldsymbol{\beta}+\boldsymbol{\beta}'\mathbf{X'X}\boldsymbol{\beta} \\
+    & = \mathbf{Y'Y}-2\boldsymbol{\beta}'\mathbf{X'Y}+\boldsymbol{\beta}'\mathbf{X}'\mathbf{X}\boldsymbol{\beta}
+\end{align*}
+$$
+
+## Ordinary least squares 
+
+
+-  Differentiate to find the value of $\boldsymbol{\beta}$ which minimizes $f$:
+
+$$
+\begin{align*}
+    &\frac{\boldsymbol{\delta} f}{\boldsymbol{\delta}\boldsymbol{\beta}} = -2\mathbf{X'Y}+2\mathbf{X'X}\boldsymbol{\beta} = \mathbf{0} \hspace{2mm}\rightarrow\hspace{2mm} \mathbf{X'X}\boldsymbol{\beta} = \mathbf{X'Y}\\
+    & \rightarrow \hspace{2mm} \boldsymbol{\hat \beta}_{\text{OLS}} = (\mathbf{X'X})^{-1}\mathbf{X'Y}
+\end{align*}
+$$
+
+## Ordinary least squares 
+
+
+Verify that the estimator $\boldsymbol{\hat \beta}_{\text{OLS}}$ is a minimum by examining the matrix of second derivatives:
+
+$$
+\begin{align}\label{Hessian}
+    \frac{\boldsymbol{\delta}^2f}{\boldsymbol{\delta\beta}^2} = 2\mathbf{X'X}
+\end{align}
+$$
+
+
+-  For most regression problems in practice with $n > p$, the matrix $X^TX$ is positive definite, and thus it has positive eigenvalues and is nonsingular. $f$ therefore attains a minimum at $\boldsymbol{\hat \beta}_{\text{OLS}}$.
+
+-  Note that $\mathbf{X'X}$ is a $p\times p$ matrix, $\boldsymbol{\beta}$ is a $p \times 1$ vector, and  $\mathbf{X'Y}$ is a $p \times 1$ vector. 
+
+
+## System of Equations
+
+-  A linear system of equations can have:
+   -  No solution
+   -  Many solutions
+   -  Exactly one solution: this means multiplication by the matrix is an invertible function. 
+
+##  Linear system
+
+-  If the matrix $A$ is a square non-singular matrix, the usual solution to the $A x = b$ is $x = A^{-1} b$.
+
+$$
+\begin{align}
+A x & = b \\
+\Rightarrow A^{-1} A x & = A^{-1} b \\
+\Rightarrow I_n x & = A^{-1} b \equiv x =  A^{-1} b.
+\end{align}
+$$
+
+
+-  Directly inverting the matrix $A$ is inefficient and could be numerically inaccurate $\Rightarrow$ Gaussian elimination!
+
+## Invertibility 
+
+-  Matrix can’t be inverted if…
+  -   More rows than columns
+  -   More columns than rows
+  -   Redundant rows/columns (“linearly dependent”,
+“low rank”)
+
+##  Invertibility 
+
+-  For a square matrix, 
+      -   invertibility is equivalent to 
+      -   having a non-zero determinant, 
+      -   full rank (meaning the rank equals the number of rows/columns), 
+      -   and linearly independent columns (or rows); essentially, all these conditions imply the matrix can be inverted and vice versa. 
+      
+-  A square matrix with linearly dependent columns is known as singular. 
+
+## Check for singular 
+
+```{r}
+A <- matrix(c(2, 4, 1, 2), nrow = 2, byrow = TRUE)
+
+A
+
+det(A)
+
+qr(A)$rank  # QR decomposition gives rank
+
+(qr(A)$rank == ncol(A))
+
+```
+
+      
+## Check non-singular
+
+```{r}
+A <- matrix(c(2, 4, 1, 3), nrow = 2, byrow = TRUE)
+
+A
+
+det(A)
+
+qr(A)$rank  # QR decomposition gives rank
+
+(qr(A)$rank == ncol(A))
+
+```
+
+
+## Solve linear system 
+
+- Inverse in R uses QR decomposition, that we might briefly talk about at the very end of this course (if time permits)! 
+
+- For linear systems we don't need to compute inverses. We can use Gaussian Elimination. 
+
+```{r, echo = TRUE}
+b <- c(5, 3)
+solve(A, b) # use this
+Ainv %*% b # don't use this
+```
+
+## Time comparison 
+
+- Compare execution times for the different methods of solving the Least Squares problem when the number of observations is large.
+
+-  Let us start by making up our own random data: $n \times p$ design matrix $X$ and an $n \times 1$ response vector $y$. 
+-  Take $n = 5 \times 10^5$. 
+
+```{r, echo = TRUE, cache = TRUE}
+set.seed(123)
+n <- 5e5; p <- 20
+X <- matrix(rnorm(n * p, mean = 1 : p, sd = 10), nr = n, nc = p, byrow = TRUE)
+y <- rowSums(X) + rnorm(n)
+```
+
+## OLS 
+
+- The naive approach to solve the LS problem is to compute: 
+$\hat{\beta} = (X^T X)^{-1}X^T y$
+
+```{r, echo = TRUE, cache = TRUE}
+system.time(bHat1 <- solve(t(X) %*% X) %*% t(X) %*% y)
+```
+
+-  Not so naive: use `crossprod`.
+
+```{r, echo = TRUE, cache = TRUE}
+system.time(bHat2 <- solve(crossprod(X), crossprod(X, y)))
+```
+
+
+## Moore-Penrose Pseudoinverse
+
+- Used when matrix inversion is not possible.
+- Defined as: $A^+ = V D^+ U^T$.
+- Provides least-squares solutions to systems of equations.
+
+## R Example: Pseudoinverse
+
+```{r}
+library(MASS)
+pinv_A <- ginv(A)
+print(pinv_A)
+```
+
+## Variance-Covariance Matrix
+
+- Measures the variance and covariance between variables.
+- Notation: $S = \frac{1}{n-1} (X - \bar{X})(X - \bar{X})^T$
+
+## R Example: Variance-Covariance Matrix
+
+```{r}
+data_matrix <- matrix(rnorm(20), nrow=5)
+cov_matrix <- cov(data_matrix)
+print(cov_matrix)
+```
+
+## Correlation Matrix
+- Standardized measure of association between variables.
+- Notation: $R = D^{-1} S D^{-1}$
+
+## R Example: Correlation Matrix
+
+```{r}
+corr_matrix <- cor(data_matrix)
+print(corr_matrix)
+```
+
+## Standardization (Scaling and Centering)
+
+- Subtract mean and divide by standard deviation.
+
+## R Example: Standardization
+```{r}
+scaled_data <- scale(data_matrix)
+print(scaled_data)
+```
+
+
+# More advanced topics  
+
+## Inverting a matrix using Cholesky helps
+
+- A symmetric positive definite matrix can be factorized as: 
+$$
+A = L L^T
+$$
+
+```{r, echo = TRUE, cache = TRUE}
+p = 1000; A = array(rnorm(p*p), c(p,p))
+A = crossprod(A)
+ptm <- proc.time(); B = solve(A); proc.time()-ptm
+ptm <- proc.time(); B = chol2inv(A); proc.time()-ptm
+```
