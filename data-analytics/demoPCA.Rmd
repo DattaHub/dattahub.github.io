@@ -1,6 +1,5 @@
 ---
 title: "PCA"
-subtitle: "Data Analytics"
 author: "Jyotishka Datta (<jyotishka@vt.edu>) <br> Department of Statistics, Virginia Tech"
 output: 
   ioslides_presentation:
