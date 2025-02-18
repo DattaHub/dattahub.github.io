@@ -1,17 +1,17 @@
 /* Whole document: */
 body{
-  font-family: Times New Roman;
+  font-family: Palatino;
   font-size: 10pt;
 }
 /* Headers */
 h1{
   font-size: 16pt;
 }
-h2,h3,h4,h5,h6{
+h2,h3,h4{
   font-size: 14pt;
 }
-h3,h4,h5,h6{
-  font-size: 12pt;
+h5,h6{
+  font-size: 14pt;
 }
 .remark-slide-content {
     font-size: 30px;
