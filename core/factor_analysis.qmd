@@ -744,7 +744,7 @@ Thurstone (1931) defined **simple structure** as a desirable property of
 factor solutions, characterized by:
 
 -   Each row of the factor loading matrix has at least **one zero**.
--   Each column of the loading matrix has at least **k zeros**.
+-   Each column of the loading matrix has at least **m zeros**.
 -   Every pair of factor columns has variables with **zero loadings in
     one but not the other**.
 -   With four or more factors, most variables should have **zero
@@ -1215,4 +1215,4 @@ example, factor 1 may not have the largest variance.
 
 ## Envoi
 
-![](summary_everitt.png){width="822"}{fig-align="center"}
+![](summary_everitt.png){width="822"}
