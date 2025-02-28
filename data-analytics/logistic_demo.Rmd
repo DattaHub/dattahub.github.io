@@ -1,8 +1,15 @@
 ---
 title: "Logistic Regression"
 author: "Jyotishka Datta"
-date: "April 13, 2018, updated `r Sys.Date()`"
-output: ioslides_presentation
+date: "Updated `r Sys.Date()`"
+output: 
+  ioslides_presentation:
+    theme: united
+    smaller: true
+    logo: ../vt.png
+    css: custom.css
+    transition: faster
+    widescreen: true
 ---
 
 ```{r setup, include=FALSE}

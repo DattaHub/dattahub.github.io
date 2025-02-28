@@ -95,6 +95,14 @@ $$
 (R_sq = 1 - summaryLog$deviance / summaryLog$null.deviance)
 ```
 -  Is the high value of $R^2$ surprising or not? 
+---
+## Smarket 
+
+```{r, echo = T}
+library(ISLR)
+names(Smarket)
+dim(Smarket)
+```
 
 ---
 ## Smarket data 

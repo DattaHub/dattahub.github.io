@@ -1,0 +1,395 @@
+---
+title: "Bivariate Normal <br> Properties"
+author: "Dr. Jyotishka Datta"
+format:
+  revealjs: 
+    theme: simple
+    fontsize: 22pt
+    scrollable: true
+    logo: ./vt.png
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, fig.align = 'center')
+```
+
+## Bivariate boxplot 
+
+Instead of the central box containing
+50% of the univariate data as in a univariate boxplot, the bivariate boxplot
+includes a pair of estimated ellipses, the inner one containing approximately 50%
+of the data and the outer one containing about 95%.
+
+
+## R code 
+
+```{r, warning=FALSE, message=FALSE, fig.asp = 0.8}
+library(MVA) # library for bvbox
+library(datasets)
+swiss2 <- swiss[, c("Agriculture", "Examination")]
+bvbox(swiss2, xlab = "Agriculture", ylab = "Examination",pch = 19, cex = 1.25, col = "red")
+```
+
+
+
+## Convex Hull 
+
+The convex hull is a lot like wrapping an irregularly shaped object with the
+smallest amount of gift paper: The most extreme points in any direction will define
+the ultimate shape of the package. Mathematically, the convex hull is the smallest
+convex polygon containing all of the data.
+
+
+
+## R code
+
+```{r, fig.asp = 0.8}
+ch <- chull(swiss2) # find the indices of the convex hull
+ch <- c(ch,ch[1]) # loop back to the beginning
+plot(swiss2, pch = 19, col = 2,
+     cex = 1.25) # plot the original data
+lines(swiss2$Agriculture[ch], swiss2$Examination[ch],
+      type = "l", col = 3, lwd = 2) # bold, green lines
+```
+
+
+## Layers 
+
+Suppose we omitted the observations on the convex hull and looked at what
+remains. This would remove the most extreme values to reveal those less extreme.
+We might then draw the convex hull of those remaining observations. It is also useful
+to repeat this process several times. The net effect is much like peeling an onion,
+successively removing the outermost layers, one at a time. This repeated process will
+give a better idea about the underlying shape of the data.
+
+
+## R code
+
+```{r, results = 'hide', fig.asp = 0.8}
+library(aplpack)
+nlev <- 5 # Number of levels
+colors <- heat.colors(9)[3:(nlev+2)]
+plothulls(swiss2, n.hull = nlev, col.hull = colors, xlab = "Agriculture", ylab = "Examination",lty.hull = 1:nlev, density = NA, col = 0, main = " ")
+points(swiss2, pch = 16, cex = 1, col = "blue")
+```
+
+
+
+## Bivariate normal 
+
+The probability density function of a bivariate normal distribution with means $\mu_1, \mu_2$, standard deviations $\sigma_1, \sigma_2$, and correlation coefficient $\rho$ is given by:
+
+$$
+\begin{align}
+f(x, y) &= \frac{1}{2\pi \sigma_x \sigma_y \sqrt{1-\rho^2}} \\
+& \exp \left( -\frac{1}{2(1-\rho^2)} 
+\left[ \frac{(x - \mu_x)^2}{\sigma_x^2} - 2\rho \frac{(x - \mu_x)(y - \mu_y)}{\sigma_x \sigma_y} + \frac{(y - \mu_y)^2}{\sigma_y^2} \right] \right)
+\end{align}
+$$
+
+## Simplify 
+
+-  If you standardize both $x$ and $y$, i.e., 
+
+$$x \mapsto (x - \mu_x)/\sigma_x, y \mapsto (y - \mu_y)/\sigma_y$$. 
+
+-  We can get a much simpler form: 
+
+$$
+\begin{align}
+f(x, y) &= \frac{1}{2\pi \sqrt{1-\rho^2}} 
+\exp \left( -\frac{1}{2(1-\rho^2)} 
+\left[ x^2 - 2\rho xy + y^2 \right] \right)
+\end{align}
+$$
+
+-  Clearly, if $\rho = 0$, this is just the product of two standard normal density functions. 
+
+
+## Bivariate contours 
+
+-  The `R` functions for random variable generation, CDF and quantile are respectively, `rmvnorm`, `dmvnorm`, `pmvnorm` and `qmvnorm` from the `mvtnorm` library. 
+
+
+```{r, warning=FALSE, message = FALSE, fig.width = 10, fig.height= 4, echo = F}
+# Load necessary libraries
+library(mvtnorm)
+library(graphics)
+
+# Define grid for x and y
+x <- seq(-3, 3, length.out = 100)
+y <- seq(-3, 3, length.out = 100)
+grid <- expand.grid(x = x, y = y)
+
+# Function to compute density matrix for given correlation
+get_density_matrix <- function(rho) {
+  sigma <- matrix(c(1, rho, rho, 1), nrow = 2)  # Covariance matrix
+  dmvnorm(grid, mean = c(0, 0), sigma = sigma)
+}
+
+# Compute density matrices for different correlations
+cor_values <- c(-0.9, -0.5, 0, 0.5, 0.9)
+densities <- lapply(cor_values, get_density_matrix)
+
+# Set up plotting area
+par(mfrow = c(1, 5))  
+
+# Generate contour plots
+for (i in 1:length(cor_values)) {
+  contour(x, y, matrix(densities[[i]], nrow = length(x)), 
+          main = paste("ρ =", cor_values[i]), xlab = "X", ylab = "Y")
+}
+```
+
+
+
+## More ...
+
+```{r}
+library(MASS)  # For mvrnorm()
+# Define parameters
+set.seed(123)  # For reproducibility
+n <- 500  # Number of samples
+rho <- 0.9  # Correlation
+mu <- c(0, 0)  # Mean vector
+sigma <- matrix(c(1, rho, rho, 1), nrow = 2)  # Covariance matrix
+
+# Generate samples using rmvnorm()
+samples <- rmvnorm(n, mean = mu, sigma = sigma)
+```
+
+
+## Plot them
+
+```{r, fig.asp = 0.7, warning = FALSE, message = FALSE}
+library(ggplot2)  
+df <- data.frame(x = samples[,1], y = samples[,2])
+(p <- ggplot(df, aes(x = x, y = y)) +
+  geom_point(alpha = 0.5, color = "blue")+
+  theme_minimal())
+```
+
+
+## Bivariate boxplot 
+
+```{r}
+bvbox(samples,pch = 19, cex = 1.25, col = "red")
+```
+
+## Linear combinations
+
+-  A very useful property is that if $X$ and $Y$ are jointly normally distributed, any linear combination $\alpha X + \beta Y$ should be normally distributed. 
+
+-  We use this property extensively in linear models as well as factor analysis. 
+
+-  We can use this property to transform a correlated bivariate normal pair into two
+independent normals. 
+
+$$
+Z_1 = X/\sqrt{2}\sigma_X + Y/\sqrt{2} \sigma_Y, \quad Z_2 = X/\sqrt{2}\sigma_X - Y/\sqrt{2} \sigma_Y,
+$$
+
+-  Try to prove: $(Z_1, Z_2)$ should be a bivariate normal with correlation zero. 
+
+-  Try to work out the covariance of $Z_1, Z_2$ assuming unit variance first. 
+
+
+## Marginal distributions
+
+-  If $(X,Y)$ are jointly normal, then $X$ and $Y$ should have marginal distributions as normal. 
+
+```{r, fig.asp = 0.7, warning = FALSE, message = FALSE}
+library(ggExtra)
+# with marginal histogram
+(p1 <- ggMarginal(p, type="histogram"))
+```
+
+
+## Is the reverse true?
+
+-  Jointly normal $\Rightarrow$ marginal normal, but marginally normal does not necessarily imply joint normal. 
+
+```{r}
+checker <- function(n)
+# not bivariate normal
+{
+checker <- NULL # start a list
+for (i in 1:n)
+{
+x <- rnorm(2) 
+if(x[1]>0) x[2] <- abs(x[2])
+else x[2] <- -abs(x[2])
+checker <- rbind(checker, x)
+}
+return(checker)
+}
+```
+
+
+## Look at the joint
+
+```{r, echo = F, fig.asp = 0.7, warning = FALSE, message = FALSE}
+
+checker_samples <- checker(200)
+
+library(ggplot2)  
+df <- data.frame(x = checker_samples[,1], y = checker_samples[,2])
+p <- ggplot(df, aes(x = x, y = y)) +
+  geom_point(alpha = 0.5, color = "blue")+
+  theme_minimal()
+(p1 <- ggMarginal(p, type="histogram"))
+```
+
+## Test for correlation
+
+-  We have already seen how to calculate the bivariate mean, variances, the dispersion matrix and correlation matrix. 
+
+-  We can use `cor.test` for testing if the correlation is equal to zero. 
+
+```{r}
+cor.test(swiss$Agriculture, swiss$Examination)
+```
+
+
+## Conditional distribution
+
+-  A useful property of bivariate normal is that the conditional distributions are also normally
+distributed. 
+
+-  Specifically, for any given value or range of X, the corresponding values of Y are also normally distributed. 
+
+-  In practical terms of data analysis, this suggests we can examine the Y values as normals, separately for different ranges of X.
+
+
+## Conditional 
+
+-  When we sample from the bivariate normal density function, the conditional distribution of Y for any given value of X = x is also normally distributed with mean and variance:
+
+$$
+\text{mean} = \mu_Y + \rho (x - \mu_X) \frac{\sigma_Y}{\sigma_X}, \;
+\text{and variance} = 
+(1 - \rho^2) \sigma_Y^2.
+$$
+
+-  The conditional mean of Y is a linear function of a known value of X. 
+
+-  This property is utilized in linear regression.
+
+-  Also, the conditional variance
+of Y is always smaller than the marginal variance $\sigma^2_Y$. 
+
+-  This reduction in the variance demonstrated the benefit achieved by knowing the value of X.
+
+## Conditional variance
+
+$$
+\text{mean} = \mu_Y + \rho (x - \mu_X) \frac{\sigma_Y}{\sigma_X}, \;
+\text{and variance} = 
+(1 - \rho^2) \sigma_Y^2.
+$$
+
+-  Further, the conditional variance is the same for every value of X. 
+
+-   One assumption of linear regression is the constant variance, conditional on X, yet independent of the value of X. 
+
+-   This is called homoscedasticity. 
+
+-   Let us connect this to simple linear regression.
+
+
+## Formulation 
+
+- Simple linear model: $Y = \beta_0 + \beta_1 X + \epsilon$.
+- $\beta_0$ and $\beta_1$ are known as the intercept and slope, and
+$\epsilon$ is a random variable with mean zero and independent from $X$.
+- Another way of looking at this is:
+$$
+\mathbb{E}(Y | X = x) = \beta_0 + \beta_1 X, \text{ since } \mathbb{E}(\epsilon | x) = 0.
+$$
+- LHS: conditional expectation of $Y$  given $X$ : how the mean of the random variable $Y$  is changing according to a particular value, denoted by $x$, of the random variable $X$.
+
+- we are saying is that the mean of Y is changing in a linear fashion with respect to the value of X.
+
+## Estimating $\beta$ 
+
+- One way of estimating $(\beta_0, \beta_1)$ is by minimizing the residual sum of squares: 
+
+$$
+RSS(\beta_0, \beta_1) = \sum_{i=1}^{n}(Y_i - \beta_0 - \beta_1 X_i)^2
+$$
+
+- Look for estimates such that:
+
+$$
+(\hat{\beta}_0, \hat{\beta}_1) = \arg \min_{(\beta_0, \beta_1) \in \mathbb{R}^2} RSS(\beta_0, \beta_1)
+$$
+
+
+## Estimating $\beta$ 
+
+-  It can be seen that the minimizers of the RSS are:
+
+$$
+\hat{\beta}_0 = \bar{Y} - \hat{\beta}_1 \bar{X}, \hat{\beta}_1 = \frac{s_{xy}}{s_{x}^2}
+$$
+
+-  $\bar{X}, s_{xy}, s_{x}^2$: sample mean of $Y$, covariance between $X$ and $Y$ and variance of $X$ ($s_x$ is the std. dev.)
+
+- Fitted values: $\hat{Y}_i = \hat{\beta}_0 + \hat\beta_1 X_i$. These are the vertical projections of $Y_1, \ldots, Y_n$ into the fitted line.
+
+## Now, compare
+
+-  Look at the fitted values for regressing $Y$ on $X$. 
+
+$$
+\hat{Y}_i = \bar{Y} - \hat{\beta}_1 \bar{X} + \hat\beta_1 X_i = \bar{Y} - \frac{s_{xy}}{s_{x}^2}(X_i - \bar{X}) = \bar{Y} - \frac{r_{xy}s_{y}}{s_{x}}(X_i - \bar{X})
+$$
+
+-  and, look at the conditional mean/expectation of $Y$ given $X$ for $(Y,X) \sim BVN(\mu_X, \mu_Y, \sigma_X, \sigma_Y, \rho)$.
+
+
+$$
+\text{mean} = \mu_Y + \rho (x - \mu_X) \frac{\sigma_Y}{\sigma_X}, \;
+\text{and variance} = 
+(1 - \rho^2) \sigma_Y^2.
+$$
+
+-  Then, convince yourself that they are essentially the same expression (albeit at the population level and at the sample level.)
+
+## BVN to MVN 
+
+-  It is often convenient to express the variances and covariance in a symmetric matrix, denoted by $\Sigma$. 
+
+
+- which can be written in terms of the variances and correlation as:
+
+$$
+\Sigma = \begin{bmatrix} 
+\sigma_X^2 & \rho \sigma_X \sigma_Y \\
+\rho \sigma_X \sigma_Y & \sigma_Y^2 \end{bmatrix}
+$$
+
+
+## MVN
+
+There is also a matrix representation of the above. Let us define $\boldsymbol{\mu} = (\mu_1, \mu_2)$ to be the vector of means and $\Sigma$ in  the last slide to denote the matrix of variances and covariance.  
+
+$$
+\begin{equation}
+\det(\mathbf{\Sigma}) = \sigma_X^2 \sigma_Y^2 (1 - \rho^2)
+\end{equation}
+$$
+
+
+### In matrix notation
+
+-  The density function of the bivariate normal distribution can be written as
+
+$$ 
+\begin{align}
+\phi(x \mid \mu, \Sigma) & = (2\pi)^{-1} \det(\Sigma)^{-1/2} \exp \left\{ -\frac{1}{2} (x - \mu)' \Sigma^{-1}(x - \mu) \right\} 
+\end{align}
+$$
+
+-  **This** holds true for not just $p = 2$ but for any $p$, where the $\Sigma$ is a $p \times p$ matrix and $\mu$ is a $p \times 1$ vector. This is the density for multivariate normal. 
+

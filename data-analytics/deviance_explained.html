@@ -25,7 +25,7 @@ class: center, middle, inverse, title-slide
 ### Virginia Tech
 ]
 .date[
-### 2016/12/12 (updated: 2023-02-24)
+### 2016/12/12 (updated: 2025-02-19)
 ]
 
 ---
@@ -38,7 +38,7 @@ class: center, middle, inverse, title-slide
 ## Example 
 
 
-```r
+``` r
 options(contrasts = c("contr.treatment", "contr.poly"))
 ldose &lt;- rep(0:5, 2)
 numdead &lt;- c(1, 4, 9, 13, 18, 20, 0, 2, 6, 10, 12, 16)
@@ -57,10 +57,6 @@ summary(budworm.lg, cor = F)
 ## 
 ## Call:
 ## glm(formula = SF ~ sex * ldose, family = binomial)
-## 
-## Deviance Residuals: 
-##      Min        1Q    Median        3Q       Max  
-## -1.39849  -0.32094  -0.07592   0.38220   1.10375  
 ## 
 ## Coefficients:
 ##             Estimate Std. Error z value Pr(&gt;|z|)    
@@ -85,7 +81,7 @@ summary(budworm.lg, cor = F)
 ## Deviances are stored in `summary` object
 
 
-```r
+``` r
 summaryLog &lt;- summary(budworm.lg)
 # 'Residual deviance' is the deviance; 
 # 'Null deviance' is the null deviance
@@ -97,7 +93,7 @@ summaryLog &lt;- summary(budworm.lg)
 ## [1] 4.993727
 ```
 
-```r
+``` r
 (summaryLog$null.deviance)
 ```
 
@@ -112,7 +108,7 @@ summaryLog &lt;- summary(budworm.lg)
 ## Fit the null model to check
 
 
-```r
+``` r
 # Null model - only intercept
 budworm.null &lt;- glm(SF ~ 1, family = binomial)
 summary(budworm.null, cor = F)
@@ -122,10 +118,6 @@ summary(budworm.null, cor = F)
 ## 
 ## Call:
 ## glm(formula = SF ~ 1, family = binomial)
-## 
-## Deviance Residuals: 
-##     Min       1Q   Median       3Q      Max  
-## -4.9833  -2.7215   0.1118   2.0401   5.5538  
 ## 
 ## Coefficients:
 ##             Estimate Std. Error z value Pr(&gt;|z|)
@@ -154,7 +146,7 @@ $$
 -  For the example at hand, 
 
 
-```r
+``` r
 (R_sq = 1 - summaryLog$deviance / summaryLog$null.deviance)
 ```
 
@@ -162,12 +154,33 @@ $$
 ## [1] 0.9600104
 ```
 -  Is the high value of `\(R^2\)` surprising or not? 
+---
+## Smarket 
+
+
+``` r
+library(ISLR)
+names(Smarket)
+```
+
+```
+## [1] "Year"      "Lag1"      "Lag2"      "Lag3"      "Lag4"      "Lag5"     
+## [7] "Volume"    "Today"     "Direction"
+```
+
+``` r
+dim(Smarket)
+```
+
+```
+## [1] 1250    9
+```
 
 ---
 ## Smarket data 
 
 
-```r
+``` r
 glm.fits=glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume,data=Smarket,family=binomial)
 summary(glm.fits)
 ```
@@ -177,10 +190,6 @@ summary(glm.fits)
 ## Call:
 ## glm(formula = Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + 
 ##     Volume, family = binomial, data = Smarket)
-## 
-## Deviance Residuals: 
-##    Min      1Q  Median      3Q     Max  
-## -1.446  -1.203   1.065   1.145   1.326  
 ## 
 ## Coefficients:
 ##              Estimate Std. Error z value Pr(&gt;|z|)
@@ -208,7 +217,7 @@ summary(glm.fits)
 - Calculate the `\(R^2\)` for this fitted model. 
 
 
-```r
+``` r
 summarySmarket &lt;- summary(glm.fits)
 (R_sq = 1 - (summarySmarket$deviance / summarySmarket$null.deviance))
 ```
