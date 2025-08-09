@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Two-sample Nonparametric Tests</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Jyotishka Datta" />
+    <script src="2sample_sim_files/header-attrs-2.20/header-attrs.js"></script>
+    <link href="2sample_sim_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="2sample_sim_files/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Two-sample Nonparametric Tests
+]
+.author[
+### Jyotishka Datta
+]
+.date[
+### Updated: 2024-10-15
+]
+
+---
+
+
+
+
+## Example 
+
+The following are 12 independent observations of pouring times of a
+metal grouped into before and after lunch. The metallurgical engineer
+suspects that the pouring time **before lunch was shorter than the pouring
+time after lunch**. We want to find the P-value for the alternative that the
+median pouring time before lunch is indeed shorter.
+
+
+```r
+x = c(12.6,11.2,11.4,9.4,13.2,12)
+y = c(16.4,15.4,14.1,14,13.4,11.3)
+```
+
+-  As you have seen before, specifying the correct alternative decides how the p-value is calculated. Here, we have: 
+
+$$
+`\begin{align}
+H_0: \mu_{before} &amp;= \mu_{after} \\
+H_1: \mu_{before} &amp; &lt; \mu_{after}
+\end{align}`
+$$
+
+
+---
+# Mind the alternative
+
+-  The `R` function is `wilcox.test` but pay attention to the `paired = F` argument. It tells us that the two series are not paired, i.e. `\(x_1\)` and `\(y_1\)` might not be observed for the same individual.
+
+- The second thing to note here is that since we specify `x` before `y`, the alternative should be `less`, not `greater`. 
+
+- Note that the `W` value here is 4. This is the Mann-Whitney U. 
+
+
+
+```r
+wilcox.test(x,y,paired=F,alternative="less")
+```
+
+```
+## 
+## 	Wilcoxon rank sum exact test
+## 
+## data:  x and y
+## W = 4, p-value = 0.01299
+## alternative hypothesis: true location shift is less than 0
+```
+
+---
+# Mind the alternative
+
+- If you switch the order, i.e. specify `y` then `x` then you should specify the alternative as `greater` since `\(y &gt; x\)` is what we want to test. 
+
+
+```r
+wilcox.test(y,x,paired=F,alternative="g")
+```
+
+```
+## 
+## 	Wilcoxon rank sum exact test
+## 
+## data:  y and x
+## W = 32, p-value = 0.01299
+## alternative hypothesis: true location shift is greater than 0
+```
+
+- Note that the `W` value here is 32. This is the Mann-Whitney U (but in the other direction!)
+
+---
+## R code returns all the values
+
+- You can get hold of all the internal calculations from the R function as well. Here these are stored in the `twotest` object that where we assign the outcome of the `wilcox.test` function. 
+
+
+
+```r
+twotest &lt;- wilcox.test(y,x,paired=F,alternative="greater")
+names(twotest)
+```
+
+```
+## [1] "statistic"   "parameter"   "p.value"     "null.value"  "alternative"
+## [6] "method"      "data.name"
+```
+
+- For example, you can just extract the `statistic` or the `p.value`.
+
+
+```r
+twotest$statistic
+```
+
+```
+##  W 
+## 32
+```
+
+```r
+twotest$p.value
+```
+
+```
+## [1] 0.01298701
+```
+
+---
+## Apply CLT manually
+
+-  We can also apply CLT maually. We need the large sample formula for mean and standard deviation for the CLT result.
+
+- Note that the p-value is calculated using `1 - pnorm(z)` which is `\(P(Z \ge z)\)` since our alternative is "greater". 
+
+
+```r
+U_Y = wilcox.test(y,x,paired=F,alternative="greater")$statistic
+m = length(y)
+n = length(x)
+clt.mu = m*n/2
+clt.s2 = m*n*(m+n+1)/12
+
+(Z_score = (U_Y-clt.mu-0.5)/(sqrt(clt.s2))) # Continuity correction, minus 1/2
+```
+
+```
+##       W 
+## 2.16173
+```
+
+```r
+(P.value = 1 - pnorm(Z_score)) # P(Z &gt; z) since alt = "greater"
+```
+
+```
+##          W 
+## 0.01531949
+```
+
+---
+
+## Apply CLT manually
+
+-  We can apply CLT with `y` first and `x` second and a "less" alternative too. 
+
+- But then the p-value should be calculated using `pnorm(z)` which is `\(P(Z \le z)\)` since our alternative is now "less". 
+
+
+```r
+U_X = wilcox.test(x,y,paired=F,alternative="less")$statistic
+m = length(x)
+n = length(y)
+
+(Z_score = (U_X-clt.mu)/(sqrt(clt.s2))) # continuity correction, add 1/2
+```
+
+```
+##         W 
+## -2.241794
+```
+
+```r
+(P.value = pnorm(Z_score)) # P(Z &lt;= z) since alt = "less"
+```
+
+```
+##          W 
+## 0.01248734
+```
+
+---
+## Using formula
+
+-  Instead of specifying the two "vectors", we can also use formula in a data.frame. 
+
+-  It should be of the form: `value ~ grp` where `value` column has all the values for both groups and `grp` is a binary categorical variable. 
+
+
+```r
+xydata = rbind(data.frame(values = x, grp = "x"),
+              data.frame(values = y, grp = "y"))
+wilcox.test(values ~ grp, data = xydata, alternative = "less")
+```
+
+```
+## 
+## 	Wilcoxon rank sum exact test
+## 
+## data:  values by grp
+## W = 4, p-value = 0.01299
+## alternative hypothesis: true location shift is less than 0
+```
+
+---
+## Class data
+
+- Read the simulated class data from the OpenIntro website. We can directly read from the URL without downloading it. 
+
+&gt; "An instructor decided to run two slight variations of the same exam. Prior to passing out the exams, they shuffled the exams together to ensure each student received a random version. Anticipating complaints from students who took Version B, they would like to evaluate whether the difference observed in the groups is so large that it provides convincing evidence that Version B was more difficult (on average) than Version A." 
+
+- The dataset has three exams: a, b, c. We will only consider the first two exams "a" and "b". 
+
+
+
+```r
+classdata &lt;- read.csv("https://www.openintro.org/data/csv/classdata.csv")
+classdata_ab &lt;- classdata[classdata$lecture %in% c("a", "b"),]
+```
+
+
+---
+## Visualize &amp; Summarize 
+
+
+```r
+library(dplyr)
+classdata_ab %&gt;% group_by(lecture) %&gt;% summarize(mean = mean(m1), median = median(m1), sd = sd(m1), n = n())
+```
+
+```
+## # A tibble: 2 × 5
+##   lecture  mean median    sd     n
+##   &lt;chr&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;
+## 1 a        75.1   73.5  13.9    58
+## 2 b        72.0   72    13.8    55
+```
+
+
+
+```r
+boxplot(m1 ~ lecture, data = classdata_ab)
+```
+
+![](2sample_sim_files/figure-html/unnamed-chunk-11-1.png)&lt;!-- --&gt;
+
+---
+## Testing difference 
+
+-  Test if the score for the two exams "a" and "b" had the same median? 
+
+-  Note that we want to test if "b" was more difficult, i.e. your hypotheses are:
+
+$$
+`\begin{align}
+H_0: \mu_{a} &amp;= \mu_{b} \\
+H_1: \mu_{a} &amp; &gt; \mu_{b}
+\end{align}`
+$$
+
+
+```r
+## Your code here! 
+```
+
+
+- Take 5 minutes! 
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create();
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

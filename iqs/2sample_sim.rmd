@@ -1,0 +1,185 @@
+---
+title: "Two-sample Nonparametric Tests"
+author: "Jyotishka Datta"
+date: "Updated: `r Sys.Date()`"
+output: xaringan::moon_reader
+lib_dir: libs
+nature:
+  highlightStyle: github
+highlightLines: true
+countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = F, warning = F)
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+## Example 
+
+The following are 12 independent observations of pouring times of a
+metal grouped into before and after lunch. The metallurgical engineer
+suspects that the pouring time **before lunch was shorter than the pouring
+time after lunch**. We want to find the P-value for the alternative that the
+median pouring time before lunch is indeed shorter.
+
+```{r, fig.height = 4}
+x = c(12.6,11.2,11.4,9.4,13.2,12)
+y = c(16.4,15.4,14.1,14,13.4,11.3)
+```
+
+-  As you have seen before, specifying the correct alternative decides how the p-value is calculated. Here, we have: 
+
+$$
+\begin{align}
+H_0: \mu_{before} &= \mu_{after} \\
+H_1: \mu_{before} & < \mu_{after}
+\end{align}
+$$
+
+
+---
+# Mind the alternative
+
+-  The `R` function is `wilcox.test` but pay attention to the `paired = F` argument. It tells us that the two series are not paired, i.e. $x_1$ and $y_1$ might not be observed for the same individual.
+
+- The second thing to note here is that since we specify `x` before `y`, the alternative should be `less`, not `greater`. 
+
+- Note that the `W` value here is 4. This is the Mann-Whitney U. 
+
+
+```{r}
+wilcox.test(x,y,paired=F,alternative="less")
+```
+
+---
+# Mind the alternative
+
+- If you switch the order, i.e. specify `y` then `x` then you should specify the alternative as `greater` since $y > x$ is what we want to test. 
+
+```{r}
+wilcox.test(y,x,paired=F,alternative="g")
+```
+
+- Note that the `W` value here is 32. This is the Mann-Whitney U (but in the other direction!)
+
+---
+## R code returns all the values
+
+- You can get hold of all the internal calculations from the R function as well. Here these are stored in the `twotest` object that where we assign the outcome of the `wilcox.test` function. 
+
+
+```{r}
+twotest <- wilcox.test(y,x,paired=F,alternative="greater")
+names(twotest)
+```
+
+- For example, you can just extract the `statistic` or the `p.value`.
+
+```{r}
+twotest$statistic
+twotest$p.value
+```
+
+---
+## Apply CLT manually
+
+-  We can also apply CLT maually. We need the large sample formula for mean and standard deviation for the CLT result.
+
+- Note that the p-value is calculated using `1 - pnorm(z)` which is $P(Z \ge z)$ since our alternative is "greater". 
+
+```{r}
+U_Y = wilcox.test(y,x,paired=F,alternative="greater")$statistic
+m = length(y)
+n = length(x)
+clt.mu = m*n/2
+clt.s2 = m*n*(m+n+1)/12
+
+(Z_score = (U_Y-clt.mu-0.5)/(sqrt(clt.s2))) # Continuity correction, minus 1/2
+(P.value = 1 - pnorm(Z_score)) # P(Z > z) since alt = "greater"
+```
+
+---
+
+## Apply CLT manually
+
+-  We can apply CLT with `y` first and `x` second and a "less" alternative too. 
+
+- But then the p-value should be calculated using `pnorm(z)` which is $P(Z \le z)$ since our alternative is now "less". 
+
+```{r}
+U_X = wilcox.test(x,y,paired=F,alternative="less")$statistic
+m = length(x)
+n = length(y)
+
+(Z_score = (U_X-clt.mu)/(sqrt(clt.s2))) # continuity correction, add 1/2
+
+(P.value = pnorm(Z_score)) # P(Z <= z) since alt = "less"
+```
+
+---
+## Using formula
+
+-  Instead of specifying the two "vectors", we can also use formula in a data.frame. 
+
+-  It should be of the form: `value ~ grp` where `value` column has all the values for both groups and `grp` is a binary categorical variable. 
+
+```{r}
+xydata = rbind(data.frame(values = x, grp = "x"),
+              data.frame(values = y, grp = "y"))
+wilcox.test(values ~ grp, data = xydata, alternative = "less")
+```
+
+---
+## Class data
+
+- Read the simulated class data from the OpenIntro website. We can directly read from the URL without downloading it. 
+
+> "An instructor decided to run two slight variations of the same exam. Prior to passing out the exams, they shuffled the exams together to ensure each student received a random version. Anticipating complaints from students who took Version B, they would like to evaluate whether the difference observed in the groups is so large that it provides convincing evidence that Version B was more difficult (on average) than Version A." 
+
+- The dataset has three exams: a, b, c. We will only consider the first two exams "a" and "b". 
+
+
+```{r, fig.height = 4}
+classdata <- read.csv("https://www.openintro.org/data/csv/classdata.csv")
+classdata_ab <- classdata[classdata$lecture %in% c("a", "b"),]
+```
+
+
+---
+## Visualize & Summarize 
+
+```{r}
+library(dplyr)
+classdata_ab %>% group_by(lecture) %>% summarize(mean = mean(m1), median = median(m1), sd = sd(m1), n = n())
+```
+
+
+```{r, fig.height = 4}
+boxplot(m1 ~ lecture, data = classdata_ab)
+```
+
+---
+## Testing difference 
+
+-  Test if the score for the two exams "a" and "b" had the same median? 
+
+-  Note that we want to test if "b" was more difficult, i.e. your hypotheses are:
+
+$$
+\begin{align}
+H_0: \mu_{a} &= \mu_{b} \\
+H_1: \mu_{a} & > \mu_{b}
+\end{align}
+$$
+
+```{r}
+
+## Your code here! 
+
+```
+
+
+- Take 5 minutes! 
+
+

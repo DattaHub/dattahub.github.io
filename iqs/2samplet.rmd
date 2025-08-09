@@ -1,0 +1,152 @@
+---
+title: "Two-sample t-test"
+author: "Jyotishka Datta"
+date: "Updated: `r Sys.Date()`"
+output: xaringan::moon_reader
+lib_dir: libs
+nature:
+  highlightStyle: github
+highlightLines: true
+countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = F, warning = F)
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+## Birth-weight Data 
+
+-  Source: https://www.openintro.org/data/index.php?data=births14 
+
+-  Description: Every year, the US releases to the public a large data set containing information on births recorded in the country. This data set has been of interest to medical researchers who are studying the relation between habits and practices of expectant mothers and the birth of their children. This is a random sample of 1,000 cases from the data set released in 2014.
+
+
+```{r, echo = T}
+birth <- read.csv("https://www.openintro.org/data/csv/births14.csv")
+dim(birth)
+```
+
+-  Only consider the complete cases i.e. rows without any missing values. 
+
+```{r}
+birth <- birth[complete.cases(birth),]
+```
+
+---
+## Structure 
+
+```{r}
+str(birth)
+```
+
+---
+## Hypothesis
+
+-  Q: Is the mean birth weigth same across smoker and nonsmokers?
+
+```{r, fig.asp = 0.8}
+boxplot(weight ~ habit, data = birth)
+```
+
+---
+## Plot the densities
+
+```{r, fig.asp = 0.8}
+library(ggplot2)
+ggplot(birth, aes(x = weight, group = habit, fill = habit)) + geom_density(alpha = 0.5) + theme_minimal()
+```
+
+---
+## Hypothesis
+
+-  Q: Is the mean birth weigth same across male and female children?
+
+```{r, fig.asp = 0.8}
+boxplot(weight ~ sex, data = birth)
+```
+
+---
+## Plot the densities
+
+```{r, fig.asp = 0.8}
+library(ggplot2)
+ggplot(birth, aes(x = weight, group = sex, fill = sex)) + geom_density(alpha = 0.5) + theme_minimal()
+```
+
+
+---
+## T-test (Equal Variance)
+
+
+```{r}
+x<- birth$weight[birth$habit =="nonsmoker"]
+y <- birth$weight[birth$habit =="smoker"]
+t.test(x,y, alternative = "greater", var.equal = T)
+```
+
+---
+## T-test (Equal Variance, Using formula)
+
+
+```{r}
+t.test(weight ~ habit, data = birth, alternative = "greater", var.equal = T)
+```
+
+
+---
+## Manually?
+
+```{r}
+s1=sd(x)
+s2=sd(y)
+m=length(x)
+n=length(y)
+ntotal=m+n
+spooled=sqrt(((m-1)*(s1^2))+((n-1)*(s2^2)))/sqrt(ntotal-2)
+spooled
+tm=mean(x)-mean(y)
+tval=tm/(spooled*sqrt((1/m)+(1/n)))
+tval
+
+(pval = 1 - pt(tval, df = ntotal-2))
+```
+
+---
+## T-test (Unequal Variance)
+
+-  Pay attention to the value of `t`, `df` and `p-value` in the output. 
+
+```{r}
+x<- birth$weight[birth$habit =="nonsmoker"]
+y <- birth$weight[birth$habit =="smoker"]
+t.test(x,y, alternative = "greater", var.equal = F)
+```
+
+
+---
+## Manual calculation for unequal variance 
+
+-  The `df` calculation is a little tricky! See notes. 
+
+```{r}
+s1=sd(x)
+s2=sd(y)
+m=length(x)
+n=length(y)
+tm=mean(x)-mean(y)
+tval=tm/(sqrt((s1^2/m)+(s2^2/n)))
+tval
+
+(df = ((s1^2/m)+(s2^2/n))^2/(1/(m-1)*(s1^2/m)^2+1/(n-1)*(s2^2/n)^2))
+
+(pval = 1 - pt(tval, df = df))
+```
+
+
+---
+## Exercise 
+
+-   Test if there is any difference in birth-weights for male and female born babies? 
+
+-   Test if the weights are normally distributed? 
