@@ -6,15 +6,17 @@
 3. Matrix and `apply` class of functions [Tutorial demo](http://dattahub.github.io/iqs/matrix_and_apply.html)
 4. Introduction to parallel computing [Tutorial demo](http://dattahub.github.io/iqs/parallel.html)
 
-## Nonparametric statistics 
+## Statistics 
 
-1.  One sample t-test and sign test: [Examples in R](http://dattahub.github.io/iqs/onesample.html)
-2.  Random Variable Generation using Quantile Transformation [Examples in R](http://dattahub.github.io/iqs/rvgen.html)
+1.  Random Variable Generation using Quantile Transformation [Examples in R](http://dattahub.github.io/iqs/rvgen.html)
+2.  One sample t-test and sign test: [Examples in R](http://dattahub.github.io/iqs/onesample.html)
 3.  Wilcoxon and Quantiles [Examples in R](http://dattahub.github.io/iqs/wilcox_qq_demo_x.html)
-4.  One way Analysis of Variance (ANOVA): [Examples in R](http://dattahub.github.io/iqs/anova_examples_doc.html)
-5.  ANOVA in R Demo in [ioslides presentation](http://dattahub.github.io/iqs/aovexamples.html).
-6.  Tests for trends and associations [R Examples](http://dattahub.github.io/iqs/association_demo.html#1)
-7.  Chi-square test for association [R Examples](http://dattahub.github.io/iqs/countdata_association.html#1)
-8.  Bootstrap [R Examples](http://dattahub.github.io/iqs/bootstrap_demo.html#1)
-9.  Chi-square tests [R Examples](http://dattahub.github.io/iqs/chisqdemo.html#1)
-10.  Kernel Density Estimation [R Examples](http://dattahub.github.io/iqs/kde_demo.html#1)
+4.  Two-sample t-test. [Examples in R](http://dattahub.github.io/iqs/2samplet.html)
+5.  Two-sample nonparametric tests. [Examples in R](http://dattahub.github.io/iqs/2sample_sim.html)
+6.  One way Analysis of Variance (ANOVA): [Examples in R](http://dattahub.github.io/iqs/anova_examples_doc.html)
+7.  ANOVA in R Demo in [ioslides presentation](http://dattahub.github.io/iqs/aovexamples.html).
+8.  Tests for trends and associations [R Examples](http://dattahub.github.io/iqs/association_demo.html#1)
+9.  Chi-square test for association [R Examples](http://dattahub.github.io/iqs/countdata_association.html#1)
+10.  Bootstrap [R Examples](http://dattahub.github.io/iqs/bootstrap_demo.html#1)
+11.  Chi-square tests [R Examples](http://dattahub.github.io/iqs/chisqdemo.html#1)
+12.  Kernel Density Estimation [R Examples](http://dattahub.github.io/iqs/kde_demo.html#1)
