@@ -1,6 +1,11 @@
 # List of tutorials
 
+I use these R-based demos and tutorials for different courses that uses nonparametric statistics, and this is a live directory, i.e., the contents are subject to change as time goes. Please feel free to use them, distribute them or copy them but I want to note here that a lot of these contents are borrowed or inspired from many available tutorials, workshops and textbooks. I have tried attributing to the right resource whenever possible but if you notice any omission or commission, please let me know. 
+
 ## `R` related 
+
+> These are useful if you have little to no prior experience with the R programming language, but these are not comprehensive. I will also recommend looking at this collection of notes and tutorials here: [https://github.com/DattaHub/beginneR](https://github.com/DattaHub/beginneR). 
+
 1. "Why R?" [Tutorial demo](http://dattahub.github.io/iqs/why_R.html)
 2. Logic and functions in R [Tutorial demo](http://dattahub.github.io/iqs/logic_and_functions_in_R.html)
 3. Matrix and `apply` class of functions [Tutorial demo](http://dattahub.github.io/iqs/matrix_and_apply.html)
