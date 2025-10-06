@@ -1,10 +1,9 @@
 ﻿# Welcome to DattaHub
 
 Created and maintained by Jyotishka Datta.
-Department of Statistics
-Virginia Tech
-E-mail: jyotishka@vt.edu
-Website: https://you.uark.edu/jd033/
+Department of Statistics, Virginia Tech
+-  E-mail: jyotishka@vt.edu
+-  Website: https://jyotishkadatta.wordpress.com/
 
 ## About 
 This is an website for current projects, intended for sharing codes for recently developed Statistical methods. 
@@ -17,6 +16,8 @@ All the R markdown and HTML slides posted in this site: in sub-folders stat5525,
 
 If you notice something is amiss, please 
 send me an email at jyotishka@vt.edu
+
+
 
 
 
