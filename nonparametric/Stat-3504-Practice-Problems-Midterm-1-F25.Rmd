@@ -1,0 +1,198 @@
+---
+title: "Stat 3504: Practice Problems for Midterm 1 (F25)"
+format: html
+toc: true
+number-sections: false
+fontsize: 11pt
+geometry: margin=1in
+date: "2025-10-06"
+---
+## Topics covered
+
+- Central Limit Theorem, in particular, the DeMoivre–Laplace CLT (Normal approximation to Binomial). Continuity correction.
+
+- Inverse CDF transformation method for random variable generation.
+
+- One-sample and paired-sample tests.
+
+- Sign test: null and alternative hypotheses; exact P value (in R), Monte Carlo and CLT-based normal approximation, continuity correction.
+
+- Wilcoxon signed-rank test: null and alternative hypotheses; exact P value (in R), Monte Carlo and CLT-based normal approximation, continuity correction.
+
+- Test for normality: histogram and QQ plots.
+
+- Chi-square goodness of fit test.
+
+- Kolmogorov–Smirnov and Lilliefors goodness-of-fit tests.
+
+- Two-sample tests: permutation test, Wilcoxon rank sum and Mann–Whitney U test.
+
+
+## Comments and advice
+
+- You will not be asked to write R code or pseudo-code during the test.
+
+- You may be asked to perform an appropriate test for a small data set. Bring a calculator.
+
+- Be ready to look up Normal and Chi-square tables to compute P values.
+
+- Know the conditions under which tests are appropriate. For example, the sign test is appropriate for IID data from any continuous distribution.
+
+**Comment: The numbers in parenthesis indicate the problem numbers in Gibbons and Chakrabarti book. You may have seen one or more of these problems during the in-class activities.**
+
+
+## One-sample and paired-sample tests
+
+
+#### Problem 1 (5.13)
+
+Twenty-four students took both the midterm and the final exam in a writing course. Numerical grades were not given on the final, but each student was classified as either *no change*, *improvement*, or *reduced level of performance* compared with the midterm. Six showed improvement, 5 showed no change, and 13 had a reduced level of performance. Find the P value for an appropriate one-sided test.
+
+
+#### Problem 2 (5.20)
+
+A manufacturer of suntan lotion is testing a new formula to see whether it provides more protection against sunburn than the old formula. The manufacturer chose 10 persons at random from among the company’s employees, applied the two types of lotion to their backs, one type on each side, and exposed their backs to a controlled but intense amount of sun. Degree of sunburn was measured for each side of each subject, with the results shown below (higher numbers represent more severe sunburn).
+
+(a) Test the null hypothesis that the difference (old − new) of degree of sunburn has median zero against the one-sided alternative that it is negative, assuming that the differences are symmetric. Does the new formula appear to be effective?
+
+(b) Find a confidence interval for the median difference, assuming symmetry and with confidence coefficient near 0.90.
+
+(c) Do (a) and (b) without assuming symmetry.
+
+| Subject | Old formula | New formula |
+|:------:|:-----------:|:-----------:|
+| 1 | 41 | 37 |
+| 2 | 42 | 39 |
+| 3 | 48 | 31 |
+| 4 | 38 | 39 |
+| 5 | 38 | 34 |
+| 6 | 45 | 47 |
+| 7 | 21 | 19 |
+| 8 | 28 | 30 |
+| 9 | 29 | 25 |
+| 10 | 14 | 8 |
+
+
+#### Problem 3 (5.23)
+
+In a marketing research test, 15 adult males were asked to shave one side of their face with a brand A razor blade and the other side with a brand B razor blade and state their preferred blade. Twelve men preferred brand A. Find the P value for the alternative that the probability of preferring brand A is greater than 0.5.
+
+
+## Inverse CDF transformation
+
+
+#### Problem 4 (2.4)
+
+Find the transformation to obtain, from an observation $ U $ following a uniform $(0,1)$ distribution, an observation from each of the following continuous probability distributions:
+
+(a) Exponential distribution with mean 1.
+
+(b) Beta distribution with $\alpha = 2$ and $\beta = 1$. The probability density function is given by
+
+$$
+f(x) = 2x, \quad 0 < x < 1.
+$$
+
+
+(c) The logistic distribution defined by the probability density function
+
+$$
+f(x) = \frac{\exp\{(x-\mu)/\beta\}}{\beta\,\bigl(1 + \exp\{(x-\mu)/\beta\}\bigr)^2}, \quad -\infty < x < \infty.
+$$
+
+(d) The double exponential distribution defined by the probability density function
+
+$$
+f(x) = \begin{cases}
+\dfrac{1}{2\beta} \exp\!\bigl((x-\mu)/\beta\bigr), & x < \mu, \\
+\dfrac{1}{2\beta} \exp\!\bigl(-(x-\mu)/\beta\bigr), & x > \mu, 
+\end{cases}
+$$
+
+(e) The Cauchy distribution defined by the probability density function
+
+$$
+f(x) = \frac{\beta}{\pi\,\bigl[\beta^2 + (x - \mu)^2\bigr]}, \quad -\infty < x < \infty.
+$$
+
+
+#### Problem 5 (2.6)
+
+If $X$ is a continuous random variable with probability density function $f_X(x) = 2(1-x),\ 0 < x < 1$, find the transformation $Y = g(X)$ such that the random variable $Y$ has the uniform distribution over $(0,2)$.
+
+
+## Central Limit Theorem
+
+
+#### Problem 6 (5.24)
+
+The lifetimes of interactive computer chips produced by a certain semiconductor manufacturer are normally distributed with parameters $\mu = 1.4 \times 10^5$ hours and $\sigma = 3 \times 10^4$ hours. What is the approximate probability that a batch of 100 chips will contain at least 20 whose lifetimes are less than $1.8 \times 10^5$ hours?
+
+
+#### Problem 7 (5.25)
+
+Each item produced by a certain manufacturer is, independently, of acceptable quality with probability 0.95. Approximate the probability that at most 10 of the next 150 items produced are unacceptable.
+
+
+## Goodness of fit tests
+
+
+#### Problem 8 (4.24)
+
+Each student in a class of 18 is asked to list three people he likes and three he dislikes and label the people 0, 1, 2, 3, 4, 5 according to how much he likes them, with 0 denoting least liked and 5 denoting most liked. From this list each student selects the number assigned to the person he thinks is the wealthiest of the six. The results in the form of an array are as follows:
+
+0, 0, 0, 0, 1, 2, 2, 2, 2, 3, 3, 4, 4, 4, 4, 4, 4, 5
+
+Test the null hypothesis that the students are equally likely to select any of the numbers 0–5, using the most appropriate test and the 0.05 level of significance.
+
+
+#### Problem 9 (4.26)
+
+Suppose that monthly collections for home delivery of the *New York Times* in a large suburb of New York are approximately normally distributed with mean \$150 and standard deviation \$20. A random sample of 10 delivery persons in a nearby suburb is taken; the arrayed data for monthly collections in dollars are:
+
+90, 106, 109, 117, 130, 145, 156, 170, 174, 190
+
+Test the null hypothesis that the same normal distribution model applies to this suburb, using the most appropriate test.
+
+
+#### Problem 10 (4.27)
+
+A bank frequently makes large installment loans to builders. At any point in time, outstanding loans are classified in the following four repayment categories:
+
+A: Current  
+B: Up to 30 days delinquent  
+C: 30–60 days delinquent  
+D: Over 60 days delinquent  
+
+The bank has established the internal standard that these loans are “in control” as long as the percentage in each category is as follows:
+
+A: 80%   B: 12%   C: 7%   D: 1%
+
+They make frequent spot checks by drawing a random sample of loan files, noting their repayment status at that time and comparing the observed distribution with the standard for control. Suppose a sample of 500 files produces the following data on number of loans in each repayment category:
+
+A: 358   B: 88   C: 44   D: 15
+
+Does it appear that installment loan operations are under control at this time?
+
+
+#### Problem 11 (4.28)
+
+Durtco Incorporated designs and manufactures gears for heavy-duty construction equipment. One such gear, 9973, has the following specifications:
+
+(a) Mean diameter 3.0 in.  
+(b) Standard deviation 0.001 in.  
+(c) Output normally distributed.
+
+The production control manager has selected a random sample of 500 gears from the inventory and measured the diameter of each. Nothing more has been done to the data. How would you determine statistically whether gear 9973 meets the specifications?
+
+
+## Two-sample tests
+
+
+#### Problem 12 (8.9)
+
+A travel agency wanted to compare the noncorporate prices charged by two major motel chains for a standard-quality single room at major airport locations around the country. A random sample of five Best Eastern motels and an independent sample of six Travelers’ Inn motels, all located at major airports, gave the approximate current total costs of a standard single room as shown below. Find a 95% confidence interval estimate of the difference between median costs at Best Eastern and Travelers’ Inn motels.
+
+Best Eastern: $68, 75, 92, 79, 95  
+Travelers’ Inn: $69, 76, 81, 72, 75, 80
+

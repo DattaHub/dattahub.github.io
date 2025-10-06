@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2025-10-06">
+
+<title>Stat 3504: Practice Problems for Midterm 1 (F25)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="Stat-3504-Practice-Problems-Midterm-1-F25_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Stat-3504-Practice-Problems-Midterm-1-F25_files/libs/quarto-html/quarto.js"></script>
+<script src="Stat-3504-Practice-Problems-Midterm-1-F25_files/libs/quarto-html/popper.min.js"></script>
+<script src="Stat-3504-Practice-Problems-Midterm-1-F25_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Stat-3504-Practice-Problems-Midterm-1-F25_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Stat-3504-Practice-Problems-Midterm-1-F25_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Stat-3504-Practice-Problems-Midterm-1-F25_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Stat-3504-Practice-Problems-Midterm-1-F25_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Stat-3504-Practice-Problems-Midterm-1-F25_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Stat-3504-Practice-Problems-Midterm-1-F25_files/libs/bootstrap/bootstrap-8ffaf084027a881f3b7580f5d96998cb.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#topics-covered" id="toc-topics-covered" class="nav-link active" data-scroll-target="#topics-covered">Topics covered</a></li>
+  <li><a href="#comments-and-advice" id="toc-comments-and-advice" class="nav-link" data-scroll-target="#comments-and-advice">Comments and advice</a></li>
+  <li><a href="#one-sample-and-paired-sample-tests" id="toc-one-sample-and-paired-sample-tests" class="nav-link" data-scroll-target="#one-sample-and-paired-sample-tests">One-sample and paired-sample tests</a></li>
+  <li><a href="#inverse-cdf-transformation" id="toc-inverse-cdf-transformation" class="nav-link" data-scroll-target="#inverse-cdf-transformation">Inverse CDF transformation</a></li>
+  <li><a href="#central-limit-theorem" id="toc-central-limit-theorem" class="nav-link" data-scroll-target="#central-limit-theorem">Central Limit Theorem</a></li>
+  <li><a href="#goodness-of-fit-tests" id="toc-goodness-of-fit-tests" class="nav-link" data-scroll-target="#goodness-of-fit-tests">Goodness of fit tests</a></li>
+  <li><a href="#two-sample-tests" id="toc-two-sample-tests" class="nav-link" data-scroll-target="#two-sample-tests">Two-sample tests</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Stat 3504: Practice Problems for Midterm 1 (F25)</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 6, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="topics-covered" class="level2">
+<h2 class="anchored" data-anchor-id="topics-covered">Topics covered</h2>
+<ul>
+<li><p>Central Limit Theorem, in particular, the DeMoivre–Laplace CLT (Normal approximation to Binomial). Continuity correction.</p></li>
+<li><p>Inverse CDF transformation method for random variable generation.</p></li>
+<li><p>One-sample and paired-sample tests.</p></li>
+<li><p>Sign test: null and alternative hypotheses; exact P value (in R), Monte Carlo and CLT-based normal approximation, continuity correction.</p></li>
+<li><p>Wilcoxon signed-rank test: null and alternative hypotheses; exact P value (in R), Monte Carlo and CLT-based normal approximation, continuity correction.</p></li>
+<li><p>Test for normality: histogram and QQ plots.</p></li>
+<li><p>Chi-square goodness of fit test.</p></li>
+<li><p>Kolmogorov–Smirnov and Lilliefors goodness-of-fit tests.</p></li>
+<li><p>Two-sample tests: permutation test, Wilcoxon rank sum and Mann–Whitney U test.</p></li>
+</ul>
+</section>
+<section id="comments-and-advice" class="level2">
+<h2 class="anchored" data-anchor-id="comments-and-advice">Comments and advice</h2>
+<ul>
+<li><p>You will not be asked to write R code or pseudo-code during the test.</p></li>
+<li><p>You may be asked to perform an appropriate test for a small data set. Bring a calculator.</p></li>
+<li><p>Be ready to look up Normal and Chi-square tables to compute P values.</p></li>
+<li><p>Know the conditions under which tests are appropriate. For example, the sign test is appropriate for IID data from any continuous distribution.</p></li>
+</ul>
+<p><strong>Comment: The numbers in parenthesis indicate the problem numbers in Gibbons and Chakrabarti book. You may have seen one or more of these problems during the in-class activities.</strong></p>
+</section>
+<section id="one-sample-and-paired-sample-tests" class="level2">
+<h2 class="anchored" data-anchor-id="one-sample-and-paired-sample-tests">One-sample and paired-sample tests</h2>
+<section id="problem-1-5.13" class="level4">
+<h4 class="anchored" data-anchor-id="problem-1-5.13">Problem 1 (5.13)</h4>
+<p>Twenty-four students took both the midterm and the final exam in a writing course. Numerical grades were not given on the final, but each student was classified as either <em>no change</em>, <em>improvement</em>, or <em>reduced level of performance</em> compared with the midterm. Six showed improvement, 5 showed no change, and 13 had a reduced level of performance. Find the P value for an appropriate one-sided test.</p>
+</section>
+<section id="problem-2-5.20" class="level4">
+<h4 class="anchored" data-anchor-id="problem-2-5.20">Problem 2 (5.20)</h4>
+<p>A manufacturer of suntan lotion is testing a new formula to see whether it provides more protection against sunburn than the old formula. The manufacturer chose 10 persons at random from among the company’s employees, applied the two types of lotion to their backs, one type on each side, and exposed their backs to a controlled but intense amount of sun. Degree of sunburn was measured for each side of each subject, with the results shown below (higher numbers represent more severe sunburn).</p>
+<ol type="a">
+<li><p>Test the null hypothesis that the difference (old − new) of degree of sunburn has median zero against the one-sided alternative that it is negative, assuming that the differences are symmetric. Does the new formula appear to be effective?</p></li>
+<li><p>Find a confidence interval for the median difference, assuming symmetry and with confidence coefficient near 0.90.</p></li>
+<li><p>Do (a) and (b) without assuming symmetry.</p></li>
+</ol>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Subject</th>
+<th style="text-align: center;">Old formula</th>
+<th style="text-align: center;">New formula</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">41</td>
+<td style="text-align: center;">37</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">42</td>
+<td style="text-align: center;">39</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">48</td>
+<td style="text-align: center;">31</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">38</td>
+<td style="text-align: center;">39</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">38</td>
+<td style="text-align: center;">34</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">45</td>
+<td style="text-align: center;">47</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">21</td>
+<td style="text-align: center;">19</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">28</td>
+<td style="text-align: center;">30</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">29</td>
+<td style="text-align: center;">25</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">10</td>
+<td style="text-align: center;">14</td>
+<td style="text-align: center;">8</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="problem-3-5.23" class="level4">
+<h4 class="anchored" data-anchor-id="problem-3-5.23">Problem 3 (5.23)</h4>
+<p>In a marketing research test, 15 adult males were asked to shave one side of their face with a brand A razor blade and the other side with a brand B razor blade and state their preferred blade. Twelve men preferred brand A. Find the P value for the alternative that the probability of preferring brand A is greater than 0.5.</p>
+</section>
+</section>
+<section id="inverse-cdf-transformation" class="level2">
+<h2 class="anchored" data-anchor-id="inverse-cdf-transformation">Inverse CDF transformation</h2>
+<section id="problem-4-2.4" class="level4">
+<h4 class="anchored" data-anchor-id="problem-4-2.4">Problem 4 (2.4)</h4>
+<p>Find the transformation to obtain, from an observation $ U $ following a uniform <span class="math inline">\((0,1)\)</span> distribution, an observation from each of the following continuous probability distributions:</p>
+<ol type="a">
+<li><p>Exponential distribution with mean 1.</p></li>
+<li><p>Beta distribution with <span class="math inline">\(\alpha = 2\)</span> and <span class="math inline">\(\beta = 1\)</span>. The probability density function is given by</p></li>
+</ol>
+<p><span class="math display">\[
+f(x) = 2x, \quad 0 &lt; x &lt; 1.
+\]</span></p>
+<ol start="3" type="a">
+<li>The logistic distribution defined by the probability density function</li>
+</ol>
+<p><span class="math display">\[
+f(x) = \frac{\exp\{(x-\mu)/\beta\}}{\beta\,\bigl(1 + \exp\{(x-\mu)/\beta\}\bigr)^2}, \quad -\infty &lt; x &lt; \infty.
+\]</span></p>
+<ol start="4" type="a">
+<li>The double exponential distribution defined by the probability density function</li>
+</ol>
+<p><span class="math display">\[
+f(x) = \begin{cases}
+\dfrac{1}{2\beta} \exp\!\bigl((x-\mu)/\beta\bigr), &amp; x &lt; \mu, \\
+\dfrac{1}{2\beta} \exp\!\bigl(-(x-\mu)/\beta\bigr), &amp; x &gt; \mu,
+\end{cases}
+\]</span></p>
+<ol start="5" type="a">
+<li>The Cauchy distribution defined by the probability density function</li>
+</ol>
+<p><span class="math display">\[
+f(x) = \frac{\beta}{\pi\,\bigl[\beta^2 + (x - \mu)^2\bigr]}, \quad -\infty &lt; x &lt; \infty.
+\]</span></p>
+</section>
+<section id="problem-5-2.6" class="level4">
+<h4 class="anchored" data-anchor-id="problem-5-2.6">Problem 5 (2.6)</h4>
+<p>If <span class="math inline">\(X\)</span> is a continuous random variable with probability density function <span class="math inline">\(f_X(x) = 2(1-x),\ 0 &lt; x &lt; 1\)</span>, find the transformation <span class="math inline">\(Y = g(X)\)</span> such that the random variable <span class="math inline">\(Y\)</span> has the uniform distribution over <span class="math inline">\((0,2)\)</span>.</p>
+</section>
+</section>
+<section id="central-limit-theorem" class="level2">
+<h2 class="anchored" data-anchor-id="central-limit-theorem">Central Limit Theorem</h2>
+<section id="problem-6-5.24" class="level4">
+<h4 class="anchored" data-anchor-id="problem-6-5.24">Problem 6 (5.24)</h4>
+<p>The lifetimes of interactive computer chips produced by a certain semiconductor manufacturer are normally distributed with parameters <span class="math inline">\(\mu = 1.4 \times 10^5\)</span> hours and <span class="math inline">\(\sigma = 3 \times 10^4\)</span> hours. What is the approximate probability that a batch of 100 chips will contain at least 20 whose lifetimes are less than <span class="math inline">\(1.8 \times 10^5\)</span> hours?</p>
+</section>
+<section id="problem-7-5.25" class="level4">
+<h4 class="anchored" data-anchor-id="problem-7-5.25">Problem 7 (5.25)</h4>
+<p>Each item produced by a certain manufacturer is, independently, of acceptable quality with probability 0.95. Approximate the probability that at most 10 of the next 150 items produced are unacceptable.</p>
+</section>
+</section>
+<section id="goodness-of-fit-tests" class="level2">
+<h2 class="anchored" data-anchor-id="goodness-of-fit-tests">Goodness of fit tests</h2>
+<section id="problem-8-4.24" class="level4">
+<h4 class="anchored" data-anchor-id="problem-8-4.24">Problem 8 (4.24)</h4>
+<p>Each student in a class of 18 is asked to list three people he likes and three he dislikes and label the people 0, 1, 2, 3, 4, 5 according to how much he likes them, with 0 denoting least liked and 5 denoting most liked. From this list each student selects the number assigned to the person he thinks is the wealthiest of the six. The results in the form of an array are as follows:</p>
+<p>0, 0, 0, 0, 1, 2, 2, 2, 2, 3, 3, 4, 4, 4, 4, 4, 4, 5</p>
+<p>Test the null hypothesis that the students are equally likely to select any of the numbers 0–5, using the most appropriate test and the 0.05 level of significance.</p>
+</section>
+<section id="problem-9-4.26" class="level4">
+<h4 class="anchored" data-anchor-id="problem-9-4.26">Problem 9 (4.26)</h4>
+<p>Suppose that monthly collections for home delivery of the <em>New York Times</em> in a large suburb of New York are approximately normally distributed with mean $150 and standard deviation $20. A random sample of 10 delivery persons in a nearby suburb is taken; the arrayed data for monthly collections in dollars are:</p>
+<p>90, 106, 109, 117, 130, 145, 156, 170, 174, 190</p>
+<p>Test the null hypothesis that the same normal distribution model applies to this suburb, using the most appropriate test.</p>
+</section>
+<section id="problem-10-4.27" class="level4">
+<h4 class="anchored" data-anchor-id="problem-10-4.27">Problem 10 (4.27)</h4>
+<p>A bank frequently makes large installment loans to builders. At any point in time, outstanding loans are classified in the following four repayment categories:</p>
+<p>A: Current<br>
+B: Up to 30 days delinquent<br>
+C: 30–60 days delinquent<br>
+D: Over 60 days delinquent</p>
+<p>The bank has established the internal standard that these loans are “in control” as long as the percentage in each category is as follows:</p>
+<p>A: 80% B: 12% C: 7% D: 1%</p>
+<p>They make frequent spot checks by drawing a random sample of loan files, noting their repayment status at that time and comparing the observed distribution with the standard for control. Suppose a sample of 500 files produces the following data on number of loans in each repayment category:</p>
+<p>A: 358 B: 88 C: 44 D: 15</p>
+<p>Does it appear that installment loan operations are under control at this time?</p>
+</section>
+<section id="problem-11-4.28" class="level4">
+<h4 class="anchored" data-anchor-id="problem-11-4.28">Problem 11 (4.28)</h4>
+<p>Durtco Incorporated designs and manufactures gears for heavy-duty construction equipment. One such gear, 9973, has the following specifications:</p>
+<ol type="a">
+<li>Mean diameter 3.0 in.<br>
+</li>
+<li>Standard deviation 0.001 in.<br>
+</li>
+<li>Output normally distributed.</li>
+</ol>
+<p>The production control manager has selected a random sample of 500 gears from the inventory and measured the diameter of each. Nothing more has been done to the data. How would you determine statistically whether gear 9973 meets the specifications?</p>
+</section>
+</section>
+<section id="two-sample-tests" class="level2">
+<h2 class="anchored" data-anchor-id="two-sample-tests">Two-sample tests</h2>
+<section id="problem-12-8.9" class="level4">
+<h4 class="anchored" data-anchor-id="problem-12-8.9">Problem 12 (8.9)</h4>
+<p>A travel agency wanted to compare the noncorporate prices charged by two major motel chains for a standard-quality single room at major airport locations around the country. A random sample of five Best Eastern motels and an independent sample of six Travelers’ Inn motels, all located at major airports, gave the approximate current total costs of a standard single room as shown below. Find a 95% confidence interval estimate of the difference between median costs at Best Eastern and Travelers’ Inn motels.</p>
+<p>Best Eastern: $68, 75, 92, 79, 95<br>
+Travelers’ Inn: $69, 76, 81, 72, 75, 80</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
