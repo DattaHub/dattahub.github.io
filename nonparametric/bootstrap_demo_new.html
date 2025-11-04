@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Bootstrap</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Jyotishka Datta" />
+    <script src="libs/header-attrs-2.28/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Bootstrap
+]
+.author[
+### Jyotishka Datta
+]
+.institute[
+### Virginia Tech
+]
+.date[
+### 2021/06/21 (updated: 2025-11-04)
+]
+
+---
+
+
+
+
+# Bootstrap using R 
+
+&lt;!-- --- --&gt;
+&lt;!-- ## Bootstrap vs. CV  --&gt;
+
+&lt;!-- -  Cross-validation: provides estimates of the (test) error --&gt;
+
+&lt;!-- - The Bootstrap: provides the (standard) error of estimates --&gt;
+
+---
+## Bootstrap 
+
+- Wikipedia: group of metaphors which refer to a self-sustaining process that proceeds without external help.
+- In Statistics, Bootstrap is a procedure that helps us get an idea about the distribution of a test statistic by resampling from the sample that produces the statistic. 
+- Introduced by Brad Efron in 1979 - spread like a bushfire in scientific disciplines within a couple of decades. 
+
+![](bootstrap_cite.jpg){width=150px height=120px}
+
+
+
+---
+## Motivation 
+
+-  Goal: *Summarize* a sample based study and *generalize* the finding to the parent population, using sample statistics are sample mean, sample median, sample standard deviation etc.
+	
+- Sample mean will fluctuate from sample to sample and we would like to know *the magnitude of these fluctuations* around the corresponding population parameter in an overall sense. 
+
+-  This is then used in assessing the Margin of Errors. 
+
+- The entire picture of all possible values of a sample statistics presented in the form of a probability distribution is called a *sampling distribution.*
+
+---
+## Sampling distributions 
+
+-  There is a plenty of theoretical knowledge of sampling distributions for some common statistics, which can be found in any text books of mathematical statistics.  
+
+- For example,
+
+  + Normal: `\(\mathcal {N}(\mu ,\sigma ^{2})\)` `\(\Rightarrow\)` Sample mean `\(\bar {X}\)` from samples of size n	`\(\Rightarrow\)` `\(\bar  X \sim {\mathcal  {N}}{\Big (}\mu ,\,{\frac  {\sigma ^{2}}{n}}{\Big )}\)`
+  + Bernoulli: `\(\operatorname {Bernoulli}(p)\)` `\(\Rightarrow\)`	Sample proportion of "successful trials" `\(\bar {X}\)` `\(\Rightarrow\)`	`\(n{\bar  X} \sim \operatorname {Binomial}(n,p)\)`
+  + Similarly, you can find sampling distribution for difference of two normal means (used in hypothesis testing).
+  + But, sometimes the sampling distribution is way too complicated or not available in a closed form even for simple test statistics. 
+  + e.g. Pearson's correlation coefficient 
+  
+
+---
+## Sampling distribution of `\(r\)` 
+
+&lt;img src="samplingdistr.png" width="1929" style="display: block; margin: auto;" /&gt;
+
+
+-  TL;DR: sampling distributions are not always easy to derive / admit a 'nice' closed form probability density. 
+-  A general intuitive method applicable to just about any kind of sample statistic without the technical tedium has got its own special appeal. 
+-  Bootstrap is such a method.
+
+
+---
+## Bootstrap
+
+- To understand bootstrap, suppose it were possible to draw repeated samples (of the same size) from the population of interest, a large number of times. 
+
+&gt;- For example, if you want to know about distribution of `\(\bar{X}\)`, where `\(X_1, \ldots, X_n\)` are from `\(N(\mu,\sigma^2)\)`, you can do so by drawing many independent samples of size `\(n\)` from `\(N(\mu,\sigma^2)\)`, and see how `\(\bar{X}\)` from different samples behave. 
+
+&gt;- For any statistic, one would get a fairly good idea about the sampling distribution of a particular statistic from the collection of its values arising from these repeated samples.
+
+&gt;- But, that does not make sense *as it would be too expensive and defeat the purpose of a sample study*. The purpose of a sample study is *to gather information cheaply in a timely fashion.*
+
+---
+## Main idea 
+
+- The idea behind bootstrap is to use the sample at hand as a
+_surrogate population_, for the purpose of approximating the
+sampling distribution of a statistic.
+- We resample (with replacement) from the sample data at hand and create a large number of "phantom samples" known as bootstrap samples.
+- Sample with replacement: 
+ + you have a box with n balls with n values, you 1) choose a ball at random 2) note it's number, 3) put it back,
+and 4) repeat. 
+  + (This is called an SRSWR: Simple Random Sample
+With Replacement).
+- The sample summary is then computed on each of the bootstrap
+samples (usually a few thousand).
+- A histogram of the set of these computed values is referred to as the bootstrap distribution of the statistic.
+
+---
+class: center, middle
+
+# Let's try Bootstrap for a simple problem 
+
+---
+## Sampling distribution 
+
+- If the population distribution is known, we can sample from it many times to get an idea of the sampling distribution. 
+
+- Example: `\(X_i \sim N(\mu, \sigma^2), i = 1, \ldots, n\)`. 
+- Sampling distribution of `\(\bar{X}\)` is `\(N(\mu, \sigma^2/n)\)`
+- Also, we can draw from normal many times, and plot the histogram of all the means. 
+
+---
+## Sampling distribution Normal mean
+
+
+``` r
+set.seed(123)
+x = rnorm(100, 2, 3)
+xbar.smpls = rep(NA, 1000)
+for (i in 1:1000) xbar.smpls[i] = mean(rnorm(100, 2, 3))
+hist(xbar.smpls, freq = FALSE)
+curve(dnorm(x, mean = 2, sd = 3/10), add = T)
+```
+
+&lt;img src="bootstrap_demo_new_files/figure-html/unnamed-chunk-2-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+## Use of sampling distribution
+-  We can use the sampling distribution to get an idea about the fluctuation of the sample mean etc.
+- The true sampling mean should be 2, and true sampling std. dev. should be `\(\sigma/\sqrt{n}= 3/\sqrt(100) = 0.3\)`.
+
+
+``` r
+mean(xbar.smpls)
+```
+
+```
+  [1] 2.00255
+```
+
+``` r
+sd(xbar.smpls)
+```
+
+```
+  [1] 0.2851543
+```
+
+---
+## Bootstrapping the sample mean 
+
+-  Now, we will find the bootstrap estimate of the sampling distribution of the sample mean, 
+-  But, before that, let's introduce a little bit of formalism to help us. 
+
+
+---
+## Algorithm 
+
+1.  Data: `\(X_1, \ldots, X_n\)`. Test statistics `\(t_n\)` (e.g. `\(\bar{X}\)`)
+2.  Draw `\(B\)` samples `\(x_1^b, x_2^b, \ldots, x_n^b\)` with replacement `\(b = 1, \ldots, B\)` (there might be ties). This is called a **Bootstrap sample**!
+3.  For each of the `\(B\)` samples calculate the statistic `\(t_n^b\)`.
+4.  Use these `\(B\)` realizations of `\(t_n\)` to compute whatever you want, e.g. 
+-   mean: `\(E(t_n) \approx 1/B \sum_b t_n^b\)`.
+-   variance: `\(Var(t_n) \approx 1/(B-1) \sum_b (t_n^b - \bar{t}_n)^2\)`.
+-   Empirical CDF `\(\hat{F}(t_n)\)`. 
+
+
+---
+## Bootstrap in R - the sample() function 
+
+A major component of bootstrapping is being able to resample a given data set and in R the function which does this is the sample function.
+
+sample(x, size, replace, prob)
+
+-  The first argument is a vector containing the data set to be resampled or the indices of the data to be resampled.
+-  The size option specifies the sample size with the default being the size of the population being resampled.
+-  The replace option determines if the sample will be drawn with or without replacement where the default value is FALSE, i.e. without replacement. 
+-  The prob option takes a vector of length equal to the data set given in the first argument containing the probability of selection for each element of x. 
+
+---
+## More on sampling - 1
+-  Using sample to generate a permutation of the sequence 1:10
+
+``` r
+sample(10)
+```
+
+```
+   [1]  4  1  5 10  3  9  8  6  7  2
+```
+-  Bootstrap sample from the same sequence (ties)
+
+``` r
+sample(10, replace = T)
+```
+
+```
+   [1]  1  9  5  8  1 10  7  5  5  6
+```
+
+``` r
+sample(10, replace = T)
+```
+
+```
+   [1]  5 10 10  1  7  5  6  8  8 10
+```
+
+---
+## More on sampling - 2
+
+-  Boostrap sample from the same sequence with probabilities that favor the numbers 1-5
+
+``` r
+prob1 &lt;- c(rep(0.15, 5), rep(0.05, 5))
+prob1
+```
+
+```
+   [1] 0.15 0.15 0.15 0.15 0.15 0.05 0.05 0.05 0.05 0.05
+```
+
+``` r
+sample(10, replace = T, prob = prob1)
+```
+
+```
+   [1] 4 8 4 3 7 5 5 3 1 7
+```
+
+---
+## Bootstrap in R 
+- Here is an R code for getting the bootstrap samples from the same `\(x\)` that we saw before. 
+
+
+``` r
+B = 5000
+theta.boot = rep(0, B)
+n = length(x)
+*for (b in 1:B) theta.boot[b] = mean(sample(x, replace = TRUE))
+```
+
+
+-  Pay attention to what that single line of code is doing: it's sampling from the same observations `\(x\)` multiple (5000) times, then calculating the mean for each such *resample* and storing them in a vector called `theta.boot` 
+
+- To estimate the standard errors of `\(\bar{x}\)`, we just need to calculate the mean and s.d. of these bootstrap samples. 
+
+
+---
+## Bootstrap mean and sd
+
+-  We can use the statistics calculated from the bootstrap distribution to get an idea about the fluctuation of the sample mean etc. when the true F is not known.
+
+
+``` r
+mean(theta.boot)
+```
+
+```
+  [1] 2.269501
+```
+
+``` r
+sd(theta.boot)
+```
+
+```
+  [1] 0.2727257
+```
+
+---
+## The bootstrap distribution 
+
+
+``` r
+hist(theta.boot, breaks = 30, col = rgb(0, 1, 0, 0.5), freq = FALSE)
+hist(xbar.smpls, breaks = 30, col = rgb(0, 0, 1, 0.5), freq = FALSE,
+    add = TRUE)
+abline(v = mean(xbar.smpls), lty = "dotted")
+abline(v = mean(theta.boot))
+legend("topright", c("Bootstrap", "Sampling dist"), col = c(rgb(0,
+    1, 0, 0.5), rgb(0, 0, 1, 0.5)), lty = c(2, 2), lwd = c(4,
+    4))
+```
+
+&lt;img src="bootstrap_demo_new_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+## Bootstrap theory 
+
+-  You have data `\(X_1, \ldots, X_n\)`, realizations from a distribution `\(F\)`.
+-  If `\(F\)` is completely unknown, we cannot generate random numbers from this distribution. 
+-  Your only source of information is your data at hand: `\(X_1, \ldots, X_n\)`. 
+
+--
+-  The idea is to approximate `\(F\)` by `\(\hat{F}_n\)` based on `\(X_1, \ldots, X_n\)`. This is called an empirical CDF. 
+
+-  Basic idea: Inference about a population from sample data, (sample `\(\rightarrow\)` population), can be modeled by resampling the sample data and performing inference about a sample from resampled data, (resampled `\(\rightarrow\)` sample).
+
+---
+## Empirical CDF 
+
+- The EDF `\(F_n\)` is defined as `\(F_n(x) = \frac{1}{n} \sum_{i=1}^{n} I\{ X_i \le x\}\)`.
+- Glivenko-Cantelli Lemma: EDF converges to the true CDF, i.e. `\(F_n\)` converges to `\(F\)` as `\(n \to \infty\)`. 
+- Since the Bootstrap samples are resamples from the given sample, we can think of bootstrap samples as draws from the Empiricial Distribution Function. 
+
+&gt;- The population is to the sample as
+&gt;- the sample is to the bootstrap samples. (John Fox)
+
+---
+class: center, middle, dark
+## G-C Lemma: Empirical CDF converges to the *true CDF*
+
+[https://jdatta.shinyapps.io/eCDFdemo/](https://jdatta.shinyapps.io/eCDFdemo/)
+
+---
+## Bootstrapping median - 0
+
+-  Taken entirely from [ATS UCLA website](http://www.ats.ucla.edu/stat/r/library/bootstrap.htm) 
+- In the following bootstrapping example we would like to obtain a standard error for the estimate of the median. 
+
+- We will use the `lapply` and `sapply` functions. 
+
+- `lapply(X, FUN, ...)`: returns a list of the same length as X, each element of which is the result of applying FUN to the corresponding element of X.
+- `sapply(X, FUN, ...)` is a user-friendly version and wrapper of lapply by default returning a vector, matrix or, if `simplify = "array"`, an array if appropriate.
+
+---
+class: center, middle
+
+# Example 2: Bootstrapping the median. 
+
+&gt;- (The exact expression for the sampling distribution of the sample median is not available in closed form.)
+
+
+---
+## Bootstrapping median - 1
+
+-  We want to calculating the standard error of the median for a data set created by taking 100 observations from a normal distribution with mean 5 and stdev 3. 
+
+-  The distribution of median is not as simple as the mean.
+
+
+``` r
+data &lt;- rnorm(100, 5, 3)
+data[1:10]
+```
+
+```
+   [1]  6.733251  8.033396 10.952668  2.321523  5.784268  3.614725  5.427864
+   [8]  3.917381  2.808604  2.062305
+```
+
+
+---
+## Bootstrapping median - 2
+- We will generate only 20 bootstrap samples. 
+- Show the first sample for demonstration. 
+
+
+``` r
+resamples &lt;- lapply(1:20, function(i) sample(data, replace = T))
+resamples[1]
+```
+
+```
+  [[1]]
+    [1]  6.5408603  1.0506880  2.2906844  5.4154695  0.8284962  5.4623857
+    [7]  2.6849414  2.8790922 -1.1825335  6.8980367  2.0623048  0.8284962
+   [13]  4.6617780  3.9173813  4.6901455  3.6319773  1.5631956  2.1929835
+   [19]  7.2478484  5.3055196  4.9760104  2.8086036  3.1998967  3.8731326
+   [25]  7.2868731  6.7378142 10.4292735  8.3667153  6.9539595  1.9988276
+   [31]  6.7378142  1.9988276  2.6855018  8.3667153  4.6901455  4.4547279
+   [37]  3.9173813  9.8425477  7.9312938  6.3502594  9.0273332  7.2868731
+   [43]  5.3055196  5.4623857  2.1125888  2.6855018  0.8284962  0.8284962
+   [49]  2.6855018  5.3055196  5.4154695  6.1671975  7.0864048  7.2868731
+   [55]  2.0926952  5.6320070  3.8841552  2.5177823  7.7264152  3.8731326
+   [61]  1.1129027  1.3204487  6.8980367  7.2868731  6.5395316  3.6319773
+   [67]  8.3667153  1.5631956  5.6320070  4.0628588  5.7842685  1.9742257
+   [73]  2.2070494  3.0447383  5.0774720  6.9539595  7.9312938  2.8086036
+   [79]  2.6849414  5.0774720  5.6856782  1.3344209  7.5653981  1.3204487
+   [85]  8.0333956  5.4960551 10.4292735  4.9447316  8.3667153  2.6849414
+   [91]  4.6617780 10.4292735  5.5259351  6.5408603  4.4547279  6.5408603
+   [97]  2.2070494  3.1908632  6.3502594  2.9616065
+```
+
+
+---
+## Bootstrapping median - 3
+
+- For each bootstrap samples, we will calculate the median. 
+- Now we have a bootstrap sample from the distribution of the sample median, and we can use it to calculate the standard deviation. 
+
+``` r
+r.median &lt;- sapply(resamples, median)
+r.median
+```
+
+```
+   [1] 4.817439 4.718712 4.558253 4.221214 4.791569 4.661778 4.062859 4.529029
+   [9] 3.884155 4.632554 4.661778 4.661778 4.799835 4.962863 4.740317 5.013594
+  [17] 4.257172 4.363435 4.962863 4.131543
+```
+
+``` r
+sqrt(var(r.median))
+```
+
+```
+  [1] 0.3189351
+```
+
+
+---
+## Bootstrapping median - 4
+
+
+``` r
+hist(r.median, freq = FALSE, col = rgb(0, 1, 0, 0.5))
+```
+
+&lt;img src="bootstrap_demo_new_files/figure-html/unnamed-chunk-13-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+## Using package 
+
+Bootstrap the 95% CI for `\(R^2\)` statistic. 
+
+First need function to obtain R-Squared from the data 
+
+
+``` r
+rsq &lt;- function(formula, data, indices) {
+    d &lt;- data[indices, ]  # allows boot to select sample 
+    fit &lt;- lm(formula, data = d)
+    return(summary(fit)$r.square)
+}
+```
+
+Botstrapping with 1000 replications:
+
+
+``` r
+library(boot)
+results &lt;- boot(data = mtcars, statistic = rsq, R = 1000, formula = mpg ~
+    wt + disp)
+```
+
+---
+## Using package 
+
+
+``` r
+# view results
+results
+```
+
+```
+  
+  ORDINARY NONPARAMETRIC BOOTSTRAP
+  
+  
+  Call:
+  boot(data = mtcars, statistic = rsq, R = 1000, formula = mpg ~ 
+      wt + disp)
+  
+  
+  Bootstrap Statistics :
+       original     bias    std. error
+  t1* 0.7809306 0.01148737  0.04958466
+```
+
+---
+## Using package 
+
+You can also get them separately:
+
+``` r
+(bs.median = results$t0)
+```
+
+```
+  [1] 0.7809306
+```
+
+``` r
+(bs.stderr = sqrt(var(results$t)))
+```
+
+```
+             [,1]
+  [1,] 0.04958466
+```
+
+---
+## Plotting results 
+
+
+``` r
+plot(results)
+```
+
+&lt;img src="bootstrap_demo_new_files/figure-html/unnamed-chunk-18-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+## Plotting results 
+
+
+``` r
+df &lt;- data.frame(x = results$t)
+x &lt;- df$x
+library(ggplot2)
+ggplot(df, aes(x)) + geom_histogram(aes(y = ..density..), alpha = 0.5) +
+    geom_density()
+```
+
+&lt;img src="bootstrap_demo_new_files/figure-html/unnamed-chunk-19-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+## Law data example 
+
+
+``` r
+setwd("~/GitHub/DattaHub.github.io/iqs")
+load("law.rda")
+attach(law)
+library(ggplot2)
+qplot(LSAT, GPA, data = law) + theme_bw()
+```
+
+&lt;img src="bootstrap_demo_new_files/figure-html/unnamed-chunk-20-1.png" style="display: block; margin: auto;" /&gt;
+
+``` r
+cor(LSAT, GPA)
+```
+
+```
+  [1] 0.7763745
+```
+
+---
+## Sample with replacement 
+
+
+``` r
+sample(nrow(law), replace = TRUE)
+```
+
+```
+   [1]  2 15  4  6  3  7  3  2  2 13 13  8  7  2  4
+```
+
+``` r
+sample(nrow(law), replace = TRUE)
+```
+
+```
+   [1]  7  5  9  7  2  4  8  1 10  8 12 12 12  3  2
+```
+
+``` r
+with(law[sample(nrow(law), replace = TRUE), ], cor(LSAT, GPA))
+```
+
+```
+  [1] 0.7122137
+```
+
+``` r
+with(law[sample(nrow(law), replace = TRUE), ], cor(LSAT, GPA))
+```
+
+```
+  [1] 0.6926734
+```
+
+``` r
+with(law[sample(nrow(law), replace = TRUE), ], cor(LSAT, GPA))
+```
+
+```
+  [1] 0.7429673
+```
+
+---
+## Bootstrap (Long code)
+
+
+``` r
+ptm &lt;- proc.time()
+B &lt;- 5000
+cor.boot &lt;- rep(0, B)
+for (b in 1:B) {
+    law.boot &lt;- law[sample(nrow(law), replace = TRUE), ]
+    cor.boot[b] = cor(law.boot$LSAT, law.boot$GPA)
+}
+summary(cor.boot)
+```
+
+```
+     Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  0.07721 0.69098 0.79229 0.77206 0.87380 0.99462
+```
+
+``` r
+proc.time() - ptm
+```
+
+```
+     user  system elapsed 
+     0.17    0.03    0.21
+```
+
+---
+## Bootstrap (Short code)
+
+
+``` r
+ptm &lt;- proc.time()
+B &lt;- 5000
+cors &lt;- replicate(B, {
+    with(law[sample(nrow(law), replace = TRUE), ], cor(LSAT,
+        GPA))
+})
+summary(cors)
+```
+
+```
+      Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+  -0.05628  0.68932  0.78942  0.77030  0.87292  0.99626
+```
+
+``` r
+proc.time() - ptm
+```
+
+```
+     user  system elapsed 
+     0.20    0.03    0.25
+```
+
+- Slight gain in running time! Gets better with bigger data.
+
+---
+## Plotting results 
+
+
+``` r
+df &lt;- data.frame(x = cors)
+x &lt;- df$x
+library(ggplot2)
+ggplot(df, aes(x)) + geom_histogram(aes(y = ..density..), binwidth = 0.1,
+    alpha = 0.5) + geom_density() + theme_bw()
+```
+
+&lt;img src="bootstrap_demo_new_files/figure-html/unnamed-chunk-24-1.png" style="display: block; margin: auto;" /&gt;
+
+
+---
+## How many bootstrap samples do we need? 
+
+- We will perform Bootstrap sampling for different values of `\(B\)`, the number of Bootstrap samples and observe the fluctuation between bootstrap estimates for each choice. 
+
+- Our preferred `\(B\)` should lead to a low variation.
+
+- We will show the standard loop-y code, which is not efficient and a fast code. 
+
+
+---
+## Design 
+
+
+``` r
+Bs &lt;- rep(100 * (1:50), 3)
+Bs
+```
+
+```
+    [1]  100  200  300  400  500  600  700  800  900 1000 1100 1200 1300 1400 1500
+   [16] 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000
+   [31] 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500
+   [46] 4600 4700 4800 4900 5000  100  200  300  400  500  600  700  800  900 1000
+   [61] 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500
+   [76] 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000
+   [91] 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000  100  200  300  400  500
+  [106]  600  700  800  900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000
+  [121] 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500
+  [136] 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000
+```
+
+---
+## How many bootstrap samples do we need? 
+
+
+``` r
+ptm &lt;- proc.time()
+corsize = matrix(0, length(Bs), 2)
+for (i in 1:length(Bs)) {
+    b = Bs[i]
+    cor.boot &lt;- numeric(b)
+    for (j in 1:b) {
+        law.boot &lt;- law[sample(nrow(law), replace = TRUE), ]
+        cor.boot[j] = cor(law.boot$LSAT, law.boot$GPA)
+    }
+    corsize[i, ] = c(b, mean(cor.boot))
+}
+colnames(corsize) = c("B", "cor")
+proc.time() - ptm
+```
+
+```
+     user  system elapsed 
+    14.69    0.28   15.32
+```
+
+
+---
+## How many bootstrap samples do we need? 
+
+
+``` r
+head(corsize, n = 6)
+```
+
+```
+         B       cor
+  [1,] 100 0.7731894
+*  [2,] 200 0.7626174
+*  [3,] 300 0.7773320
+  [4,] 400 0.7712480
+  [5,] 500 0.7673362
+  [6,] 600 0.7645024
+```
+
+
+---
+## Plot
+
+- Plot the correlation estimates for each value of `\(B\)` for three choices. 
+- As `\(B\)` increases, fluctuation diminishes. 
+
+
+``` r
+qplot(B, cor, data = data.frame(corsize)) + theme_bw()
+```
+
+&lt;img src="bootstrap_demo_new_files/figure-html/unnamed-chunk-28-1.png" style="display: block; margin: auto;" /&gt;
+
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

@@ -1,11 +1,123 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jyotishka Datta</title>
+  <meta name="description" content="Personal academic site." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0f172a; /* slate-900 */
+      --panel:#111827; /* gray-900 */
+      --text:#e5e7eb; /* gray-200 */
+      --muted:#94a3b8; /* slate-400 */
+      --accent:#38bdf8; /* sky-400 */
+      --chip:#1f2937; /* gray-800 */
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,var(--bg),#0b1224 60%);color:var(--text);}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+    .wrap{max-width:1000px;margin:0 auto;padding:24px}
+    header{display:flex;gap:24px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#38bdf8,#22c55e);display:grid;place-items:center;font-weight:800}
+    nav{display:flex;gap:16px;flex-wrap:wrap}
+    nav a{padding:8px 12px;border-radius:999px;background:var(--chip);}
+    .hero{margin:48px 0;padding:32px;border:1px solid #2a374f;background:linear-gradient(180deg,#0e162d,#0b1527);border-radius:20px}
+    .hero h1{margin:0 0 8px 0;font-size:clamp(28px,5vw,44px)}
+    .hero p{margin:6px 0;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+    .card{border:1px solid #293651;background:linear-gradient(180deg,#0f1a33,#0c162b);padding:18px;border-radius:16px}
+    .card h3{margin:0 0 8px 0;font-size:18px}
+    .list{padding:0;margin:0;list-style:none}
+    .list li{padding:8px 0;border-top:1px dashed #24314a}
+    footer{margin:48px 0;color:var(--muted);font-size:14px}
+    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:#0a1224;border:1px solid #22304a;padding:2px 6px;border-radius:6px}
+  </style>
+</head>
 <body>
-<h1>Jyotishka Datta's GitHub page </h1>
-  
-<p>
-<a hrf ="https://github.com/DattaHub"> https://github.com/DattaHub </a>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">JD</div>
+        <div>
+          <strong>Jyotishka Datta</strong><br />
+          <span style="color:var(--muted)">Statistics • Research • Teaching</span>
+        </div>
+      </div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="research.html">Research</a>
+        <a href="publications.html">Publications</a>
+        <a href="teaching.html">Teaching</a>
+        <a href="https://jyotishkadatta.wordpress.com/" target="_blank" rel="noopener">Blog ↗</a>
+        <a href="index.html#contact">Contact</a>
+      </nav>
+    </header>
 
-</p>
+    <section class="hero">
+      <h1>Hello — I’m Jyotishka.</h1>
+      <p>Associate Professor of Statistics at Virginia Tech. I work on Bayesian methods (shrinkage priors, high-dimensional inference) and their applications.</p>
+      <p style="margin-top:12px">This site is a light, fast landing page hosted on <span class="kbd">GitHub Pages</span>. You can keep your longer posts on WordPress for now.</p>
+    </section>
+
+    <section id="about" class="grid" aria-label="About and Quick links">
+      <div class="card">
+        <h3>About</h3>
+        <p>I build probabilistic models and write about statistics in Bengali and English. Outside work: books, music, the usual curiosities.</p>
+      </div>
+      <div class="card">
+        <h3>Quick links</h3>
+        <ul class="list">
+          <li><a href="https://github.com/DattaHub" target="_blank" rel="noopener">GitHub</a></li>
+          <li><a href="https://scholar.google.com/" target="_blank" rel="noopener">Google Scholar</a></li>
+          <li><a href="cv.pdf" target="_blank" rel="noopener">CV (PDF)</a> <span style="color:var(--muted)">— add later</span></li>
+          <li><a href="mailto:you@example.com">you@example.com</a> <span style="color:var(--muted)">— update</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="research" style="margin-top:28px" class="grid">
+      <div class="card">
+        <h3>Current work</h3>
+        <ul class="list">
+          <li>Bayesian Global–Local regularization (with Polson & Sokolov).</li>
+          <li>Prediction-Powered Inference with IPW estimators.</li>
+          <li>Robust Bayesian distance estimation in astronomy.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Selected publications</h3>
+        <ul class="list">
+          <li>Paper A — <a href="#">arXiv</a></li>
+          <li>Paper B — <a href="#">Journal</a></li>
+          <li>Paper C — <a href="#">arXiv</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="teaching" style="margin-top:28px" class="grid">
+      <div class="card">
+        <h3>Teaching</h3>
+        <ul class="list">
+          <li>STAT 5xxx: Bayesian Methods — Spring 2025</li>
+          <li>STAT 4xxx: Regression — Fall 2024</li>
+        </ul>
+      </div>
+      <div class="card" id="contact">
+        <h3>Contact</h3>
+        <p>Department of Statistics, Virginia Tech.<br>Blacksburg, VA.</p>
+      </div>
+    </section>
+
+    <footer>
+      <div>© <span id="y"></span> Jyotishka Datta • Built with GitHub Pages</div>
+    </footer>
+  </div>
+  <script>document.getElementById('y').textContent=new Date().getFullYear()</script>
 </body>
-</html>
