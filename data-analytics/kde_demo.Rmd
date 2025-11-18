@@ -16,9 +16,51 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+## Density Estimation 
+
+Suppose a random sample \(X_1, \ldots, X_n\) is drawn from a population with an unknown continuous probability density function \(f(x)\).
+
+Goal: estimate \(f(x)\).
+
+### Histogram
+
+Partition the range of data into subintervals
+\[
+a_1 < a_2 < \cdots < a_k.
+\]
+
+For \(x \in (a_i, a_{i+1}]\),
+\[
+\hat f(x) = 
+\frac{\#\{\text{observations} \in (a_i, a_{i+1}]\}}{n(a_{i+1} - a_i)}.
+\]
+
+## Bandwidth 
+
+-  Typically, the intervals have equal length \(h\): \((a_{i+1} - a_i) = 2h\) for \(i = 1, \ldots, k\). The equal interval length \(h\) is often referred to as the **bandwidth**. 
+
+-  In this case, for any \(x\) within the data range,
+\[
+\hat f(x) = 
+\frac{\#\{\text{observations within } h \text{ of } x\}}{2nh}
+= \frac{1}{2nh} \sum_{i=1}^n I(|X_i - x| \le h).
+\]
+
+- Narrow intervals (smaller \(h\)): histogram has a choppy appearance, large variance.
+- Large intervals (larger \(h\)): histogram may lose local features, large bias.
+- Generally, a larger sample size \(n\) requires a smaller \(h\), thus more intervals.
+
+Suggested bandwidth:
+\[
+h = \frac{1.75}{n^{1/3}} S,
+\]
+where \(S\) is the sample standard deviation.
+
 ## Histograms 
 
--  Histograms provide an idea about the data distribution. Defined as:
+-  Histograms provide an idea about the data distribution. 
+
+-  Look at the definition again:
 
 $$
 \hat{f}(x) = \frac{ \text{No. of observations within } h \text{ of } x }{n \times 2h} \\
@@ -88,6 +130,7 @@ par(mfrow = c(1,1))
 
 -  Drawback of histogram: density estimation is piecewise constant and thus unsmooth.
 -  Main idea of kernel density estimation: instead of counting number of observations within $h$ of $x$, we take a certain weighted average of data points near $x$ to estimate $f(x)$.
+-  Usually we assign higher weights to data points closer to $x$, and lower weights to those further away from $x$.
   
 -  Kernel Density Estimate:
 
@@ -97,7 +140,124 @@ $$
 where $K(\cdot)$ is a Kernel function. 
 
 - Choices: $h$ bandwidth and $K()$ the kernel.
-	
+
+## Choices of kernel function
+
+- Uniform: \(K(u) = \frac{1}{2} I(|u| \le 1)\). Reduces to histogram.
+- Gaussian: \(K(u) = \phi(u)\) (standard normal density).
+- Triangle: \(K(u) = (1 - |u|) I(|u| \le 1)\).
+- Epanechnikov: \(K(u) = \tfrac{3}{4}(1 - u^2) I(|u| \le 1)\).
+- Biweight: \(K(u) = \tfrac{15}{16}(1 - u^2)^2 I(|u| \le 1)\).
+- Triweight: \(K(u) = \tfrac{35}{32}(1 - u^2)^3 I(|u| \le 1)\).
+- Minimum variance kernel (allowing negative weight):
+
+\[
+  K(u) = \tfrac{1}{8}(3 - 5u^2) I(|u| \le 1).
+\]
+
+
+## Choice of bandwidth \(h\)
+
+A rule of thumb (Harfle, 1991):
+\[
+h = \frac{1.06}{n^{1/5}} S,
+\]
+where \(S\) is the sample standard deviation, or a more robust version such as
+
+- scaled interquartile range:
+  \[
+  S = \frac{X_{(0.75)} - X_{(0.25)}}{1.34},
+  \]
+- scaled MAD (median absolute deviation):
+  \[
+  S = 1.4826 \cdot \text{Median}\{|X_i - \text{median}(X_i)|\}.
+  \]
+  
+## Kernel function shapes
+
+```{r kernel-shapes, echo=FALSE, fig.height=6, fig.width=8}
+
+# Grid of u values
+u <- seq(-1.5, 1.5, length.out = 500)
+
+# Indicator function
+I01 <- function(x) as.numeric(abs(x) <= 1)
+
+# Kernels
+K_uniform <- function(u) 0.5 * I01(u)
+
+K_triangle <- function(u) (1 - abs(u)) * I01(u)
+
+K_epanechnikov <- function(u) 0.75 * (1 - u^2) * I01(u)
+
+K_biweight <- function(u) (15/16) * (1 - u^2)^2 * I01(u)
+
+K_triweight <- function(u) (35/32) * (1 - u^2)^3 * I01(u)
+
+K_minvar <- function(u) (1/8) * (3 - 5*u^2) * I01(u)
+
+K_gaussian <- function(u) dnorm(u)  # standard normal density
+
+# Evaluate kernels on grid
+k_unif  <- K_uniform(u)
+k_tri   <- K_triangle(u)
+k_epan  <- K_epanechnikov(u)
+k_bi    <- K_biweight(u)
+k_triwt <- K_triweight(u)
+k_min   <- K_minvar(u)
+k_gauss <- K_gaussian(u)
+
+# Plot settings
+op <- par(mfrow = c(3, 3), mar = c(4, 4, 3, 1))
+
+# Uniform
+plot(u, k_unif, type = "l", lwd = 2,
+     xlab = "u", ylab = "K(u)",
+     main = "Uniform kernel")
+abline(h = 0, col = "grey")
+
+# Triangle
+plot(u, k_tri, type = "l", lwd = 2,
+     xlab = "u", ylab = "K(u)",
+     main = "Triangle kernel")
+abline(h = 0, col = "grey")
+
+# Epanechnikov
+plot(u, k_epan, type = "l", lwd = 2,
+     xlab = "u", ylab = "K(u)",
+     main = "Epanechnikov kernel")
+abline(h = 0, col = "grey")
+
+# Biweight
+plot(u, k_bi, type = "l", lwd = 2,
+     xlab = "u", ylab = "K(u)",
+     main = "Biweight kernel")
+abline(h = 0, col = "grey")
+
+# Triweight
+plot(u, k_triwt, type = "l", lwd = 2,
+     xlab = "u", ylab = "K(u)",
+     main = "Triweight kernel")
+abline(h = 0, col = "grey")
+
+# Minimum variance (can be negative)
+plot(u, k_min, type = "l", lwd = 2,
+     xlab = "u", ylab = "K(u)",
+     main = "Min-variance kernel")
+abline(h = 0, col = "grey", lty = 2)
+
+# Gaussian (not compactly supported)
+u_g <- seq(-3, 3, length.out = 500)
+k_g <- K_gaussian(u_g)
+plot(u_g, k_g, type = "l", lwd = 2,
+     xlab = "u", ylab = "K(u)",
+     main = "Gaussian kernel")
+abline(h = 0, col = "grey")
+# Restore par
+par(op)
+
+```
+
 
 ## Kernel Density Plot
 

@@ -1,0 +1,62 @@
+<!-- ===== File: teaching.html ===== -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>/* same styles as index */
+:root{--bg:#0f172a;--panel:#111827;--text:#e5e7eb;--muted:#94a3b8;--accent:#38bdf8;--chip:#1f2937}
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,var(--bg),#0b1224 60%);color:var(--text)}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.wrap{max-width:1000px;margin:0 auto;padding:24px}
+header{display:flex;gap:24px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#38bdf8,#22c55e);display:grid;place-items:center;font-weight:800}
+nav{display:flex;gap:16px;flex-wrap:wrap}
+nav a{padding:8px 12px;border-radius:999px;background:var(--chip)}
+.card{border:1px solid #293651;background:linear-gradient(180deg,#0f1a33,#0c162b);padding:18px;border-radius:16px;margin:16px 0}
+.list{padding:0;margin:0;list-style:none}
+.list li{padding:8px 0;border-top:1px dashed #24314a}
+footer{margin:48px 0;color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="brand"><div class="logo">JD</div><div><strong>Jyotishka Datta</strong><br><span style="color:var(--muted)">Statistics • Research • Teaching</span></div></div>
+<nav>
+<a href="index.html">Home</a>
+<a href="research.html">Research</a>
+<a href="publications.html">Publications</a>
+<a href="teaching.html">Teaching</a>
+<a href="https://jyotishkadatta.wordpress.com/" target="_blank" rel="noopener">Blog ↗</a>
+<a href="index.html#contact">Contact</a>
+</nav>
+</header>
+
+
+<h1>Teaching</h1>
+<div class="card">
+<h3>Current</h3>
+<ul class="list">
+<li>STAT 5xxx: Bayesian Methods — Spring 2025 — <a href="#">Syllabus (PDF)</a> • <a href="#">Assignments</a></li>
+<li>STAT 4xxx: Regression — Fall 2024 — <a href="#">Syllabus</a> • <a href="#">Notes</a></li>
+</ul>
+</div>
+
+
+<div class="card">
+<h3>Past courses</h3>
+<ul class="list">
+<li>STAT 3xxx: Intro to Probability — Spring 2024</li>
+<li>STAT 5xxx: Bayesian Methods — Spring 2023</li>
+</ul>
+</div>
+
+
+<footer>© <span id="y3"></span> Jyotishka Datta</footer>
+</div>
+<script>document.getElementById('y3').textContent=new Date().getFullYear()</script>
+</body>
+</html>
+
+
+</html>

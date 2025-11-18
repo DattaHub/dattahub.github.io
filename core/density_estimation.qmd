@@ -1,0 +1,728 @@
+---
+title: "Density Estimation <br> Introduction"
+author: "Dr. Jyotishka Datta"
+format:
+  revealjs: 
+    theme: serif
+    fontsize: 22pt
+    scrollable: true
+    logo: vt.png
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, fig.align = 'center')
+```
+
+
+
+## Density Estimation 
+
+Suppose a random sample $X_1, \ldots, X_n$ is drawn from a population with an unknown continuous probability density function $f(x)$.
+
+Goal: estimate $f(x)$.
+
+### Histogram
+
+Partition the range of data into subintervals:
+
+$$
+a_1 < a_2 < \cdots < a_k.
+$$
+
+For $x \in (a_i, a_{i+1}]$,
+$$
+\hat f(x) = 
+\frac{\#\{\text{observations} \in (a_i, a_{i+1}]\}}{n(a_{i+1} - a_i)}.
+$$
+
+## Bandwidth 
+
+-  Typically, the intervals have equal length $h$: $(a_{i+1} - a_i) = 2h$ for $i = 1, \ldots, k$. The equal interval length $h$ is often referred to as the **bandwidth**. 
+
+-  In this case, for any $x$ within the data range,
+$$
+\hat f(x) = 
+\frac{\#\{\text{observations within } h \text{ of } x\}}{2nh}
+= \frac{1}{2nh} \sum_{i=1}^n I(|X_i - x| \le h).
+$$
+
+- Narrow intervals (smaller $h$): histogram has a choppy appearance, large variance.
+- Large intervals (larger $h$): histogram may lose local features, large bias.
+
+## Bandwidth 
+
+- Generally, a larger sample size $n$ requires a smaller $h$, thus more intervals.
+
+Suggested bandwidth:
+$$
+h = \frac{1.75}{n^{1/3}} S,
+$$
+where $S$ is the sample standard deviation.
+
+## Histograms 
+
+-  Histograms provide an idea about the data distribution. 
+
+-  Look at the definition again:
+
+$$
+\hat{f}(x) = \frac{ \text{No. of observations within } h \text{ of } x }{n \times 2h} \\
+$$
+or, 
+
+$$
+	\hat{f}(x) = \frac{1}{2nh} \sum_{i=1}^{n} I(|{X_i - x}| \le h).
+$$
+
+-  Narrow intervals (smaller h): histogram has a choppy appearance, large variance.
+- Large intervals (larger h): histogram may lose the local feature, large bias.
+
+## R `hist()` 
+
+- In base R's `hist()` method, you can use the `break` argument:
+
+-  `breaks` can be one of:
+
+1. a vector giving the breakpoints between histogram cells,
+2. a function to compute the vector of breakpoints,
+3. a single number giving the number of cells for the histogram,
+4. a character string naming an algorithm to compute the number of cells (see ‘Details’),
+5. a function to compute the number of cells.
+
+
+## Sampling distribution 
+
+- By default, number of breaks is calculated by using Sturges' formula. 
+
+```{r,echo = TRUE}
+data(mtcars)
+hist(mtcars$mpg)
+```
+
+## Histogram with different number of bins
+
+```{r,echo = TRUE}
+hist(mtcars$mpg, breaks=12, col="red")
+```
+
+## Different h 
+
+```{r, echo = T, eval = F}
+par(mfrow = c(2,2))
+hist(mtcars$mpg, breaks=2, col="red")
+hist(mtcars$mpg, breaks=8, col="red")
+hist(mtcars$mpg, breaks=12, col="red")
+hist(mtcars$mpg, breaks=20, col="red")
+par(mfrow = c(1,1))
+```
+
+## Different h 
+
+```{r, echo = F, eval = T}
+par(mfrow = c(2,2))
+hist(mtcars$mpg, breaks=2, col="red")
+hist(mtcars$mpg, breaks=8, col="red")
+hist(mtcars$mpg, breaks=12, col="red")
+hist(mtcars$mpg, breaks=20, col="red")
+par(mfrow = c(1,1))
+
+```
+
+## Kernel Density Estimation
+
+-  Drawback of histogram: density estimation is piecewise constant and thus unsmooth.
+-  Main idea of kernel density estimation: instead of counting number of observations within $h$ of $x$, we take a certain weighted average of data points near $x$ to estimate $f(x)$.
+-  Usually we assign higher weights to data points closer to $x$, and lower weights to those further away from $x$.
+  
+-  Kernel Density Estimate:
+
+$$
+	\hat{f}(x) = \frac{1}{nh} \sum_{i=1}^{n} K\left(\frac{|{X_i - x|}}{h}\right).
+$$
+where $K(\cdot)$ is a Kernel function. 
+
+- Choices: $h$ bandwidth and $K()$ the kernel.
+
+## Choices of kernel function
+
+- Uniform: $K(u) = \frac{1}{2} I(|u| \le 1)$. Reduces to histogram.
+- Gaussian: $K(u) = \phi(u)$ (standard normal density).
+- Triangle: $K(u) = (1 - |u|) I(|u| \le 1)$.
+- Epanechnikov: $K(u) = \tfrac{3}{4}(1 - u^2) I(|u| \le 1)$.
+- Biweight: $K(u) = \tfrac{15}{16}(1 - u^2)^2 I(|u| \le 1)$.
+- Triweight: $K(u) = \tfrac{35}{32}(1 - u^2)^3 I(|u| \le 1)$.
+- Minimum variance kernel (allowing negative weight):
+
+$$
+  K(u) = \tfrac{1}{8}(3 - 5u^2) I(|u| \le 1).
+$$
+
+
+## Choice of bandwidth $h$
+
+A rule of thumb (Harfle, 1991):
+$$
+h = \frac{1.06}{n^{1/5}} S,
+$$
+where $S$ is the sample standard deviation, or a more robust version such as
+
+- scaled interquartile range:
+  $$
+  S = \frac{X_{(0.75)} - X_{(0.25)}}{1.34},
+  $$
+- scaled MAD (median absolute deviation):
+  $$
+  S = 1.4826 \cdot \text{Median}\{|X_i - \text{median}(X_i)|\}.
+  $$
+  
+## Kernel function shapes
+
+```{r kernel-shapes, echo=FALSE, fig.height=6, fig.width=8}
+
+# Grid of u values
+u <- seq(-1.5, 1.5, length.out = 500)
+
+# Indicator function
+I01 <- function(x) as.numeric(abs(x) <= 1)
+
+# Kernels
+K_uniform <- function(u) 0.5 * I01(u)
+
+K_triangle <- function(u) (1 - abs(u)) * I01(u)
+
+K_epanechnikov <- function(u) 0.75 * (1 - u^2) * I01(u)
+
+K_biweight <- function(u) (15/16) * (1 - u^2)^2 * I01(u)
+
+K_triweight <- function(u) (35/32) * (1 - u^2)^3 * I01(u)
+
+K_minvar <- function(u) (1/8) * (3 - 5*u^2) * I01(u)
+
+K_gaussian <- function(u) dnorm(u)  # standard normal density
+
+# Evaluate kernels on grid
+k_unif  <- K_uniform(u)
+k_tri   <- K_triangle(u)
+k_epan  <- K_epanechnikov(u)
+k_bi    <- K_biweight(u)
+k_triwt <- K_triweight(u)
+k_min   <- K_minvar(u)
+k_gauss <- K_gaussian(u)
+
+# Plot settings
+op <- par(mfrow = c(3, 3), mar = c(4, 4, 3, 1))
+
+# Uniform
+plot(u, k_unif, type = "l", lwd = 2,
+     xlab = "u", ylab = "K(u)",
+     main = "Uniform kernel")
+abline(h = 0, col = "grey")
+
+# Triangle
+plot(u, k_tri, type = "l", lwd = 2,
+     xlab = "u", ylab = "K(u)",
+     main = "Triangle kernel")
+abline(h = 0, col = "grey")
+
+# Epanechnikov
+plot(u, k_epan, type = "l", lwd = 2,
+     xlab = "u", ylab = "K(u)",
+     main = "Epanechnikov kernel")
+abline(h = 0, col = "grey")
+
+# Biweight
+plot(u, k_bi, type = "l", lwd = 2,
+     xlab = "u", ylab = "K(u)",
+     main = "Biweight kernel")
+abline(h = 0, col = "grey")
+
+# Triweight
+plot(u, k_triwt, type = "l", lwd = 2,
+     xlab = "u", ylab = "K(u)",
+     main = "Triweight kernel")
+abline(h = 0, col = "grey")
+
+# Minimum variance (can be negative)
+plot(u, k_min, type = "l", lwd = 2,
+     xlab = "u", ylab = "K(u)",
+     main = "Min-variance kernel")
+abline(h = 0, col = "grey", lty = 2)
+
+# Gaussian (not compactly supported)
+u_g <- seq(-3, 3, length.out = 500)
+k_g <- K_gaussian(u_g)
+plot(u_g, k_g, type = "l", lwd = 2,
+     xlab = "u", ylab = "K(u)",
+     main = "Gaussian kernel")
+abline(h = 0, col = "grey")
+# Restore par
+par(op)
+
+```
+
+
+## Kernel Density Plot
+
+```{r,echo = TRUE}
+d <- density(mtcars$mpg) # returns the density data 
+plot(d) # plots the results
+```
+
+## Kernel Density Plot with 1/3rd bandwith 
+
+```{r,echo = TRUE}
+d <- density(mtcars$mpg,adjust = 1/3) # returns the density data 
+plot(d) # plots the results
+```
+
+## Kernel Density Plot with 2x bandwith 
+
+```{r,echo = TRUE}
+d <- density(mtcars$mpg,adjust = 2) # returns the density data 
+plot(d) # plots the results
+```
+
+## Kernel Density Plot with a rectangular kernel
+
+```{r,echo = TRUE}
+d <- density(mtcars$mpg, kernel = "rectangular") # returns the density data 
+plot(d) # plots the results
+```
+
+## Kernel Density Plot with the Epanechnikov kernel
+
+```{r,echo = TRUE}
+d <- density(mtcars$mpg, kernel = "epanechnikov") # returns the density data 
+plot(d) # plots the results
+```
+
+## Faithful Geyser 
+
+-  Data set faithful contains 272 durations (mins) of
+the eruptions of Old Faithful geyser.
+
+-  Take a look at the data set (the first 5 observations)
+
+```{r, echo = T}
+
+faithful[1:5,]
+duration = faithful$eruptions
+n=length(duration)
+```
+
+-  Goal is to estimate the density using histogram and kernel estimation.
+
+
+## Different Kernels 
+
+```{r, echo = F, fig.asp =0.8}
+par(mfrow=c(2,2))
+#histogram
+out=hist(duration, nclass=15, prob=TRUE, main="Histogram, h=0.2")
+z = (out$breaks[-1] + out$breaks[-19])/2
+lines(out$density~z, col="blue")
+#kernel density estimation
+d1 = density(duration, kernel="gaussian", bw=0.2)
+plot(d1, main="Gaussian kernel, h=0.2")
+d2=density(duration, kernel="gaussian", bw=0.05)
+plot(d2, main="Gaussian kernel, h=0.05")
+d3=density(duration, kernel="triangular", bw=0.2)
+plot(d3,main="Triangular kernel, h=0.2")
+par(mfrow=c(1,1))
+```
+
+
+## We can also use ggplot
+
+```{r, echo = T, fig.asp =0.4}
+library(ggplot2)
+ggplot(data = faithful, aes(x = eruptions)) + geom_density(color= "red", adjust = 1/3) + theme_minimal()
+```
+
+## Different bandwidth {.smaller}
+
+```{r, echo = T, fig.asp =0.4}
+library(patchwork)
+p1 <- ggplot(data = faithful, aes(x = eruptions)) + geom_density(adjust = 1/10) +
+  labs(title = "adjust = 1/10")+theme_bw()
+p2 <- ggplot(data = faithful, aes(x = eruptions)) + geom_density(adjust = 1/2) +
+  labs(title = "adjust = 1/2")+theme_bw()
+p1+p2
+```
+
+
+## Different Kernels {.smaller}
+
+```{r, echo = T, fig.asp =0.4}
+p1 <- ggplot(data = faithful, aes(x = eruptions)) + geom_density(kernel = "gaussian") +
+  labs(title = "Gaussian")+theme_bw()
+p2 <- ggplot(data = faithful, aes(x = eruptions)) + geom_density(kernel = "rectangular") +
+  labs(title = "Rectangular")+theme_bw()
+p1+p2
+```
+
+## Drawing KDE manually 
+
+- We choose a range of values to plot using the minimum and maximum values of the data, and create a sequence of values using the seq() function. We set the bandwidth for the kernel density estimation using the bw variable.
+
+- Next, we use the sapply() function to compute the kernel density estimate for each value in the sequence. 
+
+
+```{r, echo = TRUE, eval = F}
+# Generate some sample data
+set.seed(123)
+x <- rnorm(100)
+
+# Choose a range of values to plot
+xmin <- min(x)
+xmax <- max(x)
+xseq <- seq(xmin, xmax, length.out = 100)
+
+# Set the bandwidth for the kernel density estimation
+bw <- 0.5
+
+# Compute the kernel density estimate
+kde <- sapply(xseq, function(xi) {
+  mean(dnorm((xi - x)/bw)/bw)
+})
+```
+
+
+## Drawing KDE manually 
+
+- The R code on the last slide would produce this KDE. 
+
+
+```{r, echo = FALSE, eval = T}
+# Generate some sample data
+set.seed(123)
+x <- rnorm(100)
+
+# Choose a range of values to plot
+xmin <- min(x)
+xmax <- max(x)
+xseq <- seq(xmin, xmax, length.out = 100)
+
+# Set the bandwidth for the kernel density estimation
+bw <- 0.5
+
+# Compute the kernel density estimate
+kde <- sapply(xseq, function(xi) {
+  mean(dnorm((xi - x)/bw)/bw)
+})
+# Plot the kernel density estimate
+plot(xseq, kde, type = "l", xlab = "x", ylab = "Density")
+```
+
+
+## Bivariate kernel density estimation
+
+For bivariate data $(X_i, Y_i)$, $i = 1, \dots, n$, we want to estimate a joint density $f(x, y)$.
+
+A **bivariate kernel density estimator** is
+$$
+\hat f(x, y) =
+\frac{1}{n |H|^{1/2}}
+\sum_{i=1}^n
+K\!\left( H^{-1/2}
+\begin{pmatrix}
+x - X_i \\
+y - Y_i
+\end{pmatrix}
+\right),
+$$
+where
+
+- $K(\cdot)$ is a kernel on $\mathbb{R}^2$,
+- $H$ is a $2 \times 2$ **bandwidth matrix**, symmetric and positive definite.
+
+## Product kernels and bandwidth matrix
+
+A simple choice is a **product kernel**:
+$$
+K(u, v) = K_1(u)\,K_2(v),
+$$
+with univariate kernels $K_1, K_2$.
+
+If we take a diagonal bandwidth matrix
+$$
+H =
+\begin{pmatrix}
+h_x^2 & 0 \\
+0 & h_y^2
+\end{pmatrix},
+$$
+then
+$$
+\hat f(x, y)
+=
+\frac{1}{n h_x h_y}
+\sum_{i=1}^n
+K_1\!\left(\frac{x - X_i}{h_x}\right)
+K_2\!\left(\frac{y - Y_i}{h_y}\right).
+$$
+
+- $h_x, h_y$ control smoothing in each direction.
+- A full bandwidth matrix $H$ can capture correlation / anisotropy.
+
+
+## Visualizing bivariate KDE
+
+Common visualizations:
+
+- **Contour plots** of $\hat f(x, y)$.  
+- **Image / heat maps** (color intensity = density).  
+- 3D **perspective plots**.
+
+In R, a convenient workhorse is `MASS::kde2d()`:
+
+- Takes vectors $x$ and $y$, bandwidths, and grid resolution.
+- Returns a list with grid points and estimated density values.
+
+## Generic bivariate KDE
+
+```{r, echo = F}
+library(MASS)
+
+set.seed(123)
+
+# Simulate generic bivariate data (e.g. from a correlated normal)
+n <- 500
+Sigma <- matrix(c(1, 0.7,
+                  0.7, 1), nrow = 2)
+Z <- mvrnorm(n, mu = c(0, 0), Sigma = Sigma)
+x <- Z[, 1]
+y <- Z[, 2]
+
+# Bivariate KDE on a grid
+khat <- kde2d(x, y,
+              n = 100)  # default limits based on range of x,y
+
+par(mfrow = c(1, 3), mar = c(4, 4, 2, 1))
+
+plot(x, y,
+     pch = 16, cex = 0.4,
+     xlab = "x", ylab = "y",
+     main = "Scatterplot")
+
+contour(khat$x, khat$y, khat$z,
+        xlab = "x", ylab = "y",
+        main = "Bivariate KDE\n(Contours)")
+
+image(khat$x, khat$y, khat$z,
+      xlab = "x", ylab = "y",
+      main = "Bivariate KDE\n(Heat map)")
+contour(khat$x, khat$y, khat$z,
+        add = TRUE, drawlabels = FALSE)
+points(x, y, pch = 16, cex = 0.3)
+```
+
+## R codes 
+
+```{r, echo = T, eval = F}
+library(MASS)
+
+set.seed(123)
+
+# Simulate generic bivariate data 
+n <- 500
+Sigma <- matrix(c(1, 0.7,
+                  0.7, 1), nrow = 2)
+Z <- mvrnorm(n, mu = c(0, 0), Sigma = Sigma)
+x <- Z[, 1]
+y <- Z[, 2]
+
+# Bivariate KDE on a grid
+khat <- kde2d(x, y, n = 100)  
+
+par(mfrow = c(1, 3), mar = c(4, 4, 2, 1))
+
+plot(x, y,
+     pch = 16, cex = 0.4,
+     xlab = "x", ylab = "y",
+     main = "Scatterplot")
+
+contour(khat$x, khat$y, khat$z,
+        xlab = "x", ylab = "y",
+        main = "Bivariate KDE\n(Contours)")
+
+image(khat$x, khat$y, khat$z,
+      xlab = "x", ylab = "y",
+      main = "Bivariate KDE\n(Heat map)")
+contour(khat$x, khat$y, khat$z,
+        add = TRUE, drawlabels = FALSE)
+points(x, y, pch = 16, cex = 0.3)
+```
+
+
+## 3-D
+
+```{r}
+par(mfrow = c(1, 1))
+persp(khat$x, khat$y, khat$z,
+      xlab = "x", ylab = "y", zlab = "f_hat(x, y)",
+      theta = 40, phi = 30,
+      expand = 0.6,
+      ticktype = "detailed",
+      main = "Bivariate KDE: 3D surface")
+```
+
+
+## Spatial KDE
+
+- Here is a "simulated" example:
+
+```{r, echo = F}
+## -------------------------------
+## 2. Spatial KDE example
+## -------------------------------
+
+library(MASS)
+
+set.seed(2025)
+
+# Simulate 'incident' locations in a 10x10 rectangular city
+n <- 400
+
+# Two hotspots plus background
+cluster1_x <- rnorm(n / 3, mean = 3, sd = 0.7)
+cluster1_y <- rnorm(n / 3, mean = 7, sd = 0.7)
+
+cluster2_x <- rnorm(n / 3, mean = 7, sd = 0.8)
+cluster2_y <- rnorm(n / 3, mean = 3, sd = 0.8)
+
+background_x <- runif(n - 2 * (n / 3), min = 0, max = 10)
+background_y <- runif(n - 2 * (n / 3), min = 0, max = 10)
+
+x <- c(cluster1_x, cluster2_x, background_x)
+y <- c(cluster1_y, cluster2_y, background_y)
+
+# Keep only points inside the city [0,10] x [0,10]
+keep <- (x >= 0 & x <= 10 & y >= 0 & y <= 10)
+x <- x[keep]
+y <- y[keep]
+
+# Bivariate KDE on a fixed spatial grid
+k_spatial <- kde2d(x, y,
+                   n = 100,
+                   lims = c(0, 10,   # x-range
+                            0, 10))  # y-range
+
+# Plot: heat map + contours + points
+par(mfrow = c(1, 1), mar = c(4, 4, 2, 5))
+
+image(k_spatial$x, k_spatial$y, k_spatial$z,
+      xlab = "x (km)", ylab = "y (km)",
+      main = "Spatial KDE of incident locations",
+      col = terrain.colors(50))
+contour(k_spatial$x, k_spatial$y, k_spatial$z,
+        add = TRUE, drawlabels = FALSE)
+points(x, y, pch = 16, cex = 0.4)
+
+```
+
+## Real data : Chicago Crime
+
+```{r, cache = TRUE}
+library(tidyverse)
+library(MASS)
+
+url.data <- "https://data.cityofchicago.org/api/views/x2n5-8w5q/rows.csv?accessType=DOWNLOAD"
+
+crime_raw <- read.csv(url.data, na.strings = c("", "NA"),
+                      stringsAsFactors = FALSE)
+
+names(crime_raw)
+```
+
+
+## Filter to valid coordinates 
+
+-  Keep only rows with valid lat/lon, same as filtering out locations without an address. 
+
+```{r}
+crime_xy <- crime_raw %>%
+  filter(!is.na(LATITUDE),
+         !is.na(LONGITUDE))
+
+nrow(crime_xy)
+
+table(crime_xy$PRIMARY.DESCRIPTION)
+```
+
+## Different types of crime 
+
+```{r, echo = FALSE}
+library(tidyverse)
+
+# Create frequency table and order descending
+crime_counts <- as.data.frame(table(crime_xy$PRIMARY.DESCRIPTION)) %>%
+  as_tibble() %>%
+  rename(CRIME = Var1, COUNT = Freq) %>%
+  arrange(desc(COUNT))
+
+# Lollipop plot (descending order)
+ggplot(crime_counts,
+       aes(x = COUNT, y = reorder(CRIME, COUNT))) +
+  geom_segment(aes(x = 0, xend = COUNT,
+                   y = reorder(CRIME, COUNT),
+                   yend = reorder(CRIME, COUNT)),
+               color = "grey60", linewidth = 1) +
+  geom_point(color = "steelblue", size = 3) +
+  labs(
+    title = "Frequency of Crime Categories (Descending Order)",
+    x = "Count",
+    y = "Crime Type"
+  ) +
+  theme_minimal(base_size = 13)
+```
+
+## Theft 
+
+-  Let us look at only theft and also select a few samples for speed. 
+
+- Extract coordinates (note: LONGITUDE = x, LATITUDE = y)
+
+
+```{r}
+chicago_theft <- crime_xy %>%
+  filter(PRIMARY.DESCRIPTION == "THEFT")
+
+# 3. Subsample (for speed / clarity in plotting)
+set.seed(123)
+chicago_theft_sub <- chicago_theft %>%
+  slice_sample(n = min(15000, nrow(crime_xy)))
+
+x <- chicago_theft_sub$LONGITUDE
+y <- chicago_theft_sub$LATITUDE
+
+# Bivariate KDE over lon–lat
+# Choose grid size; 100x100 is usually plenty
+
+kde_chicago <- kde2d(x, y,
+                     n = 100,
+                     lims = c(range(x, na.rm = TRUE),
+                              range(y, na.rm = TRUE)))
+```
+
+## Finally, plot the spatial kernel density 
+
+```{r, echo = F, fig.height=8}
+blue_pal <- colorRampPalette(c("white", "lightblue", "royalblue", "navy"))
+
+image(kde_chicago$x, kde_chicago$y, kde_chicago$z,
+      xlab = "Longitude", ylab = "Latitude",
+      main = "Spatial KDE (Chicago, Theft)",
+      col = blue_pal(100))
+
+contour(kde_chicago$x, kde_chicago$y, kde_chicago$z,
+        add = TRUE, drawlabels = FALSE)
+
+points(x, y, pch = 16, cex = 0.3)
+```
+
+
+

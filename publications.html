@@ -1,0 +1,58 @@
+<!-- ===== File: publications.html ===== -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Publications — Jyotishka Datta</title>
+<meta name="description" content="Papers, preprints, and selected talks." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>/* same styles as index */
+:root{--bg:#0f172a;--panel:#111827;--text:#e5e7eb;--muted:#94a3b8;--accent:#38bdf8;--chip:#1f2937}
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,var(--bg),#0b1224 60%);color:var(--text)}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.wrap{max-width:900px;margin:0 auto;padding:24px}
+header{display:flex;gap:24px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#38bdf8,#22c55e);display:grid;place-items:center;font-weight:800}
+nav{display:flex;gap:16px;flex-wrap:wrap}
+nav a{padding:8px 12px;border-radius:999px;background:var(--chip)}
+h1{margin-top:24px}
+.pub{padding:12px 0;border-top:1px dashed #24314a}
+.tag{font-size:12px;padding:2px 8px;border-radius:999px;background:#1f2937;margin-left:8px}
+footer{margin:48px 0;color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="brand"><div class="logo">JD</div><div><strong>Jyotishka Datta</strong><br><span style="color:var(--muted)">Statistics • Research • Teaching</span></div></div>
+<nav>
+<a href="index.html">Home</a>
+<a href="research.html">Research</a>
+<a href="publications.html">Publications</a>
+<a href="teaching.html">Teaching</a>
+<a href="https://jyotishkadatta.wordpress.com/" target="_blank" rel="noopener">Blog ↗</a>
+<a href="index.html#contact">Contact</a>
+</nav>
+</header>
+
+
+<h1>Publications & Preprints</h1>
+<div class="pub"><strong>Bayesian Global–Local regularization</strong> (with N. Polson & V. Sokolov). <a href="#">arXiv</a> <span class="tag">preprint</span></div>
+<div class="pub"><strong>Prediction-Powered Inference with IPW estimators</strong> (with N. Polson). <a href="#">manuscript</a></div>
+<div class="pub"><strong>Robust Bayesian distance estimation for parallax</strong>. <a href="#">arXiv</a></div>
+
+
+<h2>Talks & Slides</h2>
+<div class="pub">Title — Venue — <a href="#">Slides</a> / <a href="#">Video</a></div>
+
+
+<footer>© <span id="y2"></span> Jyotishka Datta</footer>
+</div>
+<script>document.getElementById('y2').textContent=new Date().getFullYear()</script>
+</body>
+</html>
