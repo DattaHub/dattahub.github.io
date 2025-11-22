@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Statistical Tests as Linear Models</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Jyotishka Datta" />
+    <meta name="date" content="2025-11-22" />
+    <script src="tests_as_linear_files/header-attrs/header-attrs.js"></script>
+    <link href="tests_as_linear_files/remark-css/default.css" rel="stylesheet" />
+    <link href="tests_as_linear_files/remark-css/default-fonts.css" rel="stylesheet" />
+    <link href="tests_as_linear_files/font-awesome/css/all.min.css" rel="stylesheet" />
+    <link href="tests_as_linear_files/font-awesome/css/v4-shims.min.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Statistical Tests as Linear Models
+]
+.author[
+### Jyotishka Datta
+]
+.date[
+### 2025-11-22
+]
+
+---
+
+
+
+
+
+class: inverse
+count: false
+
+
+# Introduction
+
+-  The primary source for these materials is: [https://lindeloev.github.io/tests-as-linear/](https://lindeloev.github.io/tests-as-linear/).
+-  Many statistical tests are special cases of linear models and can be done using the `lm` function that you have used for linear models. 
+-  Understanding this simplifies your knowledge of statistics! 
+-  Also, if you know the theory behind `lm` (how to calculate estimates, how to run diagnostics, what is the sampling distribution etc.), they will carry over to these other tests as well. 
+
+
+---
+
+# Linear Models: The Core Idea
+
+-  Recall the simple linear regression: `\(y_i = \beta_0 + \beta_1 x_i + \epsilon_i\)`, `\(i = 1, 2, \ldots, n\)`, with `\(\epsilon_i \sim N(0, \sigma^2)\)`.
+
+- `\(\beta_0\)`: intercept, `\(\beta_1\)`: slope (effect of `\(x\)`),  `\(\epsilon\)`: random error. 
+
+
+&lt;img src="tests_as_linear_files/figure-html/unnamed-chunk-2-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+## Assumptions 
+
+-  Assumption of normality of the errors induce a normal distribution on the response variable `\(Y\)`. 
+
+-   We can also view the linear regression as a conditional statement on `\(Y\)` given `\(X\)`, i.e., 
+$$
+Y \mid X \sim \mathcal{N}(\beta_0 + \beta_1 X, \sigma^2)
+$$
+-   The main assumptions for linear regression are thus: linearity, normality, heteroskedasticity, and independence. 
+
+---
+## OLS solutions
+
+-  We find the best-fitting `\(\hat{\beta}_0\)` and `\(\hat{\beta}_1\)` by minimizing the least squares: `\(\sum_{i=1}^{n} (y_i - \beta_0 - \beta_1 x_i)^2\)`. 
+
+-  The solutions are: `\(\hat{\beta}_0 = \bar{y}-\hat{\beta}_1 \bar{x}\)`, and `\(\hat{\beta}_1 = cov(x, y)/var(x) = r_{x,y} s_y^2/s_x^2\)`.
+
+-  One of the implications is that the slope of the fitted line is directly proportional to the correlation and in fact, we can write the regression line as:
+$$
+`\begin{equation}
+\left(\frac{y-\bar{y}}{s_y}\right) = r_{x,y} \left(\frac{x - \bar{x}}{s_x^2} \right).
+\end{equation}`
+$$
+
+
+-   Next, we discuss how different tests (both parametric and non-parametric can be recast as a linear model.)
+
+
+---
+
+# One-sample t-test: Motivation
+
+- You have **one group**, i.e., a single sample. 
+- Question: Is the mean different from a pre-fixed hypothesized value, e.g., is it non-zero?
+- This is same as the linear model: `\(y_i = \beta_0 + \epsilon_i\)` 
+
+- This is the same as simple linear regression with `\(\beta_1 = 0\)`. 
+
+-  Hypothesis:
+
+`\(H_0: \beta_0 = \mu_0\)` vs. `\(H_1: \beta_0 \ne \mu_0\)` (or `\(&gt;\)`, or `\(&lt;\)`)
+
+---
+
+# One-sample t-test: Assumptions
+
+- Data are independent and identically distributed (IID).
+
+- Data are approximately normally distributed. 
+
+-  Although, what we really need is that the sample mean ($\bar{y}$) is approximately normally distributed for the results to hold, and CLT kicks for moderately large `\(n\)`.
+
+---
+
+# One-sample t-test: (`lm` vs. `t.test`)
+
+- Test if `\(\beta_0\)` differs from 0. 
+
+-  Put only the intercept into the model, no covariates `\(x\)` (i.e., your model is: `y ~ 1`). 
+
+
+
+``` r
+x &lt;- rnorm(30)
+mod &lt;- lm(x ~ 1)
+summary(mod)
+```
+
+```
+## 
+## Call:
+## lm(formula = x ~ 1)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -1.56439 -0.44205 -0.08721  0.60732  1.92971 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) -0.004897   0.165357   -0.03    0.977
+## 
+## Residual standard error: 0.9057 on 29 degrees of freedom
+```
+
+---
+# Built-in t-test 
+
+
+``` r
+t.test(x, mu = 0)
+```
+
+```
+## 
+## 	One Sample t-test
+## 
+## data:  x
+## t = -0.029612, df = 29, p-value = 0.9766
+## alternative hypothesis: true mean is not equal to 0
+## 95 percent confidence interval:
+##  -0.3430890  0.3332959
+## sample estimates:
+##    mean of x 
+## -0.004896554
+```
+-  Note that the t-test statistics and the p-value are identical. 
+
+---
+
+# Linear Model Form
+
+-  Model: `\(y_i = \beta_0 + \epsilon_i, \quad \epsilon_i \sim \mathcal{N}(0, \sigma^2)\)`
+
+-  Estimate: `\(\hat{\beta}_0 = \bar{y}.\)`
+
+
+-  Hypothesis: `\(H_0: \beta_0 = \mu_0\)`, vs. `\(H_1: \beta_0 \neq \mu_0\)`. 
+
+-  The t-statistic:
+`$$t = \frac{\hat{\beta}_0 - \mu_0}{\text{SE}(\hat{\beta}_0)} = \frac{\bar{y} - \mu_0}{s / \sqrt{n}}.$$`
+
+where, `\(s^2 = \frac{1}{n - 1} \sum_{i=1}^{n} (y_i - \bar{y})^2\)`. 
+-  This is exactly the one-sample `\(t\)`-test. 
+
+
+---
+# Signed rank test 
+
+-  Wilcoxon signed rank test: assumes symmetry but does not assume normality. 
+
+-  The main idea is to replace the actual observations with their signed ranks.
+
+
+``` r
+signed_rank = function(x) sign(x) * rank(abs(x))
+
+rank(c(3.6, 3.4, -5.0, 8.2))
+```
+
+```
+## [1] 3 2 1 4
+```
+
+``` r
+signed_rank(c(3.6, 3.4, -5.0, 8.2))
+```
+
+```
+## [1]  2  1 -3  4
+```
+
+
+---
+# Compare observations and ranks 
+
+- In both cases, we're testing the intercept only. 
+
+&lt;img src="tests_as_linear_files/figure-html/unnamed-chunk-6-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Built-in
+
+**Note the p-value**
+
+
+``` r
+wilcox.test(y)
+```
+
+```
+## 
+## 	Wilcoxon signed rank test with continuity correction
+## 
+## data:  y
+## V = 508, p-value = 0.213
+## alternative hypothesis: true location is not equal to 0
+```
+
+
+---
+# Equivalent linear model
+
+### Same model as above, just on signed ranks
+
+
+``` r
+b = lm(signed_rank(y) ~ 1)  
+summary(b)
+```
+
+```
+## 
+## Call:
+## lm(formula = signed_rank(y) ~ 1)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -41.82 -22.57  -5.32  18.68  55.18 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept)    -5.18       4.12  -1.257    0.215
+## 
+## Residual standard error: 29.13 on 49 degrees of freedom
+```
+
+
+---
+# Bonus: of course also works for one-sample t-test
+
+
+``` r
+t.test(signed_rank(y))
+```
+
+```
+## 
+## 	One Sample t-test
+## 
+## data:  signed_rank(y)
+## t = -1.2573, df = 49, p-value = 0.2146
+## alternative hypothesis: true mean is not equal to 0
+## 95 percent confidence interval:
+##  -13.459062   3.099062
+## sample estimates:
+## mean of x 
+##     -5.18
+```
+
+---
+
+# Paired-sample t-test: Motivation
+
+- Two measurements on the same subject.
+- Is the average change nonzero?
+
+## Paired-sample t-test as Linear Model
+
+- t-test model: a single number (intercept) predicts the pairwise differences.
+
+-  Differences:
+
+`\(d_i = y_{2i} - y_{1i}\)`, `\(i = 1, 2, \ldots, n\)`. 
+
+-  (Linear) Model:
+
+`\(d_i = \beta_0 + \epsilon_i\)`, `\(i = 1, 2, \ldots, n\)`.
+
+---
+# Pairwise differences 
+
+&lt;img src="tests_as_linear_files/figure-html/unnamed-chunk-10-1.png" style="display: block; margin: auto;" /&gt;
+
+
+
+---
+
+# Paired-sample t-test: Example (lm and t.test)
+
+
+``` r
+x1 &lt;- rnorm(30)
+x2 &lt;- x1 + rnorm(30)
+d &lt;- x1 - x2
+mod &lt;- lm(d ~ 1)
+summary(mod)
+```
+
+```
+## 
+## Call:
+## lm(formula = d ~ 1)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -1.8269 -0.6462 -0.3379  0.8409  1.9981 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept)  -0.1862     0.1820  -1.023    0.315
+## 
+## Residual standard error: 0.9967 on 29 degrees of freedom
+```
+
+---
+# Built-in t-test 
+
+
+### Again, note that the p-values are identical! 
+
+
+``` r
+t.test(x1, x2, paired = TRUE)
+```
+
+```
+## 
+## 	Paired t-test
+## 
+## data:  x1 and x2
+## t = -1.0233, df = 29, p-value = 0.3146
+## alternative hypothesis: true mean difference is not equal to 0
+## 95 percent confidence interval:
+##  -0.5584097  0.1859741
+## sample estimates:
+## mean difference 
+##      -0.1862178
+```
+
+
+---
+
+# Two-sample t-test: Idea
+
+-  Two **independent** groups, with possibly two different sample sizes. 
+
+-  Data: `\(X_1, \ldots, X_m \sim N(\mu_X, \sigma_X^2)\)` and `\(Y_1, \ldots, Y_n \sim N(\mu_Y, \sigma_Y^2)\)`.
+
+-  Compare their means: `\(H_0: \mu_x = \mu_Y\)` vs. `\(H_1: \mu_X \neq \mu_Y\)`. 
+
+-  The equal variance case `\(\sigma_X = \sigma_Y\)` is easier to handle, one needs to estimate the the common variance using a "pooled" estimator, and the resulting test statistics follows a `\(t\)`-distribution with `\(m + n - 2\)` degrees of freedom. 
+
+-  The unequal variance case is somewhat difficult, partly because the resulting test statistics is only approximately `\(t\)`-distributed. 
+
+-  In `R`, these are handled by the extra argument `var.equal = TRUE` and `var.equal = FALSE`. 
+
+---
+# Re-cap 
+
+-  Independent t-test model: two means predict \( y \).
+
+$$
+y_i = \beta_0 + \beta_1 x_i \qquad H_0 : \beta_1 = 0
+$$
+
+where `\(x_i\)` is an indicator (0 or 1) saying whether data point `\(i\)` was sampled from one or the other group. 
+Indicator variables (also called “dummy coding”) underly a lot of linear models and we’ll take an aside to see how it works in a minute.
+
+-  Mann-Whitney U (also known as **Wilcoxon rank-sum test** for two independent groups) is the same model to a very close approximation, just on the ranks of `\(x\)` and `\(y\)` instead of the actual values:
+
+$$
+\text{rank}(y_i) = \beta_0 + \beta_1 x_i \qquad H_0 : \beta_1 = 0
+$$
+
+---
+## Dummy coding 
+
+-  Dummy coding can be understood visually. The indicator is on the x-axis, so data points from the first group are located at `\(x = 0\)` and data points from the second group are located at `\(x = 1\)`. 
+-  Then `\(\beta_0\)` is the intercept (blue line) and `\(\beta_1\)` is the slope between the two means (red line). Why? Because when `\(\Delta x = 1\)` the slope equals the difference because:
+
+$$
+\text{slope} = \Delta y / \Delta x = \Delta y / 1 = \Delta y = \text{difference}
+$$
+
+-  Magic! Even categorical differences can be modelled using linear models! 
+
+---
+
+# Two-sample t-test: Linear Model
+
+`\(y_i = \beta_0 + \beta_1 \text{Group}_i + \epsilon_i\)` where `\(\text{Group}_i = 0\)` or `\(1\)`.
+
+&lt;img src="tests_as_linear_files/figure-html/unnamed-chunk-13-1.png" style="display: block; margin: auto;" /&gt;
+
+
+
+---
+
+# Two-sample t-test: Example (lm and t.test)
+
+
+``` r
+x &lt;- rnorm(30)
+group &lt;- factor(rep(c("A", "B"), each = 15))
+summary(lm(x ~ group))
+```
+
+```
+## 
+## Call:
+## lm(formula = x ~ group)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -2.3741 -0.6781  0.1877  0.5199  2.1879 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept)   0.1498     0.2666   0.562    0.579
+## groupB       -0.1263     0.3771  -0.335    0.740
+## 
+## Residual standard error: 1.033 on 28 degrees of freedom
+## Multiple R-squared:  0.003993,	Adjusted R-squared:  -0.03158 
+## F-statistic: 0.1123 on 1 and 28 DF,  p-value: 0.7401
+```
+
+
+---
+# Built-in function
+
+### Note the same p-value. 
+
+
+``` r
+t.test(x ~ group)
+```
+
+```
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  x by group
+## t = 0.33506, df = 27.689, p-value = 0.7401
+## alternative hypothesis: true difference in means between group A and group B is not equal to 0
+## 95 percent confidence interval:
+##  -0.6464500  0.8991319
+## sample estimates:
+## mean in group A mean in group B 
+##      0.14978566      0.02344473
+```
+
+---
+
+# Correlation: Idea
+
+- Relationship between two continuous variables.
+- The correlation coefficient is defined for a list of pairs  
+`\((x_1, y_1), \ldots, (x_n, y_n)\)` as the average of the product of the standardized values:
+
+$$
+\rho = \frac{1}{n} \sum_{i=1}^{n} \left( \frac{x_i - \mu_x}{\sigma_x} \right)  \left( \frac{y_i - \mu_y}{\sigma_y} \right) 
+$$
+
+- In R:
+
+``` r
+rho &lt;- mean(scale(x) * scale(y))
+## or simply 
+
+rho &lt;- cor(x,y)
+```
+
+- Correlation measures the strength of **linear** relationship. 
+- Correlation is always between -1 and +1 
+
+---
+
+## Properties of correlation coefficient
+
+-  Always between -1 and +1, i.e. `\(\lvert{\rho}\rvert \le 1\)`.
+-  Measures the **linear** relationship. 
+-  In other words, `\(\rho = 0\)` implies no **linear** relationship. 
+-  Also, if `\(X\)` and `\(Y\)` are independent, `\(X \perp Y\)`, `\(\rho(X,Y) = 0\)`.
+-  The converse of the above is not true, i.e. `\(X\)` and `\(Y\)` could be dependent but still have zero correlation.
+-  If `\(\rho &gt; 0\)`, there's a positive **linear** relationship, and if `\(\rho &lt;0\)` there is a negative **linear** relationship. 
+
+
+---
+
+# Pearson Correlation as Regression
+
+- `\(y_i = \beta_0 + \beta_1 x_i + \epsilon_i\)`
+
+- `\(\beta_1\)` is proportional to Pearson correlation `\(r\)`.
+
+
+
+---
+
+# Correlation: Example (lm and cor.test)
+
+
+``` r
+x &lt;- rnorm(30)
+y &lt;- 0.5*x + rnorm(30)
+summary(lm(y ~ x))
+```
+
+```
+## 
+## Call:
+## lm(formula = y ~ x)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -2.19065 -0.56597 -0.02667  0.88487  1.76486 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept)  0.04382    0.20544   0.213    0.833  
+## x            0.48768    0.24978   1.952    0.061 .
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 1.108 on 28 degrees of freedom
+## Multiple R-squared:  0.1198,	Adjusted R-squared:  0.08839 
+## F-statistic: 3.812 on 1 and 28 DF,  p-value: 0.06095
+```
+
+---
+# Built-in 
+
+
+``` r
+cor.test(x, y)
+```
+
+```
+## 
+## 	Pearson's product-moment correlation
+## 
+## data:  x and y
+## t = 1.9524, df = 28, p-value = 0.06095
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  -0.01611882  0.62809896
+## sample estimates:
+##       cor 
+## 0.3461606
+```
+---
+
+# Spearman Correlation: Idea
+
+- Correlation based on ranks, not raw values.
+- -  Spearman's rank correlation: replace X, Y with their ranks. 
+-  Spearman's `\(r_s\)` measure monotonic association. `\(r_s = 1\)` means X is a monotonically increasing function of Y. 
+
+
+``` r
+cor(rank(x),rank(y))
+```
+
+```
+## [1] 0.04649611
+```
+
+``` r
+cor(x,y,method="spearman")
+```
+
+```
+## [1] 0.04649611
+```
+
+### Spearman Correlation: Hypotheses
+
+`\(H_0: \rho = 0\)` vs. `\(H_1: \rho \neq 0\)`.
+
+---
+
+# Spearman example (lm on ranks and cor.test)
+
+
+``` r
+rank_x &lt;- rank(x); rank_y &lt;- rank(y)
+summary(lm(rank_y ~ rank_x))
+```
+
+```
+## 
+## Call:
+## lm(formula = rank_y ~ rank_x)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -13.8723  -7.6917  -0.3952   7.2616  14.7557 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  14.7793     3.3514   4.410 0.000139 ***
+## rank_x        0.0465     0.1888   0.246 0.807246    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 8.95 on 28 degrees of freedom
+## Multiple R-squared:  0.002162,	Adjusted R-squared:  -0.03348 
+## F-statistic: 0.06066 on 1 and 28 DF,  p-value: 0.8072
+```
+
+---
+# Built-in 
+
+#### Compare this p-value with the p-value for the t-test for `\(H_0: \beta_1 = 0\)`, i.e., the p-value for testing if the slope is equal to zero. 
+
+
+
+``` r
+cor.test(x, y, method = "spearman")
+```
+
+```
+## 
+## 	Spearman's rank correlation rho
+## 
+## data:  x and y
+## S = 4286, p-value = 0.8069
+## alternative hypothesis: true rho is not equal to 0
+## sample estimates:
+##        rho 
+## 0.04649611
+```
+
+---
+
+# One-way ANOVA: Motivation
+
+- More than two groups.
+- Are any means different?
+
+#### One-way ANOVA: Linear Model
+
+`\(y_i = \beta_0 + \beta_1 \text{Group1}_i + \beta_2 \text{Group2}_i + \ldots + \epsilon_i\)`
+
+&gt;  Need to introudce dummy variables like Group1, Group2, etc., like the independent samples situation. 
+
+---
+
+# One-way ANOVA: Hypotheses
+
+`\(H_0: \mu_1 = \mu_2 = \ldots = \mu_k\)`
+
+vs
+
+`\(H_A: \text{At least one mean is differs}\)`
+
+---
+
+# One-way ANOVA: Assumptions
+
+- Independence
+- Normality
+- Homogeneity of variances
+
+---
+
+# One-way ANOVA: Example (lm and aov)
+
+
+``` r
+x &lt;- rnorm(45)
+group &lt;- factor(rep(c("A", "B", "C"), each = 15))
+summary(lm(x ~ group))
+```
+
+```
+## 
+## Call:
+## lm(formula = x ~ group)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -2.7347 -0.7886  0.2196  0.7971  2.2002 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept)  -0.1326     0.2969  -0.447    0.657
+## groupB        0.1302     0.4198   0.310    0.758
+## groupC       -0.4209     0.4198  -1.002    0.322
+## 
+## Residual standard error: 1.15 on 42 degrees of freedom
+## Multiple R-squared:  0.0429,	Adjusted R-squared:  -0.002674 
+## F-statistic: 0.9413 on 2 and 42 DF,  p-value: 0.3982
+```
+
+---
+# Built-in function 
+
+#### Compare the p-value for the F-test from the `lm` output. 
+
+
+``` r
+summary(aov(x ~ group))
+```
+
+```
+##             Df Sum Sq Mean Sq F value Pr(&gt;F)
+## group        2   2.49   1.244   0.941  0.398
+## Residuals   42  55.52   1.322
+```
+
+---
+
+# Kruskal-Wallis Test: Idea
+
+- Compare 3+ groups without assuming normality.
+
+#### Kruskal-Wallis Test: Hypotheses
+
+`\(H_0: \text{All group distributions are equal}\)` 
+
+
+---
+
+# Kruskal-Wallis Test: Example (lm on ranks and kruskal.test)
+
+
+``` r
+x &lt;- rnorm(45)
+group &lt;- factor(rep(c("A", "B", "C"), each = 15))
+rank_x &lt;- rank(x)
+lm(rank_x ~ group) |&gt; summary()
+```
+
+```
+## 
+## Call:
+## lm(formula = rank_x ~ group)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -22.733  -9.333   1.067  10.267  23.667 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)   24.933      3.432   7.266 6.08e-09 ***
+## groupB        -4.600      4.853  -0.948    0.349    
+## groupC        -1.200      4.853  -0.247    0.806    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 13.29 on 42 degrees of freedom
+## Multiple R-squared:  0.0225,	Adjusted R-squared:  -0.02404 
+## F-statistic: 0.4834 on 2 and 42 DF,  p-value: 0.62
+```
+
+---
+# Built-in function 
+
+
+``` r
+kruskal.test(x ~ group)
+```
+
+```
+## 
+## 	Kruskal-Wallis rank sum test
+## 
+## data:  x by group
+## Kruskal-Wallis chi-squared = 0.99014, df = 2, p-value = 0.6095
+```
+
+---
+
+# When to Use Non-parametric Tests?
+
+- Small sample sizes.
+- Outliers present.
+- Skewed distributions.
+
+---
+
+# Summary
+
+| Test | Type | Assumptions? |
+| :--- | :--- | :--- |
+| t-test | Parametric | Yes |
+| Wilcoxon | Non-parametric | Symmetry |
+| ANOVA | Parametric | Yes |
+| Kruskal-Wallis | Non-parametric | Symmetry |
+
+---
+
+# Thank You!
+
+- Questions?
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create();
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

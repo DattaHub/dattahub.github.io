@@ -1,0 +1,664 @@
+---
+title: "Statistical Tests as Linear Models"
+author: "Jyotishka Datta"
+date: "`r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+  css: mystyle.css
+lib_dir: libs
+nature:
+  highlightStyle: github
+highlightLines: true
+countIncrementalSlides: false
+
+---
+
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+options(
+  htmltools.dir.version = FALSE, # for blogdown
+  width=80
+)
+
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, fig.align = 'center', warning = F, message = F)
+
+# library(emo)
+htmltools::tagList(rmarkdown::html_dependency_font_awesome())
+
+# Load packages for data handling and plotting
+library(tidyverse)
+library(patchwork)
+library(broom)
+
+# Reproducible "random" results
+set.seed(40)
+
+# Generate normal data with known parameters
+rnorm_fixed = function(N, mu = 0, sd = 1)
+  scale(rnorm(N)) * sd + mu
+
+# Plot style.
+theme_axis = function(P,
+                      jitter = FALSE,
+                      xlim = c(-0.5, 2),
+                      ylim = c(-0.5, 2),
+                      legend.position = NULL) {
+  P = P + theme_bw(15) +
+    geom_segment(
+      x = -1000, xend = 1000,
+      y = 0, yend = 0,
+      lty = 2, color = 'dark gray', lwd = 0.5
+    ) +
+    geom_segment(
+      x = 0, xend = 0,
+      y = -1000, yend = 1000,
+      lty = 2, color = 'dark gray', lwd = 0.5
+    ) +
+    coord_cartesian(xlim = xlim, ylim = ylim) +
+    theme(
+      axis.title = element_blank(),
+      axis.text = element_blank(),
+      axis.ticks = element_blank(),
+      panel.border = element_blank(),
+      panel.grid = element_blank(),
+      legend.position = legend.position
+    )
+  
+  # Return jittered or non-jittered plot?
+  if (jitter) {
+    P + geom_jitter(width = 0.1, size = 2)
+  }
+  else {
+    P + geom_point(size = 2)
+  }
+}
+
+# Wide format (sort of)
+#y = rnorm_fixed(50, mu=0.3, sd=2)  # Almost zero mean.
+y = c(rnorm(15), exp(rnorm(15)), runif(20, min = -3, max = 0))  # Almost zero mean, not normal
+x = rnorm_fixed(50, mu = 0, sd = 1)  # Used in correlation where this is on x-axis
+y2 = rnorm_fixed(50, mu = 0.5, sd = 1.5)  # Used in two means
+
+# Long format data with indicator
+value = c(y, y2)
+group = rep(c('y1', 'y2'), each = 50)
+```
+
+class: inverse
+count: false
+
+
+# Introduction
+
+-  The primary source for these materials is: [https://lindeloev.github.io/tests-as-linear/](https://lindeloev.github.io/tests-as-linear/).
+-  Many statistical tests are special cases of linear models and can be done using the `lm` function that you have used for linear models. 
+-  Understanding this simplifies your knowledge of statistics! 
+-  Also, if you know the theory behind `lm` (how to calculate estimates, how to run diagnostics, what is the sampling distribution etc.), they will carry over to these other tests as well. 
+
+
+---
+
+# Linear Models: The Core Idea
+
+-  Recall the simple linear regression: $y_i = \beta_0 + \beta_1 x_i + \epsilon_i$, $i = 1, 2, \ldots, n$, with $\epsilon_i \sim N(0, \sigma^2)$.
+
+- $\beta_0$: intercept, $\beta_1$: slope (effect of $x$),  $\epsilon$: random error. 
+
+
+```{r, echo = FALSE}
+library(ggplot2)
+# Fixed correlation
+D_correlation = data.frame(MASS::mvrnorm(30, mu = c(0.9, 0.9), Sigma = matrix(c(1, 0.8, 1, 0.8), ncol = 2), empirical = TRUE))  # Correlated data
+
+# Add labels (for next plot)
+D_correlation$label_num = sprintf('(%.1f,%.1f)', D_correlation$X1, D_correlation$X2)
+D_correlation$label_rank = sprintf('(%i,%i)', rank(D_correlation$X1), rank(D_correlation$X2))
+
+# Plot it
+fit = lm(I(X2 * 0.5 + 0.4) ~ I(X1 * 0.5 + 0.2), D_correlation)
+intercept_pearson = coefficients(fit)[1]
+
+P_pearson = ggplot(D_correlation, aes(x=X1*0.5+0.2, y=X2*0.5+0.4)) +
+  geom_smooth(method=lm, se=FALSE, lwd=2, aes(colour='beta_1')) + 
+  geom_segment(x=-100, xend=100, 
+               y=intercept_pearson, yend=intercept_pearson, 
+               lwd=2, aes(color="beta_0")) + 
+  scale_color_manual(name=NULL, values=c("blue", "red"), labels=c(bquote(beta[0]*" (intercept)"), bquote(beta[1]*" (slope)")))
+  
+theme_axis(P_pearson, legend.position = c(0.4, 0.9))
+```
+
+---
+## Assumptions 
+
+-  Assumption of normality of the errors induce a normal distribution on the response variable $Y$. 
+
+-   We can also view the linear regression as a conditional statement on $Y$ given $X$, i.e., 
+$$
+Y \mid X \sim \mathcal{N}(\beta_0 + \beta_1 X, \sigma^2)
+$$
+-   The main assumptions for linear regression are thus: linearity, normality, heteroskedasticity, and independence. 
+
+---
+## OLS solutions
+
+-  We find the best-fitting $\hat{\beta}_0$ and $\hat{\beta}_1$ by minimizing the least squares: $\sum_{i=1}^{n} (y_i - \beta_0 - \beta_1 x_i)^2$. 
+
+-  The solutions are: $\hat{\beta}_0 = \bar{y}-\hat{\beta}_1 \bar{x}$, and $\hat{\beta}_1 = cov(x, y)/var(x) = r_{x,y} s_y^2/s_x^2$.
+
+-  One of the implications is that the slope of the fitted line is directly proportional to the correlation and in fact, we can write the regression line as:
+$$
+\begin{equation}
+\left(\frac{y-\bar{y}}{s_y}\right) = r_{x,y} \left(\frac{x - \bar{x}}{s_x^2} \right).
+\end{equation}
+$$
+
+
+-   Next, we discuss how different tests (both parametric and non-parametric can be recast as a linear model.)
+
+
+---
+
+# One-sample t-test: Motivation
+
+- You have **one group**, i.e., a single sample. 
+- Question: Is the mean different from a pre-fixed hypothesized value, e.g., is it non-zero?
+- This is same as the linear model: $y_i = \beta_0 + \epsilon_i$ 
+
+- This is the same as simple linear regression with $\beta_1 = 0$. 
+
+-  Hypothesis:
+
+$H_0: \beta_0 = \mu_0$ vs. $H_1: \beta_0 \ne \mu_0$ (or $>$, or $<$)
+
+---
+
+# One-sample t-test: Assumptions
+
+- Data are independent and identically distributed (IID).
+
+- Data are approximately normally distributed. 
+
+-  Although, what we really need is that the sample mean ($\bar{y}$) is approximately normally distributed for the results to hold, and CLT kicks for moderately large $n$.
+
+---
+
+# One-sample t-test: (`lm` vs. `t.test`)
+
+- Test if $\beta_0$ differs from 0. 
+
+-  Put only the intercept into the model, no covariates $x$ (i.e., your model is: `y ~ 1`). 
+
+
+```{r}
+x <- rnorm(30)
+mod <- lm(x ~ 1)
+summary(mod)
+```
+
+---
+# Built-in t-test 
+
+```{r}
+t.test(x, mu = 0)
+```
+-  Note that the t-test statistics and the p-value are identical. 
+
+---
+
+# Linear Model Form
+
+-  Model: $y_i = \beta_0 + \epsilon_i, \quad \epsilon_i \sim \mathcal{N}(0, \sigma^2)$
+
+-  Estimate: $\hat{\beta}_0 = \bar{y}.$
+
+
+-  Hypothesis: $H_0: \beta_0 = \mu_0$, vs. $H_1: \beta_0 \neq \mu_0$. 
+
+-  The t-statistic:
+$$t = \frac{\hat{\beta}_0 - \mu_0}{\text{SE}(\hat{\beta}_0)} = \frac{\bar{y} - \mu_0}{s / \sqrt{n}}.$$
+
+where, $s^2 = \frac{1}{n - 1} \sum_{i=1}^{n} (y_i - \bar{y})^2$. 
+-  This is exactly the one-sample $t$-test. 
+
+
+---
+# Signed rank test 
+
+-  Wilcoxon signed rank test: assumes symmetry but does not assume normality. 
+
+-  The main idea is to replace the actual observations with their signed ranks.
+
+```{r}
+signed_rank = function(x) sign(x) * rank(abs(x))
+
+rank(c(3.6, 3.4, -5.0, 8.2))
+
+signed_rank(c(3.6, 3.4, -5.0, 8.2))
+```
+
+
+---
+# Compare observations and ranks 
+
+- In both cases, we're testing the intercept only. 
+
+```{r, echo = F}
+# T-test
+D_t1 = data.frame(y = rnorm_fixed(20, 0.5, 0.6),
+                  x = runif(20, 0.93, 1.07))  # Fix mean and SD
+
+P_t1 = ggplot(D_t1, aes(y = y, x = 0)) + 
+  stat_summary(fun.y=mean, geom = "errorbar", aes(ymax = ..y.., ymin = ..y.., color='beta_0'), lwd=2) +
+  scale_color_manual(name = NULL, values = c("blue"), labels = c(bquote(beta[0] * " (intercept)"))) +
+  
+  geom_text(aes(label = round(y, 1)), nudge_x = 0.2, size = 3, color = 'dark gray') + 
+  labs(title='         T-test')
+
+# Wilcoxon
+D_t1_rank = data.frame(y = signed_rank(D_t1$y))
+
+P_t1_rank = ggplot(D_t1_rank, aes(y = y, x = 0)) + 
+  stat_summary(fun.y = mean, geom = "errorbar", aes(ymax = ..y.., ymin = ..y..,  color = 'beta_0'), lwd = 2) +
+  scale_color_manual(name = NULL, values = c("blue"), labels = c(bquote(beta[0] * " (intercept)"))) +
+
+  geom_text(aes(label = y), nudge_x = 0.2, size = 3, color = 'dark gray') + 
+  labs(title='         Wilcoxon')
+
+
+# Stich together using patchwork
+theme_axis(P_t1, ylim = c(-1, 2), legend.position = c(0.6, 0.1)) + 
+  theme_axis(P_t1_rank, ylim = NULL,  legend.position = c(0.6, 0.1))
+```
+
+---
+# Built-in
+
+**Note the p-value**
+
+```{r}
+
+wilcox.test(y)
+```
+
+
+---
+# Equivalent linear model
+
+### Same model as above, just on signed ranks
+
+```{r}
+b = lm(signed_rank(y) ~ 1)  
+summary(b)
+```
+
+
+---
+# Bonus: of course also works for one-sample t-test
+
+```{r}
+t.test(signed_rank(y))
+```
+
+---
+
+# Paired-sample t-test: Motivation
+
+- Two measurements on the same subject.
+- Is the average change nonzero?
+
+## Paired-sample t-test as Linear Model
+
+- t-test model: a single number (intercept) predicts the pairwise differences.
+
+-  Differences:
+
+$d_i = y_{2i} - y_{1i}$, $i = 1, 2, \ldots, n$. 
+
+-  (Linear) Model:
+
+$d_i = \beta_0 + \epsilon_i$, $i = 1, 2, \ldots, n$.
+
+---
+# Pairwise differences 
+
+```{r, echo = F}
+
+# Data for plot
+N = nrow(D_t1)
+start = rnorm_fixed(N, 0.2, 0.3)
+D_tpaired = data.frame(
+  x = rep(c(0, 1), each = N),
+  y = c(start, start + D_t1$y),
+  id = 1:N
+)
+
+# Plot
+P_tpaired = ggplot(D_tpaired, aes(x = x, y = y)) +
+  geom_line(aes(group = id)) +
+  labs(title = '          Pairs')
+
+# Use patchwork to put them side-by-side
+theme_axis(P_tpaired) + theme_axis(P_t1, legend.position = c(0.6, 0.1))
+```
+
+
+
+---
+
+# Paired-sample t-test: Example (lm and t.test)
+
+```{r}
+x1 <- rnorm(30)
+x2 <- x1 + rnorm(30)
+d <- x1 - x2
+mod <- lm(d ~ 1)
+summary(mod)
+```
+
+---
+# Built-in t-test 
+
+
+### Again, note that the p-values are identical! 
+
+```{r}
+t.test(x1, x2, paired = TRUE)
+```
+
+
+---
+
+# Two-sample t-test: Idea
+
+-  Two **independent** groups, with possibly two different sample sizes. 
+
+-  Data: $X_1, \ldots, X_m \sim N(\mu_X, \sigma_X^2)$ and $Y_1, \ldots, Y_n \sim N(\mu_Y, \sigma_Y^2)$.
+
+-  Compare their means: $H_0: \mu_x = \mu_Y$ vs. $H_1: \mu_X \neq \mu_Y$. 
+
+-  The equal variance case $\sigma_X = \sigma_Y$ is easier to handle, one needs to estimate the the common variance using a "pooled" estimator, and the resulting test statistics follows a $t$-distribution with $m + n - 2$ degrees of freedom. 
+
+-  The unequal variance case is somewhat difficult, partly because the resulting test statistics is only approximately $t$-distributed. 
+
+-  In `R`, these are handled by the extra argument `var.equal = TRUE` and `var.equal = FALSE`. 
+
+---
+# Re-cap 
+
+-  Independent t-test model: two means predict \( y \).
+
+$$
+y_i = \beta_0 + \beta_1 x_i \qquad H_0 : \beta_1 = 0
+$$
+
+where $x_i$ is an indicator (0 or 1) saying whether data point $i$ was sampled from one or the other group. 
+Indicator variables (also called “dummy coding”) underly a lot of linear models and we’ll take an aside to see how it works in a minute.
+
+-  Mann-Whitney U (also known as **Wilcoxon rank-sum test** for two independent groups) is the same model to a very close approximation, just on the ranks of $x$ and $y$ instead of the actual values:
+
+$$
+\text{rank}(y_i) = \beta_0 + \beta_1 x_i \qquad H_0 : \beta_1 = 0
+$$
+
+---
+## Dummy coding 
+
+-  Dummy coding can be understood visually. The indicator is on the x-axis, so data points from the first group are located at $x = 0$ and data points from the second group are located at $x = 1$. 
+-  Then $\beta_0$ is the intercept (blue line) and $\beta_1$ is the slope between the two means (red line). Why? Because when $\Delta x = 1$ the slope equals the difference because:
+
+$$
+\text{slope} = \Delta y / \Delta x = \Delta y / 1 = \Delta y = \text{difference}
+$$
+
+-  Magic! Even categorical differences can be modelled using linear models! 
+
+---
+
+# Two-sample t-test: Linear Model
+
+$y_i = \beta_0 + \beta_1 \text{Group}_i + \epsilon_i$ where $\text{Group}_i = 0$ or $1$.
+
+```{r, echo = F, fig.height=6}
+
+# Data
+N = 20  # Number of data points per group
+D_t2 = data.frame(
+  x = rep(c(0, 1), each=N),
+  y = c(rnorm_fixed(N, 0.3, 0.3), rnorm_fixed(N, 1.3, 0.3))
+)
+
+# Plot
+P_t2 = ggplot(D_t2, aes(x=x, y=y)) + 
+  stat_summary(fun.y = mean, geom = "errorbar", aes(ymax = ..y.., ymin = ..y..,  color = 'something'), lwd = 2) +
+  geom_segment(x = -10, xend = 10, y = 0.3, yend = 0.3, lwd = 2, aes(color = 'beta_0')) + 
+  geom_segment(x = 0, xend = 1, y = 0.3, yend = 1.3, lwd = 2, aes(color = 'beta_1')) + 
+  
+  scale_color_manual(name = NULL, values = c("blue", "red", "darkblue"), labels=c(bquote(beta[0]*" (group 1 mean)"), bquote(beta[1]*" (slope = difference)"), bquote(beta[0]+beta[1]%.%1*" (group 2 mean)")))
+  #scale_x_discrete(breaks=c(0.5, 1.5), labels=c('1', '2'))
+
+theme_axis(P_t2, jitter = TRUE, xlim = c(-0.3, 2), legend.position = c(0.53, 0.08))
+```
+
+
+
+---
+
+# Two-sample t-test: Example (lm and t.test)
+
+```{r}
+x <- rnorm(30)
+group <- factor(rep(c("A", "B"), each = 15))
+summary(lm(x ~ group))
+```
+
+
+---
+# Built-in function
+
+### Note the same p-value. 
+
+```{r}
+t.test(x ~ group)
+```
+
+---
+
+# Correlation: Idea
+
+- Relationship between two continuous variables.
+- The correlation coefficient is defined for a list of pairs  
+$(x_1, y_1), \ldots, (x_n, y_n)$ as the average of the product of the standardized values:
+
+$$
+\rho = \frac{1}{n} \sum_{i=1}^{n} \left( \frac{x_i - \mu_x}{\sigma_x} \right)  \left( \frac{y_i - \mu_y}{\sigma_y} \right) 
+$$
+
+- In R:
+```{r, eval = F}
+rho <- mean(scale(x) * scale(y))
+## or simply 
+
+rho <- cor(x,y)
+```
+
+- Correlation measures the strength of **linear** relationship. 
+- Correlation is always between -1 and +1 
+
+---
+
+## Properties of correlation coefficient
+
+-  Always between -1 and +1, i.e. $\lvert{\rho}\rvert \le 1$.
+-  Measures the **linear** relationship. 
+-  In other words, $\rho = 0$ implies no **linear** relationship. 
+-  Also, if $X$ and $Y$ are independent, $X \perp Y$, $\rho(X,Y) = 0$.
+-  The converse of the above is not true, i.e. $X$ and $Y$ could be dependent but still have zero correlation.
+-  If $\rho > 0$, there's a positive **linear** relationship, and if $\rho <0$ there is a negative **linear** relationship. 
+
+
+---
+
+# Pearson Correlation as Regression
+
+- $y_i = \beta_0 + \beta_1 x_i + \epsilon_i$
+
+- $\beta_1$ is proportional to Pearson correlation $r$.
+
+
+
+---
+
+# Correlation: Example (lm and cor.test)
+
+```{r}
+x <- rnorm(30)
+y <- 0.5*x + rnorm(30)
+summary(lm(y ~ x))
+```
+
+---
+# Built-in 
+
+```{r}
+cor.test(x, y)
+```
+---
+
+# Spearman Correlation: Idea
+
+- Correlation based on ranks, not raw values.
+- -  Spearman's rank correlation: replace X, Y with their ranks. 
+-  Spearman's $r_s$ measure monotonic association. $r_s = 1$ means X is a monotonically increasing function of Y. 
+
+```{r, echo=TRUE}
+cor(rank(x),rank(y))
+cor(x,y,method="spearman")
+```
+
+### Spearman Correlation: Hypotheses
+
+$H_0: \rho = 0$ vs. $H_1: \rho \neq 0$.
+
+---
+
+# Spearman example (lm on ranks and cor.test)
+
+```{r}
+rank_x <- rank(x); rank_y <- rank(y)
+summary(lm(rank_y ~ rank_x))
+```
+
+---
+# Built-in 
+
+#### Compare this p-value with the p-value for the t-test for $H_0: \beta_1 = 0$, i.e., the p-value for testing if the slope is equal to zero. 
+
+
+```{r}
+cor.test(x, y, method = "spearman")
+```
+
+---
+
+# One-way ANOVA: Motivation
+
+- More than two groups.
+- Are any means different?
+
+#### One-way ANOVA: Linear Model
+
+$y_i = \beta_0 + \beta_1 \text{Group1}_i + \beta_2 \text{Group2}_i + \ldots + \epsilon_i$
+
+>  Need to introudce dummy variables like Group1, Group2, etc., like the independent samples situation. 
+
+---
+
+# One-way ANOVA: Hypotheses
+
+$H_0: \mu_1 = \mu_2 = \ldots = \mu_k$
+
+vs
+
+$H_A: \text{At least one mean is differs}$
+
+---
+
+# One-way ANOVA: Assumptions
+
+- Independence
+- Normality
+- Homogeneity of variances
+
+---
+
+# One-way ANOVA: Example (lm and aov)
+
+```{r}
+x <- rnorm(45)
+group <- factor(rep(c("A", "B", "C"), each = 15))
+summary(lm(x ~ group))
+```
+
+---
+# Built-in function 
+
+#### Compare the p-value for the F-test from the `lm` output. 
+
+```{r}
+summary(aov(x ~ group))
+```
+
+---
+
+# Kruskal-Wallis Test: Idea
+
+- Compare 3+ groups without assuming normality.
+
+#### Kruskal-Wallis Test: Hypotheses
+
+$H_0: \text{All group distributions are equal}$ 
+
+
+---
+
+# Kruskal-Wallis Test: Example (lm on ranks and kruskal.test)
+
+```{r}
+x <- rnorm(45)
+group <- factor(rep(c("A", "B", "C"), each = 15))
+rank_x <- rank(x)
+lm(rank_x ~ group) |> summary()
+```
+
+---
+# Built-in function 
+
+```{r}
+kruskal.test(x ~ group)
+```
+
+---
+
+# When to Use Non-parametric Tests?
+
+- Small sample sizes.
+- Outliers present.
+- Skewed distributions.
+
+---
+
+# Summary
+
+| Test | Type | Assumptions? |
+| :--- | :--- | :--- |
+| t-test | Parametric | Yes |
+| Wilcoxon | Non-parametric | Symmetry |
+| ANOVA | Parametric | Yes |
+| Kruskal-Wallis | Non-parametric | Symmetry |
+
+---
+
+# Thank You!
+
+- Questions?

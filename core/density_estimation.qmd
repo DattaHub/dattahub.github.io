@@ -1,5 +1,5 @@
 ---
-title: "Density Estimation <br> Introduction"
+title: "Nonparametric <br> Density Estimation <br> An Introduction"
 author: "Dr. Jyotishka Datta"
 format:
   revealjs: 
@@ -7,6 +7,8 @@ format:
     fontsize: 22pt
     scrollable: true
     logo: vt.png
+    transition: slide
+    background-transition: fade
 editor: 
   markdown: 
     wrap: 72
@@ -725,4 +727,47 @@ points(x, y, pch = 16, cex = 0.3)
 ```
 
 
+## KDE and KNN 
 
+-  Histogram and KDE is intimately connected with a nonparametric classification algorithm called k-nearest neighbors. 
+
+-  $k$-NN: given a positive integer $k$, and a new, yet-unforeseen observation $x_0$, the KNN classifier first identifies the $k$ points in the training data that are
+closest to $x_0$, represented by $N_0$.
+
+-  It then estimates the conditional probability for class j as the fraction of points in $N_0$ whose response values equal $j$:
+
+$$
+P(Y = j | X = x_0) = \frac{1}{k} \sum_{i \in N_0} I(y_i = j)
+$$
+
+-  Finally, $k$-NN classifies the test observation $x_0$
+to the class with the largest probability.
+
+
+## KNN 
+
+<img src="knn.png"  height="600" width="900">
+
+
+## KNN vs KDE
+
+-  Think of nearest neighbour as a density estimation strategy.
+-  In KDE or histogram, we fix an interval or region (V) and calculate how many points lie within (K).
+-  In K-nearest neighbour, you fix the number of neighbours (K)
+centered on x, and let the region grow to a volume $V^*$. 
+
+- The region $V^*$ will contain k out of n data points, and we can get:
+$$
+p(x) \approx \frac{k}{nV^*}
+$$
+
+In histogram of KDE, h acts as smoothing parameter, in k-NN, k
+acts as a smoothing parameter.
+
+## Conclusion 
+
+-  These methods KDE or KNN works very well in smaller dimensions and fail miserably in higher dimensions. 
+
+-  In higher dimension, most of the volume is confined within a small radius and distance and neighbours lose their usual meaning. 
+
+-  One needs different methods for classifying higher dimensional data. 

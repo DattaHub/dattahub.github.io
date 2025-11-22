@@ -10,7 +10,7 @@
   <meta name="generator" content="quarto-1.6.42">
 
   <meta name="author" content="Dr.&nbsp;Jyotishka Datta">
-  <title>Density Estimation   Introduction</title>
+  <title>Nonparametric   Density Estimation   An Introduction</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -193,7 +193,7 @@
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">Density Estimation <br> Introduction</h1>
+  <h1 class="title">Nonparametric <br> Density Estimation <br> An Introduction</h1>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -636,43 +636,43 @@ K_2\!\left(\frac{y - Y_i}{h_y}\right).
 <span id="cb20-4"><a href=""></a></span>
 <span id="cb20-5"><a href=""></a><span class="fu">nrow</span>(crime_xy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 237482</code></pre>
+<pre><code>[1] 237372</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href=""></a><span class="fu">table</span>(crime_xy<span class="sc">$</span>PRIMARY.DESCRIPTION)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
                             ARSON                           ASSAULT 
-                              377                             21591 
+                              375                             21592 
                           BATTERY                          BURGLARY 
-                            42888                              9524 
+                            42864                              9533 
 CONCEALED CARRY LICENSE VIOLATION                   CRIMINAL DAMAGE 
-                              264                             26273 
+                              265                             26266 
           CRIMINAL SEXUAL ASSAULT                 CRIMINAL TRESPASS 
-                             1621                              5257 
+                             1620                              5256 
                DECEPTIVE PRACTICE                          GAMBLING 
-                            14363                                15 
+                            14338                                14 
                          HOMICIDE                 HUMAN TRAFFICKING 
                               441                                17 
  INTERFERENCE WITH PUBLIC OFFICER                      INTIMIDATION 
-                              890                               131 
+                              892                               131 
                        KIDNAPPING              LIQUOR LAW VIOLATION 
                                90                               200 
               MOTOR VEHICLE THEFT                         NARCOTICS 
-                            17212                              7522 
+                            17208                              7522 
                      NON-CRIMINAL                         OBSCENITY 
                                 3                                52 
        OFFENSE INVOLVING CHILDREN          OTHER NARCOTIC VIOLATION 
-                             1557                                 9 
+                             1555                                 9 
                     OTHER OFFENSE                      PROSTITUTION 
-                            16674                               214 
+                            16671                               214 
                  PUBLIC INDECENCY            PUBLIC PEACE VIOLATION 
                                10                              1031 
                           ROBBERY                       SEX OFFENSE 
-                             6314                              1259 
+                             6311                              1259 
                          STALKING                             THEFT 
-                              561                             55424 
+                              564                             55377 
                 WEAPONS VIOLATION 
-                             5698 </code></pre>
+                             5692 </code></pre>
 </div>
 </div>
 </section>
@@ -710,8 +710,46 @@ CONCEALED CARRY LICENSE VIOLATION                   CRIMINAL DAMAGE
 <section id="finally-plot-the-spatial-kernel-density" class="slide level2">
 <h2>Finally, plot the spatial kernel density</h2>
 
-
 <img data-src="density_estimation_files/figure-revealjs/unnamed-chunk-25-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<section id="kde-and-knn" class="slide level2">
+<h2>KDE and KNN</h2>
+<ul>
+<li><p>Histogram and KDE is intimately connected with a nonparametric classification algorithm called k-nearest neighbors.</p></li>
+<li><p><span class="math inline">\(k\)</span>-NN: given a positive integer <span class="math inline">\(k\)</span>, and a new, yet-unforeseen observation <span class="math inline">\(x_0\)</span>, the KNN classifier first identifies the <span class="math inline">\(k\)</span> points in the training data that are closest to <span class="math inline">\(x_0\)</span>, represented by <span class="math inline">\(N_0\)</span>.</p></li>
+<li><p>It then estimates the conditional probability for class j as the fraction of points in <span class="math inline">\(N_0\)</span> whose response values equal <span class="math inline">\(j\)</span>:</p></li>
+</ul>
+<p><span class="math display">\[
+P(Y = j | X = x_0) = \frac{1}{k} \sum_{i \in N_0} I(y_i = j)
+\]</span></p>
+<ul>
+<li>Finally, <span class="math inline">\(k\)</span>-NN classifies the test observation <span class="math inline">\(x_0\)</span> to the class with the largest probability.</li>
+</ul>
+</section>
+<section id="knn" class="slide level2">
+<h2>KNN</h2>
+<p><img src="knn.png" height="600" width="900"></p>
+</section>
+<section id="knn-vs-kde" class="slide level2">
+<h2>KNN vs KDE</h2>
+<ul>
+<li><p>Think of nearest neighbour as a density estimation strategy.</p></li>
+<li><p>In KDE or histogram, we fix an interval or region (V) and calculate how many points lie within (K).</p></li>
+<li><p>In K-nearest neighbour, you fix the number of neighbours (K) centered on x, and let the region grow to a volume <span class="math inline">\(V^*\)</span>.</p></li>
+<li><p>The region <span class="math inline">\(V^*\)</span> will contain k out of n data points, and we can get: <span class="math display">\[
+p(x) \approx \frac{k}{nV^*}
+\]</span></p></li>
+</ul>
+<p>In histogram of KDE, h acts as smoothing parameter, in k-NN, k acts as a smoothing parameter.</p>
+</section>
+<section id="conclusion" class="slide level2">
+<h2>Conclusion</h2>
+<ul>
+<li><p>These methods KDE or KNN works very well in smaller dimensions and fail miserably in higher dimensions.</p></li>
+<li><p>In higher dimension, most of the volume is confined within a small radius and distance and neighbours lose their usual meaning.</p></li>
+<li><p>One needs different methods for classifying higher dimensional data.</p></li>
+</ul>
+
+</section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <p><img src="vt.png" class="slide-logo"></p>
@@ -874,14 +912,14 @@ CONCEALED CARRY LICENSE VIOLATION                   CRIMINAL DAMAGE
         previewLinks: false,
 
         // Transition style (none/fade/slide/convex/concave/zoom)
-        transition: 'none',
+        transition: 'slide',
 
         // Transition speed (default/fast/slow)
         transitionSpeed: 'default',
 
         // Transition style for full page slide backgrounds
         // (none/fade/slide/convex/concave/zoom)
-        backgroundTransition: 'none',
+        backgroundTransition: 'fade',
 
         // Number of slides away from the current that are visible
         viewDistance: 3,
