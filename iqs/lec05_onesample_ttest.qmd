@@ -30,7 +30,7 @@ execute:
 #| include: false
 library(ggplot2)
 library(dplyr)
-theme_set(theme_classic(base_size = 13))
+theme_set(theme_classic(base_size = 10))
 ```
 
 ## Setup and Motivation
@@ -186,6 +186,8 @@ We are interested in testing hypothesis about the mean `study_hours`, i.e. if st
 
 
 ```{r}
+#| echo: true
+
 gpa_study_hours <- read.csv("https://www.openintro.org/data/csv/gpa_study_hours.csv")
 str(gpa_study_hours)
 
@@ -338,6 +340,10 @@ The exact result $\frac{\bar{Y} - \mu}{s/\sqrt{n}} \sim t_{n-1}$ holds **only** 
 
 ## Problem: Gaussianity Assumption and Alternatives
 
+As we discussed in class, there are two ways of carrying out the $p$-value calculation. The first is testing via the tail probabilities under the theoretical $t$ distribution with $(n-1)$ degrees of freedom that we have calculated above. This result is exactly true when you have Gaussian or normally distributed data, and approximately true when you have a `large' sample (because the Central Limit Theorem or CLT will kick in!). We could also sample from the null distribution "many" times, and look at the resulting histogram or density of the test statistics, and calculate the p-values by looking at proportions of simulated values of the test statistics that are more extreme than the observed value of the test statistics. 
+
+In the following figure, you see how they match for $n = 30$ samples from a Gaussian distribution. It shows a histogram of simulated t-statistics overlaid with a red $t_{29 d.f.}$ distribution curve. The empirical distribution closely follows the theoretical curve, validating the t-test under normality.
+
 ```{r}
 #| label: fig-sampling-dist
 #| echo: true
@@ -360,5 +366,5 @@ ggplot(data.frame(t = t_stats), aes(x = t)) +
                  bins = 60, fill = "#aec7e8", colour = "white") +
   geom_line(data = theory, aes(x, y), colour = "#d62728", linewidth = 1) +
   labs(x = "t-statistic", y = "Density",
-       title = expression("Sampling Distribution of T under H"[0] ~ "(Monte Carlo vs" ~ t[29] ~ ")"))
+       title = expression("Sampling distribution of T under H"[0] ~ "\n (Monte Carlo vs" ~ t[29] ~ ")")) + theme_minimal()
 ```
