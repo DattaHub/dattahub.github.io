@@ -1,0 +1,370 @@
+---
+title: "Lecture: One-Sample t-Test"
+subtitle: "From z-Tests to Student's t"
+author: "Jyotishka Datta"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    theme: cosmo
+    code-fold: false
+    fig-align: center
+    html-math-method: mathjax
+    lang: en
+    # Accessibility
+    fig-cap-location: bottom
+  pdf:
+    toc: true
+    number-sections: true
+    fig-align: center
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+library(ggplot2)
+library(dplyr)
+theme_set(theme_classic(base_size = 10))
+```
+
+## Setup and Motivation
+
+Suppose we have an i.i.d. sample:
+$$Y_1, Y_2, \ldots, Y_n \sim \mathcal{N}(\mu, \sigma^2).$$
+
+We want to estimate (and test hypotheses about) $\mu$ and $\sigma^2$.
+
+### Maximum Likelihood Estimates (MLE)
+
+The MLEs are:
+$$\hat{\mu} = \bar{y} = \frac{1}{n}\sum_{i=1}^{n} y_i, \qquad
+\hat{\sigma}^2 = \frac{1}{n}\sum_{i=1}^{n}(y_i - \bar{y})^2 \quad \text{(biased)}.$$
+
+In practice we prefer the **unbiased** sample variance (requires $n \geq 2$):
+$$s^2 = \frac{1}{n-1}\sum_{i=1}^{n}(y_i - \bar{y})^2.$$
+
+> **Note (n = 1 edge case):** If $n = 1$, then $\hat{\mu} = \bar{y} = y_1$ and
+> $\hat{\sigma}^2 = (y_1 - \bar{y})^2 = 0$, which is degenerate. Always ensure $n \geq 2$.
+
+---
+
+## The z-Test (Known Variance)
+
+**Hypotheses:**
+$$H_0: \mu = 0 \quad \text{vs} \quad H_1: \mu \neq 0.$$
+
+**Test statistic:** The sample mean satisfies
+$$\mathbb{E}[\bar{Y}] = \mu, \qquad \operatorname{Var}(\bar{Y}) = \frac{\sigma^2}{n},$$
+so after standardising:
+$$Z = \frac{\bar{Y} - \mu_0}{\sigma / \sqrt{n}} \sim \mathcal{N}(0,1) \quad \text{when } \sigma = \sigma_0 \text{ is known}.$$
+
+The **p-value** for the two-sided test is $P(|Z| \geq z_\text{obs})$.
+
+```{r}
+#| label: fig-z-dist
+#| fig-cap: "Standard normal distribution with critical region (two-sided, α = 0.05) shaded. The observed test statistic z_obs = 2.5 is shown."
+#| fig-alt: "A standard normal bell curve. The two tails beyond ±1.96 are shaded in red indicating the rejection region. A vertical dashed blue line marks z_obs = 2.5."
+
+z_obs <- 2.5
+z_crit <- qnorm(0.975)
+
+x <- seq(-4, 4, length.out = 500)
+df_z <- data.frame(x = x, y = dnorm(x))
+
+ggplot(df_z, aes(x, y)) +
+  geom_line(linewidth = 0.9) +
+  # Shade left tail
+  geom_ribbon(
+    data = subset(df_z, x <= -z_crit),
+    aes(ymin = 0, ymax = y), fill = "#d62728", alpha = 0.4
+  ) +
+  # Shade right tail
+  geom_ribbon(
+    data = subset(df_z, x >= z_crit),
+    aes(ymin = 0, ymax = y), fill = "#d62728", alpha = 0.4
+  ) +
+  # Observed statistic
+  geom_vline(xintercept = z_obs, linetype = "dashed", colour = "#1f77b4", linewidth = 0.9) +
+  geom_vline(xintercept = -z_obs, linetype = "dashed", colour = "#1f77b4",
+             linewidth = 0.9, alpha = 0.5) +
+  annotate("text", x = z_obs + 0.25, y = 0.32, label = expression(z[obs]),
+           hjust = 0, colour = "#1f77b4", size = 4) +
+  annotate("text", x =  z_crit, y = 0.05,
+           label = expression(-z[obs] ~ "" ~ z[obs]), hjust = 0, size = 3.5) +
+  labs(x = "z", y = "Density",
+       title = "Standard Normal: Critical Region for Two-Sided z-Test") +
+  scale_x_continuous(
+    breaks = c(-z_obs, -z_crit, 0, z_crit, z_obs),
+    labels = c(expression(-z[obs]), expression(-z[crit]), "0",
+               expression(z[crit]), expression(z[obs]))
+  )
+```
+
+> **Practical limitation:** z-tests are rarely useful because $\sigma^2$ is almost never known in practice.
+
+---
+
+## The t-Test (Unknown Variance)
+
+### Plug-in estimator
+
+When $\sigma^2$ is unknown, we substitute $s^2$ for $\sigma^2$:
+$$T = \frac{\bar{Y} - 0}{\sqrt{s^2/n}} = \frac{\bar{Y}}{s/\sqrt{n}}.$$
+
+This statistic is **no longer** $\mathcal{N}(0,1)$-distributed.
+
+### William Gosset ("Student") and the t-distribution
+
+Gosset showed that if $\bar{Y} \sim \mathcal{N}(\mu, \sigma^2/n)$ and
+$s^2 = \frac{1}{n-1}\sum_{i=1}^n (y_i - \bar{y})^2$, then:
+
+$$\boxed{\frac{\bar{Y} - \mu}{s/\sqrt{n}} \sim t_{n-1}}$$
+
+where $t_{n-1}$ denotes the **Student's t-distribution with $n-1$ degrees of freedom**.
+
+As $n \to \infty$ (degrees of freedom $\to \infty$), $t_\nu \to \mathcal{N}(0,1)$.
+
+```{r}
+#| label: fig-t-dist
+#| fig-cap: "t-distributions for increasing degrees of freedom compared to the standard normal. As df increases, the t-distribution converges to N(0,1), but has heavier tails for small df."
+#| fig-alt: "Overlaid density curves for t distributions with 1, 5, 30 degrees of freedom and the standard normal. Heavier tails are visible for low degrees of freedom."
+
+x <- seq(-5, 5, length.out = 500)
+
+df_tdist <- bind_rows(
+  data.frame(x = x, y = dt(x, df = 1),  label = "t, df = 1"),
+  data.frame(x = x, y = dt(x, df = 5),  label = "t, df = 5"),
+  data.frame(x = x, y = dt(x, df = 30), label = "t, df = 30"),
+  data.frame(x = x, y = dnorm(x),       label = "N(0,1)")
+)
+
+ggplot(df_tdist, aes(x, y, colour = label, linetype = label)) +
+  geom_line(linewidth = 0.9) +
+  labs(x = "t", y = "Density",
+       title = "t-Distributions vs Standard Normal",
+       colour = "Distribution", linetype = "Distribution") +
+  scale_colour_manual(values = c(
+    "t, df = 1"  = "#d62728",
+    "t, df = 5"  = "#ff7f0e",
+    "t, df = 30" = "#2ca02c",
+    "N(0,1)"     = "#1f77b4"
+  )) +
+  scale_linetype_manual(values = c(
+    "t, df = 1"  = "dotted",
+    "t, df = 5"  = "dashed",
+    "t, df = 30" = "longdash",
+    "N(0,1)"     = "solid"
+  ))
+```
+
+### Computing p-values in R
+
+In R, the t-distribution functions follow the standard `d/p/q/r` naming convention:
+
+| Prefix | Function | Purpose |
+|--------|----------|---------|
+| `d` | `dt()` | Density |
+| `p` | `pt()` | CDF / Probability |
+| `q` | `qt()` | Quantile |
+| `r` | `rt()` | Random sample |
+
+For a two-sided test the p-value is:
+
+$$p\text{-value} = P(|T| \geq t_\text{obs}) = 2 \times P(T \geq |t_\text{obs}|) = 2 \times (1 - \texttt{pt}(t_\text{obs},\, n-1))$$
+
+### Example 
+
+Read the `gpa_study_hours` data set from  [https://www.openintro.org/data/index.php?data=gpa_study_hours](https://www.openintro.org/data/index.php?data=gpa_study_hours). This dataset has 193 rows and 2 columns. The columns represent the variables `gpa` and `study_hours` for a sample of 193 undergraduate students who took an introductory statistics course in 2012 at a private US university.
+
+We are interested in testing hypothesis about the mean `study_hours`, i.e. if students in this particular class studied more than a specified number of hours, e.g., we can ask if they have studied for more than 15 hours? 
+
+
+```{r}
+#| echo: true
+
+gpa_study_hours <- read.csv("https://www.openintro.org/data/csv/gpa_study_hours.csv")
+str(gpa_study_hours)
+
+mu0 = 15
+y = gpa_study_hours$study_hours
+n = length(y)
+ybar = mean(y)
+s = sd(y)
+
+se = s/(n^(1/2))
+t_stat = (ybar - mu0)/se
+
+cat("sample size:", n, "sample mean:", ybar, "standard error:", se, "t:" , t_stat, "\n")
+
+```
+
+
+```{r}
+#| label: pvalue-example
+#| echo: true
+
+
+p_upper    <- 1 - pt(t_stat, df = n - 1)   # one-sided (H1: mu > mu_0)
+p_twosided <- 2 * p_upper                  # two-sided (H1: mu ≠ mu_0)
+
+cat(sprintf("One-sided p-value  : %.4f\n", p_upper))
+cat(sprintf("Two-sided p-value  : %.4f\n", p_twosided))
+```
+
+```{r}
+#| label: fig-t-pvalue
+#| fig-cap: "t-distribution with n-1s degrees of freedom. The shaded regions represent the two-sided p-value corresponding to t_stat = 3.015799."
+#| fig-alt: "Bell-shaped t distribution curve with n-1 degrees of freedom. Both tails beyond ±t_stat are shaded in red, representing the p-value. A dashed blue line marks t_stat."
+
+x <- seq(-4, 4, length.out = 500)
+df_t80 <- data.frame(x = x, y = dt(x, df = n-1))
+
+ggplot(df_t80, aes(x, y)) +
+  geom_line(linewidth = 0.9) +
+  geom_ribbon(data = subset(df_t80, x >= t_stat),
+              aes(ymin = 0, ymax = y), fill = "#d62728", alpha = 0.4) +
+  geom_ribbon(data = subset(df_t80, x <= -t_stat),
+              aes(ymin = 0, ymax = y), fill = "#d62728", alpha = 0.4) +
+  geom_vline(xintercept =  t_stat, linetype = "dashed", colour = "#1f77b4", linewidth = 0.9) +
+  geom_vline(xintercept = -t_stat, linetype = "dashed", colour = "#1f77b4",
+             linewidth = 0.9, alpha = 0.5) +
+  annotate("text", x = t_stat + 0.1, y = 0.3,
+           label = expression(t[obs]), hjust = 0, colour = "#1f77b4", size = 4) +
+  annotate("text", x = -t_stat - 0.1, y = 0.3,
+           label = expression(-t[obs]), hjust = 1, colour = "#1f77b4", size = 4) +
+  labs(x = "t", y = "Density",
+       title = expression("t"[80] ~ "distribution: two-sided p-value region"))
+```
+
+---
+
+## Distribution of $s^2$: The Chi-Squared Connection
+
+To derive the t-distribution formally, we need the sampling distribution of $s^2$.
+
+### Chi-squared distribution
+
+If $Y \sim \mathcal{N}(0,1)$, then $Y^2 \sim \chi^2_1$.
+
+More generally, if $Y_1, \ldots, Y_n \overset{\text{iid}}{\sim} \mathcal{N}(0,1)$, then:
+$$\sum_{i=1}^n Y_i^2 \sim \chi^2_n.$$
+
+```{r}
+#| label: fig-chisq
+#| fig-cap: "Chi-squared densities for increasing degrees of freedom. The distribution is right-skewed for low df and becomes more symmetric as df grows."
+#| fig-alt: "Overlaid chi-squared density curves for 1, 2, 5, and 10 degrees of freedom. The curve for df=1 has a sharp peak near zero; higher df curves shift right and become more bell-shaped."
+
+x <- seq(0.01, 25, length.out = 500)
+
+df_chi <- bind_rows(
+  data.frame(x = x, y = dchisq(x, df = 1),  label = "df = 1"),
+  data.frame(x = x, y = dchisq(x, df = 2),  label = "df = 2"),
+  data.frame(x = x, y = dchisq(x, df = 5),  label = "df = 5"),
+  data.frame(x = x, y = dchisq(x, df = 10), label = "df = 10")
+)
+
+ggplot(df_chi, aes(x, y, colour = label)) +
+  geom_line(linewidth = 0.9) +
+  coord_cartesian(ylim = c(0, 0.5)) +
+  labs(x = expression(chi^2), y = "Density",
+       title = expression("Chi-Squared Distributions" ~ chi[df]^2),
+       colour = "Degrees of freedom") +
+  scale_colour_brewer(palette = "Set1")
+```
+
+### Decomposition of the total sum of squares
+
+For $Y_i \sim \mathcal{N}(\mu, \sigma^2)$, we know $\sum_{i=1}^n \left(\frac{Y_i - \mu}{\sigma}\right)^2 \sim \chi^2_n$.
+
+By adding and subtracting $\bar{y}$:
+$$\sum_{i=1}^n \left(\frac{Y_i - \mu}{\sigma}\right)^2
+= \sum_{i=1}^n \frac{(Y_i - \bar{Y})^2}{\sigma^2} + \left(\frac{\bar{Y} - \mu}{\sigma/\sqrt{n}}\right)^2
+= \frac{(n-1)s^2}{\sigma^2} + \underbrace{\left(\frac{\bar{Y} - \mu}{\sigma/\sqrt{n}}\right)^2}_{\sim\, \chi^2_1}.$$
+
+The cross-term $\sum_i (y_i - \bar{y})(\bar{y} - \mu) = 0$ by construction, so by independence of the two components:
+
+$$\boxed{\frac{(n-1)s^2}{\sigma^2} \sim \chi^2_{n-1}}$$
+
+Equivalently:
+$$s^2 \sim \frac{\sigma^2}{n-1} \cdot \chi^2_{n-1}, \qquad
+\sigma^2 \sim \frac{(n-1)s^2}{\chi^2_{n-1}}.$$
+
+---
+
+## Summary: The One-Sample t-Test
+
+**Setup:** $Y_1, \ldots, Y_n \overset{\text{iid}}{\sim} \mathcal{N}(\mu, \sigma^2)$, both $\mu$ and $\sigma^2$ unknown.
+
+**Hypotheses:**
+$$H_0: \mu = \mu_0 \quad \text{vs} \quad H_1: \mu \neq \mu_0 \quad (\text{two-sided}).$$
+
+**Combining results:** Since $\bar{Y} \sim \mathcal{N}(\mu, \sigma^2/n)$ and $\frac{(n-1)s^2}{\sigma^2} \sim \chi^2_{n-1}$ are **independent**, their ratio yields:
+
+$$\bar{Y} \sim t_{n-1}\!\left(\mu,\, \frac{s^2}{n}\right), \qquad
+T = \frac{\bar{Y} - \mu_0}{s/\sqrt{n}} \sim t_{n-1} \quad \text{under } H_0.$$
+
+**p-values:**
+
+$$p\text{-value} = \begin{cases} P(T > t_\text{obs}) & \text{if } H_1: \mu > \mu_0, \\ P(|T| > t_\text{obs}) & \text{if } H_1: \mu \neq \mu_0. \end{cases}$$
+
+**95% Confidence interval:**
+$$\bar{Y} \pm t_{n-1,\, 0.975} \cdot \frac{s}{\sqrt{n}} \approx \bar{Y} \pm 1.96 \cdot \frac{s}{\sqrt{n}} \quad \text{(large } n).$$
+
+**In R:**
+```{r}
+#| label: ttest-example
+#| echo: true
+
+# Simulate some data and run a one-sample t-test
+set.seed(42)
+y <- rnorm(30, mean = 0.3, sd = 1)
+
+result <- t.test(y, mu = 0)
+print(result)
+```
+
+### Caveat: Gaussianity assumption
+
+The exact result $\frac{\bar{Y} - \mu}{s/\sqrt{n}} \sim t_{n-1}$ holds **only** when $Y_1, \ldots, Y_n$ are Gaussian. For non-Gaussian data, alternatives include:
+
+- **Nonparametric tests** (e.g., Wilcoxon signed-rank test).
+- **Monte Carlo / permutation approaches** to obtain the sampling distribution of the test statistic empirically.
+
+---
+
+## Problem: Gaussianity Assumption and Alternatives
+
+As we discussed in class, there are two ways of carrying out the $p$-value calculation. The first is testing via the tail probabilities under the theoretical $t$ distribution with $(n-1)$ degrees of freedom that we have calculated above. This result is exactly true when you have Gaussian or normally distributed data, and approximately true when you have a `large' sample (because the Central Limit Theorem or CLT will kick in!). We could also sample from the null distribution "many" times, and look at the resulting histogram or density of the test statistics, and calculate the p-values by looking at proportions of simulated values of the test statistics that are more extreme than the observed value of the test statistics. 
+
+In the following figure, you see how they match for $n = 30$ samples from a Gaussian distribution. It shows a histogram of simulated t-statistics overlaid with a red $t_{29 d.f.}$ distribution curve. The empirical distribution closely follows the theoretical curve, validating the t-test under normality.
+
+```{r}
+#| label: fig-sampling-dist
+#| echo: true
+#| fig-cap: "Empirical sampling distribution of the t-statistic under the null, obtained via Monte Carlo simulation (n = 30, B = 10,000 replicates), overlaid with the theoretical t_{29} density. The close agreement illustrates how the t-distribution arises in practice."
+#| fig-alt: "A histogram of simulated t-statistics overlaid with a red t distribution curve. The empirical distribution closely follows the theoretical curve, validating the t-test under normality."
+
+
+B <- 10000
+n <- 30
+t_stats <- replicate(B, {
+  y_sim <- rnorm(n, mean = 0, sd = 1)
+  t.test(y_sim, mu = 0)$statistic
+})
+
+x_seq <- seq(-4, 4, length.out = 300)
+theory <- data.frame(x = x_seq, y = dt(x_seq, df = n - 1))
+
+ggplot(data.frame(t = t_stats), aes(x = t)) +
+  geom_histogram(aes(y = after_stat(density)),
+                 bins = 60, fill = "#aec7e8", colour = "white") +
+  geom_line(data = theory, aes(x, y), colour = "#d62728", linewidth = 1) +
+  labs(x = "t-statistic", y = "Density",
+       title = expression("Sampling distribution of T under H"[0] ~ "\n (Monte Carlo vs" ~ t[29] ~ ")")) + theme_minimal()
+```
