@@ -1,0 +1,155 @@
+---
+title: "Practice Problems for CMDA 2006 (Statistics) Midterm I"
+subtitle: "(Spring 2026)"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    theme: cosmo
+    fig-align: center
+    html-math-method: mathjax
+    lang: en
+    fig-cap-location: bottom
+  pdf:
+    toc: true
+    number-sections: true
+    fig-align: center
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+
+# Topics Covered
+
+- Central Limit Theorem (DeMoivre–Laplace CLT: Normal approximation to Binomial; (continuity correction)
+- Maximum Likelihood Estimation
+- One-sample and paired-sample tests
+- Sign test: null and alternative hypotheses; exact p-value (in R), Monte Carlo approximation, CLT-based normal approximation with continuity correction
+- Wilcoxon signed-rank test: null and alternative hypotheses; exact p-value (in R), Monte Carlo approximation, CLT-based normal approximation with continuity correction
+
+
+# Comments / Advice
+
+- You will **not** be asked to write R code or pseudo-code during the test.
+- You may be asked to perform an appropriate test for a small data set, so remember to bring your calculator.
+- Make sure you can look up values in the **Normal table** to look up p-values. This will be demonstrated in class before the test.
+- Remember the conditions under which each test is appropriate (e.g., the sign test is appropriate for IID data from any continuous distribution).
+
+---
+
+# Abbreviations:
+
+1. iid/IID = Independent and Identically Distributed.
+2. pdf/PDF = Probability Density Function. 
+3. cdf/CDF = Cumulative Distribution Function. 
+
+---
+
+# Central Limit Theorem (Normal Approximations)
+
+## 
+
+The lifetimes of computer chips are normally distributed with $\mu = 1.4 \times 10^5$ hours and $\sigma = 3 \times 10^4$ hours.
+
+What is the approximate probability that a batch of 100 chips will contain at least 20 whose lifetimes are less than $1.8 \times 10^5$ hours?
+
+(Gibbons and Chakravarti: 5.24)
+
+---
+
+## 
+
+Each item produced by a manufacturer is acceptable with probability 0.95. Approximate the probability that at most 10 of the next 150 items are unacceptable.
+
+(Gibbons and Chakravarti: 5.25)
+
+# MLE
+
+## Review the MLE calculation for ${\mathcal N}(\mu, \sigma^2)$ and ${\mathrm Poisson}(\lambda)$ that we have done in class or as activity. 
+
+## 
+
+Let $X_1, \ldots, X_n$ be IID with pdf:
+
+$$
+f(x \mid \theta) = \theta x^{\theta - 1}, \quad 0 \le x \le 1, \quad 0 \le \theta \le \infty.
+$$
+-  Find the MLE of $\theta$. 
+
+## 
+
+Let $X_1, \ldots, X_n$ be a random sample from a Bernoulli($\theta$) distrubtion with pmf: 
+
+$$
+P_{\theta}(X = x) = L(\theta) = \theta^x (1-\theta)^{1-x}, \quad x = 0 \text{ or } 1, 0 \le \theta 1
+$$ 
+-  Find the MLE of $\theta$.
+
+## 
+
+Let $X_1, X_2, \ldots, X_n \stackrel{IID}{\sim} {\mathrm Geometric}(p)$, where $X_i$ is the number of
+trials until the first success. The PMF is: 
+
+$$
+  P(X = x \mid p) = L(p) \;=\; (1-p)^{x-1}\,p,
+  \qquad x = 1, 2, 3, \ldots,\quad p \in (0,1).
+$$
+
+-  Find the MLE of $p$. 
+
+
+# One-Sample and Paired-Sample Tests
+
+## 
+
+Twenty-four students took both the midterm and the final in a writing course. Each student was classified as no change, improvement, or reduced performance compared with the midterm.
+
+Counts:
+
+-  Improvement = 6
+-  No change = 5
+-  Reduced = 13
+
+Find the p-value for an appropriate one-sided test.
+
+(Gibbons and Chakravarti: 5.13)
+
+---
+
+## 
+
+A manufacturer of suntan lotion is testing a new formula to see whether it provides more protection than the old one. Ten persons had the two lotions applied on different sides of the back. Degree of sunburn was measured (higher = worse):
+
+| Subject | Old | New |
+|----------|-----|-----|
+| 1  | 41 | 37 |
+| 2  | 42 | 39 |
+| 3  | 48 | 31 |
+| 4  | 38 | 39 |
+| 5  | 38 | 34 |
+| 6  | 45 | 47 |
+| 7  | 21 | 19 |
+| 8  | 28 | 30 |
+| 9  | 29 | 25 |
+| 10 | 14 | 8  |
+
+
+(a) Test $H_0: \text{median (old − new)} = 0$ vs $H_A: \text{median(old − new)} < 0$, assuming symmetry.  
+(b) Find a 95% confidence interval for the median difference, assuming symmetry.  
+(c) Repeat (a) and (b) without assuming symmetry.
+
+(Gibbons and Chakravarti: 5.20)
+
+---
+
+## 
+
+In a marketing research test, 15 adult males were asked to shave one side of their face with brand A and the other side with brand B. Twelve men preferred brand A. Find the p-value for the alternative that the probability of preferring brand A is greater than 0.5.
+
+(Gibbons and Chakravarti: 5.23)
+
+---

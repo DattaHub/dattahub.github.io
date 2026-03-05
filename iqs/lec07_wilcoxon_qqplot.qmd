@@ -1,0 +1,504 @@
+---
+title: "Lecture 7: Wilcoxon Signed-Rank Test and Q-Q Plots"
+subtitle: "Nonparametric Tests for Location and Goodness of Fit"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    theme: cosmo
+    fig-align: center
+    html-math-method: mathjax
+    lang: en
+    fig-cap-location: bottom
+  pdf:
+    toc: true
+    number-sections: true
+    fig-align: center
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+set.seed(42)
+```
+
+# The Wilcoxon Signed-Rank Test
+
+The Wilcoxon signed-rank test is a test for a centrality parameter (location). It is a nonparametric alternative to both the sign test and the parametric z-test/t-test, applicable to both single-sample and paired-sample problems.
+
+---
+
+## Review: Sign Test
+
+### Situation
+
+A sample of size $n$, $(x_1, x_2, \ldots, x_n)$, is drawn from an unknown distribution and we wish to test
+$$H_0: \theta = \theta_0 \quad \text{vs} \quad H_A: \theta \neq \theta_0 \quad \text{(two-sided, or one-sided)},$$
+where $\theta$ is the center (median) of the distribution.
+
+For the **sign test**, we count $S$, the number of positive values of $(x_1 - \theta_0, \ldots, x_n - \theta_0)$. We reject $H_0$ if $S$ is not close to $n/2$.
+
+### Steps of the Sign Test
+
+1. Compute $S$ = the number of observations greater than $\theta_0$.
+2. Let $s_\text{obs}$ be the observed value of $S$.
+3. Compute the p-value:
+   - One-sided: $P[S \geq s_\text{obs}]$
+   - Two-sided: $2 \times P[S \geq s_\text{obs}]$
+4. Conclude $H_A$ (reject $H_0$) if p-value $< 0.05$ (or $0.01$).
+
+In R: use `binom.test()` with $p = 1/2$ and $n$ = sample size. For large $n$, use the CLT approximation via `pnorm()`.
+
+### Drawback of the Sign Test
+
+The sign test **completely ignores the magnitudes** of the observations — only the signs of $(x_i - \theta_0)$ are used. This discards information in the data and can lead to **lack of power**.
+
+> **Power** $= 1 - P(\text{Type II error})$ = the ability to detect a departure from the null when $H_0$ is false.
+
+**Question:** How do we improve on the sign test?
+
+**Wilcoxon's answer:** Use the *ranks* of the observations (based on their absolute values), along with the sign.
+
+---
+
+## Wilcoxon Signed-Rank Test
+
+### Setup and Assumptions
+
+**Basic assumptions:**
+
+- $X_1, \ldots, X_n$ are independently and identically distributed, continuous, and **symmetric** about the common median $\theta$.
+- Test $H_0: \theta = \theta_0$ versus $H_a: \theta \neq \theta_0$, where $\theta_0$ is a prespecified hypothesized value.
+
+The Binomial (sign) test uses only the signs of the differences $D_i = X_i - \theta_0$. The Wilcoxon test uses both the signs *and* the ranks of $|D_i|$.
+
+### Constructing the Test Statistic
+
+**Step 1.** Define $D_i = X_i - \theta_0$ and rank the absolute values $|D_i|$.
+
+**Step 2.** Define $R_i$ as the rank of $|D_i|$ (rank 1 = smallest, rank $n$ = largest).
+
+**Step 3.** Define the indicator
+$$S_i = \begin{cases} 1 & \text{if } D_i > 0 \\ 0 & \text{otherwise.}\end{cases}$$
+
+**Step 4.** Define the **Wilcoxon signed-rank statistic**:
+$$SR^+ = \sum_{i=1}^{n} S_i R_i,$$
+the sum of ranks associated with positive differences.
+
+Similarly, $SR^-$ is the sum of ranks associated with negative differences.
+
+**Key identity:**
+$$SR^+ + SR^- = 1 + 2 + 3 + \cdots + n = \frac{n(n+1)}{2}$$
+so knowing one determines the other.
+
+### Behaviour Under $H_0$ and $H_A$
+
+- Under $H_0$: $SR^+ \approx SR^- \approx \dfrac{n(n+1)}{4}$, since each rank is equally likely to be positive or negative.
+- Under $H_A$: Either $SR^+$ will be large ($SR^-$ small), or $SR^+$ will be small ($SR^-$ large).
+
+**Rejection rules:**
+
+- Two-sided $H_a: \theta \neq \theta_0$: reject $H_0$ if $SR^+$ is either too large or too small.
+- Upper-tailed $H_a: \theta > \theta_0$: reject $H_0$ if $SR^+$ is too large.
+- Lower-tailed $H_a: \theta < \theta_0$: reject $H_0$ if $SR^+$ is too small.
+
+**Ties.** The continuity assumption implies no ties in theory, but in practice ties occur. When they do, replace ranks with **mid-ranks** of the tied observations. Discard any $D_i = 0$ and recalculate ranks on the remainder.
+
+---
+
+## Example: Hypnotic Susceptibility (Cooper et al., 1967)
+
+**Objective:** Test whether hypnotic susceptibility can be increased with training (paired replicate data).
+
+$H_0$: no change in hypnotic susceptibility vs. $H_A$: susceptibility can be increased (one-sided, upper).
+
+```{r}
+#| label: tbl-hypnosis
+#| tbl-cap: "Average Scores of Hypnotic Susceptibility (before and after training)."
+
+hypnosis <- data.frame(
+  Subject  = 1:6,
+  Before   = c(10.5, 19.5, 7.5, 4.0, 4.5, 2.0),
+  After    = c(18.5, 24.5, 11.0, 2.5, 5.5, 3.5)
+)
+hypnosis$D  <- hypnosis$After - hypnosis$Before
+hypnosis$R  <- rank(abs(hypnosis$D))
+hypnosis$S  <- as.integer(hypnosis$D > 0)
+knitr::kable(hypnosis, col.names = c("Subject", "$X_i$ (before)", "$Y_i$ (after)",
+                                      "$D_i = Y_i - X_i$", "$R_i$", "$S_i$"),
+             align = "crrrrr")
+```
+
+```{r}
+#| label: hypnosis-test
+
+D <- c(8, 5, 3.5, -1.5, 1, 1.5)
+SR_plus <- sum(rank(abs(D))[D > 0])
+cat("SR+ =", SR_plus, "\n")
+
+wilcox.test(D, alternative = "greater")
+```
+
+The `V = 18.5` reported by R is $SR^+$. Since the p-value $\approx 0.057 > 0.05$, we do not quite reject $H_0$ at the 5% level.
+
+---
+
+## Null Distribution of the Signed-Rank Statistic
+
+### Exact Null Distribution
+
+Under $H_0$, each sign attached to any rank is equally likely to be $+$ or $-$ (probability $1/2$ each), independently. For sample size $n$, there are $2^n$ equally probable sign assignments.
+
+### Example: $n = 4$
+
+With $n = 4$ there are $2^4 = 16$ equally probable sign assignments:
+
+```{r}
+#| label: tbl-null-dist-n4
+#| tbl-cap: "All $2^4 = 16$ sign assignments for $n = 4$, with $SR^+$, $SR^-$, and probability $1/16$."
+
+signs <- expand.grid(s1 = c(-1,1), s2 = c(-1,1),
+                     s3 = c(-1,1), s4 = c(-1,1))
+signs$SR_plus  <- apply(signs, 1, function(s) sum((1:4)[s > 0]))
+signs$SR_minus <- apply(signs, 1, function(s) sum((1:4)[s < 0]))
+signs$Prob <- "1/16"
+
+tab_display <- signs
+tab_display[,1:4] <- ifelse(signs[,1:4] > 0, "+", "-")
+knitr::kable(tab_display,
+             col.names = c("$s_1$","$s_2$","$s_3$","$s_4$",
+                           "$SR^+$","$SR^-$","Prob"),
+             align = "ccccccc")
+```
+
+### PMF and CDF of $SR^+$ for $n = 4$
+
+```{r}
+#| label: tbl-pmf-cdf-n4
+#| tbl-cap: "PMF and CDF of $SR^+$ for $n = 4$, verified against `psignrank()`."
+
+sr_vals <- 0:10
+pmf <- table(factor(signs$SR_plus, levels = sr_vals)) / 16
+cdf <- cumsum(pmf)
+
+dist_tab <- data.frame(
+  T     = sr_vals,
+  PMF   = as.numeric(pmf),
+  CDF   = as.numeric(cdf),
+  R_CDF = psignrank(sr_vals, n = 4)
+)
+knitr::kable(dist_tab,
+             col.names = c("$t$", "$P[T = t]$", "$P[T \\leq t]$ (manual)",
+                           "$P[T \\leq t]$ (`psignrank`)"),
+             digits = 4, align = "crrrr")
+```
+
+The CDF values match `psignrank(0:10, n = 4)` exactly. The size of the enumeration table grows as $2^n$, so for larger $n$ we use R or the normal approximation.
+
+```{r}
+#| label: fig-null-dist
+#| fig-cap: "PMF (left) and CDF (right) of $SR^+$ under $H_0$ for $n = 4$, computed by complete enumeration."
+#| fig-alt: "Left: bar chart showing the probability mass function of SR+ for n=4, symmetric around 5. Right: step function showing the CDF."
+#| fig-width: 8
+#| fig-height: 4
+
+par(mfrow = c(1, 2), mar = c(4.5, 4.5, 3, 1))
+
+barplot(pmf, names.arg = sr_vals,
+        xlab = expression(SR^"+"), ylab = "Probability",
+        main = expression("PMF of " * SR^"+" * ", n = 4"),
+        col = "#aec7e8", border = "white", las = 1)
+
+plot(sr_vals, cdf, type = "s", lwd = 2, col = "#1f77b4",
+     xlab = expression(SR^"+"), ylab = expression(P(SR^"+" <= t)),
+     main = expression("CDF of " * SR^"+" * ", n = 4"),
+     las = 1)
+points(sr_vals, cdf, pch = 16, col = "#1f77b4")
+
+par(mfrow = c(1, 1))
+```
+
+---
+
+## CLT Approximation for Large $n$
+
+For $n > 12$, the statistic $T$ ($W^+$ or $W^-$) is approximately normal:
+$$\mu_T = \frac{n(n+1)}{4}, \qquad \sigma_T = \sqrt{\frac{n(n+1)(2n+1)}{24}}.$$
+
+### Example: Cystic Fibrosis FVC Study
+
+**Context.** FVC (Forced Vital Capacity) = volume of air expelled from the lungs in 6 seconds; reduced over time in cystic fibrosis patients.
+
+**Research question:** Is the reduction in FVC less when a new experimental drug is administered?
+
+**Design.** Matched-pair design: pairs of patients matched on initial FVC. One receives the drug, one a placebo. Compute $x_i = \text{Reduction (placebo)} - \text{Reduction (drug)}$. Large $SR^+$ (small $SR^-$) supports the drug being effective.
+
+```{r}
+#| label: tbl-fvc
+#| tbl-cap: "Reduction in forced vital capacity (FVC) for a matched-pair sample of cystic fibrosis patients."
+
+fvc <- data.frame(
+  Subject     = 1:14,
+  Placebo     = c(224, 8, 75, 541, 74, 85, 293, -23, 525, -38, 508, 255, 525, 1023),
+  Drug        = c(213, 95, 33, 440, -32, -28, 445, -178, 367, 140, 323, 10, 65, 343)
+)
+fvc$xi    <- fvc$Placebo - fvc$Drug
+fvc$Rank  <- rank(abs(fvc$xi))
+fvc$SR_pos <- ifelse(fvc$xi > 0, fvc$Rank, NA)
+fvc$SR_neg <- ifelse(fvc$xi < 0, fvc$Rank, NA)
+
+knitr::kable(fvc,
+             col.names = c("Subject","Placebo","Drug","$x_i$","Rank","$SR^+$","$SR^-$"),
+             na.rm = FALSE, align = "crrrrrr")
+```
+
+```{r}
+#| label: fvc-clt
+
+n  <- 14
+SR_plus  <- sum(fvc$Rank[fvc$xi > 0])
+SR_minus <- sum(fvc$Rank[fvc$xi < 0])
+cat(sprintf("SR+ = %g,  SR- = %g\n", SR_plus, SR_minus))
+
+mu_T    <- n * (n + 1) / 4
+sigma_T <- sqrt(n * (n + 1) * (2*n + 1) / 24)
+cat(sprintf("Mean = n(n+1)/4 = %g\n", mu_T))
+cat(sprintf("SD   = sqrt(n(n+1)(2n+1)/24) = %.5f\n", sigma_T))
+
+# CLT p-value (using SR-)
+z_stat  <- (SR_minus - mu_T) / sigma_T
+p_clt   <- pnorm(z_stat)
+cat(sprintf("z = (SR- - mu)/sigma = (19 - %.1f) / %.5f = %.4f\n",
+            mu_T, sigma_T, z_stat))
+cat(sprintf("P-value (CLT) = P[Z <= %.4f] = %.4f\n", z_stat, p_clt))
+```
+
+Since the p-value $< 0.05$, we conclude the drug is effective in reducing the deterioration of FVC.
+
+```{r}
+#| label: fvc-exact
+
+# Exact test using R
+wilcox.test(fvc$xi, alternative = "greater")
+```
+
+---
+
+## Summary: Carrying Out the Wilcoxon Signed-Rank Test
+
+1. Compute $T = SR^+$ or $SR^-$ (often take the smaller of the two).
+2. Let $t_\text{obs}$ be the observed value of $T$.
+3. Compute the p-value:
+   - $P[T \leq t_\text{obs}]$ (one-tailed), or $2 P[T \leq t_\text{obs}]$ (two-tailed).
+4. For $n \leq 12$: use the exact distribution table or `psignrank()`.
+5. For $n > 12$: use the normal approximation above.
+6. In R (any sample size): `wilcox.test(x, alternative = "greater"/"less"/"two.sided")`.
+7. Conclude $H_A$ (reject $H_0$) if p-value $< 0.05$ (or $0.01$).
+
+---
+
+## Comparison of Tests
+
+```{r}
+#| label: tbl-comparison
+#| tbl-cap: "Assumptions and properties of the sign test, Wilcoxon signed-rank test, and t-test."
+
+comp <- data.frame(
+  Method = c("Sign test", "Wilcoxon signed-rank test", "t-test / z-test"),
+  Assumptions = c(
+    "i.i.d., any continuous distribution",
+    "i.i.d., continuous and **symmetric** distribution",
+    "i.i.d., **normal** distribution"
+  ),
+  Notes = c(
+    "Weakest assumption; ignores magnitude entirely",
+    "Uses ranks — more powerful than sign test when symmetry holds",
+    "Most powerful when normality holds (UMP test)"
+  )
+)
+knitr::kable(comp, align = "lll")
+```
+
+- The **sign test** has the weakest assumptions and is always valid for continuous data, but is the least powerful.
+- The **t-test** is most powerful under normality (uniformly most powerful for normal location families), but the Type I error rate may be distorted if normality fails.
+- The **Wilcoxon test** sits between them: more powerful than the sign test when symmetry holds; no normality required.
+
+> **How restrictive is symmetry?** Fairly restrictive. A serious violation invalidates the Wilcoxon signed-rank test, but the sign test remains valid. In practice, you must assess symmetry (e.g., via a Q-Q plot) before choosing.
+
+---
+
+## Handling Ties
+
+Real data almost always contain ties due to rounding or measurement limitations. The standard procedure is to use **mid-ranks**:
+
+```{r}
+#| label: ties-example
+
+# Sample with hypothesized median theta_0 = 3
+x      <- c(1, 1, 5, 5, 8, 8, 8)
+theta0 <- 3
+d      <- x - theta0
+cat("Differences d_i:", d, "\n")
+cat("Mid-ranks of |d_i|:", rank(abs(d)), "\n")
+```
+
+The differences $d_i = x_i - \theta_0$ are $-2, -2, 2, 2, 5, 5, 5$.
+
+- Ranks 1–4 are tied at $|d| = 2$ → mid-rank = 2.5
+- Ranks 5–7 are tied at $|d| = 5$ → mid-rank = 6
+
+```{r}
+#| label: ties-wilcox
+
+suppressWarnings(wilcox.test(x, mu = theta0, conf.int = TRUE))
+```
+
+R automatically applies mid-ranks and uses a continuity correction when ties are present.
+
+---
+
+## Univariate Example: Water Content Data
+
+```{r}
+#| label: water-example
+
+x2 <- c(5.6, 6.1, 6.3, 6.4, 6.5, 6.6, 7.0, 7.5, 7.9,
+        8.0, 8.0, 8.1, 8.1, 8.2, 8.4, 8.5, 8.7, 9.4, 14.3, 26.0)
+
+# Wilcoxon signed-rank test: H0: theta = 9 vs H1: theta > 9
+suppressWarnings(wilcox.test(x2, mu = 9, alternative = "greater", conf.int = TRUE))
+```
+
+```{r}
+#| label: water-alternatives
+
+# Sign test
+binom.test(sum(x2 > 9), n = length(x2), p = 0.5, alternative = "greater")
+
+# t-test
+t.test(x2, mu = 9, alternative = "greater")
+```
+
+Notice the discrepancy: the Wilcoxon and sign tests reject $H_0$, but the t-test does not (p-value $\approx 0.827$). This is because the data contain extreme outliers (14.3, 26.0) that inflate $s^2$ and render the t-test insensitive here — but violate the symmetry assumption needed for the Wilcoxon test too. The sign test, requiring only continuity, is the most defensible choice for this dataset.
+
+---
+
+# Quantiles and Q-Q Plots
+
+## Quantiles
+
+The **quantile** $Q(p)$ corresponding to probability $p \in (0,1)$ is defined as:
+$$Q(p) = F^{-1}(p) = \inf\{x : F(x) \geq p\}.$$
+
+- **Population (true) CDF:** $F(x) = P(X \leq x)$
+- **Empirical CDF:** $F_n(x) = \dfrac{\#\{X_i \leq x\}}{n}$
+
+$F_n$ is an estimator of $F$ (just as $\bar{X}$ estimates $\mu$). In fact, there is a stronger result: $\sup_x |F_n(x) - F(x)| \to 0$ uniformly (Glivenko–Cantelli theorem), and the scaled deviation $\sqrt{n}\sup_x |F_n(x) - F(x)|$ converges to the Kolmogorov distribution.
+
+```{r}
+#| label: fig-ecdf
+#| fig-cap: "Empirical CDF (step function) vs. true normal CDF (smooth curve) for $n = 20$ observations. The right panel shows the 90th percentile read off from the empirical CDF."
+#| fig-alt: "Two side-by-side plots. Left: step-function ECDF overlaid with smooth normal CDF. Right: same plot with a horizontal line at y=0.9 and a vertical red line indicating the empirical 90th percentile."
+#| fig-width: 9
+#| fig-height: 4.5
+
+set.seed(2025)
+n_ecdf <- 20
+x_samp <- rnorm(n_ecdf)
+Fn     <- ecdf(x_samp)
+x_grid <- seq(-3, 3, length.out = 300)
+
+par(mfrow = c(1, 2), mar = c(4.5, 4.5, 3, 1))
+
+# Left: ECDF vs true CDF
+plot(Fn, main = "Empirical and True Distribution",
+     xlab = "x", ylab = expression(F[n](x)),
+     col = "black", lwd = 1.5, las = 1,
+     xlim = c(-3, 3), do.points = TRUE, pch = 16, cex = 0.6)
+lines(x_grid, pnorm(x_grid), col = "#d62728", lwd = 1.5)
+abline(h = c(0, 1), lty = 2, col = "grey70")
+legend("topleft", legend = c("ECDF", "True CDF"),
+       col = c("black","#d62728"), lwd = 1.5, bty = "n", cex = 0.85)
+
+# Right: reading off the 90th percentile
+q90 <- quantile(x_samp, 0.9)
+plot(Fn, main = "Reading Off a Quantile",
+     xlab = "x", ylab = expression(F[n](x)),
+     col = "black", lwd = 1.5, las = 1,
+     xlim = c(-3, 3), do.points = TRUE, pch = 16, cex = 0.6)
+lines(x_grid, pnorm(x_grid), col = "#d62728", lwd = 1.5)
+abline(h = 0.9, lty = 1, col = "grey50")
+abline(v = q90, col = "#d62728", lwd = 1.5)
+abline(h = c(0, 1), lty = 2, col = "grey70")
+text(q90 + 0.1, 0.15, sprintf("Q(0.9) = %.2f", q90),
+     col = "#d62728", adj = 0, cex = 0.85)
+
+par(mfrow = c(1, 1))
+```
+
+In R: `qnorm()` for normal quantiles, `quantile()` for sample quantiles.
+
+---
+
+## Q-Q Plots
+
+For a sample $x_1, \ldots, x_n$, a **Q-Q plot** computes sample quantiles and plots them against either:
+
+(a) **theoretical quantiles** of a hypothesized distribution, or
+(b) **quantiles of a second sample**.
+
+If the points lie approximately along the diagonal ($y = x$ line), this is consistent with the sample following the hypothesized distribution, or the two samples coming from the same distribution.
+
+```{r}
+#| label: fig-qqplots
+#| fig-cap: "Three Q-Q plots. Left: 100 samples from $\\mathcal{N}(0,1)$ plotted against theoretical normal quantiles — near-perfect diagonal. Centre: two independent samples from $\\mathcal{N}(0,1)$ plotted against each other — also near-diagonal. Right: one sample from $\\mathcal{N}(0,1)$ vs one from a Cauchy distribution — heavy tails cause extreme deviations from the diagonal."
+#| fig-alt: "Three Q-Q scatter plots side by side. Left panel shows points tightly following the diagonal reference line. Middle panel similarly follows the diagonal. Right panel shows severe S-shaped deviation from the diagonal, indicating heavy-tailed Cauchy data compared to normal."
+#| fig-width: 10
+#| fig-height: 4
+
+set.seed(101)
+n_qq <- 100
+s1   <- rnorm(n_qq)
+s2   <- rnorm(n_qq)
+s3   <- rcauchy(n_qq)
+
+par(mfrow = c(1, 3), mar = c(4.5, 4.5, 3.5, 1))
+
+# Plot 1: normal sample vs theoretical normal quantiles
+qqnorm(s1, main = "Normal Q-Q Plot",
+       xlab = "Theoretical Quantiles", ylab = "Sample Quantiles",
+       pch = 1, cex = 0.7)
+qqline(s1, col = "#d62728", lwd = 1.5)
+
+# Plot 2: two N(0,1) samples
+qqplot(s1, s2,
+       main = "Two-sample Q-Q Plot\n(both N(0,1))",
+       xlab = "Sample 1 Quantiles", ylab = "Sample 2 Quantiles",
+       pch = 1, cex = 0.7, col = "#1f77b4")
+abline(0, 1, col = "#d62728", lwd = 1.5)
+
+# Plot 3: N(0,1) vs Cauchy
+qqplot(s1, s3,
+       main = "Two-sample Q-Q Plot\n(N(0,1) vs Cauchy)",
+       xlab = "Sample 1 Quantiles (Normal)", ylab = "Sample 2 Quantiles (Cauchy)",
+       pch = 1, cex = 0.7, col = "#1f77b4")
+abline(0, 1, col = "#d62728", lwd = 1.5)
+
+par(mfrow = c(1, 1))
+```
+
+Note the pronounced deviation in the right panel: the Cauchy distribution is notoriously heavy-tailed, so its quantiles diverge sharply from the normal reference line.
+
+> See also: [Wikipedia — Normality test](https://en.wikipedia.org/wiki/Normality_test)
+
+---
+
+## Next: Goodness-of-Fit Tests
+
+Q-Q plots are a visual tool. The next module covers formal **goodness-of-fit tests** — how to test whether your data follow a given distribution (both discrete and continuous cases).
