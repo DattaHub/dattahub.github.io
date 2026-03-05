@@ -1,0 +1,14 @@
+ggplot2
+dplyr
+tidyr
+patchwork
+ggrepel
+sjPlot
+gt
+sf
+terra
+geodata
+readr
+stringr
+readxl
+scales
