@@ -3,133 +3,337 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Jyotishka Datta</title>
-  <meta name="description" content="Personal academic site." />
+  <title>Jyotishka Datta — Statistics, Virginia Tech</title>
+  <meta name="description" content="Associate Professor of Statistics at Virginia Tech. Bayesian methods, shrinkage priors, high-dimensional inference." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bg:#0f172a; /* slate-900 */
-      --panel:#111827; /* gray-900 */
-      --text:#e5e7eb; /* gray-200 */
-      --muted:#94a3b8; /* slate-400 */
-      --accent:#38bdf8; /* sky-400 */
-      --chip:#1f2937; /* gray-800 */
+    :root {
+      --bg: #f5f2ec;
+      --surface: #edeae3;
+      --border: #d8d3c8;
+      --text: #1c1a17;
+      --muted: #7a7469;
+      --accent: #5c3d1e;
+      --accent2: #8b5e3c;
+      --link: #3d5a80;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,var(--bg),#0b1224 60%);color:var(--text);}
-    a{color:var(--accent);text-decoration:none}
-    a:hover{text-decoration:underline}
-    .wrap{max-width:1000px;margin:0 auto;padding:24px}
-    header{display:flex;gap:24px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-    .brand{display:flex;align-items:center;gap:12px}
-    .logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#38bdf8,#22c55e);display:grid;place-items:center;font-weight:800}
-    nav{display:flex;gap:16px;flex-wrap:wrap}
-    nav a{padding:8px 12px;border-radius:999px;background:var(--chip);}
-    .hero{margin:48px 0;padding:32px;border:1px solid #2a374f;background:linear-gradient(180deg,#0e162d,#0b1527);border-radius:20px}
-    .hero h1{margin:0 0 8px 0;font-size:clamp(28px,5vw,44px)}
-    .hero p{margin:6px 0;color:var(--muted)}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
-    .card{border:1px solid #293651;background:linear-gradient(180deg,#0f1a33,#0c162b);padding:18px;border-radius:16px}
-    .card h3{margin:0 0 8px 0;font-size:18px}
-    .list{padding:0;margin:0;list-style:none}
-    .list li{padding:8px 0;border-top:1px dashed #24314a}
-    footer{margin:48px 0;color:var(--muted);font-size:14px}
-    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:#0a1224;border:1px solid #22304a;padding:2px 6px;border-radius:6px}
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: 18px;
+      line-height: 1.75;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    a { color: var(--link); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.15s; }
+    a:hover { border-bottom-color: var(--link); }
+
+    .page { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+    /* Nav */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+    }
+    nav .inner {
+      max-width: 860px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    .nav-name { font-size: 14px; letter-spacing: 0.03em; font-family: 'DM Mono', monospace; color: var(--muted); }
+    .nav-links { display: flex; }
+    .nav-links a {
+      font-family: 'DM Mono', monospace; font-size: 13px;
+      color: var(--muted); padding: 4px 14px; border-bottom: none;
+      border-right: 1px solid var(--border); transition: color 0.15s;
+    }
+    .nav-links a:first-child { border-left: 1px solid var(--border); }
+    .nav-links a:hover { color: var(--accent); }
+
+    /* Hero */
+    .hero { padding: 72px 0 56px; border-bottom: 1px solid var(--border); }
+    .hero-tag {
+      font-family: 'DM Mono', monospace; font-size: 12px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--accent2); margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(36px, 6vw, 58px);
+      font-weight: 500; line-height: 1.15;
+      letter-spacing: -0.01em; margin-bottom: 20px;
+    }
+    .hero-sub { font-size: 19px; color: var(--muted); max-width: 560px; font-style: italic; }
+    .hero-links { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 10px; }
+    .pill {
+      display: inline-flex; align-items: center;
+      font-family: 'DM Mono', monospace; font-size: 13px;
+      padding: 6px 14px; border-radius: 2px;
+      border: 1px solid var(--border);
+      color: var(--muted); background: var(--surface);
+      transition: border-color 0.15s, color 0.15s;
+      text-decoration: none; border-bottom: 1px solid var(--border);
+    }
+    .pill:hover { border-color: var(--accent2); color: var(--accent); }
+
+    /* Sections */
+    section { padding: 56px 0; border-bottom: 1px solid var(--border); }
+    section:last-of-type { border-bottom: none; }
+    .section-label {
+      font-family: 'DM Mono', monospace; font-size: 11px;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--accent2); margin-bottom: 28px;
+    }
+    h2 { font-size: 26px; font-weight: 500; margin-bottom: 16px; }
+    p + p { margin-top: 14px; }
+
+    /* Two column */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+    @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; gap: 32px; } }
+
+    /* Publication lists */
+    .pub-list { list-style: none; }
+    .pub-list li { padding: 13px 0; border-top: 1px solid var(--border); font-size: 17px; line-height: 1.6; }
+    .pub-list li:last-child { border-bottom: 1px solid var(--border); }
+    .pub-venue {
+      font-family: 'DM Mono', monospace; font-size: 12px;
+      color: var(--accent2); display: block; margin-top: 3px;
+    }
+
+    /* Awards */
+    .award-list { list-style: none; }
+    .award-list li {
+      padding: 11px 0; border-top: 1px solid var(--border);
+      font-size: 17px; display: flex; gap: 18px; align-items: baseline;
+    }
+    .award-list li:last-child { border-bottom: 1px solid var(--border); }
+    .award-year { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); flex-shrink: 0; min-width: 38px; }
+
+    /* Education */
+    .edu-list { list-style: none; }
+    .edu-list li { padding: 12px 0; border-top: 1px solid var(--border); font-size: 17px; }
+    .edu-list li:last-child { border-bottom: 1px solid var(--border); }
+    .edu-where { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); margin-top: 3px; display: block; }
+
+    /* Courses */
+    .course-list { list-style: none; }
+    .course-list li {
+      padding: 9px 0; border-top: 1px solid var(--border);
+      font-size: 17px; display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap;
+    }
+    .course-list li:last-child { border-bottom: 1px solid var(--border); }
+    .course-code { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent2); flex-shrink: 0; min-width: 110px; }
+    .course-term { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); margin-left: auto; }
+
+    /* Contact */
+    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+    @media (max-width: 500px) { .contact-grid { grid-template-columns: 1fr; } }
+    .contact-item { font-size: 17px; }
+    .contact-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+
+    /* Note */
+    .note { background: var(--surface); border-left: 3px solid var(--border); padding: 16px 20px; font-size: 16px; color: var(--muted); margin-top: 28px; line-height: 1.6; }
+
+    /* Hero photo */
+    .hero-top { display: flex; gap: 36px; align-items: flex-start; }
+    .hero-photo {
+      width: 140px; height: 140px;
+      border-radius: 4px;
+      object-fit: cover; object-position: center top;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    @media (max-width: 500px) { .hero-top { flex-direction: column; } }
+
+    /* Footer */
+    footer { padding: 32px 0; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); letter-spacing: 0.04em; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="brand">
-        <div class="logo">JD</div>
+
+  <nav>
+    <div class="inner">
+      <span class="nav-name">jyotishka datta</span>
+      <div class="nav-links">
+        <a href="#about">About</a>
+        <a href="#research">Research</a>
+        <a href="#teaching">Teaching</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page">
+
+    <header class="hero">
+      <p class="hero-tag">Associate Professor · Statistics · Virginia Tech</p>
+      <div class="hero-top">
+        <img src="jd_cafe.jpg" alt="Jyotishka Datta" class="hero-photo" />
         <div>
-          <strong>Jyotishka Datta</strong><br />
-          <span style="color:var(--muted)">Statistics • Research • Teaching</span>
+          <h1>Jyotishka Datta</h1>
+          <p class="hero-sub">Bayesian methodology and theory for structured high-dimensional data — shrinkage, sparsity, and their applications.</p>
         </div>
       </div>
-      <nav>
-        <a href="index.html">Home</a>
-        <a href="https://jyotishkadatta.wordpress.com/" target="_blank" rel="noopener">Personal website ↗</a>
-        <a href="https://www.stat.vt.edu/people/stat-faculty/datta-jyotishka.html" target="_blank" rel="noopener">Departmental profile↗</a>
-        <a href="index.html#contact">Contact</a>
-      </nav>
+      <div class="hero-links">
+        <a class="pill" href="https://scholar.google.com/citations?user=_wA03WkAAAAJ&hl=en" target="_blank" rel="noopener">Google Scholar ↗</a>
+        <a class="pill" href="https://github.com/DattaHub" target="_blank" rel="noopener">GitHub ↗</a>
+        <a class="pill" href="https://jyotishkadatta.wordpress.com/wp-content/uploads/2025/09/jyotishka_datta_cv_sept2025_vt.pdf" target="_blank" rel="noopener">CV (Sept 2025) ↗</a>
+        <a class="pill" href="https://www.stat.vt.edu/people/stat-faculty/datta-jyotishka.html" target="_blank" rel="noopener">VT profile ↗</a>
+        <a class="pill" href="/cdn-cgi/l/email-protection#cba1b2a4bfa2b8a3a0aa8bbdbfe5aeafbe"><span class="__cf_email__" data-cfemail="63091a0c170a100b08022315174d060716">[email&#160;protected]</span></a>
+      </div>
     </header>
 
-    <section class="hero">
-      <h1>Hello — I’m Jyotishka.</h1>
-      <p>Associate Professor of Statistics at Virginia Tech. I work on Bayesian methods (shrinkage priors, high-dimensional inference) and their applications.</p>
-      <p style="margin-top:12px">I do not maintain this webpage as frequently as I should. Google scholar is the best source of my papers, and for everything else, email me.</p>
-    </section>
-
-    <section id="about" class="grid" aria-label="About and Quick links">
-      <div class="card">
-        <h3>About</h3>
-        <p>Brief bio: Jyotishka Datta is an Associate Professor of Statistics at Virginia Tech, 
-          where he previously served as an Assistant Professor. 
-          From 2016 to 2020, he was an Assistant Professor in the Department of Mathematical 
-          Sciences at the University of Arkansas, Fayetteville. His research focuses on Bayesian 
-          methodology and theory for structured high-dimensional data, including shrinkage estimation, 
-          sparse signal recovery, graphical modeling, and nonparametric Bayes. His work spans applications
-           in astronomy, cancer genomics, neuroscience, ecology, and crime forecasting. 
-           He received the NSF CAREER Award in 2025 and the Dayanand Naik Award from the Virginia Chapter 
-           of the American Statistical Association in 2023.</p>
-      </div>
-      <div class="card">
-        <h3>Quick links</h3>
-        <ul class="list">
-          <li><a href="https://github.com/DattaHub" target="_blank" rel="noopener">GitHub</a></li>
-          <li><a href="https://scholar.google.com/citations?view_op=list_works&hl=en&hl=en&user=_wA03WkAAAAJ" target="_blank" rel="noopener">Google Scholar</a></li>
-          <li><a href="https://jyotishkadatta.wordpress.com/wp-content/uploads/2025/09/jyotishka_datta_cv_sept2025_vt.pdf" target="_blank" rel="noopener">CV (PDF)</a> <span style="color:var(--muted)">— Updated September 2025</span></li>
-          <li><a href="mailto:jyotishka@vt.edu">jyotishka@vt.edu</a> <span style="color:var(--muted)"></span></li>
-        </ul>
-      </div>
-    </section>
-
-    <section id="research" style="margin-top:28px" class="grid">
-      <div class="card">
-        <h3>Currently under review</h3>
-        <ul class="list">
-          <li></li>
-          <li>Polynomial Log-Marginals and Tweedie's Formula: When Is Bayes Possible?</li>
-          <li>Prediction-powered inference with inverse probability weighting</li>
-          <li>Bayesian ICA with super-Gaussian Source Priors</li>
-          <li>The Curious Problem of the Normal Inverse Mean: Robustness and Shrinkage</li>
-          <li>Inverse Probability Weighting: from Survey Sampling to Evidence Estimation</li>
-        </ul>
-      </div>
-      <div class="card">
-        <h3>Selected publications</h3>
-        <ul class="list">
-          <li>Asymptotic Properties of Bayes Risk for the Horseshoe Prior <a href="https://projecteuclid.org/journals/bayesian-analysis/volume-8/issue-1/Asymptotic-Properties-of-Bayes-Risk-for-the-Horseshoe-Prior/10.1214/13-BA805.full">Bayesian Analysis</a></li>
-          <li>Bayesian inference on quasi-sparse count data <a href="https://academic.oup.com/biomet/article-abstract/103/4/971/2659041">Biometrika</a></li>
-          <li>Default Bayesian analysis with global-local shrinkage priors <a href="https://academic.oup.com/biomet/article-abstract/103/4/955/2659031">Biometrika</a></li>
-          <li>Lasso meets horseshoe <a href="https://www.jstor.org/stable/26874188">Statistical Science</a></li>
-          <li>Group Inverse-Gamma Gamma Shrinkage for Sparse Linear Models with Block-Correlated Regressors <a href="https://projecteuclid.org/journals/bayesian-analysis/volume-19/issue-3/Group-Inverse-Gamma-Gamma-Shrinkage-for-Sparse-Linear-Models-with/10.1214/23-BA1371.full">Bayesian Analysis</a></li>
-        </ul>
+    <!-- About -->
+    <section id="about">
+      <p class="section-label">About</p>
+      <div class="two-col">
+        <div>
+          <p>I am an Associate Professor of Statistics at Virginia Tech (previously Assistant Professor here, and at the University of Arkansas, Fayetteville, 2016–2020). My research focuses on <strong>Bayesian methodology and theory for structured high-dimensional data</strong>: shrinkage estimation, sparse signal recovery, graphical modelling, and nonparametric Bayes.</p>
+          <p>Application domains include astronomy, cancer genomics, neuroscience, ecology, and crime forecasting.</p>
+          <p>I received the <strong>NSF CAREER Award</strong> in 2025 (DMS-2443282) and the <strong>Dayanand Naik Award</strong> from the Virginia Chapter of the ASA in 2023.</p>
+          <p style="margin-top:18px;font-style:italic;color:var(--muted)">I don't maintain this page as frequently as I should. Google Scholar is the best source for my papers; for everything else, email me.</p>
+        </div>
+        <div>
+          <p class="section-label" style="margin-bottom:14px">Professional preparation</p>
+          <ul class="edu-list">
+            <li>
+              Postdoctoral Fellow
+              <span class="edu-where">Duke University (Statistics) &amp; SAMSI · 2014–2016<br>Mentors: David B. Dunson &amp; Sandeep S. Dave</span>
+            </li>
+            <li>
+              Ph.D. in Statistics
+              <span class="edu-where">Purdue University · 2009–2014<br>Advisors: Jayanta K. Ghosh &amp; Michael Yu Zhu</span>
+            </li>
+            <li>
+              B.Stat &amp; M.Stat
+              <span class="edu-where">Indian Statistical Institute · 2003–2008</span>
+            </li>
+          </ul>
+        </div>
       </div>
     </section>
 
-    <section id="teaching" style="margin-top:28px" class="grid">
-      <div class="card">
-        <h3>Teaching</h3>
-        <ul class="list">
-          <li>STAT 3504: Nonparametric Statistics (Fall 2025)</li>
-          <li>CMDA 2006: Integrated Quantitative Sciences - II (Spring 2026)</li>
-          <li> Past teaching: STAT 4504/5504G (Applied Multivariate), CMDA 4654 (Intermediate Data Analytics and ML), CMDA 2014 (Data Matter), Stat 5525 (Data Analytics)</li>
-        </ul>
+    <!-- Research -->
+    <section id="research">
+      <p class="section-label">Research &amp; Publications</p>
+      <p style="color:var(--muted);font-size:17px;margin-bottom:36px">For a complete and up-to-date list see <a href="https://scholar.google.com/citations?user=_wA03WkAAAAJ&hl=en">Google Scholar</a> or my <a href="https://jyotishkadatta.wordpress.com/wp-content/uploads/2025/09/jyotishka_datta_cv_sept2025_vt.pdf">CV</a>. Papers co-authored with Prof. Nick Polson carry an alphabetical author list.</p>
+
+      <div class="two-col" style="margin-bottom:48px">
+        <div>
+          <h2>Under review</h2>
+          <ul class="pub-list">
+            <li>
+              Polynomial Log-Marginals and Tweedie's Formula: When Is Bayes Possible?
+              <a href="https://arxiv.org/abs/2509.05823" class="pub-venue">arXiv:2509.05823</a>
+            </li>
+            <li>
+              Prediction-Powered Inference with Inverse Probability Weighting
+              <a href="https://arxiv.org/abs/2508.10149" class="pub-venue">arXiv:2508.10149</a>
+            </li>
+            <li>
+              Horseshoe-type Priors for Independent Component Estimation
+              <a href="https://arxiv.org/abs/2406.17058" class="pub-venue">arXiv:2406.17058</a>
+            </li>
+            <li>
+              The Curious Problem of the Normal Inverse Mean: Robustness and Shrinkage
+              <a href="https://arxiv.org/abs/2410.20641" class="pub-venue">arXiv:2410.20641</a>
+            </li>
+            <li>
+              Inverse Probability Weighting: from Survey Sampling to Evidence Estimation
+              <a href="https://arxiv.org/abs/2204.14121" class="pub-venue">arXiv:2204.14121 · minor revision, NEJSDS</a>
+            </li>
+            <li>
+              On Posterior Consistency of Bayesian Changepoint Models (with N. Guha)
+              <a href="https://arxiv.org/abs/2102.12938" class="pub-venue">arXiv:2102.12938</a>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h2>Selected publications</h2>
+          <ul class="pub-list">
+            <li>Asymptotic Properties of Bayes Risk for the Horseshoe Prior
+              <a href="https://projecteuclid.org/journals/bayesian-analysis/volume-8/issue-1/Asymptotic-Properties-of-Bayes-Risk-for-the-Horseshoe-Prior/10.1214/13-BA805.full" class="pub-venue">Bayesian Analysis, 2013</a>
+            </li>
+            <li>Bayesian Inference on Quasi-Sparse Count Data
+              <a href="https://academic.oup.com/biomet/article-abstract/103/4/971/2659041" class="pub-venue">Biometrika, 2016</a>
+            </li>
+            <li>Default Bayesian Analysis with Global-Local Shrinkage Priors
+              <a href="https://academic.oup.com/biomet/article-abstract/103/4/955/2659031" class="pub-venue">Biometrika, 2016</a>
+            </li>
+            <li>Lasso Meets Horseshoe
+              <a href="https://www.jstor.org/stable/26874188" class="pub-venue">Statistical Science, 2019</a>
+            </li>
+            <li>Prediction Risk for Global-Local Shrinkage Regression
+              <a href="http://www.jmlr.org/papers/v20/18-321.html" class="pub-venue">JMLR, 2019</a>
+            </li>
+            <li>Group Inverse-Gamma Gamma Shrinkage for Sparse Linear Models
+              <a href="https://projecteuclid.org/journals/bayesian-analysis/volume-19/issue-3/Group-Inverse-Gamma-Gamma-Shrinkage-for-Sparse-Linear-Models-with/10.1214/23-BA1371.full" class="pub-venue">Bayesian Analysis, 2024</a>
+            </li>
+            <li>Evidence Estimation in Gaussian Graphical Models
+              <a href="https://jmlr.org/papers/v25/23-0254.html" class="pub-venue">JMLR, 2024</a>
+            </li>
+            <li>Nonparametric Bayes Multiresolution Testing for Massive-Dimensional Rare Events
+              <a href="https://doi.org/10.1080/10485252.2024.2309978" class="pub-venue">Journal of Nonparametric Statistics, 2024</a>
+            </li>
+          </ul>
+        </div>
       </div>
-      <div class="card" id="contact">
-        <h3>Contact</h3>
-        <p>Department of Statistics, Virginia Tech.<br>Blacksburg, VA.</p>
+
+      <h2 style="margin-bottom:16px">Awards &amp; Funding</h2>
+      <ul class="award-list">
+        <li><span class="award-year">2025</span><span><strong>NSF CAREER Award</strong> — "Heavy-Tailed Priors for Robust Bayesian Inference in Ecology, Machine Learning, and Astronomy." DMS-2443282 · $450,000 (2025–2030). <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2443282">nsf.gov ↗</a></span></li>
+        <li><span class="award-year">2023</span><span><strong>Dayanand Naik Award</strong> — Virginia Chapter of the American Statistical Association, for outstanding research and service to Virginia.</span></li>
+        <li><span class="award-year">2020</span><span>NSF-DMS 2015460 (Co-PI with N. Guha) — "New Directions in Bayesian Change-Point Analysis." $139,984 (2020–2023).</span></li>
+        <li><span class="award-year">2018</span><span><strong>Robert and Sandra Connor Endowed Faculty Fellowship</strong>, University of Arkansas.</span></li>
+        <li><span class="award-year">2013</span><span><strong>Honorable Mention, Best Theoretical Poster</strong> — O'Bayes 2013, Durham, NC.</span></li>
+        <li><span class="award-year">2013</span><span><strong>William J. Studden Publication Award</strong> — Department of Statistics, Purdue University.</span></li>
+      </ul>
+
+      <div class="note">
+        <strong>Prospective PhD students:</strong> Admissions to the Statistics PhD programme at Virginia Tech are decided solely by the departmental admissions committee — there is no direct admission to my group. If you are interested, please apply via the <a href="https://www.stat.vt.edu/academics/graduate.html">official portal</a> and note the research fit in your statement of purpose. I am not able to pre-evaluate applications or comment on admission chances; please consult the programme website or the graduate coordinator.
       </div>
     </section>
 
-    <footer>
-      <div>© <span id="y"></span> Jyotishka Datta • Built with GitHub Pages</div>
-    </footer>
-  </div>
-  <script>document.getElementById('y').textContent=new Date().getFullYear()</script>
-</body>
+    <!-- Teaching -->
+    <section id="teaching">
+      <p class="section-label">Teaching</p>
+      <ul class="course-list">
+        <li><span class="course-code">STAT 3504</span> Nonparametric Statistics <span class="course-term">Fall 2025</span></li>
+        <li><span class="course-code">CMDA 2006</span> Integrated Quantitative Sciences II <span class="course-term">Spring 2026</span></li>
+        <li><span class="course-code">STAT 4504/5504G</span> Applied Multivariate Statistics</li>
+        <li><span class="course-code">CMDA 4654</span> Intermediate Data Analytics &amp; Machine Learning</li>
+        <li><span class="course-code">STAT 5525</span> Data Analytics</li>
+        <li><span class="course-code">CMDA 2014</span> Data Matters</li>
+      </ul>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact">
+      <p class="section-label">Contact</p>
+      <div class="contact-grid">
+        <div class="contact-item">
+          <p class="contact-label">Email</p>
+          <a href="/cdn-cgi/l/email-protection#53392a3c273a203b38321325277d363726"><span class="__cf_email__" data-cfemail="066c7f69726f756e6d6746707228636273">[email&#160;protected]</span></a>
+        </div>
+        <div class="contact-item">
+          <p class="contact-label">Address</p>
+          Department of Statistics<br>Virginia Tech, Blacksburg, VA
+        </div>
+        <div class="contact-item">
+          <p class="contact-label">Online</p>
+          <a href="https://jyotishkadatta.wordpress.com/" target="_blank" rel="noopener">Personal website ↗</a><br>
+          <a href="https://www.stat.vt.edu/people/stat-faculty/datta-jyotishka.html" target="_blank" rel="noopener">Departmental profile ↗</a>
+        </div>
+        <div class="contact-item">
+          <p class="contact-label">Profiles</p>
+          <a href="https://scholar.google.com/citations?user=_wA03WkAAAAJ&hl=en" target="_blank" rel="noopener">Google Scholar ↗</a><br>
+          <a href="https://github.com/DattaHub" target="_blank" rel="noopener">GitHub ↗</a><br>
+          <a href="http://www.genealogy.ams.org/id.php?id=187566" target="_blank" rel="noopener">Mathematical Genealogy ↗</a>
+        </div>
+      </div>
