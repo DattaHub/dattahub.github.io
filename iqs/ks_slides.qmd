@@ -1,0 +1,672 @@
+---
+title: "Order Statistics, Ranks & Goodness-of-Fit Tests"
+subtitle: "From Empirical CDFs to the Kolmogorov–Smirnov Test"
+author: "Jyotishka Datta"
+institute: "Virginia Tech"
+date: today
+format:
+  revealjs:
+    slide-number: true
+    progress: true
+    chalkboard: true
+    code-fold: false
+    code-line-numbers: true
+    highlight-style: github
+    fig-align: center
+    smaller: true
+    scrollable: false
+    incremental: false
+    html-math-method: mathjax
+    transition: slide
+    background-transition: fade
+    footer: "STAT — Virginia Tech | Jyotishka Datta"
+    logo: "vt.png"
+execute:
+  echo: true
+  warning: false
+  message: false
+  fig-width: 7
+  fig-height: 4
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.align = "center")
+```
+
+# Part 1: Order Statistics {background-color="#861F41"}
+
+## What Are Order Statistics?
+
+Given a random sample $X_1, X_2, \ldots, X_n$, the **order statistics** are the sample values arranged in non-decreasing order:
+
+$$X_{(1)} \leq X_{(2)} \leq \cdots \leq X_{(n)}$$
+
+- $X_{(1)}$ = **sample minimum**
+- $X_{(n)}$ = **sample maximum**
+- $X_{(i)}$ = $i^{\text{th}}$ smallest value
+
+::: {.callout-important}
+Order statistics are **random quantities** — their distribution depends on the parent distribution $F$.
+:::
+
+## Familiar Statistics Built From Order Statistics
+
+- **Sample median:**
+$$M = \begin{cases} X_{\left(\frac{n+1}{2}\right)} & n \text{ odd} \\[4pt] \frac{1}{2}\!\left(X_{\left(\frac{n}{2}\right)} + X_{\left(\frac{n}{2}+1\right)}\right) & n \text{ even} \end{cases}$$
+
+- **Sample range:** $X_{(n)} - X_{(1)}$ — measures spread
+
+- **Sample midrange:** $\frac{X_{(n)} + X_{(1)}}{2}$ — alternative center
+
+## Distribution of the Maximum
+
+Let $X_1, \ldots, X_n \overset{\text{iid}}{\sim} F$ (continuous). Let $G$ be the CDF of $X_{(n)}$.
+
+The maximum is $\leq t$ iff **every** observation is $\leq t$:
+
+$$G(t) = P(X_{(n)} \leq t) = \prod_{i=1}^{n} P(X_i \leq t) = F^n(t)$$
+
+Differentiating:
+
+$$\boxed{g(t) = n\, F^{n-1}(t)\, f(t)}$$
+
+## Distribution of the Minimum
+
+The minimum is $\geq t$ iff **every** observation is $\geq t$:
+
+$$H(t) = P(X_{(1)} \leq t) = 1 - (1 - F(t))^n$$
+
+Differentiating:
+
+$$\boxed{h(t) = n\,(1-F(t))^{n-1}\, f(t)}$$
+
+## General $r^{\text{th}}$ Order Statistic
+
+$$\boxed{f_{X_{(r)}}(x) = \frac{n!}{(r-1)!\,(n-r)!}\, F^{r-1}(x)\,(1-F(x))^{n-r}\, f(x)}$$
+
+**Memory aid:** Think of it as a multinomial:
+
+- $(r-1)$ observations **below** $x$: probability $F^{r-1}(x)$
+- **1** observation **at** $x$: probability $f(x)\,dx$
+- $(n-r)$ observations **above** $x$: probability $(1-F(x))^{n-r}$
+
+::: {.callout-tip}
+When $F = \text{Uniform}(0,1)$, this simplifies to a **Beta$(r,\, n-r+1)$** density.  
+This fact is the key to the KS distribution-free property!
+:::
+
+## Simulating Order Statistic Distributions
+
+```{r order-stat-demo}
+#| fig-height: 3.5
+#| code-fold: true
+set.seed(42); n <- 10; B <- 50000
+sims <- replicate(B, sort(runif(n)))
+
+par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+hist(sims[1,],  breaks=50, freq=FALSE, col="#861F4155", border="white",
+     main=expression(X[(1)]), xlab="x")
+curve(dbeta(x,1,n), add=TRUE, col="#E5751F", lwd=2)
+
+hist(sims[5,],  breaks=50, freq=FALSE, col="#861F4155", border="white",
+     main=expression(X[(5)]), xlab="x")
+curve(dbeta(x,5,6), add=TRUE, col="#E5751F", lwd=2)
+
+hist(sims[10,], breaks=50, freq=FALSE, col="#861F4155", border="white",
+     main=expression(X[(10)]), xlab="x")
+curve(dbeta(x,n,1), add=TRUE, col="#E5751F", lwd=2)
+par(mfrow=c(1,1))
+```
+
+Red curves: theoretical Beta densities. Histograms: simulation.
+
+# Part 2: Ranks {background-color="#861F41"}
+
+## Ranks — Definition
+
+The **rank** of $X_i$ in a sample $X_1, \ldots, X_n$ is the number of observations $\leq X_i$:
+
+$$\text{rank}(X_i) = n \times S_n(X_i) = \sum_{j=1}^{n} \mathbf{1}(X_j \leq X_i)$$
+
+**Key facts:**
+- Ranks are integers in $\{1, 2, \ldots, n\}$
+- The $r^{\text{th}}$ order statistic has rank $r$: $\;\text{rank}(X_{(r)}) = r$
+- Ties → use **mid-ranks** (average of tied positions)
+
+::: {.callout-note}
+Ranks discard the actual values — only relative ordering is retained.  
+This is the foundation of **nonparametric statistics**.
+:::
+
+## Two-Sample Ranks
+
+With $m$ observations $X_1,\ldots,X_m$ (group 1) and $n$ observations $Y_1,\ldots,Y_n$ (group 2), define ranks in the **combined sample** of $m+n$:
+
+$$\text{rank}(Y_{(j)}) = \underbrace{\sum_{i=1}^{m} \mathbf{1}(X_i \leq Y_{(j)})}_{\text{how many } X\text{'s are} \leq Y_{(j)}} + \underbrace{j}_{\text{how many } Y\text{'s are} \leq Y_{(j)}}$$
+
+This structure underlies the **Wilcoxon rank-sum test** and related two-sample procedures.
+
+# Part 3: The Empirical CDF {background-color="#861F41"}
+
+## Empirical Distribution Function (EDF)
+
+Given i.i.d. $X_1, \ldots, X_n \sim F_X$, the **EDF** is:
+
+$$S_n(x) = \frac{1}{n}\sum_{i=1}^{n} \mathbf{1}(X_i \leq x)$$
+
+In terms of order statistics:
+
+$$S_n(x) = \begin{cases} 0 & x < X_{(1)} \\ i/n & X_{(i)} \leq x < X_{(i+1)} \\ 1 & x \geq X_{(n)} \end{cases}$$
+
+A **right-continuous step function** with jumps of $1/n$ at each observation.
+
+## Statistical Properties of the EDF
+
+For each fixed $x$, $\;T_n(x) = nS_n(x) \sim \text{Binomial}(n,\, F_X(x))$.
+
+Therefore:
+
+$$E[S_n(x)] = F_X(x) \qquad \text{(unbiasedness)}$$
+
+$$\text{Var}[S_n(x)] = \frac{F_X(x)(1-F_X(x))}{n} \qquad \text{(consistency)}$$
+
+As $n \to \infty$, $S_n(x) \xrightarrow{p} F_X(x)$ for each fixed $x$.
+
+But can we say something **uniform** over all $x$?
+
+## Glivenko–Cantelli Theorem
+
+::: {.callout-important icon=false}
+## Theorem (Glivenko–Cantelli — "Fundamental Theorem of Statistics")
+$$P\!\left[\lim_{n\to\infty} \sup_{x\in\mathbb{R}} |S_n(x) - F_X(x)| = 0\right] = 1$$
+:::
+
+$S_n$ converges to $F_X$ **uniformly** over all $x$, **almost surely**.
+
+**TL;DR:** With enough IID data, $\sup_x |S_n(x) - F_X(x)|$ is small.  
+This is the key motivation for the KS test. ↓
+
+## EDF in Action
+
+```{r edf-demo}
+#| fig-height: 3.5
+#| code-fold: true
+set.seed(7)
+par(mfrow=c(1,2))
+for(n in c(20,50)){
+  x <- rnorm(n)
+  plot(ecdf(x), main=paste0("n = ", n), xlab="x",
+       ylab=expression(S[n](x)), col="#861F41", lwd=2, xlim=c(-3,3))
+  curve(pnorm(x), add=TRUE, col="#E5751F", lwd=2, lty=2)
+  legend("topleft", c("EDF","True CDF N(0,1)"),
+         col=c("#861F41","#E5751F"), lwd=2, lty=c(1,2), bty="n", cex=0.8)
+}
+par(mfrow=c(1,1))
+```
+
+# Part 4: Quantile Transformation & RV Generation {background-color="#861F41"}
+
+## The Probability Integral Transform
+
+::: {.callout-important icon=false}
+## Theorem (PIT / "The Golden Rule")
+Let $X$ have a **continuous** CDF $F$. Then:
+$$U = F(X) \sim \text{Uniform}(0,1)$$
+:::
+
+**Proof:** For $u \in (0,1)$,
+$$P(F(X) \leq u) = P(X \leq F^{-1}(u)) = F(F^{-1}(u)) = u \quad \checkmark$$
+
+**Shorthand to remember:**
+$$X \sim F \;\Rightarrow\; F(X) \sim U[0,1] \;\Rightarrow\; F^{-1}(U) \sim F$$
+
+::: {.callout-warning}
+Continuity of $F$ is **essential**. For discrete $F$, $F(X)$ is stochastically larger than Uniform — this has consequences for the KS test!
+:::
+
+## The Inverse CDF Method
+
+::: {.callout-note icon=false}
+## Algorithm
+1. Generate $U_1, \ldots, U_n \overset{\text{iid}}{\sim} \text{Uniform}(0,1)$
+2. Set $X_i = F^{-1}(U_i)$
+
+Then $X_1, \ldots, X_n \overset{\text{iid}}{\sim} F$
+:::
+
+**Why it works:** For any $x$,
+$$P(F^{-1}(U) \leq x) = P(U \leq F(x)) = F(x) \quad \checkmark$$
+
+**Interactive demo:**  
+[https://dattahub.github.io/iqs/rvgen.html](https://dattahub.github.io/iqs/rvgen.html)
+
+## Example: Exponential Distribution
+
+$X \sim \text{Exp}(\lambda)$: $\quad f(x) = \lambda e^{-\lambda x}$, $\quad F(x) = 1 - e^{-\lambda x}$
+
+**Step 1:** Solve $F(F^{-1}(u)) = u$:
+$$1 - e^{-\lambda F^{-1}(u)} = u \;\Rightarrow\; F^{-1}(u) = -\frac{1}{\lambda}\log(1-u)$$
+
+**Step 2:** Generate $U_i \sim U[0,1]$, set $X_i = -\frac{1}{\lambda}\log(1-U_i)$
+
+```r
+lambda <- 3
+U <- runif(1000)
+X <- -(1/lambda) * log(1 - U)
+```
+
+(R uses `rexp()` internally, which does exactly this!)
+
+## Example: Non-Standard CDF
+
+Consider $F(x) = 1 - \exp(-\sqrt{x})$ for $x \geq 0$.
+
+**Derive $F^{-1}(u)$:**
+
+$$F(F^{-1}(u)) = u$$
+$$\Rightarrow 1 - \exp\!\bigl(-\sqrt{F^{-1}(u)}\bigr) = u$$
+$$\Rightarrow \exp\!\bigl(-\sqrt{F^{-1}(u)}\bigr) = 1-u$$
+$$\Rightarrow \boxed{F^{-1}(u) = \{\log(1/(1-u))\}^2}$$
+
+```r
+U <- runif(5000)
+X <- (log(1/(1 - U)))^2
+```
+
+## Verification
+
+```{r nonstandard-gen}
+#| fig-height: 3.2
+#| code-fold: true
+set.seed(42)
+U <- runif(5000)
+X <- (log(1/(1-U)))^2
+f_true <- function(x) (1/(2*sqrt(x))) * exp(-sqrt(x))
+
+hist(X, breaks=80, freq=FALSE, col="#861F4155", border="white",
+     main=expression("F(x) = 1 - exp("*-sqrt(x)*")"),
+     xlab="x", xlim=c(0,20))
+curve(f_true(x), from=0.01, to=20, add=TRUE, col="#E5751F", lwd=2)
+legend("topright","True density", col="#E5751F", lwd=2, bty="n")
+```
+
+## Special Case: Generating Normal Variables
+
+$\Phi(x)$ (standard Normal CDF) has **no closed-form inverse** — can't apply inverse CDF directly.
+
+**Box–Müller Transform** uses polar coordinates:
+
+If $(X_1, X_2) \sim N(0,I_2)$ with polar coordinates $(R, \Theta)$:
+$$R^2 = X_1^2 + X_2^2 \sim \chi^2_2 \equiv \text{Exp}(1/2), \qquad \Theta \sim \text{Uniform}(0, 2\pi)$$
+
+::: {.callout-note icon=false}
+## Algorithm (Box–Müller)
+1. Generate $U_1, U_2 \overset{\text{iid}}{\sim} U[0,1]$
+2. $X_1 = \sqrt{-2\log U_1}\,\cos(2\pi U_2)$
+3. $X_2 = \sqrt{-2\log U_1}\,\sin(2\pi U_2)$
+
+Then $X_1, X_2 \overset{\text{iid}}{\sim} N(0,1)$.
+:::
+
+# Part 5: The Kolmogorov–Smirnov Test {background-color="#861F41"}
+
+## Setup: What Are We Testing?
+
+We observe $X_1, \ldots, X_n$ and want to test:
+$$H_0: F_X(x) = F_0(x) \quad \text{for all } x \in \mathbb{R}$$
+where $F_0$ is a **completely specified** continuous CDF.
+
+**Idea:** By Glivenko–Cantelli, $S_n \approx F_X$.  
+Under $H_0$, $S_n \approx F_0$, so $\sup_x |S_n(x) - F_0(x)|$ should be **small**.
+
+**Large values of this supremum → evidence against $H_0$.**
+
+## The KS Statistics
+
+$$D_n^+ = \sup_{x}\, [S_n(x) - F_0(x)] \qquad \text{(upper one-sided)}$$
+
+$$D_n^- = \sup_{x}\, [F_0(x) - S_n(x)] \qquad \text{(lower one-sided)}$$
+
+$$\boxed{D_n = \sup_{x}\, |S_n(x) - F_0(x)| = \max(D_n^+,\, D_n^-)}$$
+
+$D_n$ is the **two-sided KS statistic** — the one we almost always use.
+
+Reject $H_0$ when $D_n$ is **large** (exceeds the critical value).
+
+## Remarkable Property: Distribution-Free!
+
+::: {.callout-important icon=false}
+## Theorem
+Under $H_0$, the distributions of $D_n$, $D_n^+$, $D_n^-$ are **independent of $F_0$**, provided $F_0$ is continuous.
+:::
+
+**Is this surprising?** The test statistic measures how far $S_n$ is from $F_0$ — yet its distribution doesn't depend on $F_0$ at all!
+
+To understand why, we need the PIT + a careful look at how $D_n^+$ reduces...
+
+## Proof: $D_n^+$ is Distribution-Free {.smaller}
+
+Using the step-function form of $S_n$:
+
+$$D_n^+ = \sup_{x} [S_n(x) - F_0(x)]$$
+
+$$= \max_{0\leq i\leq n} \left[\sup_{X_{(i)}\leq x < X_{(i+1)}} \left\{\frac{i}{n} - F_0(x)\right\}\right]$$
+
+$$= \max_{0\leq i\leq n} \left[\frac{i}{n} - \inf_{X_{(i)}\leq x < X_{(i+1)}} F_0(x)\right]$$
+
+$$= \max_{0\leq i\leq n} \left[\frac{i}{n} - F_0(X_{(i)})\right]$$
+
+Since $X_{(i)}$ are order stats from $F_0$, by the **PIT**, $F_0(X_{(i)})$ behave as order stats from $U[0,1]$ — **regardless of $F_0$**! $\square$
+
+## Two Critical Consequences
+
+From the proof:
+
+::: {.incremental}
+1. **Distribution-free** ✓  
+   The same critical value table works for **any** continuous null distribution.
+
+2. **$F_0$ must be continuous**  
+   The PIT requires continuity. Applying KS to discrete data makes the test **overly conservative**.
+
+3. **$F_0$ must be completely known**  
+   We need to evaluate $F_0(X_{(i)})$ exactly. If parameters are estimated from the data, the critical values are **wrong**.
+:::
+
+## Computing $D_n$ in Practice
+
+**Convenient formula:**
+
+$$D_n = \max_{i=1,\ldots,n}\left\{ \left|\frac{i}{n} - F_0(X_{(i)})\right|,\; \left|\frac{i-1}{n} - F_0(X_{(i)})\right| \right\}$$
+
+The two terms capture the jump from both sides of the step function.
+
+**In R:**
+```r
+ks.test(x, "pnorm", mean = 0, sd = 1)   # test against N(0,1)
+ks.test(x, "pexp",  rate = 2)            # test against Exp(2)
+```
+
+## Worked Example {.smaller}
+
+20 values from $U(0,1)$. Test: do their **square roots** also follow $U(0,1)$?
+
+Under $H_0$: $F_0(x) = x$.
+
+```{r ks-example}
+x_obs <- c(0.0123, 0.1039, 0.1954, 0.2621, 0.2802,
+           0.3217, 0.3645, 0.3919, 0.4240, 0.4814,
+           0.5139, 0.5846, 0.6275, 0.6541, 0.6889,
+           0.7621, 0.8320, 0.8871, 0.9249, 0.9634)
+y <- sqrt(x_obs)
+ks.test(y, "punif")
+```
+
+$D_{20} = 0.36 > 0.352$ (critical value at $\alpha=0.01$) → **Reject $H_0$**
+
+## Visualising the KS Statistic
+
+```{r ks-plot}
+#| fig-height: 3.5
+#| code-fold: true
+x_obs <- c(0.0123,0.1039,0.1954,0.2621,0.2802,0.3217,0.3645,
+           0.3919,0.4240,0.4814,0.5139,0.5846,0.6275,0.6541,
+           0.6889,0.7621,0.8320,0.8871,0.9249,0.9634)
+y <- sqrt(x_obs)
+
+plot(ecdf(y), col="#861F41", lwd=2,
+     main=expression("EDF of"~sqrt(x)~"vs Uniform(0,1)"),
+     xlab="x", ylab="CDF")
+abline(0, 1, col="#E5751F", lwd=2, lty=2)
+
+# Mark the maximum gap
+i_max <- which.max(abs((1:20)/20 - y))
+segments(y[i_max], (i_max-1)/20, y[i_max], y[i_max],
+         col="#003366", lwd=3)
+text(y[i_max]+0.05, ((i_max-1)/20 + y[i_max])/2,
+     expression(D[n]~"= 0.36"), col="#003366", cex=0.9)
+
+legend("topleft", c("EDF","Uniform CDF"),
+       col=c("#861F41","#E5751F"), lwd=2, lty=c(1,2), bty="n")
+```
+
+## Asymptotic Distribution
+
+::: {.callout-note icon=false}
+## Theorem (Kolmogorov 1933, Smirnov 1939)
+For any continuous $F_X$ and $d > 0$:
+$$\lim_{n\to\infty} P\!\left(D_n \leq \frac{d}{\sqrt{n}}\right) = L(d) = 1 - \sum_{i=1}^{\infty}(-1)^{i-1} e^{-2i^2 d^2}$$
+:::
+
+The approximation is accurate for $n \geq 35$.
+
+**For $n > 40$**, critical values at common $\alpha$:
+
+| $\alpha$ | 0.20 | 0.10 | 0.05 | 0.02 | 0.01 |
+|:--------:|:----:|:----:|:----:|:----:|:----:|
+| $c_\alpha / \sqrt{n}$ | $1.07/\sqrt{n}$ | $1.22/\sqrt{n}$ | $1.36/\sqrt{n}$ | $1.52/\sqrt{n}$ | $1.63/\sqrt{n}$ |
+
+# Part 6: The Lilliefors Test {background-color="#861F41"}
+
+## The Problem With Estimated Parameters
+
+Suppose data come from $N(\mu, \sigma^2)$ with **unknown** $\mu, \sigma$.
+
+**Tempting idea:** plug in $\hat\mu = \bar X$, $\hat\sigma = S$, run KS against $N(\hat\mu, \hat\sigma^2)$.
+
+**Why this fails:**
+- The fitted distribution is forced closer to the data
+- The KS statistic is systematically **smaller** than under a truly specified $F_0$
+- Standard KS critical values are **too large** → test is **conservative**
+- Actual type I error $\ll$ nominal $\alpha$
+
+## Lilliefors' Fix
+
+**Lilliefors (1967)** derived corrected critical values by simulation specifically for the case of testing normality with estimated parameters.
+
+::: {.callout-note icon=false}
+## Lilliefors Test Procedure
+1. Compute $\hat\mu = \bar X$, $\hat\sigma = S$
+2. Form the KS statistic $D_n$ against $N(\hat\mu, \hat\sigma^2)$
+3. Compare to **Lilliefors critical values** (smaller than standard KS values)
+:::
+
+Extensions exist for testing exponentiality, uniformity, etc., with estimated parameters.
+
+## KS vs Lilliefors: When To Use Each
+
+| Scenario | Test |
+|----------|------|
+| $H_0$: $F = F_0$ fully specified | **Kolmogorov–Smirnov** |
+| $H_0$: $F$ is Normal, $\mu,\sigma$ unknown | **Lilliefors** |
+| $H_0$: $F$ is Exponential, $\lambda$ unknown | **Lilliefors (exp variant)** |
+| Discrete data | **Neither** — use $\chi^2$ GoF |
+
+## IQ Score Example
+
+IQ scores of 18 girls:  
+`114, 81, 87, 114, 113, 87, 111, 89, 93, 108, 99, 93, 100, 95, 93, 95, 106, 108`
+
+**(a)** Test normality with **unknown** $\mu, \sigma$ → Lilliefors
+
+**(b)** Test normality with $\mu = 100$, $\sigma^2 = 100$ → KS
+
+**Why?**  
+In (a), parameters must be estimated from the data → Lilliefors.  
+In (b), $F_0 = N(100, 10^2)$ is completely specified → KS.
+
+## IQ Example in R
+
+```{r iq-r}
+if (!requireNamespace("nortest", quietly=TRUE)) install.packages("nortest")
+library(nortest)
+
+iq <- c(114, 81, 87, 114, 113, 87, 111, 89, 93, 108,
+        99, 93, 100, 95, 93, 95, 106, 108)
+
+# (a) Lilliefors
+lillie.test(iq)
+
+# (b) KS with specified parameters
+ks.test(iq, "pnorm", mean=100, sd=10)
+```
+
+# Part 7: Other Goodness-of-Fit Tests {background-color="#861F41"}
+
+## The Chi-Squared GoF Test
+
+For **discrete** distributions or **binned continuous** data:
+
+$$\chi^2 = \sum_{i=1}^{k} \frac{(O_i - E_i)^2}{E_i} \xrightarrow{d} \chi^2_{k-1-m}$$
+
+where $E_i = np_i^{(0)}$ (expected counts), $m$ = number of estimated parameters.
+
+**Rules of thumb:**
+- Each $E_i \geq 5$ (merge cells if needed)
+- Result depends on binning choice — a known weakness
+- Works for **discrete** distributions where KS is inappropriate
+
+```r
+chisq.test(table(observed_counts))
+```
+
+## The Anderson–Darling Test
+
+**Weighted** version of the KS test giving more attention to the tails:
+
+$$A^2 = -n - \sum_{i=1}^{n} \frac{2i-1}{n}\left[\log F_0(X_{(i)}) + \log(1-F_0(X_{(n+1-i)}))\right]$$
+
+**Advantages over KS:**
+- More sensitive to **tail departures**
+- Uniformly more powerful for many distributions
+- Corrected versions for estimated parameters (normality, exponentiality, etc.)
+
+```{r}
+library(nortest)
+ad.test(rnorm(20))   # Anderson-Darling normality test
+```
+
+
+## The Cramér–von Mises Test
+
+Measures the **integrated squared** difference between $S_n$ and $F_0$:
+
+$$W^2 = n\int_{-\infty}^{\infty}(S_n(x)-F_0(x))^2\,dF_0(x) = \frac{1}{12n} + \sum_{i=1}^{n}\!\left(F_0(X_{(i)}) - \frac{2i-1}{2n}\right)^2$$
+
+- Distribution-free (like KS) when $F_0$ is continuous and fully specified
+- Weights all parts of the distribution **equally** (unlike Anderson–Darling)
+
+```{r}
+library(goftest)
+cvm.test(rnorm(20), "pnorm")
+```
+
+
+
+
+## The Shapiro–Wilk Test
+
+**Normality-specific** — most powerful test for normality at small/moderate $n$.
+
+$$W = \frac{\left(\sum_{i=1}^{n} a_i X_{(i)}\right)^2}{\sum_{i=1}^{n}(X_i - \bar{X})^2}$$
+
+The $a_i$ coefficients come from the expected values and covariance matrix of standard normal order statistics.
+
+- $W \in (0, 1]$; values close to 1 → consistent with normality
+- Recommended for $n \leq 2000$
+
+```{r}
+shapiro.test(rnorm(20))
+```
+
+
+## Comparing All the Tests
+
+| Test | Null $H_0$ | Continuous? | Params known? | Tail focus |
+|------|-----------|:-----------:|:-------------:|:----------:|
+| $\chi^2$ GoF | Any (binned) | No | Yes/No | Low |
+| KS | Specific $F_0$ | **Yes** | **Yes** | Middle |
+| Lilliefors | Normal/Exp family | Yes | **No** | Middle |
+| Cramér–von Mises | Specific $F_0$ | Yes | Yes | Uniform |
+| Anderson–Darling | Specific $F_0$ | Yes | Yes | **High** |
+| Shapiro–Wilk | **Normality only** | Yes | No | **High** |
+
+## Power Comparison in R
+
+```{r power-compare}
+#| code-fold: true
+#| fig-height: 3.5
+library(nortest)
+set.seed(42)
+x_t3 <- rt(50, df = 5)   # heavy-tailed, not normal
+
+results <- data.frame(
+  Test = c("KS (Lilliefors)", "Anderson-Darling", "Shapiro-Wilk", "Cramer-von Mises"),
+  p_value = c(
+    lillie.test(x_t3)$p.value,
+    ad.test(x_t3)$p.value,
+    shapiro.test(x_t3)$p.value,
+    if(requireNamespace("goftest",quietly=TRUE))
+      goftest::cvm.test(x_t3,"pnorm",mean=mean(x_t3),sd=sd(x_t3))$p.value else NA
+  )
+)
+
+barplot(results$p_value, names.arg = results$Test,
+        col = ifelse(results$p_value < 0.05, "#861F41", "#C0C0C0"),
+        main = expression("p-values for H"[0]*": t"[5]*" data is Normal"),
+        ylab = "p-value", las = 2, cex.names = 0.75)
+abline(h = 0.05, col = "#E5751F", lwd = 2, lty = 2)
+text(0.3, 0.07, "α = 0.05", col = "#E5751F", cex = 0.8)
+```
+
+# Summary {background-color="#861F41"}
+
+## The Big Picture
+
+::: {.incremental}
+1. **Order statistics** $X_{(1)} \leq \cdots \leq X_{(n)}$ have known distributions (Beta family for Uniform parent)
+
+2. **Ranks** strip values to relative order — the basis of nonparametric inference
+
+3. **EDF** $S_n(x)$ estimates $F_X$ nonparametrically; **Glivenko–Cantelli** guarantees uniform convergence
+
+4. **Probability Integral Transform** ($X \sim F \Rightarrow F(X) \sim U[0,1]$) powers both RV generation and the KS distribution-free property
+
+5. **KS test** $D_n = \sup_x|S_n(x)-F_0(x)|$ requires $F_0$ continuous and **fully specified**
+
+6. **Lilliefors** corrects KS when parameters are estimated; **Anderson–Darling** and **Shapiro–Wilk** offer greater power in specific settings
+:::
+
+## Practical Decision Tree
+
+```
+Is H₀ fully specified?
+├── Yes → Is F₀ continuous?
+│         ├── Yes → KS test (or CvM / AD for more power)
+│         └── No  → χ² goodness-of-fit
+└── No  → What family?
+          ├── Normal → Lilliefors (or Shapiro-Wilk)
+          └── Other  → Lilliefors variant / parametric bootstrap
+```
+
+## Exercises
+
+1. Derive the density of $X_{(3)}$ for $n=10$, $X_i \sim \text{Exp}(2)$. Verify by simulation.
+
+2. For $F(x) = 1 - (\beta/x)^\alpha$ (Pareto), derive $F^{-1}(u)$ and write R code to generate samples.
+
+3. Given 10 observations (0.12, 0.28, …, 0.95), test $H_0: F = U(0,1)$ by computing $D_{10}$ by hand.
+
+4. Why does plugging in $\hat\mu, \hat\sigma$ into the KS test make it **conservative**? Which direction does the size deviate from $\alpha$?
+
+5. Generate 30 observations from $t_3$. Apply KS, Lilliefors, AD, and Shapiro–Wilk for normality. Which detects non-normality first?
+
+---
+
+## References and Further Reading
+
+- Gibbons, J.D. & Chakraborti, S. (2011). *Nonparametric Statistical Inference*, 5th ed. CRC Press.
+- Kolmogorov, A.N. (1933). Sulla determinazione empirica di una legge di distribuzione. *Giornale dell'Istituto Italiano degli Attuari*, 4, 83–91.
+- Lilliefors, H.W. (1967). On the Kolmogorov-Smirnov test for normality with mean and variance unknown. *JASA*, 62, 399–402.
+- R packages: `nortest`, `goftest`, `KSgeneral`
+- **Interactive demo:** [https://dattahub.github.io/iqs/rvgen.html](https://dattahub.github.io/iqs/rvgen.html)
