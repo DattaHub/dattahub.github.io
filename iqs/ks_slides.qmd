@@ -31,6 +31,8 @@ execute:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(fig.align = "center")
+library(knitr)
+library(kableExtra)
 ```
 
 # Part 1: Order Statistics {background-color="#861F41"}
@@ -591,23 +593,22 @@ shapiro.test(rnorm(20))
 | Anderson–Darling | Specific $F_0$ | Yes | Yes | **High** |
 | Shapiro–Wilk | **Normality only** | Yes | No | **High** |
 
-## Power Comparison in R
+## P-value Comparison in R
 
 ```{r power-compare}
 #| code-fold: true
 #| fig-height: 3.5
 library(nortest)
 set.seed(42)
-x_t3 <- rt(50, df = 5)   # heavy-tailed, not normal
+x_t5 <- rt(50, df = 5)
 
 results <- data.frame(
-  Test = c("KS (Lilliefors)", "Anderson-Darling", "Shapiro-Wilk", "Cramer-von Mises"),
+  Test = c("KS (Lilliefors)", "Anderson-Darling", "Shapiro-Wilk", "Cramér-von Mises"),
   p_value = c(
-    lillie.test(x_t3)$p.value,
-    ad.test(x_t3)$p.value,
-    shapiro.test(x_t3)$p.value,
-    if(requireNamespace("goftest",quietly=TRUE))
-      goftest::cvm.test(x_t3,"pnorm",mean=mean(x_t3),sd=sd(x_t3))$p.value else NA
+    lillie.test(x_t5)$p.value,
+    ad.test(x_t5)$p.value,
+    shapiro.test(x_t5)$p.value,
+    cvm.test(x_t5)$p.value        # corrected version from nortest
   )
 )
 
@@ -618,6 +619,32 @@ barplot(results$p_value, names.arg = results$Test,
 abline(h = 0.05, col = "#E5751F", lwd = 2, lty = 2)
 text(0.3, 0.07, "α = 0.05", col = "#E5751F", cex = 0.8)
 ```
+
+## Power comparison
+
+```{r, warning=FALSE}
+library(nortest)
+
+run_tests <- function(n, df = 5, B = 1000) {
+  # Simulate rejection rates at alpha = 0.05
+  rejections <- replicate(B, {
+    x <- rt(n, df = df)
+    c(
+      lillie.test(x)$p.value   < 0.05,
+      ad.test(x)$p.value       < 0.05,
+      shapiro.test(x)$p.value  < 0.05,
+      cvm.test(x)$p.value      < 0.05
+    )
+  })
+  rowMeans(rejections)
+}
+ns <- c(20, 50, 100, 200, 500)
+power_mat <- sapply(ns, run_tests)
+rownames(power_mat) <- c("Lilliefors", "Anderson-Darling", "Shapiro-Wilk", "CvM")
+colnames(power_mat) <- paste0("n=", ns)
+round(power_mat, 3) %>%  kable()
+```
+
 
 # Summary {background-color="#861F41"}
 

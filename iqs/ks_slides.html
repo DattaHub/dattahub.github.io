@@ -912,36 +912,109 @@ W = 0.94199, p-value = 0.2614</code></pre>
 </tbody>
 </table>
 </section>
-<section id="power-comparison-in-r" class="slide level2">
-<h2>Power Comparison in R</h2>
+<section id="p-value-comparison-in-r" class="slide level2">
+<h2>P-value Comparison in R</h2>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href=""></a><span class="fu">library</span>(nortest)</span>
 <span id="cb23-2"><a href=""></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
-<span id="cb23-3"><a href=""></a>x_t3 <span class="ot">&lt;-</span> <span class="fu">rt</span>(<span class="dv">50</span>, <span class="at">df =</span> <span class="dv">5</span>)   <span class="co"># heavy-tailed, not normal</span></span>
+<span id="cb23-3"><a href=""></a>x_t5 <span class="ot">&lt;-</span> <span class="fu">rt</span>(<span class="dv">50</span>, <span class="at">df =</span> <span class="dv">5</span>)</span>
 <span id="cb23-4"><a href=""></a></span>
 <span id="cb23-5"><a href=""></a>results <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb23-6"><a href=""></a>  <span class="at">Test =</span> <span class="fu">c</span>(<span class="st">"KS (Lilliefors)"</span>, <span class="st">"Anderson-Darling"</span>, <span class="st">"Shapiro-Wilk"</span>, <span class="st">"Cramer-von Mises"</span>),</span>
+<span id="cb23-6"><a href=""></a>  <span class="at">Test =</span> <span class="fu">c</span>(<span class="st">"KS (Lilliefors)"</span>, <span class="st">"Anderson-Darling"</span>, <span class="st">"Shapiro-Wilk"</span>, <span class="st">"Cramér-von Mises"</span>),</span>
 <span id="cb23-7"><a href=""></a>  <span class="at">p_value =</span> <span class="fu">c</span>(</span>
-<span id="cb23-8"><a href=""></a>    <span class="fu">lillie.test</span>(x_t3)<span class="sc">$</span>p.value,</span>
-<span id="cb23-9"><a href=""></a>    <span class="fu">ad.test</span>(x_t3)<span class="sc">$</span>p.value,</span>
-<span id="cb23-10"><a href=""></a>    <span class="fu">shapiro.test</span>(x_t3)<span class="sc">$</span>p.value,</span>
-<span id="cb23-11"><a href=""></a>    <span class="cf">if</span>(<span class="fu">requireNamespace</span>(<span class="st">"goftest"</span>,<span class="at">quietly=</span><span class="cn">TRUE</span>))</span>
-<span id="cb23-12"><a href=""></a>      goftest<span class="sc">::</span><span class="fu">cvm.test</span>(x_t3,<span class="st">"pnorm"</span>,<span class="at">mean=</span><span class="fu">mean</span>(x_t3),<span class="at">sd=</span><span class="fu">sd</span>(x_t3))<span class="sc">$</span>p.value <span class="cf">else</span> <span class="cn">NA</span></span>
-<span id="cb23-13"><a href=""></a>  )</span>
-<span id="cb23-14"><a href=""></a>)</span>
-<span id="cb23-15"><a href=""></a></span>
-<span id="cb23-16"><a href=""></a><span class="fu">barplot</span>(results<span class="sc">$</span>p_value, <span class="at">names.arg =</span> results<span class="sc">$</span>Test,</span>
-<span id="cb23-17"><a href=""></a>        <span class="at">col =</span> <span class="fu">ifelse</span>(results<span class="sc">$</span>p_value <span class="sc">&lt;</span> <span class="fl">0.05</span>, <span class="st">"#861F41"</span>, <span class="st">"#C0C0C0"</span>),</span>
-<span id="cb23-18"><a href=""></a>        <span class="at">main =</span> <span class="fu">expression</span>(<span class="st">"p-values for H"</span>[<span class="dv">0</span>]<span class="sc">*</span><span class="st">": t"</span>[<span class="dv">5</span>]<span class="sc">*</span><span class="st">" data is Normal"</span>),</span>
-<span id="cb23-19"><a href=""></a>        <span class="at">ylab =</span> <span class="st">"p-value"</span>, <span class="at">las =</span> <span class="dv">2</span>, <span class="at">cex.names =</span> <span class="fl">0.75</span>)</span>
-<span id="cb23-20"><a href=""></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="fl">0.05</span>, <span class="at">col =</span> <span class="st">"#E5751F"</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
-<span id="cb23-21"><a href=""></a><span class="fu">text</span>(<span class="fl">0.3</span>, <span class="fl">0.07</span>, <span class="st">"α = 0.05"</span>, <span class="at">col =</span> <span class="st">"#E5751F"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb23-8"><a href=""></a>    <span class="fu">lillie.test</span>(x_t5)<span class="sc">$</span>p.value,</span>
+<span id="cb23-9"><a href=""></a>    <span class="fu">ad.test</span>(x_t5)<span class="sc">$</span>p.value,</span>
+<span id="cb23-10"><a href=""></a>    <span class="fu">shapiro.test</span>(x_t5)<span class="sc">$</span>p.value,</span>
+<span id="cb23-11"><a href=""></a>    <span class="fu">cvm.test</span>(x_t5)<span class="sc">$</span>p.value        <span class="co"># corrected version from nortest</span></span>
+<span id="cb23-12"><a href=""></a>  )</span>
+<span id="cb23-13"><a href=""></a>)</span>
+<span id="cb23-14"><a href=""></a></span>
+<span id="cb23-15"><a href=""></a><span class="fu">barplot</span>(results<span class="sc">$</span>p_value, <span class="at">names.arg =</span> results<span class="sc">$</span>Test,</span>
+<span id="cb23-16"><a href=""></a>        <span class="at">col =</span> <span class="fu">ifelse</span>(results<span class="sc">$</span>p_value <span class="sc">&lt;</span> <span class="fl">0.05</span>, <span class="st">"#861F41"</span>, <span class="st">"#C0C0C0"</span>),</span>
+<span id="cb23-17"><a href=""></a>        <span class="at">main =</span> <span class="fu">expression</span>(<span class="st">"p-values for H"</span>[<span class="dv">0</span>]<span class="sc">*</span><span class="st">": t"</span>[<span class="dv">5</span>]<span class="sc">*</span><span class="st">" data is Normal"</span>),</span>
+<span id="cb23-18"><a href=""></a>        <span class="at">ylab =</span> <span class="st">"p-value"</span>, <span class="at">las =</span> <span class="dv">2</span>, <span class="at">cex.names =</span> <span class="fl">0.75</span>)</span>
+<span id="cb23-19"><a href=""></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="fl">0.05</span>, <span class="at">col =</span> <span class="st">"#E5751F"</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb23-20"><a href=""></a><span class="fu">text</span>(<span class="fl">0.3</span>, <span class="fl">0.07</span>, <span class="st">"α = 0.05"</span>, <span class="at">col =</span> <span class="st">"#E5751F"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 
 </div>
-<img data-src="ks_slides_files/figure-revealjs/power-compare-1.png" class="quarto-figure quarto-figure-center r-stretch" width="672"></section></section>
+<img data-src="ks_slides_files/figure-revealjs/power-compare-1.png" class="quarto-figure quarto-figure-center r-stretch" width="672"></section>
+<section id="power-comparison" class="slide level2">
+<h2>Power comparison</h2>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href=""></a><span class="fu">library</span>(nortest)</span>
+<span id="cb24-2"><a href=""></a></span>
+<span id="cb24-3"><a href=""></a>run_tests <span class="ot">&lt;-</span> <span class="cf">function</span>(n, <span class="at">df =</span> <span class="dv">5</span>, <span class="at">B =</span> <span class="dv">1000</span>) {</span>
+<span id="cb24-4"><a href=""></a>  <span class="co"># Simulate rejection rates at alpha = 0.05</span></span>
+<span id="cb24-5"><a href=""></a>  rejections <span class="ot">&lt;-</span> <span class="fu">replicate</span>(B, {</span>
+<span id="cb24-6"><a href=""></a>    x <span class="ot">&lt;-</span> <span class="fu">rt</span>(n, <span class="at">df =</span> df)</span>
+<span id="cb24-7"><a href=""></a>    <span class="fu">c</span>(</span>
+<span id="cb24-8"><a href=""></a>      <span class="fu">lillie.test</span>(x)<span class="sc">$</span>p.value   <span class="sc">&lt;</span> <span class="fl">0.05</span>,</span>
+<span id="cb24-9"><a href=""></a>      <span class="fu">ad.test</span>(x)<span class="sc">$</span>p.value       <span class="sc">&lt;</span> <span class="fl">0.05</span>,</span>
+<span id="cb24-10"><a href=""></a>      <span class="fu">shapiro.test</span>(x)<span class="sc">$</span>p.value  <span class="sc">&lt;</span> <span class="fl">0.05</span>,</span>
+<span id="cb24-11"><a href=""></a>      <span class="fu">cvm.test</span>(x)<span class="sc">$</span>p.value      <span class="sc">&lt;</span> <span class="fl">0.05</span></span>
+<span id="cb24-12"><a href=""></a>    )</span>
+<span id="cb24-13"><a href=""></a>  })</span>
+<span id="cb24-14"><a href=""></a>  <span class="fu">rowMeans</span>(rejections)</span>
+<span id="cb24-15"><a href=""></a>}</span>
+<span id="cb24-16"><a href=""></a></span>
+<span id="cb24-17"><a href=""></a>ns <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">20</span>, <span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">500</span>)</span>
+<span id="cb24-18"><a href=""></a>power_mat <span class="ot">&lt;-</span> <span class="fu">sapply</span>(ns, run_tests)</span>
+<span id="cb24-19"><a href=""></a><span class="fu">rownames</span>(power_mat) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Lilliefors"</span>, <span class="st">"Anderson-Darling"</span>, <span class="st">"Shapiro-Wilk"</span>, <span class="st">"CvM"</span>)</span>
+<span id="cb24-20"><a href=""></a><span class="fu">colnames</span>(power_mat) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"n="</span>, ns)</span>
+<span id="cb24-21"><a href=""></a><span class="fu">round</span>(power_mat, <span class="dv">3</span>) <span class="sc">%&gt;%</span>  <span class="fu">kable</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">n=20</th>
+<th style="text-align: right;">n=50</th>
+<th style="text-align: right;">n=100</th>
+<th style="text-align: right;">n=200</th>
+<th style="text-align: right;">n=500</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Lilliefors</td>
+<td style="text-align: right;">0.148</td>
+<td style="text-align: right;">0.210</td>
+<td style="text-align: right;">0.346</td>
+<td style="text-align: right;">0.528</td>
+<td style="text-align: right;">0.886</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Anderson-Darling</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">1.000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Shapiro-Wilk</td>
+<td style="text-align: right;">0.188</td>
+<td style="text-align: right;">0.347</td>
+<td style="text-align: right;">0.572</td>
+<td style="text-align: right;">0.812</td>
+<td style="text-align: right;">0.993</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CvM</td>
+<td style="text-align: right;">0.973</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">1.000</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section></section>
 <section>
 <section id="summary" class="title-slide slide level1 center" data-background-color="#861F41">
 <h1>Summary</h1>
