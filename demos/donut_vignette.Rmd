@@ -1,0 +1,350 @@
+---
+title: "The Donut Condition: A Vignette"
+author: "Dylan Steberg and Jyotishka Datta"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+    highlight: tango
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo      = TRUE,
+  message   = FALSE,
+  warning   = FALSE,
+  fig.align = "center",
+  fig.width = 7,
+  fig.height = 6
+)
+```
+
+---
+
+## What Is the Donut Condition?
+
+When analysts study spatial data, such as, crime counts, disease cases, or any quantity measured across a map, they often divide the study area into a regular grid of cells (a **fishnet**) and test each cell for statistical significance using **Local Moran's I**. This test identifies **hotspots**: cells that are unusually high *and* surrounded by other high cells.
+
+The "*donut condition*" describes a counter-intuitive failure of this test: the single cell with the *highest* count can be flagged as **not significant**, while the ring of cells surrounding it *are* flagged. The result looks like a donut -- a significant ring with an invisible hole at the centre.
+
+This vignette demonstrates the donut condition in a controlled simulation and explains why/when it occurs.
+
+```{r echo=FALSE, out.width="55%", fig.align="center", fig.cap="Will there be donuts?"}
+
+knitr::include_graphics("donuts.jpg")
+```
+
+---
+
+## The Core Reason: A Mathematical Cancellation
+
+Local Moran's I for cell $i$ is defined as
+
+$$I_i = \frac{z_i}{m_2} \cdot L_i$$
+
+where $z_i = x_i - \bar{x}$ is the cell's deviation from the global mean,
+$m_2$ is the global variance, and $L_i$ is the average deviation of the
+neighbouring cells (the **spatial lag**).
+
+To test significance, the method compares this to a **permutation null**: it
+holds cell $i$'s value fixed and randomly reshuffles all other values,
+asking how extreme $I_i$ is relative to that null distribution.
+
+Since $z_i$ and $m_2$ are held fixed under the permutation, $I_i$ is just a
+constant multiple of $L_i$. When we standardise $I_i$ by subtracting its
+permutation mean and dividing by its permutation standard deviation, the
+factor $z_i/m_2$ cancels exactly (Lemma 2 in the paper). What remains is
+the standardised spatial lag:
+
+$$\frac{I_i - \mathbb{E}_\pi[I_i]}{\sqrt{\text{Var}_\pi(I_i)}} = \text{sgn}(z_i) \cdot \frac{L_i - \mathbb{E}_\pi[L_i]}{\sqrt{\text{Var}_\pi(L_i)}}$$
+
+**Cell $i$'s own value plays no role in determining its significance.**
+Only how elevated its *neighbours* are --- relative to the global variance
+--- matters.
+
+When the centre cell is a very sharp spike, two things happen simultaneously:
+
+1. The neighbours are only slightly elevated (the bump is narrow), so $L_i$
+   is small.
+2. The spike inflates the global variance $m_2$, making even a moderately
+   elevated neighbourhood look unremarkable by comparison.
+
+Both effects push the standardised statistic below the significance threshold,
+producing the donut.
+
+---
+
+## Setup
+
+```{r libraries}
+library(spdep)
+library(tidyverse)
+
+set.seed(42)
+```
+
+We build a 50 × 50 regular grid. Each cell is connected to its (up to) 8
+**queen neighbours** --- the cells touching it horizontally, vertically, and
+diagonally. Weights are row-standardised: each neighbour receives weight
+$1/k_i$ where $k_i$ is the number of neighbours (8 for interior cells).
+
+```{r grid}
+n_row <- 50
+n_col <- 50
+n     <- n_row * n_col
+
+coords <- expand.grid(col = 1:n_col, row = 1:n_row)
+
+nb <- cell2nb(n_row, n_col, type = "queen")
+lw <- nb2listw(nb, style = "W", zero.policy = TRUE)
+
+center_row  <- 25
+center_col  <- 25
+center_id   <- which(coords$row == center_row & coords$col == center_col)
+center_nbrs <- nb[[center_id]]
+
+cat("Centre cell ID:", center_id,
+    "| Neighbours:", length(center_nbrs), "\n")
+```
+
+---
+
+## Generating the Bump Surface
+
+We place a **Gaussian bump** at the centre of the grid. The bump height
+$\delta$ controls how far above the background the centre cell sits (in
+units of background standard deviation). The width $\sigma_b$ controls how
+quickly the elevation falls off with distance.
+
+For the donut to appear we use:
+
+- **`delta = 10`**: the centre cell is 10 standard deviations above
+  background --- an extreme outlier by any measure.
+- **`sigma_b = 0.1`**: the bump is extremely narrow, confined almost
+  entirely to the centre cell itself.
+
+```{r bump}
+add_bump <- function(delta, sigma_b,
+                     center_row      = 25,
+                     center_col      = 25,
+                     background_mean = 5,
+                     background_sd   = 1) {
+  bg    <- rnorm(n, mean = background_mean, sd = background_sd)
+  dist2 <- (coords$row - center_row)^2 + (coords$col - center_col)^2
+  bump  <- (delta * background_sd) * exp(-dist2 / (2 * sigma_b^2))
+  pmax(bg + bump, 0)
+}
+```
+
+---
+
+## Detecting the Donut
+
+The helper below classifies the centre cell: is it a local maximum, is it
+significant, and how many of its neighbours are significant HH (high–high)
+cells?
+
+```{r helpers}
+# Is centre cell a donut hole?
+# Requires: local maximum, not significant itself,
+# and at least min_sig_neighbors significant HH neighbours.
+detect_center_donut_hh <- function(x, p_val, nb, center_id, lw,
+                                   alpha = 0.05, min_hh_neighbors = 5) {
+  signif <- p_val < alpha
+  z      <- x - mean(x)
+  lag_z  <- lag.listw(lw, z, zero.policy = TRUE)
+
+  quadrant <- case_when(
+    z > 0 & lag_z > 0 ~ "HH",
+    z < 0 & lag_z < 0 ~ "LL",
+    z > 0 & lag_z < 0 ~ "HL",
+    z < 0 & lag_z > 0 ~ "LH"
+  )
+
+  center_nbrs   <- nb[[center_id]]
+  is_local_max  <- x[center_id] >= max(x[center_nbrs])
+  center_not_sig <- !signif[center_id]
+  hh_neighbors  <- sum(signif[center_nbrs] & quadrant[center_nbrs] == "HH")
+
+  list(
+    is_donut      = is_local_max && center_not_sig &&
+                    (hh_neighbors >= min_hh_neighbors),
+    hh_neighbors  = hh_neighbors,
+    is_local_max  = is_local_max,
+    center_not_sig = center_not_sig,
+    quadrant      = quadrant
+  )
+}
+```
+
+---
+
+## The Neighbourhood Elevation Ratio $\rho_i$
+
+Our theorem shows that significance is governed by
+
+$$\rho_i = \frac{L_i}{\sqrt{m_2}}$$
+
+the average neighbour deviation divided by the square root of global
+variance. For an interior queen cell the significance threshold at
+$\alpha = 0.05$ is
+
+$$\rho_i < \frac{1.96}{\sqrt{8}} \approx 0.693.$$
+
+Below this threshold, no value of $x_i$ --- however large --- can make
+the cell significant.
+
+```{r rho}
+compute_rho <- function(x) {
+  z  <- x - mean(x)
+  m2 <- mean(z^2)
+  mean(z[center_nbrs]) / sqrt(m2)
+}
+
+threshold <- qnorm(0.975) / sqrt(8)
+cat(sprintf("Significance threshold for rho_i: %.4f\n", threshold))
+```
+
+---
+
+## Producing the Donut Map
+
+```{r map-function}
+
+plot_center_counts_vs_significance <- function(delta = 10, sigma_b = 0.1, seed = 123) {
+  if (!is.null(seed)) set.seed(seed)
+
+  x <- add_bump(delta, sigma_b)
+
+  lm <- localmoran(
+    x, lw,
+    conditional = TRUE,
+    mlvar = FALSE,
+    zero.policy = TRUE
+  )
+
+  p_val  <- lm[, 5]
+  signif <- p_val < 0.05
+
+  df <- coords %>%
+    mutate(
+      x = x,
+      p_val = p_val,
+      signif = signif,
+      is_center = seq_len(n()) == center_id,
+      is_neighbor = seq_len(n()) %in% center_nbrs
+    ) %>%
+    filter(is_center | is_neighbor)
+
+  p_counts <- ggplot(df, aes(x = col, y = row, fill = x)) +
+    geom_tile(color = "black", linewidth = 0.8) +
+    coord_equal() +
+    scale_y_reverse() +
+    scale_fill_distiller(palette = "YlOrRd", direction = 1, name = "Count") +
+    labs(
+      title = sprintf("Actual counts | delta = %g, sigma_b = %g", delta, sigma_b),
+      x = NULL, y = NULL
+    ) +
+    theme_bw(base_size = 12) +
+    theme(
+      axis.text = element_blank(),
+      axis.ticks = element_blank(),
+      panel.grid = element_blank()
+    )
+
+  p_sig <- ggplot(df, aes(x = col, y = row, fill = case_when(
+    is_center & !signif ~ "Center: not significant",
+    is_center & signif  ~ "Center: significant",
+    is_neighbor & signif ~ "Significant neighbor",
+    TRUE ~ "Neighbor: not significant"
+  ))) +
+    geom_tile(color = "black", linewidth = 0.8) +
+    coord_equal() +
+    scale_y_reverse() +
+    scale_fill_manual(
+      values = c(
+        "Center: not significant" = "dodgerblue",
+        "Center: significant" = "red",
+        "Significant neighbor" = "orange",
+        "Neighbor: not significant" = "grey85"
+      ),
+      name = NULL
+    ) +
+    labs(
+      title = "Local Moran significance pattern",
+      subtitle = sprintf("center p = %.4f", p_val[center_id]),
+      x = NULL, y = NULL
+    ) +
+    theme_bw(base_size = 12) +
+    theme(
+      axis.text = element_blank(),
+      axis.ticks = element_blank(),
+      panel.grid = element_blank()
+    )
+
+  p_counts / p_sig
+}
+```
+
+```{r donut-plot, fig.width=7, fig.height=6}
+library(patchwork)
+plot_center_counts_vs_significance(
+  delta             = 10,
+  sigma_b           = 0.1,
+  seed              = 123
+)
+```
+
+The **blue cell** at the centre is the strict local maximum --- the cell with the highest count on the grid. It is surrounded by **orange cells** that *are* statistically significant. The centre itself is not. This is the donut.
+
+The subtitle reports $\rho_i \ll 0.693$, confirming that the neighbourhood elevation ratio falls well below the analytical threshold.
+
+---
+
+## Why the Centre Cell Fails: A Closer Look
+
+The table below shows the raw values for the centre cell and its 8 neighbours,
+making the mechanism concrete.
+
+```{r table}
+set.seed(123)
+x_demo <- add_bump(delta = 10, sigma_b = 0.1)
+lm_demo <- localmoran(x_demo, lw, zero.policy = TRUE)
+
+xbar <- mean(x_demo)
+z    <- x_demo - xbar
+m2   <- mean(z^2)
+
+ids_to_show <- c(center_id, center_nbrs)
+
+tibble(
+  Cell     = c("Centre", paste0("Neighbour ", seq_along(center_nbrs))),
+  Count    = round(x_demo[ids_to_show], 2),
+  `z (deviation)` = round(z[ids_to_show], 2),
+  `p-value` = round(lm_demo[ids_to_show, 5], 4),
+  Significant = ifelse(lm_demo[ids_to_show, 5] < 0.05, "Yes", "No")
+) |>
+  knitr::kable(align = "lrrrr",
+               caption = paste0(
+                 "Global mean = ", round(xbar, 2),
+                 "  |  sqrt(m2) = ", round(sqrt(m2), 2),
+                 "  |  rho_i = ",
+                 round(mean(z[center_nbrs]) / sqrt(m2), 4)
+               ))
+```
+
+The centre cell has a very large count and deviation, but its neighbours are
+barely above the background. Because the spike inflates $\sqrt{m_2}$, the
+neighbours' average deviation $L_i$ is tiny relative to the global scale,
+so $\rho_i$ falls far below the threshold.
+
+---
+
+## Session Information
+
+```{r session}
+sessionInfo()
+```
