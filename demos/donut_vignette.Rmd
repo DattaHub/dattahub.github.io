@@ -26,14 +26,29 @@ knitr::opts_chunk$set(
 
 ## What Is the Donut Condition?
 
-When analysts study spatial data, such as, crime counts, disease cases, or any quantity measured across a map, they often divide the study area into a regular grid of cells (a **fishnet**) and test each cell for statistical significance using **Local Moran's I**. This test identifies **hotspots**: cells that are unusually high *and* surrounded by other high cells.
+When analysts study spatial data, such as crime counts, disease cases, or any
+quantity measured across a map, they often divide the study area into a regular
+grid of cells (a **fishnet**) and test each cell for statistical significance
+using **Local Moran's I**. This test identifies **hotspots**: cells that are
+unusually high *and* surrounded by other high cells.
 
-The "*donut condition*" describes a counter-intuitive failure of this test: the single cell with the *highest* count can be flagged as **not significant**, while the ring of cells surrounding it *are* flagged. The result looks like a donut -- a significant ring with an invisible hole at the centre.
+The *donut condition* describes a counterintuitive failure of this test: the
+single cell with the *highest* count can be flagged as **not significant**,
+while the ring of cells surrounding it *are* flagged. The result looks like a
+donut — a significant ring with an invisible hole at the centre.
 
-This vignette demonstrates the donut condition in a controlled simulation and explains why/when it occurs.
+This vignette demonstrates the donut condition under two distinct mechanisms
+identified in the paper:
+
+1. **The Gaussian bump** (Corollaries 4.1–4.2): the centre is elevated but
+   surrounded by neighbours that are only mildly elevated. The neighbourhood
+   elevation ratio $\rho_i$ falls below the significance threshold.
+2. **The isolated spike** (Corollary 4.4): the centre is so extreme that it
+   dominates the global variance $m_2$, driving $\rho_i \to -1/\sqrt{n}$ and
+   making the standardised statistic converge to zero regardless of how large
+   the count is.
 
 ```{r echo=FALSE, out.width="55%", fig.align="center", fig.cap="Will there be donuts?"}
-
 knitr::include_graphics("donuts.jpg")
 ```
 
@@ -50,30 +65,19 @@ $m_2$ is the global variance, and $L_i$ is the average deviation of the
 neighbouring cells (the **spatial lag**).
 
 To test significance, the method compares this to a **permutation null**: it
-holds cell $i$'s value fixed and randomly reshuffles all other values,
-asking how extreme $I_i$ is relative to that null distribution.
+holds cell $i$'s value fixed and randomly reshuffles all other values, asking
+how extreme $I_i$ is relative to that null distribution.
 
 Since $z_i$ and $m_2$ are held fixed under the permutation, $I_i$ is just a
-constant multiple of $L_i$. When we standardise $I_i$ by subtracting its
-permutation mean and dividing by its permutation standard deviation, the
-factor $z_i/m_2$ cancels exactly (Lemma 2 in the paper). What remains is
-the standardised spatial lag:
+constant multiple of $L_i$. When we standardise $I_i$, the factor $z_i/m_2$
+cancels exactly (Lemma 1 in the paper). What remains is the standardised
+spatial lag:
 
 $$\frac{I_i - \mathbb{E}_\pi[I_i]}{\sqrt{\text{Var}_\pi(I_i)}} = \text{sgn}(z_i) \cdot \frac{L_i - \mathbb{E}_\pi[L_i]}{\sqrt{\text{Var}_\pi(L_i)}}$$
 
-**Cell $i$'s own value plays no role in determining its significance.**
-Only how elevated its *neighbours* are --- relative to the global variance
---- matters.
-
-When the centre cell is a very sharp spike, two things happen simultaneously:
-
-1. The neighbours are only slightly elevated (the bump is narrow), so $L_i$
-   is small.
-2. The spike inflates the global variance $m_2$, making even a moderately
-   elevated neighbourhood look unremarkable by comparison.
-
-Both effects push the standardised statistic below the significance threshold,
-producing the donut.
+**Cell $i$'s own value plays no role in determining its significance.** Only
+how elevated its neighbours are — relative to the global variance — matters.
+This single algebraic fact underlies both failure modes demonstrated below.
 
 ---
 
@@ -82,14 +86,14 @@ producing the donut.
 ```{r libraries}
 library(spdep)
 library(tidyverse)
+library(patchwork)
 
 set.seed(42)
 ```
 
 We build a 50 × 50 regular grid. Each cell is connected to its (up to) 8
-**queen neighbours** --- the cells touching it horizontally, vertically, and
-diagonally. Weights are row-standardised: each neighbour receives weight
-$1/k_i$ where $k_i$ is the number of neighbours (8 for interior cells).
+**queen neighbours**. Weights are row-standardised: each neighbour receives
+weight $1/k_i$ where $k_i$ is the number of neighbours (8 for interior cells).
 
 ```{r grid}
 n_row <- 50
@@ -110,92 +114,10 @@ cat("Centre cell ID:", center_id,
     "| Neighbours:", length(center_nbrs), "\n")
 ```
 
----
+The neighbourhood elevation ratio and its significance threshold are the key
+diagnostic quantities from Theorem 3 and Corollary 4.1 of the paper:
 
-## Generating the Bump Surface
-
-We place a **Gaussian bump** at the centre of the grid. The bump height
-$\delta$ controls how far above the background the centre cell sits (in
-units of background standard deviation). The width $\sigma_b$ controls how
-quickly the elevation falls off with distance.
-
-For the donut to appear we use:
-
-- **`delta = 10`**: the centre cell is 10 standard deviations above
-  background --- an extreme outlier by any measure.
-- **`sigma_b = 0.1`**: the bump is extremely narrow, confined almost
-  entirely to the centre cell itself.
-
-```{r bump}
-add_bump <- function(delta, sigma_b,
-                     center_row      = 25,
-                     center_col      = 25,
-                     background_mean = 5,
-                     background_sd   = 1) {
-  bg    <- rnorm(n, mean = background_mean, sd = background_sd)
-  dist2 <- (coords$row - center_row)^2 + (coords$col - center_col)^2
-  bump  <- (delta * background_sd) * exp(-dist2 / (2 * sigma_b^2))
-  pmax(bg + bump, 0)
-}
-```
-
----
-
-## Detecting the Donut
-
-The helper below classifies the centre cell: is it a local maximum, is it
-significant, and how many of its neighbours are significant HH (high–high)
-cells?
-
-```{r helpers}
-# Is centre cell a donut hole?
-# Requires: local maximum, not significant itself,
-# and at least min_sig_neighbors significant HH neighbours.
-detect_center_donut_hh <- function(x, p_val, nb, center_id, lw,
-                                   alpha = 0.05, min_hh_neighbors = 5) {
-  signif <- p_val < alpha
-  z      <- x - mean(x)
-  lag_z  <- lag.listw(lw, z, zero.policy = TRUE)
-
-  quadrant <- case_when(
-    z > 0 & lag_z > 0 ~ "HH",
-    z < 0 & lag_z < 0 ~ "LL",
-    z > 0 & lag_z < 0 ~ "HL",
-    z < 0 & lag_z > 0 ~ "LH"
-  )
-
-  center_nbrs   <- nb[[center_id]]
-  is_local_max  <- x[center_id] >= max(x[center_nbrs])
-  center_not_sig <- !signif[center_id]
-  hh_neighbors  <- sum(signif[center_nbrs] & quadrant[center_nbrs] == "HH")
-
-  list(
-    is_donut      = is_local_max && center_not_sig &&
-                    (hh_neighbors >= min_hh_neighbors),
-    hh_neighbors  = hh_neighbors,
-    is_local_max  = is_local_max,
-    center_not_sig = center_not_sig,
-    quadrant      = quadrant
-  )
-}
-```
-
----
-
-## The Neighbourhood Elevation Ratio $\rho_i$
-
-Our theorem shows that significance is governed by
-
-$$\rho_i = \frac{L_i}{\sqrt{m_2}}$$
-
-the average neighbour deviation divided by the square root of global
-variance. For an interior queen cell the significance threshold at
-$\alpha = 0.05$ is
-
-$$\rho_i < \frac{1.96}{\sqrt{8}} \approx 0.693.$$
-
-Below this threshold, no value of $x_i$ --- however large --- can make
-the cell significant.
+$$\rho_i = \frac{L_i}{\sqrt{m_2}}, \qquad \text{non-significant when } \rho_i < \frac{1.96}{\sqrt{8}} \approx 0.693.$$
 
 ```{r rho}
 compute_rho <- function(x) {
@@ -210,108 +132,121 @@ cat(sprintf("Significance threshold for rho_i: %.4f\n", threshold))
 
 ---
 
-## Producing the Donut Map
+# Case 1: The Gaussian Bump
 
-```{r map-function}
+## Mechanism
 
-plot_center_counts_vs_significance <- function(delta = 10, sigma_b = 0.1, seed = 123) {
+The field is generated by adding a smooth Gaussian bump to a flat Gaussian
+background. Two parameters control the bump:
+
+- **`delta`**: bump height in units of background standard deviation.
+- **`sigma_b`**: spatial spread in grid cells. A small $\sigma_b$ concentrates
+  the elevation almost entirely on the centre cell, leaving neighbours only
+  slightly above the background.
+
+When $\sigma_b$ is very small, the neighbours receive little elevation so
+$L_i$ is small. At the same time, the extreme centre inflates $m_2$, making
+even a moderately elevated neighbourhood look unremarkable. Both effects push
+$\rho_i$ below the threshold — the donut condition of Corollary 4.1.
+
+## Generating the Surface
+
+```{r bump}
+add_bump <- function(delta, sigma_b,
+                     center_row      = 25,
+                     center_col      = 25,
+                     background_mean = 5,
+                     background_sd   = 1) {
+  bg    <- rnorm(n, mean = background_mean, sd = background_sd)
+  dist2 <- (coords$row - center_row)^2 + (coords$col - center_col)^2
+  bump  <- (delta * background_sd) * exp(-dist2 / (2 * sigma_b^2))
+  pmax(bg + bump, 0)
+}
+```
+
+## Plotting Function
+
+```{r bump-plot-fn}
+plot_center_counts_vs_significance <- function(delta = 10, sigma_b = 0.1,
+                                               seed  = 123) {
   if (!is.null(seed)) set.seed(seed)
 
   x <- add_bump(delta, sigma_b)
 
-  lm <- localmoran(
-    x, lw,
-    conditional = TRUE,
-    mlvar = FALSE,
-    zero.policy = TRUE
-  )
-
-  p_val  <- lm[, 5]
+  lm_res <- localmoran(x, lw, conditional = TRUE,
+                       mlvar = FALSE, zero.policy = TRUE)
+  p_val  <- lm_res[, 5]
   signif <- p_val < 0.05
 
   df <- coords %>%
     mutate(
-      x = x,
-      p_val = p_val,
-      signif = signif,
-      is_center = seq_len(n()) == center_id,
+      x           = x,
+      p_val       = p_val,
+      signif      = signif,
+      is_center   = seq_len(n()) == center_id,
       is_neighbor = seq_len(n()) %in% center_nbrs
     ) %>%
     filter(is_center | is_neighbor)
 
   p_counts <- ggplot(df, aes(x = col, y = row, fill = x)) +
     geom_tile(color = "black", linewidth = 0.8) +
-    coord_equal() +
-    scale_y_reverse() +
+    coord_equal() + scale_y_reverse() +
     scale_fill_distiller(palette = "YlOrRd", direction = 1, name = "Count") +
-    labs(
-      title = sprintf("Actual counts | delta = %g, sigma_b = %g", delta, sigma_b),
-      x = NULL, y = NULL
-    ) +
+    labs(title = sprintf("Gaussian bump  |  delta = %g, sigma_b = %g",
+                         delta, sigma_b),
+         x = NULL, y = NULL) +
     theme_bw(base_size = 12) +
-    theme(
-      axis.text = element_blank(),
-      axis.ticks = element_blank(),
-      panel.grid = element_blank()
-    )
+    theme(axis.text = element_blank(), axis.ticks = element_blank(),
+          panel.grid = element_blank())
 
   p_sig <- ggplot(df, aes(x = col, y = row, fill = case_when(
-    is_center & !signif ~ "Center: not significant",
-    is_center & signif  ~ "Center: significant",
-    is_neighbor & signif ~ "Significant neighbor",
-    TRUE ~ "Neighbor: not significant"
+    is_center   & !signif ~ "Centre: not significant",
+    is_center   &  signif ~ "Centre: significant",
+    is_neighbor &  signif ~ "Significant neighbour",
+    TRUE                  ~ "Neighbour: not significant"
   ))) +
     geom_tile(color = "black", linewidth = 0.8) +
-    coord_equal() +
-    scale_y_reverse() +
+    coord_equal() + scale_y_reverse() +
     scale_fill_manual(
-      values = c(
-        "Center: not significant" = "dodgerblue",
-        "Center: significant" = "red",
-        "Significant neighbor" = "orange",
-        "Neighbor: not significant" = "grey85"
-      ),
-      name = NULL
-    ) +
-    labs(
-      title = "Local Moran significance pattern",
-      subtitle = sprintf("center p = %.4f", p_val[center_id]),
-      x = NULL, y = NULL
-    ) +
+      values = c("Centre: not significant"    = "dodgerblue",
+                 "Centre: significant"        = "red",
+                 "Significant neighbour"      = "orange",
+                 "Neighbour: not significant" = "grey85"),
+      name = NULL) +
+    labs(title    = "Local Moran significance pattern",
+         subtitle = sprintf(
+           "Centre value = %.2f  |  p-value = %.4f  |  rho_i = %.4f",
+           x[center_id], p_val[center_id], compute_rho(x)),
+         x = NULL, y = NULL) +
     theme_bw(base_size = 12) +
-    theme(
-      axis.text = element_blank(),
-      axis.ticks = element_blank(),
-      panel.grid = element_blank()
-    )
+    theme(axis.text = element_blank(), axis.ticks = element_blank(),
+          panel.grid = element_blank())
 
   p_counts / p_sig
 }
 ```
 
-```{r donut-plot, fig.width=7, fig.height=6}
-library(patchwork)
-plot_center_counts_vs_significance(
-  delta             = 10,
-  sigma_b           = 0.1,
-  seed              = 123
-)
+## Result
+
+```{r bump-donut, fig.width=7, fig.height=6}
+plot_center_counts_vs_significance(delta = 10, sigma_b = 0.1, seed = 123)
 ```
 
-The **blue cell** at the centre is the strict local maximum --- the cell with the highest count on the grid. It is surrounded by **orange cells** that *are* statistically significant. The centre itself is not. This is the donut.
+The **blue cell** at the centre is the strict local maximum — the cell with
+the highest count on the grid. It is surrounded by **orange cells** that *are*
+statistically significant. The centre itself is not. This is the donut.
 
-The subtitle reports $\rho_i \ll 0.693$, confirming that the neighbourhood elevation ratio falls well below the analytical threshold.
+The subtitle reports $\rho_i \ll 0.693$, confirming that the neighbourhood
+elevation ratio falls well below the analytical threshold, exactly as predicted
+by Corollary 4.1.
 
----
+## A Closer Look
 
-## Why the Centre Cell Fails: A Closer Look
+The table below shows the raw values for the centre cell and its 8 neighbours.
 
-The table below shows the raw values for the centre cell and its 8 neighbours,
-making the mechanism concrete.
-
-```{r table}
+```{r bump-table}
 set.seed(123)
-x_demo <- add_bump(delta = 10, sigma_b = 0.1)
+x_demo  <- add_bump(delta = 10, sigma_b = 0.1)
 lm_demo <- localmoran(x_demo, lw, zero.policy = TRUE)
 
 xbar <- mean(x_demo)
@@ -321,25 +256,240 @@ m2   <- mean(z^2)
 ids_to_show <- c(center_id, center_nbrs)
 
 tibble(
-  Cell     = c("Centre", paste0("Neighbour ", seq_along(center_nbrs))),
-  Count    = round(x_demo[ids_to_show], 2),
+  Cell            = c("Centre", paste0("Neighbour ", seq_along(center_nbrs))),
+  Count           = round(x_demo[ids_to_show], 2),
   `z (deviation)` = round(z[ids_to_show], 2),
-  `p-value` = round(lm_demo[ids_to_show, 5], 4),
-  Significant = ifelse(lm_demo[ids_to_show, 5] < 0.05, "Yes", "No")
+  `p-value`       = round(lm_demo[ids_to_show, 5], 4),
+  Significant     = ifelse(lm_demo[ids_to_show, 5] < 0.05, "Yes", "No")
 ) |>
-  knitr::kable(align = "lrrrr",
-               caption = paste0(
-                 "Global mean = ", round(xbar, 2),
-                 "  |  sqrt(m2) = ", round(sqrt(m2), 2),
-                 "  |  rho_i = ",
-                 round(mean(z[center_nbrs]) / sqrt(m2), 4)
-               ))
+  knitr::kable(
+    align   = "lrrrr",
+    caption = paste0("Global mean = ", round(xbar, 2),
+                     "  |  sqrt(m2) = ", round(sqrt(m2), 2),
+                     "  |  rho_i = ",
+                     round(mean(z[center_nbrs]) / sqrt(m2), 4))
+  )
 ```
 
 The centre cell has a very large count and deviation, but its neighbours are
-barely above the background. Because the spike inflates $\sqrt{m_2}$, the
-neighbours' average deviation $L_i$ is tiny relative to the global scale,
-so $\rho_i$ falls far below the threshold.
+barely above the background. The spike inflates $\sqrt{m_2}$, so the
+neighbours' average deviation $L_i$ is tiny relative to the global scale and
+$\rho_i$ falls far below the threshold.
+
+---
+
+# Case 2: The Isolated Spike
+
+## Mechanism
+
+This is a more extreme version of the donut, corresponding to Corollary 4.4
+of the paper. Rather than a smooth bump, a **single cell** is assigned a very
+large count while all other cells are drawn from an independent Poisson
+background. There is no spatial structure whatsoever — just one massive
+outlier surrounded by random noise.
+
+The theory predicts that as the spike value $x_i \to \infty$ with all other
+values fixed:
+
+- The global mean shifts: $\bar{x} \approx x_i / n$.
+- Every neighbour deviation becomes **negative**: $z_j \approx -x_i / n$,
+  pulled below zero by the inflated mean.
+- The spatial lag is therefore also negative: $L_i \approx -x_i / n$.
+- The global variance is dominated by the spike: $m_2 \approx z_i^2 / n$.
+- Therefore $\rho_i \to -1/\sqrt{n}$, which is deep inside the acceptance
+  region for any practical grid size.
+
+The standardised statistic $T_i \to 0$. Paradoxically, **the more extreme
+the spike, the less detectable it becomes**. No amount of additional counts
+at the centre cell can push $\rho_i$ past the significance threshold.
+
+## Generating the Surface
+
+```{r spike}
+add_spike <- function(spike_value     = 500,
+                      background_mean = 5,
+                      center_row      = 25,
+                      center_col      = 25) {
+  x <- rpois(n, lambda = background_mean)
+  center_id_local <- which(coords$row == center_row &
+                             coords$col == center_col)
+  x[center_id_local] <- spike_value
+  x
+}
+```
+
+## Diagnostics
+
+We verify the theoretical prediction $\rho_i \approx -1/\sqrt{n}$.
+
+```{r spike-diagnostics}
+set.seed(123)
+x_spike <- add_spike(spike_value = 500, background_mean = 5)
+
+lm_spike    <- localmoran(x_spike, lw, zero.policy = TRUE)
+p_val_spike <- lm_spike[, 5]
+
+xbar  <- mean(x_spike)
+z     <- x_spike - xbar
+m2    <- mean(z^2)
+rho_i <- mean(z[center_nbrs]) / sqrt(m2)
+
+rho_theoretical <- -1 / sqrt(n)
+
+cat(sprintf(
+  "Centre cell count:               %d
+Global mean:                     %.2f
+sqrt(m2):                        %.2f
+rho_i (observed):                %.6f
+rho_i (theoretical -1/sqrt(n)):  %.6f
+Significance threshold:          %.4f
+Centre cell p-value:             %.4f
+Centre cell significant?         %s\n",
+  x_spike[center_id],
+  xbar,
+  sqrt(m2),
+  rho_i,
+  rho_theoretical,
+  threshold,
+  p_val_spike[center_id],
+  ifelse(p_val_spike[center_id] < 0.05, "YES", "NO")
+))
+```
+
+The observed $\rho_i$ matches the theoretical prediction $-1/\sqrt{2500} =
+-0.02$ closely. Since $|\rho_i| \ll 0.693$, the centre is not significant.
+
+## Plotting Function
+
+```{r spike-plot-fn}
+plot_neighborhood_from_x <- function(x, alpha = 0.05, title_str = NULL) {
+  lm_res <- localmoran(x, lw, zero.policy = TRUE)
+  p_val  <- lm_res[, 5]
+  signif <- p_val < alpha
+
+  xbar  <- mean(x)
+  z     <- x - xbar
+  m2    <- mean(z^2)
+  rho_i <- mean(z[center_nbrs]) / sqrt(m2)
+
+  nbrs <- nb[[center_id]]
+  df <- coords %>%
+    mutate(
+      x_val       = x,
+      is_center   = (row == center_row & col == center_col),
+      is_neighbor = seq_len(n()) %in% nbrs
+    ) %>%
+    filter(is_center | is_neighbor) %>%
+    mutate(
+      status = case_when(
+        is_center  & !signif[center_id] ~ "Centre: not significant",
+        is_center  &  signif[center_id] ~ "Centre: significant",
+        is_neighbor & signif[seq_len(nrow(coords)) %in% nbrs] ~
+                                           "Significant neighbour",
+        TRUE ~ "Non-significant neighbour"
+      )
+    )
+
+  p_counts <- ggplot(df, aes(x = col, y = row, fill = x_val)) +
+    geom_tile(color = "black", linewidth = 0.8) +
+    coord_equal() + scale_y_reverse() +
+    scale_fill_distiller(palette = "YlOrRd", direction = 1, name = "Count") +
+    labs(title = title_str %||% "Isolated Poisson spike",
+         x = NULL, y = NULL) +
+    theme_bw(base_size = 12) +
+    theme(axis.text = element_blank(), axis.ticks = element_blank(),
+          panel.grid = element_blank())
+
+  p_sig <- ggplot(df, aes(x = col, y = row, fill = status)) +
+    geom_tile(color = "black", linewidth = 0.8) +
+    coord_equal() + scale_y_reverse() +
+    scale_fill_manual(
+      values = c("Centre: not significant"    = "dodgerblue",
+                 "Centre: significant"        = "red",
+                 "Significant neighbour"      = "orange",
+                 "Non-significant neighbour"  = "grey80"),
+      name = NULL) +
+    labs(title    = "Local Moran significance pattern",
+         subtitle = sprintf(
+           "Centre count = %d  |  p-value = %.4f  |  rho_i = %.6f  |  -1/sqrt(n) = %.6f",
+           x[center_id], p_val[center_id], rho_i, -1/sqrt(n)),
+         x = NULL, y = NULL, fill = NULL) +
+    theme_bw(base_size = 12) +
+    theme(axis.text = element_blank(), axis.ticks = element_blank(),
+          panel.grid = element_blank())
+
+  p_counts / p_sig
+}
+```
+
+## Result
+
+```{r spike-donut, fig.width=7, fig.height=6}
+set.seed(123)
+x_spike <- add_spike(spike_value = 500, background_mean = 5)
+plot_neighborhood_from_x(
+  x         = x_spike,
+  title_str = "Isolated spike  |  spike_value = 500, background Poisson(5)"
+)
+```
+
+In contrast to the Gaussian bump, the isolated spike reaches the same visual conclusion — a non-significant blue centre surrounded by a significant orange ring — but via a different mechanism. Here the centre cell has count 500 against a background mean of 5, yet it is not significant. The neighbours *are* significant, but not because they are elevated in any meaningful sense: their raw counts are near the background level of 5. They appear significant because, relative to each other, they form a locally coherent pattern — while the extreme centre inflates $m_2$ so severely that $\rho_i \approx -1/\sqrt{n} \approx -0.02$, placing the centre deep inside the acceptance region regardless of its count.
+
+This is the most extreme form of the donut condition, described by 
+Corollary 4.4: as the spike value grows without bound, the standardised statistic $T_i \to 0$ and the centre becomes *less* detectable, not more.
+
+## A Closer Look
+
+```{r spike-table}
+set.seed(123)
+x_spike  <- add_spike(spike_value = 500, background_mean = 5)
+lm_spike <- localmoran(x_spike, lw, zero.policy = TRUE)
+
+xbar <- mean(x_spike)
+z    <- x_spike - xbar
+m2   <- mean(z^2)
+
+ids_to_show <- c(center_id, center_nbrs)
+
+tibble(
+  Cell            = c("Centre", paste0("Neighbour ", seq_along(center_nbrs))),
+  Count           = round(x_spike[ids_to_show], 2),
+  `z (deviation)` = round(z[ids_to_show], 2),
+  `p-value`       = round(lm_spike[ids_to_show, 5], 4),
+  Significant     = ifelse(lm_spike[ids_to_show, 5] < 0.05, "Yes", "No")
+) |>
+  knitr::kable(
+    align   = "lrrrr",
+    caption = paste0("Global mean = ", round(xbar, 2),
+                     "  |  sqrt(m2) = ", round(sqrt(m2), 2),
+                     "  |  rho_i = ",
+                     round(mean(z[center_nbrs]) / sqrt(m2), 6),
+                     "  |  -1/sqrt(n) = ",
+                     round(-1/sqrt(n), 6))
+  )
+```
+
+Notice that the neighbour deviations $z_j$ are **negative** — each neighbour appears *below* the heavily inflated global mean, even though their raw counts are near the background level of 5. This is why $L_i < 0$ and $\rho_i \approx -1/\sqrt{n}$: the spike pulls the mean up so far that every other cell looks like a below-average region.
+
+---
+
+## Comparison of the Two Mechanisms
+
+| Feature | Gaussian bump | Isolated spike |
+|---|---|---|
+| Background | Gaussian noise | Poisson counts |
+| Elevation profile | Smooth, narrow bump | Single point |
+| Neighbours significant? | Yes (orange ring) | No (all grey) |
+| $\rho_i$ | Small positive | $\approx -1/\sqrt{n}$ |
+| Mechanism | Weak neighbourhood elevation | $m_2$ dominated by spike |
+| Corollary | 4.1 / 4.2 | 4.4 |
+| Can a broader/taller spike fix it? | Yes (wider bump detected) | No: more extreme $\Rightarrow$ less detectable |
+
+In both cases $\rho_i$ falls well below the threshold $1.96/\sqrt{8} \approx
+0.693$. The Gaussian bump case is recoverable: a wider bump raises $\rho_i$
+above the threshold and the centre would be correctly flagged. The isolated
+spike case is not recoverable within the Local Moran framework: as the spike
+grows, $\rho_i \to -1/\sqrt{n}$ regardless of its magnitude.
 
 ---
 
