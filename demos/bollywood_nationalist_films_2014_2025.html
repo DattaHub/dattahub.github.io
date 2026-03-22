@@ -310,14 +310,14 @@
 </header>
 
 <nav>
-  <button class="nav-tab active" onclick="showSection('filmography',this)">Filmography</button>
-  <button class="nav-tab" onclick="showSection('analysis',this)">Data analysis</button>
+  <button class="nav-tab active" onclick="showSection('analysis',this)">Data analysis</button>
+  <button class="nav-tab" onclick="showSection('filmography',this)">Filmography</button>
 </nav>
 
 <main>
 
 <!-- FILMOGRAPHY -->
-<div id="filmography" class="section active">
+<div id="filmography" class="section">
   <div class="section-heading">Complete filmography</div>
   <div class="section-sub">64 films, 2014–2025. Toggle categories and filter by year. Multiple categories may apply to a single film.</div>
 
@@ -340,7 +340,7 @@
 </div>
 
 <!-- ANALYSIS -->
-<div id="analysis" class="section">
+<div id="analysis" class="section active">
   <div class="section-heading">Trend analysis</div>
   <div class="section-sub">Annual output, cumulative growth, category distribution, and key findings.</div>
 
@@ -375,11 +375,17 @@
   </div>
 
   <div class="chart-section">
-    <div class="chart-title">Category distribution</div>
-    <div class="chart-sub">Films may belong to multiple categories. Muscular nationalism and anti-Pakistan themes dominate commercially; Hindutva propaganda is smaller but most politically explicit.</div>
-    <div class="chart-card" style="display:flex;align-items:center;gap:32px;flex-wrap:wrap;">
-      <div class="chart-wrap" style="height:200px;width:200px;min-width:200px;"><canvas id="pieChart"></canvas></div>
-      <div id="pie-legend" style="font-size:12px;line-height:2;color:var(--text-muted);"></div>
+    <div class="chart-title">Category distribution &amp; commercial success</div>
+    <div class="chart-sub">Left: share of films per category (non-exclusive). Right: proportion of films classified as box-office successes by category — anti-Pakistan and muscular nationalism films succeed commercially at nearly 3× the rate of explicit BJP propaganda.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;flex-wrap:wrap;">
+      <div class="chart-card" style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
+        <div class="chart-wrap" style="height:200px;width:180px;min-width:180px;"><canvas id="pieChart"></canvas></div>
+        <div id="pie-legend" style="font-size:12px;line-height:2;color:var(--text-muted);flex:1;min-width:120px;"></div>
+      </div>
+      <div class="chart-card">
+        <div style="font-size:12px;font-weight:500;color:var(--text-muted);margin-bottom:12px;">Hit rate by category</div>
+        <div class="chart-wrap" style="height:200px;"><canvas id="hitChart"></canvas></div>
+      </div>
     </div>
   </div>
 
@@ -602,9 +608,53 @@ function renderCharts() {
       <span>${catNames[c]}</span>
       <span style="margin-left:auto;font-weight:500;color:var(--text);">${totals[i]}</span>
     </div>`).join('');
+
+  // Hit rate by category (horizontal bar)
+  const hitRates = cats.map(c => {
+    const catFilms = films.filter(f => f.cats.includes(c) && f.hit !== null && f.hit !== undefined);
+    return catFilms.length ? Math.round(100 * catFilms.filter(f => f.hit).length / catFilms.length) : 0;
+  });
+  // Sort descending for display
+  const hitOrder = cats.map((c,i) => ({c, i, rate: hitRates[i], name: catNames[c]}))
+                       .sort((a,b) => a.rate - b.rate);
+
+  new Chart(document.getElementById('hitChart'), {
+    type: 'bar',
+    data: {
+      labels: hitOrder.map(x => x.name),
+      datasets: [{
+        data: hitOrder.map(x => x.rate),
+        backgroundColor: hitOrder.map(x => colors[x.i] + 'BB'),
+        borderColor: hitOrder.map(x => colors[x.i]),
+        borderWidth: 0.5,
+        borderRadius: 3
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.x}%` } },
+        datalabels: { display: false }
+      },
+      scales: {
+        x: {
+          min: 0, max: 100,
+          grid: { color: 'rgba(0,0,0,0.05)' },
+          ticks: { callback: v => v + '%', font: { family: 'DM Sans', size: 11 } }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { font: { family: 'DM Sans', size: 11 } }
+        }
+      }
+    }
+  });
 }
 
 renderFilmography();
+setTimeout(renderCharts, 80);
 </script>
 </body>
 </html>
