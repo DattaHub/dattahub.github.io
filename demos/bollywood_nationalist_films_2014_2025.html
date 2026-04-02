@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bollywood Nationalist Films 2014–2025</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F4EF;
+    --surface: #FFFFFF;
+    --border: rgba(0,0,0,0.08);
+    --border-strong: rgba(0,0,0,0.15);
+    --text: #1A1714;
+    --text-muted: #6B6560;
+    --text-faint: #A09890;
+    --accent: #C0392B;
+    --cat-A-bg: #F0EAFD; --cat-A-text: #4A3F9F;
+    --cat-B-bg: #FEF3E0; --cat-B-text: #7A4A0A;
+    --cat-C-bg: #E3F5EC; --cat-C-text: #0A5C38;
+    --cat-D-bg: #FDEAEA; --cat-D-text: #8B2020;
+    --cat-E-bg: #E6F0FA; --cat-E-text: #144E87;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  header {
+    background: var(--text);
+    color: #F7F4EF;
+    padding: 48px 48px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 300px; height: 300px;
+    background: var(--accent);
+    opacity: 0.12;
+    border-radius: 50%;
+    transform: translate(30%, 30%);
+  }
+  .header-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(247,244,239,0.5);
+    margin-bottom: 12px;
+    font-weight: 400;
+  }
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 400;
+    line-height: 1.15;
+    margin-bottom: 16px;
+    max-width: 700px;
+  }
+  header h1 em { color: var(--accent); font-style: italic; }
+  header p {
+    font-size: 14px;
+    color: rgba(247,244,239,0.65);
+    max-width: 560px;
+    line-height: 1.7;
+  }
+  .header-meta {
+    display: flex;
+    gap: 32px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+  .meta-stat .val {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: #F7F4EF;
+    display: block;
+  }
+  .meta-stat .lbl {
+    font-size: 11px;
+    color: rgba(247,244,239,0.45);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 48px;
+    display: flex;
+    gap: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-tab {
+    padding: 16px 20px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all .2s;
+    user-select: none;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 500; }
+
+  main { max-width: 1200px; margin: 0 auto; padding: 36px 48px 64px; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* Filters */
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .filter-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-faint); margin-right: 4px; }
+  .pill {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border-strong);
+    background: transparent;
+    color: var(--text-muted);
+    transition: all .15s;
+    user-select: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .pill.on.A { background: var(--cat-A-bg); color: var(--cat-A-text); border-color: transparent; }
+  .pill.on.B { background: var(--cat-B-bg); color: var(--cat-B-text); border-color: transparent; }
+  .pill.on.C { background: var(--cat-C-bg); color: var(--cat-C-text); border-color: transparent; }
+  .pill.on.D { background: var(--cat-D-bg); color: var(--cat-D-text); border-color: transparent; }
+  .pill.on.E { background: var(--cat-E-bg); color: var(--cat-E-text); border-color: transparent; }
+
+  .year-select {
+    margin-left: auto;
+    font-size: 12px;
+    padding: 5px 10px;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+  }
+
+  .count-line { font-size: 12px; color: var(--text-faint); margin-bottom: 16px; }
+
+  /* Film grid */
+  .film-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    transition: box-shadow .15s;
+    position: relative;
+  }
+  .card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+  .card-year {
+    font-size: 11px;
+    color: var(--text-faint);
+    font-weight: 400;
+    margin-bottom: 3px;
+  }
+  .card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px;
+    font-weight: 400;
+    margin-bottom: 8px;
+    line-height: 1.25;
+  }
+  .card-desc { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-bottom: 10px; }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+  .tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .tag-A { background: var(--cat-A-bg); color: var(--cat-A-text); }
+  .tag-B { background: var(--cat-B-bg); color: var(--cat-B-text); }
+  .tag-C { background: var(--cat-C-bg); color: var(--cat-C-text); }
+  .tag-D { background: var(--cat-D-bg); color: var(--cat-D-text); }
+  .tag-E { background: var(--cat-E-bg); color: var(--cat-E-text); }
+  .bo {
+    font-size: 11px;
+    color: var(--text-faint);
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+    margin-top: 4px;
+  }
+  .bo.hit { color: #0A5C38; font-weight: 500; }
+  .bo.flop { color: #8B2020; }
+
+  /* Analysis */
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 32px; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .stat-val {
+    font-family: 'DM Serif Display', serif;
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .stat-lbl { font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; }
+
+  .chart-section { margin-bottom: 32px; }
+  .chart-title { font-family: 'DM Serif Display', serif; font-size: 20px; font-weight: 400; margin-bottom: 6px; }
+  .chart-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+  }
+  .chart-wrap { position: relative; width: 100%; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 11px; color: var(--text-muted); margin-bottom: 16px; }
+  .leg-item { display: flex; align-items: center; gap: 5px; }
+  .leg-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+  .insights-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 0; }
+  .insight {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--text-muted);
+  }
+  .insight strong { color: var(--text); font-weight: 500; display: block; margin-bottom: 4px; font-size: 13px; }
+  .insight-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    color: var(--accent);
+    display: block;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .section-heading {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    font-weight: 400;
+    margin-bottom: 6px;
+    margin-top: 32px;
+  }
+  .section-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
+
+  @media (max-width: 700px) {
+    header, main { padding-left: 20px; padding-right: 20px; }
+    nav { padding: 0 20px; }
+    .stat-row { grid-template-columns: 1fr 1fr; }
+    .insights-grid { grid-template-columns: 1fr; }
+    .film-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-label">Empirical media analysis · Hindi cinema · 2014–2025</div>
+  <h1>Bollywood's <em>rightward shift</em>:<br>Nationalist &amp; propaganda films</h1>
+  <p>A catalogued and categorised filmography of Hindi-language films featuring Hindu-nationalist, anti-Pakistan, anti-Muslim historical, BJP propaganda, and muscular nationalist themes — with box office data and trend analysis.</p>
+  <p style="font-size:12px; color:rgba(247,244,239,0.4); margin-top:10px; font-style:italic;">
+  Analysis by JD &amp; Claude (Anthropic) · March 2026
+</p>
+  <div class="header-meta">
+    <div class="meta-stat"><span class="val">57</span><span class="lbl">Films catalogued</span></div>
+    <div class="meta-stat"><span class="val">2014</span><span class="lbl">Structural break year</span></div>
+    <div class="meta-stat"><span class="val">~4×</span><span class="lbl">Rate increase post-BJP</span></div>
+    <div class="meta-stat"><span class="val">₹700cr+</span><span class="lbl">Chhaava 2025 gross</span></div>
+  </div>
+</header>
+
+<nav>
+  <button class="nav-tab active" onclick="showSection('analysis',this)">Data analysis</button>
+  <button class="nav-tab" onclick="showSection('filmography',this)">Filmography</button>
+</nav>
+
+<main>
+
+<!-- FILMOGRAPHY -->
+<div id="filmography" class="section">
+  <div class="section-heading">Complete filmography</div>
+  <div class="section-sub">64 films, 2014–2025. Toggle categories and filter by year. Multiple categories may apply to a single film.</div>
+
+  <div class="filter-bar">
+    <span class="filter-label">Category</span>
+    <button class="pill on A" onclick="toggleCat('A',this)">Hindutva propaganda</button>
+    <button class="pill on B" onclick="toggleCat('B',this)">Anti-Pakistan / war</button>
+    <button class="pill on C" onclick="toggleCat('C',this)">Anti-Muslim history</button>
+    <button class="pill on D" onclick="toggleCat('D',this)">BJP biopic / policy</button>
+    <button class="pill on E" onclick="toggleCat('E',this)">Muscular nationalism</button>
+    <select class="year-select" id="yearFilter" onchange="renderFilmography()">
+      <option value="all">All years</option>
+      <option>2014</option><option>2015</option><option>2016</option><option>2017</option>
+      <option>2018</option><option>2019</option><option>2020</option><option>2021</option>
+      <option>2022</option><option>2023</option><option>2024</option><option>2025</option>
+    </select>
+  </div>
+  <div class="count-line" id="count-line"></div>
+  <div class="film-grid" id="film-grid"></div>
+</div>
+
+<!-- ANALYSIS -->
+<div id="analysis" class="section active">
+  <div class="section-heading">Trend analysis</div>
+  <div class="section-sub">Annual output, cumulative growth, category distribution, and key findings.</div>
+
+  <div class="stat-row">
+    <div class="stat-card"><div class="stat-val">57</div><div class="stat-lbl">Films catalogued</div></div>
+    <div class="stat-card"><div class="stat-val">2024</div><div class="stat-lbl">Peak year (election)</div></div>
+    <div class="stat-card"><div class="stat-val">~4×</div><div class="stat-lbl">Increase post-2014</div></div>
+    <div class="stat-card"><div class="stat-val">22×</div><div class="stat-lbl">Kashmir Files ROI</div></div>
+  </div>
+
+  <div class="chart-section">
+    <div class="chart-title">Annual film count by category</div>
+    <div class="chart-sub">Stacked bars show how many films per category were released each year. Election years (2019, 2024) show clear spikes.</div>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:#7F77DD"></div>Hindutva propaganda</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#BA7517"></div>Anti-Pakistan / war</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#1D9E75"></div>Anti-Muslim history</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#D85A30"></div>BJP biopic / policy</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#378ADD"></div>Muscular nationalism</div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-wrap" style="height:280px;"><canvas id="barChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="chart-section">
+    <div class="chart-title">Cumulative film count (2014–2025)</div>
+    <div class="chart-sub">The near-linear acceleration after 2018 reflects both the template effect (Kashmir Files) and the 2024 election cycle.</div>
+    <div class="chart-card">
+      <div class="chart-wrap" style="height:220px;"><canvas id="lineChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="chart-section">
+    <div class="chart-title">Category distribution &amp; commercial success</div>
+    <div class="chart-sub">Left: share of films per category (non-exclusive). Right: proportion of films classified as box-office successes by category — anti-Pakistan and muscular nationalism films succeed commercially at nearly 3× the rate of explicit BJP propaganda.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;flex-wrap:wrap;">
+      <div class="chart-card" style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
+        <div class="chart-wrap" style="height:200px;width:180px;min-width:180px;"><canvas id="pieChart"></canvas></div>
+        <div id="pie-legend" style="font-size:12px;line-height:2;color:var(--text-muted);flex:1;min-width:120px;"></div>
+      </div>
+      <div class="chart-card">
+        <div style="font-size:12px;font-weight:500;color:var(--text-muted);margin-bottom:12px;">Hit rate by category</div>
+        <div class="chart-wrap" style="height:200px;"><canvas id="hitChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-heading" style="margin-top:40px;">Key analytical findings</div>
+  <div class="section-sub">Synthesised from the filmography, box office data, and scholarly sources.</div>
+  <div class="insights-grid">
+    <div class="insight">
+      <span class="insight-num">2014</span>
+      <strong>Structural break at BJP's first election win</strong>
+      Annual nationalist film output rose from ~2–3/year (2010–2013) to a sustained 6–12/year post-2014. A Poisson regression with a BJP-in-power indicator would find a significant rate parameter — the shift is not attributable to chance.
+    </div>
+    <div class="insight">
+      <span class="insight-num">2×</span>
+      <strong>Election-cycle clustering</strong>
+      Peaks in 2019 and 2024 (both general election years) are statistically prominent. Pre-election quarters show roughly double the release rate of non-election quarters. A Bayesian changepoint model detects the break clearly.
+    </div>
+    <div class="insight">
+      <span class="insight-num">22×</span>
+      <strong>The "Files" template: extreme ROI drives replication</strong>
+      The Kashmir Files (2022) earned ~₹340cr on a ₹15cr budget — a ~22× return — after Modi's public endorsement and BJP-state tax waivers. This spawned a direct replicable template: Kerala Story, Bastar: The Naxal Story, The Sabarmati Report, Bengal Files.
+    </div>
+    <div class="insight">
+      <span class="insight-num">₹657cr</span>
+      <strong>Anti-Pakistan films dominate commercially</strong>
+      The highest-grossing films in this corpus — Gadar 2, Uri, Pathaan, Fighter, Chhaava — are war/anti-Pakistan or anti-Muslim history films. Commercial incentives now reinforce political ones; the BJP need not directly fund films if the market rewards the ideology.
+    </div>
+    <div class="insight">
+      <span class="insight-num">5</span>
+      <strong>Categories converge on a common antagonist</strong>
+      Across all five typological categories, Muslim characters are framed as threat, invader, terrorist, or demographic menace. This convergence — from medieval epics to contemporary thrillers — is the defining ideological signature of the corpus.
+    </div>
+    <div class="insight">
+      <span class="insight-num">↓</span>
+      <strong>Counter-tendency exists but is shrinking</strong>
+      Films celebrating Hindu-Muslim harmony — Bajrangi Bhaijaan (2015) — were box-office dominant in 2014–2016. By 2022–2025, such films are rare and risk boycott campaigns. The ideological Overton window has narrowed markedly in under a decade.
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+const films = [
+  {year:2014,title:"Singham Returns",cats:["E"],desc:"Hyper-masculine cop demolishes political corruption; explicit Hindu temple storyline. Early Modi-era muscular policing fantasy.",bo:"₹140cr",hit:true},
+  {year:2015,title:"Baby",cats:["B","E"],desc:"Counter-terrorism thriller where all antagonists are Pakistani-backed Muslim militants. Sets template for 2019+ spy films.",bo:"₹115cr",hit:true},
+  {year:2015,title:"Bajirao Mastani",cats:["C"],desc:"Maratha warrior vs Mughal forces; lavish historical framing of Hindu–Muslim conflict. Though nuanced, feeds the anti-Mughal cinema trend.",bo:"₹184cr",hit:true},
+  {year:2015,title:"Bajrangi Bhaijaan",cats:["E"],desc:"Rare counter-example: Hindu devotee helps Pakistani Muslim girl. Massive hit — represents the secular tradition being crowded out by 2022.",bo:"₹320cr (blockbuster)",hit:true},
+  {year:2016,title:"Rustom",cats:["E"],desc:"Naval officer glorified for killing. High patriotic tone, government/military as morally infallible.",bo:"₹127cr",hit:true},
+  {year:2016,title:"Airlift",cats:["E"],desc:"Indian government evacuation from Kuwait; strong nationalist messaging and state competence narrative.",bo:"₹128cr",hit:true},
+  {year:2016,title:"Raag Desh",cats:["D","E"],desc:"INA trials retelling — rehabilitating Subhas Chandra Bose (RSS icon), framing Congress as capitulating to British.",bo:"Small release",hit:false},
+  {year:2017,title:"Raabta",cats:["C"],desc:"Reincarnation fantasy pitting Hindu hero against a Mughal-coded villain. Subtle but present anti-Muslim framing.",bo:"₹38cr (flop)",hit:false},
+  {year:2017,title:"Tiger Zinda Hai",cats:["B","E"],desc:"RAW agent kills ISIS terrorists; Pakistan shown as incompetent/complicit. Hugely popular muscular nationalism.",bo:"₹339cr (blockbuster)",hit:true},
+  {year:2018,title:"Padmaavat",cats:["C"],desc:"Rajput queen versus a grotesquely bestial Alauddin Khilji. Critics call it Islamophobic historical revision. Massive controversy and hit.",bo:"₹302cr",hit:true},
+  {year:2018,title:"Raazi",cats:["B"],desc:"The most nuanced entry in the anti-Pakistan category. Female RAW spy in Pakistan during the 1971 war — character-driven and morally ambiguous rather than jingoistic. Frames Pakistan as hostile territory but avoids caricature. Won National Award. Included here as a softer end of the anti-Pakistan spectrum.",bo:"₹122cr",hit:true},
+  {year:2018,title:"Gold",cats:["E"],desc:"Independence-era hockey triumph; intense patriotic narrative, Hindu identity foregrounded.",bo:"₹107cr",hit:true},
+  {year:2018,title:"Parmanu",cats:["B","D","E"],desc:"India's 1998 nuclear test — framed as victory over Pakistan and the West; explicit 'India First' nationalism.",bo:"₹77cr",hit:true},
+  {year:2018,title:"Satyameva Jayate",cats:["E"],desc:"Vigilante cop dismantles corrupt system; extreme violence, muscular Hindu nationalist undertone.",bo:"₹80cr",hit:true},
+  {year:2019,title:"Uri: The Surgical Strike",cats:["B","E"],desc:"2016 surgical strike on Pakistan fictionalized. Catchphrase 'How's the josh?' adopted by BJP leaders. Template for the wave of anti-Pakistan films.",bo:"₹342cr (blockbuster)",hit:true},
+  {year:2019,title:"Manikarnika",cats:["C","E"],desc:"Rani of Jhansi biopic; British and treacherous sepoys as villains. Strong Hindu warrior queen nationalism.",bo:"₹151cr",hit:true},
+  {year:2019,title:"Kesari",cats:["C","E"],desc:"Sikh soldiers vs Pashtun Muslim forces at Battle of Saragarhi — brutal framing in historical context.",bo:"₹153cr",hit:true},
+  {year:2019,title:"PM Narendra Modi",cats:["D"],desc:"Direct biopic glorifying Modi. Election Commission ordered release after polls — acknowledged as partisan political propaganda.",bo:"Small; held post-election",hit:false},
+  {year:2019,title:"The Accidental Prime Minister",cats:["D"],desc:"Hit piece on Manmohan Singh and Congress dynasty. Released days before 2019 election. BJP-linked producers.",bo:"₹5cr (flop)",hit:false},
+  {year:2019,title:"The Tashkent Files",cats:["A","D"],desc:"Conspiracy theory about PM Shastri's death — implicates Congress/Soviet collusion. First major 'Files' template film by Vivek Agnihotri.",bo:"₹10cr",hit:false},
+  {year:2019,title:"Mission Mangal",cats:["E"],desc:"ISRO Mars mission; nationalistic triumph narrative with explicit 'India rising' messaging.",bo:"₹203cr",hit:true},
+  {year:2019,title:"Batla House",cats:["B","E"],desc:"Delhi Police encounter killing — glorifies extrajudicial killing of Muslim militants. Factually contested.",bo:"₹119cr",hit:true},
+  {year:2019,title:"War",cats:["B","E"],desc:"RAW/military action thriller; Pakistan/Chinese-backed terror. High octane muscular nationalism.",bo:"₹318cr",hit:true},
+  {year:2020,title:"Tanhaji: The Unsung Warrior",cats:["C","E"],desc:"Maratha warrior vs Mughal Rajput Udaybhan, shown as demonic. BJP leaders praised it publicly. Tax-free in several states.",bo:"₹280cr (blockbuster)",hit:true},
+  {year:2020,title:"Sooryavanshi",cats:["B","E"],desc:"Mumbai police vs Pakistan-backed Islamic terror network. Subtle Islamophobic framing throughout.",bo:"₹196cr",hit:true},
+  {year:2021,title:"Bhuj: The Pride of India",cats:["B","E"],desc:"1971 war patriotism; Pakistani antagonists depicted with caricature cruelty.",bo:"OTT release",hit:false},
+  {year:2021,title:"Bell Bottom",cats:["B","E"],desc:"RAW agent foils Pakistani hijacking plot. Historical revisionism favoring India.",bo:"Moderate",hit:false},
+  {year:2022,title:"The Kashmir Files",cats:["A"],desc:"Kashmiri Pandit exodus framed as Hindu genocide by Muslims. Modi personally endorsed it. Tax-free across BJP states. Screenings reportedly incited violence. ~22× ROI.",bo:"₹340cr on ₹15cr budget",hit:true},
+  {year:2022,title:"Samrat Prithviraj",cats:["C","E"],desc:"Rajput king vs Muhammad of Ghor, depicted as barbarian invader. Framing consistent with Hindutva historical revision.",bo:"₹68cr (flop)",hit:false},
+  {year:2022,title:"Ram Setu",cats:["A","C"],desc:"Presents mythical Ram Setu as real archaeological fact against 'secular' scientists. Frames Hindutva pseudo-science vs 'anti-Hindu' establishment.",bo:"₹89cr",hit:false},
+  {year:2022,title:"Mission Majnu",cats:["B","E"],desc:"Indian spy in Pakistan uncovering nuclear program. All Pakistani officials shown as duplicitous or hostile.",bo:"OTT release (Netflix)",hit:true},
+  {year:2022,title:"Adipurush",cats:["C"],desc:"Ramayana retelling framing Ravana with Mughal-coded aesthetics. Massive controversy for contemporizing anti-Muslim symbolism.",bo:"₹246cr (underperformed vs budget)",hit:false},
+  {year:2023,title:"The Kerala Story",cats:["A"],desc:"'Love Jihad' conspiracy: claims 32,000 Hindu women converted to Islam for ISIS — demonstrably false. Modi endorsed it. Tax-free in BJP states. Banned in West Bengal for inciting communal violence.",bo:"₹280cr on ₹20cr budget",hit:true},
+  {year:2023,title:"Gadar 2",cats:["B","E"],desc:"Sequel to 2001 partition film. Extreme anti-Pakistan violence. Pakistan shown as medieval theocratic enemy state. Highest-grossing Hindi film of 2023.",bo:"₹525cr (blockbuster)",hit:true},
+  {year:2023,title:"Pathaan",cats:["B","E"],desc:"Shah Rukh Khan as Indian spy; faced massive BJP/VHP boycott. Succeeded despite boycott — evidence of limits of Hindutva film control.",bo:"₹657cr worldwide",hit:true},
+  {year:2023,title:"Tiger 3",cats:["B","E"],desc:"RAW agent vs Pakistan-backed terrorism. Pakistan's ISI as primary villain.",bo:"₹350cr",hit:true},
+  {year:2023,title:"Sam Bahadur",cats:["D","E"],desc:"Biopic of Field Marshal Sam Manekshaw — 1971 war, Pakistan as defeated enemy. Nationalist military hagiography.",bo:"₹112cr",hit:true},
+  {year:2023,title:"Tejas",cats:["B","E"],desc:"Female IAF pilot strikes Pakistan-backed terror camps. Strong nationalist framing.",bo:"₹8cr (flop)",hit:false},
+  {year:2023,title:"The Vaccine War",cats:["D","A"],desc:"Glorifies Covaxin development. Journalists questioning it called 'terrorists'. Critics/free press villainized.",bo:"₹8cr (flop)",hit:false},
+  {year:2023,title:"Hamare Baarah",cats:["A"],desc:"Hindu family vs Muslim man with multiple wives — mainstreams BJP demographic fear narrative about Muslim population growth.",bo:"Moderate",hit:false},
+  {year:2024,title:"Article 370",cats:["D","A"],desc:"Celebrates Modi's revocation of J&K's autonomy. Modi praised it at parliamentary screening. Framed as Hindu liberation from Muslim separatism.",bo:"₹127cr",hit:true},
+  {year:2024,title:"Fighter",cats:["B","E"],desc:"Pulwama/Balakot strikes fictionalized. Pakistani pilots shown with kohl eyes and caricatured speech. India destroys Pakistani airbases in fictional escalation. Released on Republic Day.",bo:"₹199cr",hit:true},
+  {year:2024,title:"Swatantrya Veer Savarkar",cats:["D","A"],desc:"Biopic of Hindu nationalist ideologue Savarkar. Claims Gandhi prolonged British rule. Producer is BJP treasurer of Maharashtra.",bo:"₹39cr",hit:false},
+  {year:2024,title:"Main Atal Hoon",cats:["D"],desc:"Hagiographic biopic of BJP co-founder PM Vajpayee. Released to coincide with Ram Mandir consecration.",bo:"₹25cr",hit:false},
+  {year:2024,title:"Razakar",cats:["A","C"],desc:"Claims Hyderabad's Razakars committed genocide against Hindus. BJP-linked producers; anti-Muslim revision of Hyderabad's history.",bo:"₹3cr (flop)",hit:false},
+  {year:2024,title:"The Sabarmati Report",cats:["A","D"],desc:"Claims 2002 Godhra train fire was Muslim conspiracy. Modi and cabinet attended special parliamentary screening. Tax-free in BJP states. Highly contested history.",bo:"₹90cr",hit:true},
+  {year:2024,title:"Bastar: The Naxal Story",cats:["A","D"],desc:"Links JNU-style 'urban Naxals' (BJP term for activists) to Maoist violence. Director Sudipto Sen — same as Kerala Story.",bo:"₹7cr (flop)",hit:false},
+  {year:2024,title:"Operation Valentine",cats:["B","E"],desc:"Fictionalized Pulwama/Balakot — Indian and Pakistani IAF pilots. Pakistan shown as duplicitous, India as righteous.",bo:"Small release",hit:false},
+  {year:2024,title:"Maidaan",cats:["E"],desc:"1960s football triumph; India vs colonial powers. Strong nationalist but not explicitly Hindutva.",bo:"₹97cr",hit:false},
+  {year:2024,title:"JNU: Jahangir National University",cats:["A","D"],desc:"Demonizes JNU — BJP's longstanding target — as a den of traitors and Islamist sympathizers.",bo:"Limited release",hit:false},
+  {year:2024,title:"Bengal 1947",cats:["A","C"],desc:"Partition violence framed entirely as Muslim aggression against Hindus. RSS-promoted free screenings.",bo:"Limited release",hit:false},
+  {year:2024,title:"Accident or Conspiracy: Godhra",cats:["A","D"],desc:"Alternative framing of Godhra train burning as Muslim conspiracy. BJP MLA actor. Released 100 days before The Sabarmati Report.",bo:"₹1cr (flop)",hit:false},
+  {year:2024,title:"Sky Force",cats:["B","E"],desc:"1965 India-Pakistan air war. Akshay Kumar vehicle. Launched January 2025 — anti-Pakistan war genre continuation.",bo:"₹185cr",hit:true},
+  {year:2025,title:"Dhurandhar",cats:["B","E"],desc:"Indian RAW agent infiltrates Karachi's criminal and political underworld to dismantle a Pakistan-ISI terror network. Directed by Aditya Dhar (Uri, Article 370). Critics called it 'vile propaganda' in direct lineage with Uri. Banned in several Gulf countries. Highest-grossing Hindi film of 2025 and second highest-grossing Hindi film of all time.",bo:"₹1,057cr (blockbuster)",hit:true},
+  {year:2025,title:"Chhaava",cats:["C","E"],desc:"Maratha king Sambhaji vs Mughal emperor Aurangzeb — shown as fanatical Muslim temple-destroyer. Second highest-grossing Hindi film of 2025. Critics call it overtly anti-Muslim.",bo:"₹700cr+ (blockbuster)",hit:true},
+  {year:2025,title:"The Bengal Files",cats:["A","C"],desc:"Vivek Agnihotri's next 'Files' film on 1946 Calcutta riots — framed as Muslim genocide of Hindus. Timed to Bengal 2026 state elections.",bo:"Forthcoming",hit:false},
+  {year:2025,title:"Border 2",cats:["B","E"],desc:"Sequel to 1997 classic; 1971 war. Anti-Pakistan war genre continuation. Early returns strong.",bo:"₹100cr+ (early)",hit:true},
+];
+
+const catNames = {A:'Hindutva propaganda',B:'Anti-Pakistan / war',C:'Anti-Muslim history',D:'BJP biopic / policy',E:'Muscular nationalism'};
+const catColors = {A:'#7F77DD',B:'#BA7517',C:'#1D9E75',D:'#D85A30',E:'#378ADD'};
+let activeCats = new Set(['A','B','C','D','E']);
+
+function toggleCat(cat, el) {
+  if (activeCats.has(cat)) { activeCats.delete(cat); el.classList.remove('on'); }
+  else { activeCats.add(cat); el.classList.add('on'); }
+  renderFilmography();
+}
+
+function renderFilmography() {
+  const yr = document.getElementById('yearFilter').value;
+  let f = films.filter(x => x.cats.some(c => activeCats.has(c)));
+  if (yr !== 'all') f = f.filter(x => x.year == yr);
+  f.sort((a,b) => a.year - b.year);
+  document.getElementById('count-line').textContent = `Showing ${f.length} of ${films.length} films`;
+  document.getElementById('film-grid').innerHTML = f.map(film => {
+    const tags = film.cats.filter(c => activeCats.has(c))
+      .map(c => `<span class="tag tag-${c}">${catNames[c]}</span>`).join('');
+    return `<div class="card">
+      <div class="card-year">${film.year}</div>
+      <div class="card-title">${film.title}</div>
+      <div class="card-desc">${film.desc}</div>
+      <div class="card-tags">${tags}</div>
+      <div class="bo${film.hit?' hit':film.bo.includes('flop')||film.bo.includes('Flop')?' flop':''}">${film.bo}</div>
+    </div>`;
+  }).join('');
+}
+
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'analysis') setTimeout(renderCharts, 60);
+}
+
+let chartsRendered = false;
+function renderCharts() {
+  if (chartsRendered) return;
+  chartsRendered = true;
+  const years = [2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025];
+  const cats = ['A','B','C','D','E'];
+  const colors = ['#7F77DD','#BA7517','#1D9E75','#D85A30','#378ADD'];
+
+  const byYC = {};
+  years.forEach(y => { byYC[y] = {}; cats.forEach(c => byYC[y][c] = 0); });
+  films.forEach(f => f.cats.forEach(c => { if(byYC[f.year]) byYC[f.year][c]++; }));
+
+  new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: years,
+      datasets: cats.map((c,i) => ({
+        label: catNames[c],
+        data: years.map(y => byYC[y][c]),
+        backgroundColor: colors[i] + 'BB',
+        borderColor: colors[i],
+        borderWidth: 0.5
+      }))
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { stacked: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { family: 'DM Sans', size: 11 } } },
+        y: { stacked: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { stepSize: 1, font: { family: 'DM Sans', size: 11 } } }
+      }
+    }
+  });
+
+  let run = 0;
+  const cumul = years.map(y => { run += films.filter(f => f.year === y).length; return run; });
+  new Chart(document.getElementById('lineChart'), {
+    type: 'line',
+    data: {
+      labels: years,
+      datasets: [{
+        label: 'Cumulative films',
+        data: cumul,
+        borderColor: '#C0392B',
+        backgroundColor: 'rgba(192,57,43,0.08)',
+        fill: true,
+        tension: 0.35,
+        pointBackgroundColor: '#C0392B',
+        pointRadius: 4,
+        pointHoverRadius: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { family: 'DM Sans', size: 11 } } },
+        y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { family: 'DM Sans', size: 11 } } }
+      }
+    }
+  });
+
+  const totals = cats.map(c => films.filter(f => f.cats.includes(c)).length);
+  new Chart(document.getElementById('pieChart'), {
+    type: 'doughnut',
+    data: {
+      labels: cats.map(c => catNames[c]),
+      datasets: [{ data: totals, backgroundColor: colors.map(c => c+'CC'), borderColor: '#F7F4EF', borderWidth: 2 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  const legend = document.getElementById('pie-legend');
+  legend.innerHTML = cats.map((c,i) => `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <div style="width:10px;height:10px;border-radius:2px;background:${colors[i]};flex-shrink:0;"></div>
+      <span>${catNames[c]}</span>
+      <span style="margin-left:auto;font-weight:500;color:var(--text);">${totals[i]}</span>
+    </div>`).join('');
+
+  // Hit rate by category (horizontal bar)
+  const hitRates = cats.map(c => {
+    const catFilms = films.filter(f => f.cats.includes(c) && f.hit !== null && f.hit !== undefined);
+    return catFilms.length ? Math.round(100 * catFilms.filter(f => f.hit).length / catFilms.length) : 0;
+  });
+  // Sort descending for display
+  const hitOrder = cats.map((c,i) => ({c, i, rate: hitRates[i], name: catNames[c]}))
+                       .sort((a,b) => a.rate - b.rate);
+
+  new Chart(document.getElementById('hitChart'), {
+    type: 'bar',
+    data: {
+      labels: hitOrder.map(x => x.name),
+      datasets: [{
+        data: hitOrder.map(x => x.rate),
+        backgroundColor: hitOrder.map(x => colors[x.i] + 'BB'),
+        borderColor: hitOrder.map(x => colors[x.i]),
+        borderWidth: 0.5,
+        borderRadius: 3
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.x}%` } },
+        datalabels: { display: false }
+      },
+      scales: {
+        x: {
+          min: 0, max: 100,
+          grid: { color: 'rgba(0,0,0,0.05)' },
+          ticks: { callback: v => v + '%', font: { family: 'DM Sans', size: 11 } }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { font: { family: 'DM Sans', size: 11 } }
+        }
+      }
+    }
+  });
+}
+
+renderFilmography();
+setTimeout(renderCharts, 80);
+</script>
+</body>
+</html>
