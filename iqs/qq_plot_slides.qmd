@@ -1,0 +1,168 @@
+---
+title: "Reading QQ-Plots"
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    fig-align: center
+    smaller: false
+    self-contained: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+set.seed(42)
+n <- 500
+
+make_slide_plots <- function(x, y, caption) {
+  probs <- seq(0.01, 0.99, length.out = 200)
+  qx <- quantile(x, probs)
+  qy <- quantile(y, probs)
+  rng <- range(c(qx, qy))
+  
+  oldpar <- par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+  
+  # Device is 9 x 5.5 inches. We want:
+  #   Left half  (x: 0.00-0.50): square QQ plot
+  #   Top-right  (x: 0.50-1.00, y: 0.50-1.00): histogram of X
+  #   Bot-right  (x: 0.50-1.00, y: 0.00-0.50): histogram of Y
+  
+  # QQ plot — square panel on the left
+  par(fig = c(0.00, 0.50, 0.08, 0.97), mar = c(4, 4, 1, 1), new = FALSE)
+  plot(qx, qy, type = "l", lwd = 1.5,
+       xlab = "X", ylab = "Y",
+       xlim = rng, ylim = rng, asp = 1)
+  abline(0, 1, lty = 2)
+  
+  # Histogram of X — top right
+  par(fig = c(0.50, 1.00, 0.50, 0.97), mar = c(4, 3, 1, 1), new = TRUE)
+  hist(x, breaks = 20, col = "white", border = "black",
+       main = "", xlab = "X", ylab = "")
+  
+  # Histogram of Y — bottom right
+  par(fig = c(0.50, 1.00, 0.08, 0.55), mar = c(4, 3, 1, 1), new = TRUE)
+  hist(y, breaks = 20, col = "white", border = "black",
+       main = "", xlab = "Y", ylab = "")
+  
+  mtext(caption, side = 1, outer = TRUE, line = -1.5, cex = 1.5, font = 3)
+}
+```
+
+## Why two-sample QQ plots? {.center}
+
+Two-sample QQ plots let you compare distributions **without assuming any parametric form**.
+By plotting the quantiles of $X$ against the quantiles of $Y$, deviations from the
+45° reference line reveal *what kind* of difference exists between the groups, more than just
+*whether* one exists.
+
+
+---
+
+## Where and how 
+
+
+Unlike a hypothesis test, which returns a single $p$-value, the QQ plot tells you
+**where** and **how** the distributions differ — upper tail only, throughout the
+whole range, or just in location. 
+
+This makes it an essential diagnostic before
+choosing a two-sample test: a pure location shift supports the $t$-test or
+Wilcoxon, but tail differences or unequal spread may call for something else.
+
+
+
+---
+
+## Y stochastically greater than X {.center}
+
+```{r slide1, fig.width=9, fig.height=5.5}
+x1 <- rnorm(n, mean = 0, sd = 1)
+y1 <- rnorm(n, mean = 0.75, sd = 1)
+make_slide_plots(x1, y1,
+  "Y is stochastically greater than X.")
+```
+
+---
+
+## X stochastically greater than Y {.center}
+
+```{r slide2, fig.width=9, fig.height=5.5}
+# X is Poisson(2), Y is Poisson(1) — right-skewed, lower quantiles close
+x2 <- rpois(n, lambda = 2)
+y2 <- rpois(n, lambda = 1)
+make_slide_plots(x2, y2,
+  "X is stochastically greater than Y, but their lower quantiles are very close.")
+```
+
+---
+
+## X more variable than Y {.center}
+
+```{r slide3, fig.width=9, fig.height=5.5}
+x3 <- rnorm(n, mean = 0, sd = 2)
+y3 <- rnorm(n, mean = 0, sd = 1)
+make_slide_plots(x3, y3,
+  "X is more variable than Y.")
+```
+
+---
+
+## Y more variable than X {.center}
+
+```{r slide4, fig.width=9, fig.height=5.5}
+x4 <- rnorm(n, mean = 0, sd = 1)
+y4 <- rnorm(n, mean = 0, sd = 2)
+make_slide_plots(x4, y4,
+  "Y is more variable than X.")
+```
+
+---
+
+## Same distribution {.center}
+
+```{r slide5, fig.width=9, fig.height=5.5}
+x5 <- rnorm(n, mean = 0, sd = 1)
+y5 <- rnorm(n, mean = 0, sd = 1)
+make_slide_plots(x5, y5,
+  "X and Y have the same distribution.")
+```
+
+---
+
+## X has a longer right tail {.center}
+
+```{r slide6, fig.width=9, fig.height=5.5}
+x6 <- c(rnorm(round(n * 0.75), 0, 1), rexp(round(n * 0.25), 0.5))
+y6 <- rnorm(n, mean = 0, sd = 1)
+make_slide_plots(x6, y6,
+  "X has a longer right tail.")
+```
+
+---
+
+## X has longer right tail and shorter left tail {.center}
+
+```{r slide7, fig.width=9, fig.height=5.5}
+# X is right-skewed (log-normal shifted), Y is symmetric
+x7 <- rlnorm(n, meanlog = 0, sdlog = 0.8) - 0.5
+y7 <- rnorm(n, mean = 0.5, sd = 1)
+make_slide_plots(x7, y7,
+  "X has a longer right tail and a shorter left tail.")
+```
+
+
+---
+
+## Summary of patterns
+
+
+| Pattern | What the QQ plot shows |
+|---|---|
+| Curve above/below the diagonal | Stochastic ordering (one group tends larger) |
+| Slope $\neq 1$ through the origin | Difference in spread/variability |
+| S-shape | One distribution has heavier tails |
+| Shifted S-shape | Skewness differs between groups |
+| Hugs the diagonal | Distributions are similar |
+
+

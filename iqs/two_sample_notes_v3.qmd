@@ -1,0 +1,944 @@
+---
+title: "Two-Sample Tests: Lecture Notes"
+subtitle: "Parametric and Nonparametric Methods"
+author: "Jyotishka Datta"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-float: true
+    toc-title: "Contents"
+    number-sections: true
+    highlight-style: tango
+    code-fold: false
+    code-tools: true
+    theme: united
+    embed-resources: true
+    smooth-scroll: true
+    fig-align: center
+execute:
+  echo: true
+  eval: true
+  warning: false
+  message: false
+---
+
+```{=html}
+<style>
+:root {
+  --vt-maroon: #861F41;
+  --vt-orange: #E87722;
+  --accent:    #2e7d32;
+  --code-bg:   #f5f5f5;
+}
+body { font-family: 'Georgia', serif; font-size: 1.05rem; line-height: 1.75; }
+h1, h2, h3 { font-family: 'Palatino Linotype', Georgia, serif; color: var(--vt-maroon); }
+.callout { border-left: 4px solid var(--vt-orange); }
+#ls-demo {
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
+  padding: 1.5rem; background: #fafafa; border-radius: 8px;
+  border: 1px solid #ddd; margin: 1.5rem 0;
+}
+#ls-canvas { border: 1px solid #ccc; border-radius: 4px; background: white; }
+.ls-controls { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; }
+.ls-control  { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.ls-control label { font-size: 0.85rem; font-weight: bold; color: #444; }
+.ls-control input { width: 160px; }
+.ls-control span  { font-size: 0.8rem; color: var(--vt-maroon); font-weight: bold; }
+</style>
+```
+
+---
+
+# Overview
+
+These notes accompany the lecture slides on **Two-Sample Tests**. The goal is to compare two independent populations — either their means (location) or their spreads (scale) — using both parametric and nonparametric approaches.
+
+We cover:
+
+- Two-sample $t$-tests and the Behrens-Fisher problem
+- Permutation test
+- Wilcoxon rank-sum / Mann-Whitney $U$ test
+- Asymptotic Relative Efficiency
+- Hodges-Lehmann estimator
+- Scale tests ($F$-test, Siegel-Tukey)
+- $Q$-$Q$ plots and the Kolmogorov-Smirnov test
+- A brief look at Difference-in-Differences as an application
+
+---
+
+# The Location-Scale Family (Interactive)
+
+Before diving into tests, let's build intuition about **location** and **scale** shifts.
+
+A **location shift** moves the distribution left/right (changes the mean/median).  
+A **scale shift** stretches or shrinks the distribution (changes the variance).
+
+The interactive figure below lets you explore both simultaneously. Drag the sliders to see how $N(\mu, \sigma^2)$ changes.
+
+```{=html}
+<div id="ls-demo">
+  <canvas id="ls-canvas" width="640" height="300"></canvas>
+  <div class="ls-controls">
+    <div class="ls-control">
+      <label>Location shift Δ (red curve)</label>
+      <input type="range" id="sl-delta" min="-3" max="3" step="0.1" value="0">
+      <span id="val-delta">Δ = 0</span>
+    </div>
+    <div class="ls-control">
+      <label>Scale factor σ (red curve)</label>
+      <input type="range" id="sl-sigma" min="0.3" max="3" step="0.1" value="1">
+      <span id="val-sigma">σ = 1</span>
+    </div>
+  </div>
+  <p style="font-size:0.85rem;color:#666;margin:0">
+    <b>Blue:</b> N(0,1) reference &nbsp;|&nbsp; <b>Red:</b> N(Δ, σ²) &nbsp;|&nbsp;
+    A location shift slides the curve; a scale shift stretches it.
+  </p>
+</div>
+<script>
+(function() {
+  const canvas = document.getElementById('ls-canvas');
+  const ctx    = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const slDelta = document.getElementById('sl-delta');
+  const slSigma = document.getElementById('sl-sigma');
+  const valDelta = document.getElementById('val-delta');
+  const valSigma = document.getElementById('val-sigma');
+  function normpdf(x, mu, sigma) {
+    return Math.exp(-0.5 * ((x - mu) / sigma) ** 2) / (sigma * Math.sqrt(2 * Math.PI));
+  }
+  function toCanvas(x, y, xmin, xmax, ymax) {
+    return [(x - xmin) / (xmax - xmin) * W,
+             H - (y / ymax) * (H - 40) - 20];
+  }
+  function drawCurve(mu, sigma, color) {
+    const xmin = -6, xmax = 6, ymax = 0.55;
+    ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 2.5;
+    let first = true;
+    for (let i = 0; i <= W; i++) {
+      const x = xmin + (i / W) * (xmax - xmin);
+      const [px, py] = toCanvas(x, normpdf(x, mu, sigma), xmin, xmax, ymax);
+      first ? ctx.moveTo(px, py) : ctx.lineTo(px, py); first = false;
+    }
+    ctx.stroke();
+    ctx.beginPath(); ctx.globalAlpha = 0.12; ctx.fillStyle = color;
+    const [sx] = toCanvas(xmin, 0, xmin, xmax, ymax);
+    const sy = toCanvas(xmin, 0, xmin, xmax, ymax)[1];
+    ctx.moveTo(sx, sy);
+    for (let i = 0; i <= W; i++) {
+      const x = xmin + (i / W) * (xmax - xmin);
+      const [px, py] = toCanvas(x, normpdf(x, mu, sigma), xmin, xmax, ymax);
+      ctx.lineTo(px, py);
+    }
+    const [ex, ey] = toCanvas(xmax, 0, xmin, xmax, ymax);
+    ctx.lineTo(ex, ey); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1.0;
+  }
+  function drawAxes() {
+    const xmin = -6, xmax = 6, ymax = 0.55;
+    ctx.strokeStyle = '#aaa'; ctx.lineWidth = 1;
+    const [x0, y0] = toCanvas(xmin, 0, xmin, xmax, ymax);
+    const [x1, y1] = toCanvas(xmax, 0, xmin, xmax, ymax);
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+    ctx.fillStyle = '#666'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+    for (let v = -6; v <= 6; v += 2) {
+      const [px, py] = toCanvas(v, 0, xmin, xmax, ymax);
+      ctx.beginPath(); ctx.moveTo(px, py-3); ctx.lineTo(px, py+3); ctx.stroke();
+      ctx.fillText(v, px, py+14);
+    }
+  }
+  function draw() {
+    const delta = parseFloat(slDelta.value);
+    const sigma = parseFloat(slSigma.value);
+    valDelta.textContent = 'Δ = ' + delta.toFixed(1);
+    valSigma.textContent = 'σ = ' + sigma.toFixed(1);
+    ctx.clearRect(0, 0, W, H); drawAxes();
+    drawCurve(0, 1, '#1565C0');
+    drawCurve(delta, sigma, '#C62828');
+    ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
+    ctx.fillStyle = '#1565C0'; ctx.fillText('N(0, 1)', 20, 25);
+    ctx.fillStyle = '#C62828';
+    ctx.fillText('N(' + delta.toFixed(1) + ', ' + (sigma*sigma).toFixed(2) + ')', 110, 25);
+  }
+  slDelta.addEventListener('input', draw);
+  slSigma.addEventListener('input', draw);
+  draw();
+})();
+</script>
+```
+
+**Key observations:**
+
+- When $\Delta \ne 0$ and $\sigma = 1$: pure **location shift** — curves identical in shape, just shifted
+- When $\Delta = 0$ and $\sigma \ne 1$: pure **scale shift** — curves centered at the same point but different spread
+- Both together: the red $N(\Delta, \sigma^2)$ curve is shifted and re-scaled relative to the blue $N(0,1)$ curve
+
+---
+
+# Two-Sample $t$-test
+
+## Motivating Example: Birth-weight Data
+
+We use the `births14` dataset from OpenIntro, a random sample of 1,000 US births from 2014.
+
+```{r load-birth}
+birth <- read.csv("https://www.openintro.org/data/csv/births14.csv")
+dim(birth)
+
+# Keep only complete cases (no missing values)
+birth <- birth[complete.cases(birth), ]
+```
+
+It is always a good idea to inspect the structure of the data before doing any analysis:
+
+```{r str-birth}
+str(birth)
+```
+
+**Research question 1:** Is mean birth weight the same for smokers and nonsmokers?
+
+```{r box-habit}
+boxplot(weight ~ habit, data = birth)
+```
+
+```{r density-habit}
+library(ggplot2)
+ggplot(birth, aes(x = weight, group = habit, fill = habit)) +
+  geom_density(alpha = 0.5) + theme_minimal()
+```
+
+Now, let's see how the tests perform on this data set. We will look at the equal variance and the unequal variance case, and use both the R built-in function as well as manual calculation. The point of manual calculation is to show that you could do the exact same test with the formuale available, even if the built-in function did not exist. 
+
+### Equal Variance $t$-test
+
+Under $H_0: \mu_X = \mu_Y$, if we assume **equal variances** $\sigma_X^2 = \sigma_Y^2 = \sigma^2$, the test statistic is:
+
+$$T = \frac{\bar{X} - \bar{Y}}{S_p \sqrt{1/m + 1/n}} \sim t_{m+n-2}$$
+
+The **pooled standard deviation** $S_p$ combines information from both samples:
+
+$$S_p = \sqrt{\frac{(m-1)S_X^2 + (n-1)S_Y^2}{m+n-2}}$$
+
+```{r ttest-equal-var}
+x <- birth$weight[birth$habit == "nonsmoker"]
+y <- birth$weight[birth$habit == "smoker"]
+
+t.test(x, y, alternative = "greater", var.equal = TRUE)
+```
+
+You can also use the **formula interface** — convenient when the data are in a data frame:
+
+```{r ttest-formula}
+t.test(weight ~ habit, data = birth,
+       alternative = "greater", var.equal = TRUE)
+```
+
+Both calls produce identical output. The $p$-value is extremely small ($p < 0.0001$), giving strong evidence that nonsmokers have higher birth-weight babies.
+
+#### Manual calculation
+
+```{r ttest-manual-equal}
+s1 <- sd(x);  s2 <- sd(y)
+m  <- length(x);  n <- length(y)
+ntotal <- m + n
+
+# Pooled standard deviation
+spooled <- sqrt(((m-1)*(s1^2) + (n-1)*(s2^2))) / sqrt(ntotal - 2)
+
+# t-statistic
+tval <- (mean(x) - mean(y)) / (spooled * sqrt(1/m + 1/n))
+tval
+## [1] 4.58215
+
+# One-sided p-value: P(T > tval) under t_{m+n-2}
+(pval <- 1 - pt(tval, df = ntotal - 2))
+## [1] 2.672421e-06
+```
+
+### Unequal Variance (Welch) $t$-test
+
+If $\sigma_X^2 \ne \sigma_Y^2$, Welch's test uses a different denominator:
+
+$$T_W = \frac{\bar{X} - \bar{Y}}{\sqrt{S_X^2/m + S_Y^2/n}}$$
+
+The degrees of freedom $\nu$ are estimated by the **Satterthwaite approximation**:
+
+$$\nu = \frac{\left(S_X^2/m + S_Y^2/n\right)^2}{\dfrac{\left(S_X^2/m\right)^2}{m-1} + \dfrac{\left(S_Y^2/n\right)^2}{n-1}}$$
+
+```{r ttest-welch}
+t.test(x, y, alternative = "greater", var.equal = FALSE)
+```
+
+```
+  Welch Two Sample t-test
+
+data:  x and y
+t = 3.5993, df = 66.935, p-value = 0.0003033
+```
+
+Notice the $df$ dropped from 792 to $\approx 67$ because the smoker group is much smaller.
+
+#### Manual calculation (unequal variance)
+
+```{r ttest-manual-welch}
+s1 <- sd(x);  s2 <- sd(y)
+m  <- length(x);  n <- length(y)
+
+tval <- (mean(x) - mean(y)) / sqrt(s1^2/m + s2^2/n)
+tval
+## [1] 3.599276
+
+(df <- (s1^2/m + s2^2/n)^2 /
+        (1/(m-1) * (s1^2/m)^2 + 1/(n-1) * (s2^2/n)^2))
+## [1] 66.93501
+
+(pval <- 1 - pt(tval, df = df))
+## [1] 0.0003032835
+```
+
+## The Behrens-Fisher Problem
+
+::: {.callout-note}
+### What is the Behrens-Fisher Problem?
+Testing $H_0: \mu_X = \mu_Y$ when $X_i \overset{iid}{\sim} N(\mu_X, \sigma_X^2)$ and $Y_j \overset{iid}{\sim} N(\mu_Y, \sigma_Y^2)$ with $\sigma_X^2 \ne \sigma_Y^2$ — all parameters unknown — has no exact finite-sample solution. This is the Behrens-Fisher problem.
+:::
+
+- The **equal-variance $t$-test** has an exact $t_{m+n-2}$ distribution but is **wrong** when $\sigma_X^2 \ne \sigma_Y^2$
+- **Welch's test** is a widely accepted approximate solution
+- For a beginner's course: **use `var.equal = FALSE` (Welch) as your default** — it performs nearly as well when variances are equal, and protects you when they are not
+
+| | Equal Var $t$ | Welch $t$ |
+|---|---|---|
+| $t$ statistic | 4.582 | 3.599 |
+| $df$ | 792 | **66.9** |
+| $p$-value | $2.67 \times 10^{-6}$ | $3.03 \times 10^{-4}$ |
+
+## Exercise
+
+1. Test if there is any difference in birth weights for **male and female** born babies. The boxplot and density plots are given below. Does your output match your intuition when you look at the plots? 
+
+2. Test if the weights follow a $N(\mu, \sigma^2)$ distribution.
+
+```{r box-sex}
+boxplot(weight ~ sex, data = birth)
+```
+
+```{r density-sex}
+ggplot(birth, aes(x = weight, group = sex, fill = sex)) +
+  geom_density(alpha = 0.5) + theme_minimal()
+```
+
+---
+
+# Permutation Test
+
+## The Key Idea
+
+The **permutation test** (also called a randomization test) is one of the most elegant ideas in nonparametric statistics. It answers:
+
+> If there were truly no difference between the two groups, how often would we see a test statistic as extreme as the one observed, purely by chance?
+
+Under $H_0: F_X = F_Y$, the group labels are **exchangeable** — every permutation of the labels is equally likely under the null. We therefore compute the exact null distribution of any test statistic by enumerating (or sampling) all permutations.
+
+## Setup
+
+For two independent samples $X_1, \ldots, X_m$ and $Y_1, \ldots, Y_n$:
+
+1. Compute the **observed test statistic** $T_{\text{obs}}$ (e.g. $\bar{X} - \bar{Y}$)
+2. Pool all $N = m + n$ observations
+3. Randomly re-assign $m$ observations to "group $X$" and $n$ to "group $Y$"
+4. Recompute $T$ for this permutation
+5. Repeat $B$ times to build the **permutation null distribution**
+6. The $p$-value is the proportion of permuted statistics at least as extreme as $T_{\text{obs}}$:
+
+$$p\text{-value} = \frac{1}{B}\sum_{b=1}^{B} \mathbf{1}\!\left(T^{(b)} \ge T_{\text{obs}}\right)$$
+
+(for a one-sided upper-tail test; flip the inequality or use $|T|$ for other alternatives).
+
+## Permutation Test: Pouring Times
+
+We use the pouring-times data: testing whether before-lunch times tend to be **shorter** than after-lunch times.
+
+$$H_0: F_{\text{before}} = F_{\text{after}} \qquad H_1: \mu_{\text{before}} < \mu_{\text{after}}$$
+
+```{r perm-setup}
+x <- c(12.6, 11.2, 11.4,  9.4, 13.2, 12.0)   # before lunch
+y <- c(16.4, 15.4, 14.1, 14.0, 13.4, 11.3)   # after lunch
+```
+
+```{r perm-test}
+set.seed(123)
+B        <- 9999
+combined <- c(x, y)
+m        <- length(x)
+n        <- length(y)
+N        <- m + n
+
+# Observed test statistic
+T_obs <- mean(x) - mean(y)
+T_obs
+## [1] -3.316667
+
+# Monte Carlo permutation distribution
+T_perm <- replicate(B, {
+  perm <- sample(combined)
+  mean(perm[1:m]) - mean(perm[(m+1):N])
+})
+
+# One-sided p-value: P(T <= T_obs) since H_1: mu_before < mu_after
+p_perm <- mean(T_perm <= T_obs)
+p_perm
+```
+
+We can compare with the t-test! 
+
+```{r}
+t.test(x, y, "less")
+```
+
+
+The permutation test leads to the same conclusion as the t-test. 
+
+```{r perm-plot}
+hist(T_perm, breaks = 40,
+     main = "Permutation Null Distribution",
+     xlab = expression(bar(X) - bar(Y)),
+     col = "steelblue", border = "white")
+abline(v = T_obs, col = "red", lwd = 2, lty = 2)
+legend("topleft",
+       legend = paste0("T_obs = ", round(T_obs, 3),
+                       "\np = ",   round(p_perm, 4)),
+       bty = "n", text.col = "red")
+```
+
+## Exact Permutation
+
+For $m = n = 6$ there are $\binom{12}{6} = 924$ permutations — small enough to enumerate **exactly**:
+
+```{r perm-exact}
+# All ways to choose m positions out of N for group X
+all_combs <- combn(N, m)   # each column is one assignment
+
+T_exact <- apply(all_combs, 2, function(idx) {
+  mean(combined[idx]) - mean(combined[-idx])
+})
+
+# Exact one-sided p-value
+mean(T_exact <= T_obs)
+```
+
+## Permutation Test on Birth-weight Data
+
+```{r perm-birth}
+set.seed(42)
+x_b <- birth$weight[birth$habit == "nonsmoker"]
+y_b <- birth$weight[birth$habit == "smoker"]
+
+combined_b <- c(x_b, y_b)
+m_b        <- length(x_b)
+N_b        <- length(combined_b)
+T_obs_b    <- mean(x_b) - mean(y_b)
+
+T_perm_b <- replicate(1e6, {
+  perm <- sample(combined_b)
+  mean(perm[1:m_b]) - mean(perm[(m_b+1):N_b])
+})
+
+# One-sided p-value: P(T >= T_obs)
+p_perm_b <- mean(T_perm_b >= T_obs_b)
+```
+
+```{r perm-birth-compare}
+# Compare to the parametric t-test
+t_pval <- t.test(x_b, y_b, alternative = "greater")$p.value
+
+cat("Permutation p-value:", p_perm_b, "\n")
+cat("t-test p-value:     ", t_pval,   "\n")
+# Both are very small and agree with each other
+```
+
+::: {.callout-tip}
+### When are permutation tests especially useful?
+
+- Small samples where $N(\mu, \sigma^2)$ is doubtful
+- Non-standard test statistics (a ratio, a range, a correlation) — the permutation framework works for **any** statistic
+- When you want an exact (or very accurate Monte Carlo) $p$-value without distributional assumptions
+:::
+
+---
+
+# Wilcoxon Rank-Sum / Mann-Whitney Test
+
+## Motivation
+
+The **Wilcoxon rank-sum test** is a nonparametric alternative to the two-sample $t$-test that works for any continuous distribution.
+
+**Setup:**
+
+- $X_1, \ldots, X_m \overset{iid}{\sim} F(x)$ and $Y_1, \ldots, Y_n \overset{iid}{\sim} G(y)$
+- Location shift model: $G(y) = F(y - \Delta)$
+- $H_0: \Delta = 0$ vs $H_1: \Delta \ne 0$ (or one-sided)
+
+**Procedure:**
+
+1. Combine all $N = m + n$ observations and rank from $1$ to $N$
+2. Compute $W_X = \sum_{i=1}^m R_i$ (sum of ranks for the $X$ group)
+
+## Mann-Whitney $U$ Statistic
+
+The **Mann-Whitney $U$** counts the number of pairs $(X_i, Y_j)$ where $X_i > Y_j$, called $U_X$. Similarly, if you count the number of pairs where $Y_i > x_j$, it is $U_Y$. We often think of the comparisons as "pairwise tournaments". 
+
+When we assume the samples are independent and continuous, the probability of a tie is zero, and hence, each of the $mn$ pairs of $(X_i, Y_j)$ for $1 \le i \le m, 1 \le j \le n$, should either have the $X$ value winning or the $Y$ value winning. Hence, it should follow that $U_X + U_Y = mn$, trivially. 
+
+Under the null hypothesis, the two samples should be well mixed and the the average should be near half the number of pairs, i.e., $mn/2$ and deviations should make $U$ statistics either very large or very small (compared to the midpoint). 
+
+It is also true that the $U$ test and the Wilcoxon rank sum test are equivalent, and they are often clubbed together and called Wilcoxon-Mann-Whitney test. The rank sum test was proposed by a chemist Frank Wilcoxon in 1945 and the $U$ test was proposed in 1947 by Henry Mann and Donald Whitney. 
+
+It is easy to prove why they are equivaent: one way of seeing the equivalence is that they differ by a constant (independent of the sampling variability!)
+
+$$U_X = W_X - \frac{m(m+1)}{2}, \qquad U_Y = mn - U_X$$
+
+This is also the reason why R's `wilcox.test()` returns $U_X$ (but is labeled `W` in output).
+
+## Pouring Times Example
+
+```{r wilcox-setup}
+x <- c(12.6, 11.2, 11.4, 9.4, 13.2, 12.0)   # before lunch
+y <- c(16.4, 15.4, 14.1, 14.0, 13.4, 11.3)  # after lunch
+```
+
+$$H_0: \Delta = 0 \quad \text{vs} \quad H_1: \Delta < 0$$
+
+```{r wilcox-less}
+wilcox.test(x, y, paired = FALSE, alternative = "less")
+```
+
+```
+  Wilcoxon rank sum exact test
+
+data:  x and y
+W = 4, p-value = 0.01299
+alternative hypothesis: true location shift is less than 0
+```
+
+The $p$-value $0.013 < 0.05$. We reject $H_0$.
+
+### Extracting values from the test object
+
+```{r wilcox-extract}
+twotest <- wilcox.test(y, x, paired = FALSE, alternative = "greater")
+names(twotest)
+## [1] "statistic"   "parameter"   "p.value"     "null.value"
+## [5] "alternative" "method"      "data.name"
+
+twotest$statistic
+##  W
+## 32
+
+twotest$p.value
+## [1] 0.01298701
+```
+
+## Mind the Alternative
+
+The order in which you supply the `x` and `y` argument matters (not just here, but in all other instances, re-read the `logics in R` tutorial again!). In this case, the difference is critical for one-sided testing. If you switch `x` and `y`, remember to switch the alternative too. 
+
+```{r wilcox-alt}
+# x first, y second → alternative = "less"
+wilcox.test(x, y, paired = FALSE, alternative = "less")
+# W = 4, p-value = 0.01299
+
+# y first, x second → alternative = "greater"
+wilcox.test(y, x, paired = FALSE, alternative = "greater")
+# W = 32, p-value = 0.01299
+```
+
+Note: $4 + 32 = 36 = 6 \times 6 = mn$ ✓ — the two $U$ statistics always sum to $mn$.
+
+## Formula Interface
+
+```{r wilcox-formula}
+xydata <- rbind(
+  data.frame(values = x, grp = "x"),
+  data.frame(values = y, grp = "y")
+)
+
+wilcox.test(values ~ grp, data = xydata, alternative = "less")
+##   Wilcoxon rank sum exact test
+## W = 4, p-value = 0.01299
+## alternative hypothesis: true location shift is less than 0
+```
+
+## CLT Approximation
+
+For large $m, n$, the $U$ statistic is approximately $N(\mu_U, \sigma_U^2)$:
+
+$$Z = \frac{U - \mu_U}{\sigma_U}, \qquad \mu_U = \frac{mn}{2}, \qquad \sigma_U^2 = \frac{mn(m+n+1)}{12}$$
+
+Apply a **continuity correction** of $\pm 0.5$.
+
+**Case 1: `y` first, `"greater"`** — subtract $0.5$, use $P(Z \ge z)$:
+
+```{r clt-greater}
+U_Y    <- wilcox.test(y, x, paired = FALSE, alternative = "greater")$statistic
+m      <- length(y);  n <- length(x)
+clt.mu <- m * n / 2
+clt.s2 <- m * n * (m + n + 1) / 12
+
+(Z_score <- (U_Y - clt.mu - 0.5) / sqrt(clt.s2))
+
+(P.value <- 1 - pnorm(Z_score))
+```
+
+**Case 2: `x` first, `"less"`** — add $0.5$, use $P(Z \le z)$:
+
+```{r clt-less}
+U_X    <- wilcox.test(x, y, paired = FALSE, alternative = "less")$statistic
+m      <- length(x);  n <- length(y)
+
+(Z_score <- (U_X - clt.mu + 0.5) / sqrt(clt.s2))
+
+(P.value <- pnorm(Z_score))
+```
+
+The two $p$-values differ slightly due to continuity correction direction, but both reject $H_0$ at $\alpha = 0.05$.
+
+## Class Exam Data
+
+> "An instructor decided to run two slight variations of the same exam. Prior to passing out the exams, they shuffled the exams together to ensure each student received a random version. Anticipating complaints from students who took Version B, they would like to evaluate whether the difference observed in the groups is so large that it provides convincing evidence that Version B was more difficult (on average) than Version A."
+
+```{r classdata-load}
+classdata    <- read.csv("https://www.openintro.org/data/csv/classdata.csv")
+classdata_ab <- classdata[classdata$lecture %in% c("a", "b"), ]
+```
+
+### Visualize and summarize
+
+```{r classdata-summary}
+library(dplyr)
+classdata_ab %>%
+  group_by(lecture) %>%
+  summarize(mean = mean(m1), median = median(m1), sd = sd(m1), n = n())
+```
+
+
+```{r classdata-box}
+boxplot(m1 ~ lecture, data = classdata_ab)
+```
+
+### Test the difference
+
+$$H_0: \mu_a = \mu_b \qquad H_1: \mu_a > \mu_b$$
+
+```{r classdata-wilcox}
+## Your code here!
+wilcox.test(m1 ~ lecture, data = classdata_ab, alternative = "greater")
+```
+
+```{r classdata-ttest}
+t.test(m1 ~ lecture, data = classdata_ab, alternative = "greater")
+```
+
+Do both tests agree? Which would you trust more, and why?
+
+---
+
+# Asymptotic Relative Efficiency
+
+## The Idea
+
+The **ARE (Asymptotic Relative Efficiency)** of test A relative to test B is the limiting ratio $n_B / n_A$ needed for equal power at equal $\alpha$ as $n \to \infty$ and $H_1 \to H_0$:
+
+- $\text{ARE} > 1$ $\Rightarrow$ test A needs fewer observations (more efficient)
+- $\text{ARE} < 1$ $\Rightarrow$ test B is more efficient
+- $\text{ARE} = 1$ $\Rightarrow$ asymptotically equivalent
+
+## One-Sample Results
+
+| Distribution | $\text{ARE}(S, t)$ | $\text{ARE}(SR_+, t)$ |
+|:---|:---:|:---:|
+| $N(\mu, \sigma^2)$ | 0.637 | 0.955 |
+| $\text{Uniform}(a, b)$ | 0.333 | 1.0 |
+| $\text{Logistic}(\mu, s)$ | 0.822 | 1.097 |
+| $\text{Laplace}(\mu, b)$ | 2.0 | 1.5 |
+| $\text{Cauchy}(\mu, \gamma)$ | $+\infty$ | $+\infty$ |
+
+## Two-Sample: Wilcoxon vs $t$-test
+
+| Distribution | $\text{ARE}(\text{Wilcoxon}, t)$ |
+|:---|:---:|
+| $\text{Uniform}(a,b)$ | 1.0 |
+| $N(\mu, \sigma^2)$ | 0.955 |
+| $\text{Laplace}(\mu, b)$ | 1.5 |
+| $\text{Exponential}(\lambda)$ | 3.0 |
+| $\text{Cauchy}(\mu, \gamma)$ | $+\infty$ |
+
+**Key insight:** The Wilcoxon test loses only $\approx 5\%$ efficiency under $N(\mu,\sigma^2)$ data, but gains dramatically for heavy tails.
+
+---
+
+# Hodges-Lehmann Estimator
+
+## Estimating the Location Shift $\Delta$
+
+$$\hat{\Delta}_{HL} = \operatorname{median}\{X_i - Y_j : 1 \le i \le m,\ 1 \le j \le n\}$$
+
+This estimator is consistent, unbiased, and super-efficient relative to the difference of sample medians.
+
+## Walsh Averages (Single Sample)
+
+For $X_1, \ldots, X_n$, the $n(n+1)/2$ **Walsh averages** are:
+
+$$W_{ik} = \frac{X_i + X_k}{2}, \quad i \le k$$
+
+The **Hodges-Lehmann estimate of the median** is $\operatorname{median}\{W_{ik}\}$.
+
+## Pouring Times: Complete Solution
+
+```{r hl-example}
+x <- c(12.6, 11.2, 11.4,  9.4, 13.2, 12.0)
+y <- c(16.4, 15.4, 14.1, 14.0, 13.4, 11.0)
+
+# ── Part 1: HL estimate of median of X (Walsh averages) ───────────
+walsh.x <- outer(x, x, "+") / 2
+walsh.x <- walsh.x[!lower.tri(walsh.x)]
+sort(walsh.x)
+median(walsh.x)   # 11.7  (sample median = 11.8, slightly different)
+
+# ── Part 2: HL estimate of shift Delta ────────────────────────────
+pwd <- sort(as.vector(outer(x, y, "-")))
+median(pwd)        # -2.4
+```
+
+$\hat{\Delta}_{HL} = -2.4$: before-lunch times tend to be about 2.4 units shorter.
+
+---
+
+# Scale Tests
+
+## Location vs Scale
+
+| Shift type | Model | Effect |
+|:---|:---|:---|
+| Location | $G(y) = F(y - \Delta)$ | Same shape, shifted center |
+| Scale | $F_Y(a) = F_X(a\sigma)$ | Same center, different spread |
+
+## The Scale Model
+
+$$F_{Y-M}(x) = F_{X-M}(\theta x), \quad \theta > 0$$
+
+where $M$ is the common median. $H_0: \theta = 1$ vs $H_1: \theta \ne 1$.
+
+## Why Scale Testing is Tricky
+
+For $X \sim \text{Exp}(\lambda)$, $Y = X/\theta$:
+
+$$E(Y) = \frac{1}{\lambda\theta}, \qquad \operatorname{Var}(Y) = \frac{1}{\lambda^2\theta^2}$$
+
+A scale change also changes the mean. Center at sample medians before testing.
+
+## The Classical $F$-test
+
+For $N(\mu, \sigma^2)$ populations:
+
+$$F = \frac{S_X^2}{S_Y^2} \sim F_{m-1,\, n-1} \quad \text{under } H_0: \sigma_X^2 = \sigma_Y^2$$
+
+```{r ftest}
+var.test(x, y)
+```
+
+::: {.callout-warning}
+The $F$-test is **very sensitive** to non-normality. Use a nonparametric alternative if $N(\mu, \sigma^2)$ is in doubt.
+:::
+
+## The Siegel-Tukey Test
+
+Assign ranks alternating from extremes: rank 1 to smallest, rank 2 to largest, rank 3 to 2nd-largest, rank 4 to 2nd-smallest, $\ldots$ Then apply the Wilcoxon rank-sum test.
+
+| Ordered | smallest | $\cdots$ | largest |
+|---|:---:|:---:|:---:|
+| Siegel rank | 1 | $\cdots$ | 2 |
+
+```{r siegel-tukey}
+source("siegel.tukey.R")
+x_bev <- c(16.55, 15.36, 15.94, 16.43, 16.01)
+y_bev <- c(16.05, 15.98, 16.10, 15.88, 15.91)
+siegel.tukey(x_bev, y_bev, id.col = FALSE, adjust.median = FALSE)
+```
+
+---
+
+# $Q$-$Q$ Plots and the $K$-$S$ Test
+
+## Two-Sample $Q$-$Q$ Plots
+
+Plot the quantiles of $X$ against the quantiles of $Y$. If $F = G$ the points fall on the line $y = x$.
+
+| Pattern | Interpretation |
+|:---|:---|
+| Parallel line (shifted) | Location shift |
+| Line through origin, slope $\ne 1$ | Scale shift |
+| Curved | Shape difference |
+
+```{r qqplot-base}
+qqplot(x, y, main = "Two-Sample Q-Q Plot")
+abline(0, 1, col = "red", lty = 2)
+```
+
+```{r qqplot-ggplot}
+df_qq <- data.frame(
+  xq = quantile(x, probs = seq(0.05, 0.95, 0.05)),
+  yq = quantile(y, probs = seq(0.05, 0.95, 0.05))
+)
+library(ggplot2)
+ggplot(df_qq, aes(xq, yq)) +
+  geom_point(size = 2, color = "#861F41") +
+  geom_abline(slope = 1, intercept = 0, color = "navy", linetype = 2) +
+  labs(x = "Quantiles of X", y = "Quantiles of Y",
+       title = "Two-Sample Q-Q Plot") +
+  theme_minimal()
+```
+
+## Kolmogorov-Smirnov Two-Sample Test
+
+$$KS = \sup_x \left|\hat{F}_X(x) - \hat{G}_Y(x)\right|$$
+
+$H_0: F_X = G_Y$. An **omnibus test** — detects location, scale, or shape differences.
+
+```{r ks-test}
+ks.test(x, y)           # two-sample
+ks.test(x, "pnorm")     # one-sample goodness-of-fit for N(0,1)
+```
+
+The normalized statistic converges to a **Brownian bridge**:
+
+$$\frac{KS}{\sqrt{1/m + 1/n}} \xrightarrow{d} \sup_{0 \le t \le 1} |B(t)|$$
+
+---
+
+# Randomized Tests
+
+## The Discreteness Problem
+
+For a discrete test statistic, the Type I error can only take a limited number of values, so you cannot achieve *exactly* any target $\alpha$.
+
+**Example:** $X \sim \text{Binomial}(5, \theta)$, $H_0: \theta = 1/2$.
+
+| $c$ | 5 | 4 | 3 | 2 | 1 | 0 |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| $P(X \ge c \mid \theta = 1/2)$ | $1/32$ | $6/32$ | $16/32$ | $26/32$ | $31/32$ | 1 |
+
+Rejecting when $X = 5$ gives exact size $1/32 = 0.03125 \ne 0.05$.
+
+## Randomized Rule
+
+Introduce randomization at the boundary: reject with probability $p \in (0,1)$ at the critical boundary, chosen so that:
+
+$$\alpha = P(T \ge t_2) + p \cdot P(t_1 \le T < t_2)$$
+
+This is mainly a **theoretical tool** to make the ARE framework rigorous.
+
+---
+
+# Van der Waerden and Linear Rank Tests
+
+## Linear Rank Statistics
+
+$$T = \sum_{i=1}^N a_i Z_i, \quad Z_i = \mathbf{1}[\text{$i$-th position is from group $X$}]$$
+
+| Test | Weights $a_i$ | Best for |
+|:---|:---|:---|
+| Wilcoxon | $i$ | General location |
+| Van der Waerden | $\Phi^{-1}\!\left(\frac{i}{N+1}\right)$ | $N(\mu,\sigma^2)$ location ($\text{ARE} = 1$ with $t$) |
+| Siegel-Tukey | Alternating from extremes | Scale |
+
+---
+
+# Difference-in-Differences
+
+## From Two-Sample Tests to DiD
+
+Two-sample tests compare **two groups at one time point**. **Difference-in-Differences (DiD)** extends this to a before/after, treatment/control design:
+
+$$\hat{\tau}_{DiD} = \underbrace{\left(\bar{Y}_{T,\text{after}} - \bar{Y}_{T,\text{before}}\right)}_{\text{change in treatment}} - \underbrace{\left(\bar{Y}_{C,\text{after}} - \bar{Y}_{C,\text{before}}\right)}_{\text{change in control}}$$
+
+**Key assumption:** *parallel trends* — without treatment, both groups would have changed by the same amount.
+
+$$
+\begin{array}{lccc}
+ & \text{Before} & \text{After} & \text{Change} \\
+\hline
+\text{Control}  & \mu_{C0} & \mu_{C1} & \mu_{C1} - \mu_{C0} \\
+\text{Treated}  & \mu_{T0} & \mu_{T1} & \mu_{T1} - \mu_{T0} \\
+\hline
+\hat{\tau}_{DiD} & & & (\mu_{T1}-\mu_{T0}) - (\mu_{C1}-\mu_{C0}) \\
+\end{array}
+$$
+
+## Base R Example
+
+```{r did-simulate}
+set.seed(42)
+did_data <- data.frame(
+  unit    = rep(1:20, 2),
+  time    = rep(c("before", "after"), each = 20),
+  treated = rep(c(rep(0, 10), rep(1, 10)), 2),
+  outcome = c(rnorm(10, 5), rnorm(10, 5),   # before: both N(5, 1)
+              rnorm(10, 5), rnorm(10, 8))    # after: control N(5,1), treated N(8,1)
+)
+# "before" as reference level
+did_data$time <- factor(did_data$time, levels = c("before", "after"))
+```
+
+```{r did-regression}
+# The interaction timeafter:treated IS the DiD estimator
+fit <- lm(outcome ~ time + treated + time:treated, data = did_data)
+summary(fit)
+```
+
+
+```{r did-manual}
+# Equivalent manual calculation
+means <- tapply(did_data$outcome,
+                list(did_data$time, did_data$treated), mean)
+means
+
+did_est <- (means["after", "1"] - means["before", "1"]) -
+           (means["after", "0"] - means["before", "0"])
+did_est
+```
+
+## Connection to Two-Sample Testing
+
+| | Two-sample $t$-test | DiD |
+|:---|:---|:---|
+| Design | Cross-section | Panel / before-after |
+| Comparison | Treated vs control | Change in treated vs change in control |
+| Controls for | Observed differences | Time-invariant confounders $+$ time trends |
+| Key assumption | Exchangeability | Parallel trends |
+
+---
+
+# Summary of Tests
+
+| Test | Type | $H_0$ | Key assumption |
+|:---|:---|:---|:---|
+| Two-sample $t$ (equal var) | Parametric | $\mu_X = \mu_Y$ | $N(\mu,\sigma^2)$, $\sigma_X^2 = \sigma_Y^2$ |
+| Welch $t$ | Parametric | $\mu_X = \mu_Y$ | $N(\mu,\sigma^2)$ (approximate) |
+| Permutation | Nonparametric | $F_X = F_Y$ | Exchangeability |
+| Wilcoxon rank-sum | Nonparametric | $\Delta = 0$ | Continuity |
+| $F$-test | Parametric | $\sigma_X^2 = \sigma_Y^2$ | $N(\mu,\sigma^2)$ |
+| Siegel-Tukey | Nonparametric | $\sigma_X = \sigma_Y$ | Equal medians |
+| $K$-$S$ test | Nonparametric | $F_X = G_Y$ | Continuity |
+
+
+---
+
+# References
+
+- Gibbons, J.D. & Chakraborti, S. (2011). *Nonparametric Statistical Inference*, 5th ed. CRC Press.
+- Hollander, M., Wolfe, D.A. & Chicken, E. (2014). *Nonparametric Statistical Methods*, 3rd ed. Wiley.
+- Conover, W.J. (1999). *Practical Nonparametric Statistics*, 3rd ed. Wiley.
+- Angrist, J.D. & Pischke, J.S. (2009). *Mostly Harmless Econometrics*. Princeton University Press.
+- OpenIntro Statistics data: <https://www.openintro.org/data/>
