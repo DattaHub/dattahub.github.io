@@ -49,17 +49,17 @@ This website is for class purposes only.
 
 ### Beyond basics: Introduction to a few topics in R
 
-1.  [apply, sapply, lapply and functions in R](http://dattahub.github.io/stat4033/intro_R_pres.html)
-2.  [Updated introduction to advanced topics in R. It's basically the 2.0 version of (1) above](http://dattahub.github.io/stat4033/intro_R_pres_new.html)
-2.  [Matrix Example in R, introduction to parallel computing](http://dattahub.github.io/stat5443/matrix_R.html)
+1.  [apply, sapply, lapply and functions in R](http://dattahub.github.io/iqs/intro_R_pres.html)
+2.  [Updated introduction to advanced topics in R. It's basically the 2.0 version of (1) above](http://dattahub.github.io/iqs/intro_R_pres_new.html)
+2.  [Matrix Example in R, introduction to parallel computing](http://dattahub.github.io/stat5525/09-matrix_R.html)
 
 ### R Demos 
 
-1.  Quantile transformation, Random Variable Generation using QT, QQplot and Goodness of fit [Examples in R](http://dattahub.github.io/stat4033/rvgen.html)
-2. Wilcoxon signed rank test and QQplots/GoF demo [Examples](http://dattahub.github.io/stat4033/wilcox_qq_demo.html)
-3.  One way Analysis of Variance (ANOVA): [Examples in R](http://dattahub.github.io/stat4033/anova_examples_doc.html)
-4.  ANOVA in R Demo in [ioslides presentation](http://dattahub.github.io/stat4033/aovexamples.html).
-5.  Tests for trends and associations [R Examples](http://dattahub.github.io/stat4033/association_demo.html#1), [More examples](http://dattahub.github.io/stat4033/association_examples.html#1)
-6.  Bootstrap [R Examples](http://dattahub.github.io/stat4033/bootstrap_demo.html#1)
-7.  Chi-square tests [R Examples](http://dattahub.github.io/stat4033/chisqdemo.html#1)
-8.  Kernel Density Estimation [R Examples](http://dattahub.github.io/stat4033/kde_demo.html#1)
+1.  Quantile transformation, Random Variable Generation using QT, QQplot and Goodness of fit [Examples in R](http://dattahub.github.io/iqs/rvgen.html)
+2. Wilcoxon signed rank test and QQplots/GoF demo [Examples](http://dattahub.github.io/iqs/wilcox_qq_demo.html)
+3.  One way Analysis of Variance (ANOVA): [Examples in R](http://dattahub.github.io/iqs/anova_examples_doc.html)
+4.  ANOVA in R Demo in [ioslides presentation](http://dattahub.github.io/iqs/aovexamples.html).
+5.  Tests for trends and associations [R Examples](http://dattahub.github.io/iqs/association_demo.html#1), [More examples](http://dattahub.github.io/iqs/association_examples.html#1)
+6.  Bootstrap [R Examples](http://dattahub.github.io/iqs/bootstrap_demo.html#1)
+7.  Chi-square tests [R Examples](http://dattahub.github.io/iqs/chisqdemo.html#1)
+8.  Kernel Density Estimation [R Examples](http://dattahub.github.io/iqs/kde_demo.html#1)
