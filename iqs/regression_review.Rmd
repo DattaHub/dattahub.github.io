@@ -1,0 +1,500 @@
+---
+title: "Linear Regression"
+subtitle: "Review, History and Inference"
+author: "Jyotishka Datta"
+date: "`r Sys.Date()`"
+output: 
+  ioslides_presentation:
+    smaller: yes
+    logo: ../vt.png
+    css: custom.css
+    transition: faster
+---
+
+```{r setup, include=FALSE}
+options(width=80)
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F, fig.asp = 0.6, cache = TRUE)
+knit_hooks$set(no.main = function(before, options, envir) {
+    if (before) par(mar = c(4.1, 4.1, 1.1, 1.1))  # smaller margin on top
+})
+library(ggplot2)
+```
+
+<style>
+div.footnotes {
+  position: absolute;
+  bottom: 0;
+  margin-bottom: 10px;
+  width: 80%;
+  font-size: 0.6em;
+}
+</style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script>
+$(document).ready(function() {
+  $('slide:not(.backdrop):not(.title-slide)').append('<div class=\"footnotes\">');
+
+  $('footnote').each(function(index) {
+    var text  = $(this).html();
+    var fnNum = (index+1).toString();
+    $(this).html(fnNum.sup());
+
+    var footnote   = fnNum + '. ' + text + '<br/>';
+    var oldContent = $(this).parents('slide').children('div.footnotes').html();
+    var newContent = oldContent + footnote;
+    $(this).parents('slide').children('div.footnotes').html(newContent);
+  });
+});
+</script>
+
+## Outline 
+
+-  Last week we have seen the general formulation for simple linear regression, the connection between correlation and regression and derived the estimates for the parameters. 
+
+-  We have also looked at the four assumptions: linearity, normality, independence and homoscedasticity. 
+
+-  Today we will review those materials and look at a little bit of history and development of these ideas. 
+
+-  I will also point a common logical error that occurs when one fails to account for "regression to the mean" in outcomes where chance plays a role, even if partial. 
+
+
+## Francis Galton 
+
+-  Sir Francis Galton, British polymath (1822-1911), was interested in understanding variation and hereditary of human traits and collected height data from families for understanding how well a child's height can be predicted from the parents' heights? 
+
+-  In course of this investigation, he developed the tools for regression that is now widely applied to many areas. 
+
+-  Here is a condensed version of the parent-children heights data.
+
+<div style="text-align:center" markdown="1">
+![ ](galton_table.png "Galton's Plot"){width=60%}
+</div>
+
+
+
+## Galton's work 
+
+-  "After constructing frequency tables that classified these individuals both by their height and by the average height of their parents, Galton came to the unremarkable conclusion that tall people usually had tall parents and short people usually had short parents. In other words, he found that one could predict, with some accuracy, the heights of individuals from the heights of their parents." <footnote>A Understanding Regression Analysis, Michael Patrick Allen</footnote>
+
+- "However, after studying these data in greater detail, Galton came to another, more remarkable, conclusion. Individuals who had tall parents were often taller than average, but they were usually not as tall as their parents."
+
+- "Conversely, individuals who had short parents were often shorter than average, but they too were usually not as short as their parents."
+
+
+## Regression towards 'mediocrity'
+
+-  Galton wrote a series of paper on this phenomenon, and called this "regression towards mediocrity" [see, 'Regression towards mediocrity in hereditary stature' (Galton, 1885c).] 
+
+<div style="text-align:center" markdown="1">
+![ ](galtons_plot.png "Galton's Plot"){width=60%}
+</div>
+
+## Galton's data 
+
+- We create a dataset with the heights of fathers and a randomly selected son of each family. 
+
+```{r}
+library(tidyverse)
+library(HistData)
+data("GaltonFamilies")
+
+set.seed(1983)
+galton_heights <- GaltonFamilies |>
+  filter(gender == "male") |>
+  group_by(family) |>
+  sample_n(1) |>
+  ungroup() |>
+  select(father, childHeight) |>
+  rename(son = childHeight)
+```
+
+
+## Summary statistics
+
+Since both distributions are well approximated by the normal distribution, we could use the two averages and two standard deviations as summaries. 
+
+```{r}
+galton_heights |> 
+  summarize(mean(father), sd(father), mean(son), sd(son))
+
+galton_heights |> summarize(r = cor(father, son)) |> pull(r)
+```
+
+## Scatterplot
+
+However, this summary fails to describe an important characteristic of the data: the trend that the taller the father, the taller the son.
+
+```{r, fig.asp = 0.5}
+galton_heights |> ggplot(aes(father, son)) + 
+  geom_point(alpha = 0.5)
+```
+
+## Regression towards mean 
+
+-  We have derived the estimates for the regression coefficients $\beta_0$ and $\beta_1$:
+
+$$
+\hat{\beta}_0 = \bar{Y} - \hat{\beta}_1 \bar{X}, \hat{\beta}_1 = \frac{s_{xy}}{s_{x}^2}
+$$
+-  Our fitted regression line looks like:
+
+$$
+Y = \hat{\beta}_0 + \hat{\beta}_1 X \equiv Y = \bar{Y} +  \frac{s_{xy}}{s_{x}^2} (X-\bar{X})
+$$
+
+- Since $r = s_{xy}/s_x s_y$, we can rewrite the above as:
+
+$$
+\left( \frac{Y-\bar{Y}}{s_y} \right) = r \left( \frac{X-\bar{X}}{s_x} \right)
+$$
+
+-  Recall that $|r| \le 1$. 
+
+-  Galton used the letter "r" to denote the slope of the "regression" line, and "only under Pearson's later treatment did r come to stand for the correlation coefficient". 
+
+
+## Regression line 
+
+-  Now we can add a regression line to the original data. 
+
+-  We use the estimates to draw a line $y = b + mx$ with slope $m = r \frac{s_y}{s_x}$ and intercept $b = \mu_y - m \mu_x$. 
+
+```{r, fig.asp = 0.3}
+mu_x <- mean(galton_heights$father); mu_y <- mean(galton_heights$son)
+s_x <- sd(galton_heights$father); s_y <- sd(galton_heights$son)
+r <- cor(galton_heights$father, galton_heights$son)
+
+galton_heights |> 
+  ggplot(aes(father, son)) + 
+  geom_point(alpha = 0.5) +
+  geom_abline(slope = r * s_y/s_x, intercept = mu_y - r * s_y/s_x * mu_x) 
+```
+
+## Using R's pre-canned routine
+
+```{r}
+attach(galton_heights)
+summary(lm(son ~ father))
+```
+
+# Regression to the mean 
+
+## Daniel Kahneman
+
+-  Kahenman reports this story in his autobiography and it has been often cited in sports analysis<footnote>https://fs.blog/regression-to-the-mean/</footnote>
+
+<div style="text-align:center" markdown="1">
+![ ](kahneman.png "Kahneman"){width=80%}
+</div>
+
+## Skill + Luck 
+
+-  Another explanation from "Practical Statistics for Data Scientists". 
+
+
+<div style="text-align:center" markdown="1">
+![ ](practical.png "Practical Data Science Example"){width=80%}
+</div>
+
+## How common is this?
+
+-  I like this paragraph from Robert Nau's notes  <footnote>https://people.duke.edu/~rnau/Decision411_2007/regintro.htm </footnote>
+
+-  "Regression to the mean is an inescapable fact of life. Your children can be expected to be less exceptional (for better or worse) than you are. Your score on a final exam in a course can be expected to be less good (or bad) than your score on the midterm exam. A baseball player's batting average in the second half of the season can be expected to be closer to the mean (for all players) than his batting average in the first half of the season. And so on. The key word here is "expected." This does not mean **it's certain that regression to the mean will occur, but that's the way to bet!** (More precisely, that's the way to bet if you wish to minimize **squared error**.)"
+
+
+## Historical notes I <footnote>https://people.duke.edu/~rnau/Decision411_2007/regintro.htm </footnote>
+
+-  "Galton was a self-taught naturalist, anthropologist, astronomer, and statistician--and a real-life Indiana Jones character. He was famous for his explorations, and he wrote a best-selling book on how to survive in the wilderness entitled "The art of travel, or, Shifts and contrivances available in wild countries". 
+
+-  "The book is still in print and still considered a useful resource. Among other handy hints for staying alive--such as how to treat spear-wounds or extract your horse from quicksand--it introduced the concept of the sleeping bag to the Western World."
+
+<div style="text-align:center" markdown="1">
+![ ](galton_book_cover.jpg "Galton's Book"){width=20%}
+</div>
+
+## Historical notes II  <footnote>Introduction to Data Science, Data Analysis and Prediction Algorithms with R, by Rafael A. Irizarry</footnote>
+
+-  "Galton made important contributions to statistics and genetics, but he was also one of the first proponents of **eugenics**, a scientifically flawed philosophical movement favored by many biologists of Galton’s time but with horrific historical consequences."
+
+<div style="text-align:center" markdown="1">
+![ ](francis_galton.jpg "Galton"){width=30%}
+</div>
+
+
+
+# Review 
+
+
+## Key terms 
+
+- Fitted values: $\hat{Y}_i = \hat{\beta}_0 + \hat\beta_1 X_i$. These are the vertical projections of $Y_1, \ldots, Y_n$ into the fitted line.
+- Residuals or estimated errors: $\hat{\epsilon}_i = Y_i - \hat{Y}_i$. These are the vertical distances between actual data $(X_i, Y_i$ and fitted data $(X_i, \hat{Y}_i)$. 
+
+<div style="text-align:center" markdown="1">
+![ ](residuals.png "Residuals"){width=40%}
+</div>
+
+
+
+## Assumptions 
+
+<div style="text-align:center" markdown="1">
+![ ](assumptions.png "Assumptions of the linear model model."){width=100%}
+</div>
+
+
+## Recall:
+
+- Nothing is said about the distribution of $X$ as yet. Indeed, $X$ could be deterministic (called fixed design) or random (random design). 
+
+- The linear model assumes that $Y$ is continuous due to the normality of the errors. 
+
+- However, $X$ can be discrete!
+
+
+## Assumptions (visually)
+
+<div style="text-align:center" markdown="1">
+![ ](linearmodel.png "The key concepts of the simple linear model. The yellow band denotes where the 95 percent of the data is, according to the model."){width=50%}
+</div>
+
+## Assumptions respected
+
+<div style="text-align:center" markdown="1">
+![ ](linearmodelgood.png "Assumptions of the linear model respected."){width=60%}
+</div>
+
+## Assumptions violated
+
+<div style="text-align:center" markdown="1">
+![ ](linearmodelbad.png "Assumptions of the linear model violated."){width=60%}
+</div>
+
+## Inference for the model coefficients 
+
+- The assumptions introduced in the previous section allow to specify what is the distribution of the random variables $\hat{\beta}_0$ and $\hat{\beta}_1$. 
+- As we will see, this is a key point for making inference on $\beta_0$ and $\beta_1$.
+- The distributions are derived conditionally on the sample predictors $X_1, \ldots, X_n$. 
+- In other words, we assume that the randomness of $Y_i = \beta_0 + \beta_1 X_i + \epsilon_i, i = 1, 2, \ldots, n$, comes only from the error terms and not from the predictors.
+
+
+## Distributions of the fitted coefficients
+
+
+<div style="text-align:center" markdown="1">
+![ ](distributions.png "Distributions of the fitted coefficient."){width=100%}
+</div>
+
+
+## Implications
+
+<div style="text-align:center" markdown="1">
+![ ](implications.png "Implications."){width=100%}
+</div>
+
+## Unknown $\sigma^2$
+
+<div style="text-align:center" markdown="1">
+![ ](sigmasquare.png "Implications."){width=100%}
+</div>
+
+
+## Distribution 
+
+<div style="text-align:center" markdown="1">
+![ ](t-test.png "Implications."){width=100%}
+</div>
+
+## Testing 
+
+<div style="text-align:center" markdown="1">
+![ ](testing.png "Implications."){width=100%}
+</div>
+
+## Back to R output {.smaller}
+
+```{r lmpisa2}
+pisa <- read.csv("datasets/pisa.csv")
+pisaLinearModel <- lm(MathMean ~ logGDPp, data = pisa)
+summary(pisaLinearModel)
+```
+
+
+## Interpretation
+
+<div style="text-align:center" markdown="1">
+![ ](interpretation.png "Implications."){width=100%}
+</div>
+
+## ANOVA and model fit 
+
+- The variance of the error, $\sigma^2$ plays a fundamental role in the inference for the model coefficients and prediction. 
+
+- Now we will see how the variance of $Y$ is decomposed into two parts, each one corresponding to the regression and to the error, respectively. 
+
+- This decomposition is called the ANalysis Of VAriance (ANOVA).
+
+- This will help us in evaluating the model fit. 
+
+## ANOVA 
+
+- Before explaining ANOVA, it is important to recall an interesting result: the mean of the fitted values $\hat{Y}_1, \ldots, \hat{Y}_n$ is the mean of $Y_1, Y_2, \ldots, Y_n$. 
+
+$$
+\frac{1}{n} \sum_{i=1}^{n} \hat{Y}_i = \bar{Y}
+$$
+
+- Prove! 
+
+## ANOVA decomposition
+
+<div style="text-align:center" markdown="1">
+![ ](anova_decomposition.png "ANOVA Decomposition"){width=100%}
+</div>
+
+## ANOVA decomposition
+
+<div style="text-align:center" markdown="1">
+![ ](anova_sst.png "ANOVA Decomposition"){width=60%}
+</div>
+
+
+## ANOVA decomposition
+
+<div style="text-align:center" markdown="1">
+![ ](anova_ssr.png "ANOVA Decomposition"){width=60%}
+</div>
+
+## ANOVA decomposition
+
+<div style="text-align:center" markdown="1">
+![ ](anova_sse.png "SSE"){width=60%}
+</div>
+
+## ANOVA table
+
+<div style="text-align:center" markdown="1">
+![ ](anova-table.png "ANOVA Decomposition"){width=100%}
+</div>
+
+
+## In R 
+
+```{r anova}
+# Fit a linear model 
+model <- lm(MathMean ~ ReadingMean, data = pisa)
+anova(model)
+```
+
+
+## Model fit: $R^2$ 
+
+- The coefficient of determination $R^2$  is closely related with the ANOVA decomposition.
+$$
+R^2 = \frac{SSR}{SST} = \frac{SSR}{SSR + SSE} = \frac{SSR}{SSR + (n-2)\sigma^2}
+$$
+
+- $R^2$ measures the proportion of variation of the response variable $Y$ that is explained by the predictor $X$ through the regression. 
+
+- The proportion of total variation of $Y$ that is not explained is $1-R^2 = SSE/SST$. 
+
+- Intuitively, $R^2$ measures the tightness of the data cloud around the regression line, since is related directly with $\hat{\sigma}^2$. 
+
+
+## $R^2$ and correlation 
+
+- For univariate regression, the $R^2$ is related with the sample correlation coefficient:
+$$
+R^2 = r^2_{xy}
+$$
+
+- Interestingly, it also holds that:
+$$
+R^2 = r_{y \hat{y}}^2,
+$$
+
+that is the correlation coefficient between the observed responses $(Y_1, \ldots,Y_n)$ and the fitted values $(\hat{Y}_1, \ldots, \hat{Y}_n)$.
+
+
+## Note that 
+
+- The equality $R^2 = r_{y \hat{y}}^2$ is still true for the multiple linear regression, e.g.  
+
+$$
+Y = \beta_0 + \beta_1 X_1 + \ldots + \beta_p X_p + \epsilon.
+$$
+
+- On the contrary, there is no coefficient of correlation between three or more variables, so anything like $r_{x_1x_2 \ldots x_p y}$ does not exist. 
+
+- Hence, $R^2 = r^2_{xy}$ is a specific fact for simple linear regression.
+
+
+## Check numerically 
+
+```{r Rsquares}
+# Responses generated following a linear model
+set.seed(343567) # Fixes seed, allows to generate the same random data
+x <- rnorm(50)
+eps <- rnorm(50)
+y <- -1 + 2 * x + eps
+
+# Regression model
+reg <- lm(y ~ x)
+yHat <- reg$fitted.values
+
+# Square of the correlation coefficient
+cor(y, x)^2
+
+cor(y, yHat)^2
+```
+
+## Check numerically 
+
+```{r Rsquares-2}
+summary(reg)
+```
+
+## Two important points 
+
+- Two common sins regarding the use of $R^2$.
+
+  + Correctness. The linear model is built on certain assumptions, such as the ones we saw before. All the inferential results are based on these assumptions being true!. A model is formally correct whenever the assumptions on which is based are not violated in the data.
+
+  + Usefulness. The usefulness of the model is a more subjective concept, but is usually measured by the accuracy on the prediction and explanation of the response $Y$ by the predictor $X$. 
+
+- For example, $Y =0X + \epsilon$ is a valid linear model, but is completely useless for predicting $Y$ from $X$.
+
+
+## $R^2$ can be misleading if the assumptions aren't met
+
+- (In-class activity last week): Create data that does not follow a linear model +  the error is heteroskedastic. 
+
+```{R badRsq, fig.asp = 0.3}
+x <- seq(0.15, 1, l = 100)
+set.seed(123456)
+### <b>
+eps <- rnorm(n = 100, sd = 0.25 * x^2)
+y <- 1 - 2 * x * (1 + 0.25 * sin(4 * pi * x)) + eps
+### </b>
+data.frame(y = y, x = x) |> ggplot(aes(x,y)) + 
+  geom_point(alpha = 0.5) + theme_bw()
+
+```
+
+
+## High $R^2$ 
+
+```{R badRsq-2}
+# Great R^2!?
+reg <- lm(y ~ x)
+summary(reg)
+```
+
+## Non-linear relationships
+
+<div style="text-align:center" markdown="1">
+![ ](nonlinear.png "Non-linear relationships"){width=100%}
+</div>

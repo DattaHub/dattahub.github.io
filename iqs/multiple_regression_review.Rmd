@@ -1,0 +1,999 @@
+---
+title: "Multiple Linear Regression: Review"
+author: "Jyotishka Datta"
+date: "`r Sys.Date()`"
+output: 
+  ioslides_presentation:
+    theme: united
+    smaller: true
+    logo: ../vt.png
+    css: custom.css
+    transition: faster
+    widescreen: true
+---
+
+```{r setup, include=FALSE}
+options(width=80)
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F, fig.asp = 0.6, cache = TRUE)
+knit_hooks$set(no.main = function(before, options, envir) {
+    if (before) par(mar = c(4.1, 4.1, 1.1, 1.1))  # smaller margin on top
+})
+```
+
+## Outline 
+
+- We will cover a little bit of multiple regression today.
+- You'll see that a lot of concepts from simple linear regression will follow. 
+- Some of the contents are taken from lecture notes on  "Statistics for Social Sciences II: Multivariate Techniques" by Eduardo García Portugués. 
+
+
+## Case study: Boston housing data {.smaller}
+
+- Data description: type ?Boston on your R console. 
+- Most important ones: 
+  + *Dependent variable:* `medv`, the median value of owner-occupied homes (in thousands of dollars).
+  + *Structural variables:* Indicating the house characteristics: `rm` (average number of rooms “in owner units”) and `age` (proportion of owner-occupied units built prior to 1940).
+  + *Neighborhood variables:* `crim` (crime rate), `zn` (proportion of residential areas), `indus` (proportion of non-retail business area), `chas` (river limitation), `tax` (cost of public services in each community), `ptratio` (pupil-teacher ratio), `black` (variable $1000(B - 0.63)^2$, where $B$ is the black proportion of population) and `lstat` (percent of lower status of the population). 
+  + *Accessibility variables:* `dis` (distances to five Boston employment centers) and `rad` (accessibility to radial highways – larger index denotes better accessibility).
+  + *Air pollution variable*: `nox`, the annual concentration of nitrogen oxide (in parts per ten million).
+  
+## Boston housing data {.smaller}
+
+```{r boston}
+library(MASS)
+summary(Boston)
+```
+
+
+## (Multiple) Linear regression 
+
+The two goals of this case study are:
+
+-  Q1. Quantify the influence of the predictor variables in the housing prices.
+
+-  Q2. Obtain the "best possible" model for decomposing the housing variables and interpret it.
+
+*Data*
+
+- The response variable: $Y$ that we want to predict/explain.
+- The explanatory variables (or predictor), denoted by $X_1, X_2, \ldots, X_p$  and are used to predict/explain  $Y$
+- Recall the form of the linear model:
+$$
+Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \ldots + \beta_p X_p + \epsilon
+$$
+
+## We could fit multiple simple regression models 
+
+```{r}
+slr_1 <- lm(medv ~ crim, data = Boston)
+
+slr_1$coefficients
+
+slr_2 <- lm(medv ~ ptratio, data = Boston)
+
+slr_2$coefficients
+```
+
+* But, this is not enough because the predictors might be inter-related, and we also don't want their marginal effect on `medv` but rather we want the effect of say `crim` on `medv` after correcting for `ptration` 
+
+
+## Put all of them together {.smaller}
+
+Two useful tips about `lm`'s syntax for including/excluding predictors faster:
+
+1. `medv ~ .` -> includes all the variables in the dataset as predictors. It is equivalent to `medv ~ crim + zn + indus + chas + nox + rm + age+ dis + rad + tax + ptratio + black + lstat`.
+
+2. `medv ~ . - crim`   -> includes all the variables except the ones with - as predictors. It is equivalent to It is equivalent to `medv ~ zn + indus + chas + nox + rm + age+ dis + rad + tax + ptratio + black + lstat`
+
+
+## Output from R 
+
+- Open R-Studio and type the following: 
+
+- This R studio console won't fit the output. 
+
+```{r, echo = T, eval = T, results = F}
+library(MASS)
+modHouse <- lm(medv ~ ., data = Boston) 
+summary(modHouse)
+```
+
+- **Can you identify the coefficient estimates and the P-values and the R-square at the end**?
+
+## Output {.smaller}
+
+```{r, echo = T, eval = T, results = T}
+library(MASS)
+modHouse <- lm(medv ~ ., data = Boston) 
+summary(modHouse)
+```
+
+## Output 
+
+- The summary gives the coefficients of the line and the $R^2$ 
+('Multiple R-squared'), which can be regarded as an indicator of the strength of the linear relation between the variables. 
+
+- ( $R^2 = 1$ is a perfect linear fit – all the points lay in a line – and $R^2 = 0$ is the poorest fit.)
+
+ - There are a couple of non-significant variables, but so far the model has an $R^2 = 0.74$   and the fitted coefficients are sensible with what it would be expected. 
+ 
+ - For example, `crim`, `tax`, `ptratio` and `nox` have negative effects on medv, while `rm`, `rad` and `chas` have positive. 
+ 
+ - However, the non-significant coefficients are not improving significantly the model, but only adding artificial noise and decreasing the overall accuracy of the coefficient estimates!
+ 
+- We can remove `age` and `indus`?
+ 
+
+## Better model? {.smaller}
+
+- Once again, open R-Studio and type the following: 
+
+```{r, echo = T, eval = T}
+modHousesmall <- lm(medv ~ . -age - indus, data = Boston)
+summary(modHousesmall)
+```
+
+## Formulation 
+
+- Multiple linear model is constructed by assuming a linear relation holds between the predictor and the response. 
+- Simple linear model: $Y = \beta_0 + \beta_1 X_1 + \ldots + \beta_p X_p + \epsilon$.
+- $\beta_0$ and $\beta_j$'s are known as the intercept and slopes, and $\epsilon$ is a random variable with mean zero and independent from $X$.
+
+- Another way of looking at this is:
+$$
+\mathbb{E}(Y | X_1 = x_1, \ldots, X_p = x_p) = \beta_0 + \beta_1 X_1 + \ldots + \beta_p X_p, \text{ since } \mathbb{E}(\epsilon | x) = 0.
+$$
+- LHS: conditional expectation of $Y$  given $X$ : how the mean of the random variable $Y$  is changing according to particular values, denoted by $x_1, \ldots, x_p$, of the random variables $X_1, \ldots, X_p$.
+
+- we are saying is that the mean of $Y$ is changing in a linear fashion with respect to the values of $X_1, \ldots, X_p$.
+
+# Conditional Expectation 
+
+## Toy example 
+
+As a toy example, lets think about how relationships between two variables, $X$ and $Y$, can be expressed by probabilistic constructs,
+
+- and then we can see how that is related to regression and forecasting.
+
+Consider a regression of house **price** on **size**
+
+- price is our response, $Y$
+- size is our explanatory variable, $X$
+
+Our interest is in the distribution of $Y$, not alone (i.e., not **marginally**),
+
+- but as $X$ varies (i.e., **conditionally**);
+- because we think that $X$ might be useful for predicting $Y$.
+
+## Conditional distributions
+
+Regression is really about modeling the conditional distribution of $Y$ given $X$.
+$$
+\mathbb{P}(Y \mid X)
+$$
+
+If we have data comprised of $(x_i, y_i)$ pairs, $i=1, \dots, n$,
+
+- where these quantities have been observed to co-occur together,
+- then we can use these to learn about $\mathbb{P}(Y \mid X)$.
+
+We will find it useful to build a model for these conditional distributions,
+
+- but for now lets just explore the potential intuitively.
+
+## 
+
+A **conditional distribution** can be obtained by "slicing" the $X$-$Y$ point cloud.
+
+- the **marginal** distribution ignores the slices.
+
+<div style="text-align:center" markdown="1">
+![ ](images/cndprice.png "price v. sqft")
+</div>
+
+## Conditional v. marginal distribution
+
+The conditional distributions answer the forecasting problem:
+
+- if I know that a house is between 1 and 1.5 thousand sq.ft., 
+    + then the conditional distribution (second boxplot) gives me a point forecast (the median) and a prediction interval.
+- The conditional means/medians seem to line up along a "regression line".
+- The conditional distributions have much smaller dispersion than the marginal distribution.
+- Apparently
+$$
+\mathbb{V}\mathrm{ar}\{Y \mid X\} \ll \mathbb{V}\mathrm{ar}\{ Y\}.
+$$
+
+## When is $X$ useful for predicting $Y$?
+
+This suggests two general points.
+
+- If $X$ has no forecasting power, then the marginal and conditionals will be the same.  In particular
+$$
+\mathbb{V}\mathrm{ar}\{Y \mid X\} \approx \mathbb{V}\mathrm{ar}\{ Y\}
+$$
+
+- If $X$ has some forecasting information, then
+    + the conditional means will be different than the marginal or overall mean
+$$
+\mathbb{E}\{Y \mid X\} \ne \mathbb{E}\{ Y\},
+$$
+    + and the conditional variance of $Y$ given $X$ will be (substantially) less than the marginal variance of $Y$
+$$
+ \mathbb{V}\mathrm{ar}\{Y \mid X\} \ll \mathbb{V}\mathrm{ar}\{ Y\}.
+$$
+
+## 
+
+Intuition from an example where $X$ has no predictive power.
+
+<div style="text-align:center" markdown="1">
+![ ](images/stopsign.png "price v. stopsigns")
+</div>
+
+<br>
+*Note the code supporting the house price example(s) is in `cndprice.R`.*
+
+# Fitting lines to points
+
+## A line-based conditional distribution
+
+How do we get away from grouping the data artificially?
+
+- We're going to "fit" a line instead, a representation of $Y \mid X$ via $y=ax+b$, 
+- and check if the predictions from the line (representing our conditional distribution) lead to a reduction in variance compared to having no line,
+    + i.e., just using plain averages $\bar{Y}$, ignoring $X$.
+
+There are three steps
+
+1. Finding a line that makes sense;
+2. Arguing that it is a good line;
+3. Deriving its statistical properties,
+    + and subsequently determining if $X$ is useful for predicting $Y$.
+
+## Simple linear regression to multiple linear regression
+
+Many problems involve more than one independent variable or factor which affects the dependent or response variable.
+
+- Multi-factor asset pricing models (beyond CAPM).
+- Demand for a product given prices of competing brands, advertising, household attributes, etc.
+- More than size to predict house price.
+
+In SLR, the conditional mean of $Y$ depends on $x$. 
+
+- The **multiple linear regression (MLR)** model extends this idea to include more than one independent variable.
+
+## The MLR Model
+
+The MLR model is the same as always, but with more covariates, and there are many equivalent ways to write it:
+
+$$
+\begin{aligned}
+Y_i &= \beta_0 + \beta_1 x_1 + \dots + \beta_d x_d + \varepsilon_i, \quad \varepsilon_i \stackrel{\mathrm{iid}}{\sim} \mathcal{N}(0, \sigma^2), \quad i=1, \dots, n \\
+Y_i &\mid x_{i1}, \dots, x_{id} \stackrel{\mathrm{ind}}{\sim} \mathcal{N}(\beta_0 + \beta_1 x_1 + \dots + \beta_d x_d, \sigma^2)
+\end{aligned}
+$$
+
+- My favorite, and the easiest to work with mathematically, is the vectorized [MVN](https://en.wikipedia.org/wiki/Multivariate_normal_distribution):
+$$
+Y \sim \mathcal{N}_n(X \beta, \mathbb{I}_n \sigma^2), \quad \mbox{where}
+$$
+
+- $Y = (Y_1, \dots, Y_n)^\top$, 
+- $\beta$ is a $p=(d+1)$-vector $(\beta_0, \beta_1, \dots, \beta_d)^\top$.
+- $\mathbb{I}_n$ is the $n \times n$ identity matrix
+- and $X$ is a $n\times p$ **design matrix** with a column of 1s, and each of the $d$ coordinates stacked as columns thereafter,
+    + so that the $i^\mathrm{th}$ row is $x_i^\top = (1, \ x_{i1}, \cdots, x_{id}).$
+
+## MLR assumptions and interpretation
+
+Recall the key assumptions of linear regression, which we port from SLR to MLR:
+
+1. The conditional mean of $Y$ is **linear** in the $x_j$ variables.
+2. The additive errors (deviations from the line)
+    + are normally distributed,
+    + independent from each other,
+    + and identically distributed (i.e., they have constant variance).
+
+Our interpretation of regression coefficients can be extended from the simple single covariate regression case:
+
+$$
+\beta_j = \frac{\partial \mathbb{E}\{Y \mid x_1, \dots, x_d\}}{\partial x_j}.
+$$
+
+- *Holding all other variables constant*, $\beta_j$ is the average change in $Y$ per unit change in $x_j$.
+
+
+
+## Interpretation 
+
+- $\beta_0$ is the mean of $Y$ when $X_1 = \cdots = X_p = 0$. 
+
+- $\beta_j$: is the increment in mean of $Y$ for an increment of one unit in $X_j = x_j$ provided that the remaining variables $X_1, \ldots, X_{j-1}, X_{j+1}, \ldots, X_p$ do not change.
+
+## Estimating $\beta$ 
+
+- One way of estimating $(\beta_0, \beta_1, \beta_2, \ldots, \beta_p)$ is by minimizing the residual sum of squares: 
+
+$$
+RSS(\beta_0, \beta_1) = \sum_{i=1}^{n}(Y_i - \beta_0 - \beta_1 X_{i1}-\ldots - \beta_p X_{pi})^2
+$$
+
+- Look for estimates such that:
+
+$$
+(\hat{\beta}_0, \hat{\beta}_1, \ldots, \hat{\beta}_p) = \arg \min_{(\beta_0, \beta_1. \ldots, \beta_p) \in \mathbb{R}^{p+1}} RSS(\beta_0, \beta_1, \ldots, \beta_p)
+$$
+
+## Back to SLR: Fitted values and residuals
+
+Although there are lots of ways to choose a criteria
+
+- only a small handful lead to solutions that are "easy" to compute
+- and which have nice statistical properties.
+
+Most reasonable criteria involve measuring the amount by which the **fitted value**
+
+- obtained from the line for each point in the data, $\hat{y}_i = b_0 + b_1 x_i$
+
+differs from the observed value of the response in the data, $y_i$.
+
+- This amount is called the **residual**: $e_i = y_i - \hat{y}_i$.
+- Good lines produce small residuals.
+
+## 
+
+<div style="text-align:center" markdown="1">
+![ ](images/residual.png "residuals") 
+</div>
+
+<br>
+The **residual** $e_i$ is the discrepancy between the **fitted** $\hat{y}_i$ and observed $y_i$ values.
+
+- Note that we can write $y_i = \hat{y}_i + (y_i - \hat{y}_i) = \hat{y}_i + e_i$.
+
+## Least squares
+
+A reasonable goal is to minimize the size of *all* residuals:
+
+- If they were all zero we would have a perfect line.
+- There is a trade-off between moving closer to some points and at the same time moving away from other points.
+
+Since some residuals are positive and some are negative, we need one more ingredient.
+
+- $|e_i|$ treats positives and negatives equally.
+- So does $e_i^2$ which is easier to work with mathematically.
+
+The method of **least squares** chooses $b_0$ and $b_1$ to minimize $\sum_{i=1}^n e_i^2$.
+
+##
+
+<div style="text-align:center" markdown="1">
+![ ](images/posneg.png "positive and negative residuals")
+</div>
+
+<br>
+Choose the line to minimize the sum of the squares of the residuals,
+$$
+\sum_{i=1}^n e_i^2 = \sum_{i=1}^n (y_i - \hat{y}_i)^2 = \sum_{i=1}^n (y_i - [b_0 + b_1 x_i])^2.
+$$
+
+## Solving least squares
+
+Have to minimize something?  
+
+- Take derivatives of course!
+
+$$
+\begin{align}
+0 &= \frac{\partial}{\partial b_0} \sum_{i=1} (y_i - b_0 - b_1 x_i)^2 \\
+% b_0 &= \frac{\sum_{i=1}^n y_i}{n} - b_1 \frac{\sum_{i=1}^n x_i}{n} \\
+& \;\, \vdots \\
+\mbox{giving } \quad b_0 &= \bar{y} - b_1 \bar{x}.
+\end{align}
+$$
+
+
+## Solving least squares (2)
+
+Now for the slope.
+
+$$
+\begin{align}
+0 &= \frac{\partial}{\partial b_1} \sum_{i=1} (y_i - b_0 - b_1 x_i)^2 \\
+& \;\, \vdots \\
+%0 &= \sum_{i=1}^n y_i x_i - b_0 x_i - b_1 x_i^2 \\
+%0 &= \sum_{i=1}^n y_i x_i - \bar{y} x_i + b_1 \bar{x} x_i - b_1 x_i^2  && \mbox{with $b_0$ plugged in}\\
+%0 &=\left(\sum_{i=1}^n y_i x_i - \bar{y} x_i \right) + b_1 \left(\sum_{i=1}^n \bar{x}x_i - x_i^2\right)
+%b_1 &= \frac{\sum_{i=1}^n (y_i - \bar{y})(x_i - \bar{x})}{\sum_{i=1}^n (\bar{x} - x_i)^2} \\
+b_1 &= \frac{s_{xy}}{s_x^2}.
+\end{align}
+$$
+
+
+It turns out that the least squares line is the same as 
+
+- "correlation centered in the cloud".
+
+
+## How to solve for $\hat{\beta}$ for MLR?
+
+- We need some matrix notation
+- $Y = \beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p + \epsilon$, $\epsilon \stackrel{\mathrm{iid}}{\sim} \mathcal{N}(0, \sigma^2)$.
+- Equivalently, 
+
+$$
+Y = X\beta + \epsilon, \text{ or, } \mathbb{E}( Y \mid X) = X \beta
+$$
+
+where $Y = (y_1, \ldots, y_n)^{T}$, $\boldsymbol{\beta} = (\beta_1, \ldots, \beta_p)^T$ and $X$ the usual $n \times p$ design matrix with an extra column of $1$'s to the left to account for intercepts. 
+
+## Linear model in Matrix form 
+
+- "Design matrix": $n$ rows and $p$ or $p+1$ columns, depending on whether you include the intercept in your model. Each row corresponds to an observation and each column corresponds to a variable. 
+
+$$
+X =
+	\begin{bmatrix} 
+	x_{11} & x_{12} & \cdots & x_{1p}\\
+	x_{21} & x_{22} & \cdots & x_{2p}\\
+	\vdots & \vdots & \cdots & \vdots \\
+	x_{n1} & x_{n2} & \cdots & x_{np}\\
+	\end{bmatrix}
+	\quad
+$$
+- The response vector $Y$ and parameter vector $\boldsymbol{\beta}$ can be written as:
+
+$$
+Y =
+	\begin{pmatrix} 
+	y_{1} \\
+	y_{2}\\
+	\vdots \\
+	y_{n} \\
+	\end{pmatrix};
+	\quad
+\boldsymbol{\beta} =
+	\begin{pmatrix} 
+	\beta_{1} \\
+	\beta_{2}\\
+	\vdots \\
+	\beta_{p} \\
+	\end{pmatrix};
+	\quad
+\boldsymbol{\epsilon}=
+	\begin{pmatrix} 
+	\epsilon_{1} \\
+	\epsilon_{2}\\
+	\vdots \\
+	\epsilon_{n} \\
+	\end{pmatrix};
+$$
+
+
+<!-- <div style="text-align:center" markdown="1"> -->
+<!-- ![ ](matrix-lm.png "Matrix form of the linear model model."){width=100%} -->
+<!-- </div> -->
+
+## Solution 
+
+- We find the estimates by minimizing the RSS (residual sum of squares) 
+\begin{align*}
+	\text{RSS} & = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 \\
+	& = \sum_{i=1}^{n} (y_i - \hat{\beta}_0 - \cdots - \hat{\beta}_p x_{i,p})^2 
+\end{align*}
+
+- One can *show* this is minimized by the vector $\hat{\beta}$: 
+$$
+	\hat{\boldsymbol{\beta}} = (X^T X)^{-1} X^T y 
+$$
+- Proof? 
+
+- Provided the inverse $(X^T X)^{-1}$ exists, i.e. the $p \times p$ matrix $(X^T X)$ is invertible. 
+
+- Invertible? 
+
+- A little bit of matrix algebra helps here. I'll write just the basics. 
+
+## Solution : Proof 
+
+
+<div style="text-align:center" markdown="1">
+![ ](matrix_1.png "Residuals"){width=100%}
+</div>
+
+
+## Solution : Proof 
+
+<div style="text-align:center" markdown="1">
+![ ](matrix_2.png "Residuals"){width=100%}
+
++  Rest on 'board'! 
+
+## Inverses 
+
+- A square matrix $A$ is invertible if there exists an $A^{-1}$ such that: 
+
+$$
+A A^{-1} = A^{-1} A = I = \text{the identity matrix} = 	\begin{bmatrix} 
+	1 & 0 & \cdots & 0\\
+	0 & 1 & \cdots &0\\
+	\vdots & \vdots & \cdots & \vdots \\
+	0 & 0 & \cdots & 1\\
+	\end{bmatrix}
+$$
+
+- If $A^{-1}$ exists, $A$ is called non-singular, if it doesn't exist, $A$ is called singular. 
+
+- For a square, singular matrix $A$ of size $p \times p$, the $p$ columns (or rows ) must be "linearly independent", i.e. none of the $p$ columns can be written as a linear function of the remaining columns. 
+
+- If this doesn't hold, then the matrix isn't singular. 
+
+## Does the Inverse Exist?
+
+- There are two ways to determine whether the inverse of a square matrix exists.
+
+-  <div class="red2"> Determine its rank. </div> The rank of a matrix is a unique number associated with a square matrix. 
+
+- <div class="red2">**If the rank of an n x n matrix is less than n, the matrix does not have an inverse**. </div>
+
+- <div class="red2"> Compute its determinant. </div> The determinant is another unique number associated with a square matrix. When the determinant for a square matrix is equal to zero, the inverse for that matrix does not exist. 
+
+## Inverses : Rank of a matrix 
+
+- The rank of a matrix is defined as (a) the maximum number of linearly independent column vectors in the matrix or (b) the maximum number of linearly independent row vectors in the matrix. Both definitions are equivalent.
+
+- For an $n \times p$ matrix,
+
+   - If n is less than p, then the maximum rank of the matrix is n.
+   - If n is greater than p, then the maximum rank of the matrix is p.
+   
+- Another interesting fact is that for any matrix $A$ 
+
+$$
+\text{rank}(A) = \text{rank}(A^T) = \text{rank}(A A^T) = \text{rank}(A^T A) \quad \text{ ... (Fact 1)}
+$$
+- Combine the two, if a matrix $A$ has different dimensions $n$ and $p$, then $rank(A)$ must be less than or equal to the smaller of the two numbers $n$ and $p$, i.e. $rank(A^T A) = rank(A) \le min(n, p)$. 
+
+## Now, tying these back to regression 
+
+- In our case, consider the design matrix $X$ of size $n \times p$. 
+
+- The maximum rank is $p$ if $n > p$ (tall $X$), and the maximum rank is $n$ if $p > n$. 
+
+- Recall the $\hat{\beta}$ solution:
+
+$$
+	\hat{\boldsymbol{\beta}} = (X^T X)^{-1} X^T y 
+$$
+
+-  What is the dimension of $(X^T X)$? Ans: $p \times p$. 
+
+-  Maximum rank of this matrix is $p$. 
+
+- Now, using Fact 1, $rank(X^T X) = rank(X) \le min(n,p)$ 
+
+- Now, if you have more variables $p$ than observations $n$ (i.e. $p > n$), then $X^T X$ can have maximum rank $n$, less than the full rank $p$, and it won't be invertible (i.e. $X$ is singular)
+
+## Key points
+
+-  <div class="red2"> If you have more observations than variables, the least squares solution (typically) exists and is unique. </div>
+
+- <div class="blue">If you have more variables than observations, the least squares solution does not even exist. </div>
+
+
+## Compare with simple linear regression
+
+- Once again, recall: $\hat{\boldsymbol{\beta}} = (X^T X)^{-1} X^T y$ 
+
+- Then, recall the estimates for a simple regression last week:
+
+$$
+\hat{\beta}_0 = \bar{Y} - \hat{\beta}_1 \bar{X}, \hat{\beta}_1 = \frac{s_{xy}}{s_{x}^2}
+$$
+
+- $\bar{X}, s_{xy}, s_{x}^2$: sample mean of $Y$, covariance between $X$ and $Y$ and variance of $X$ ($s_x$ is the std. dev.)
+
+- both are related to the covariance between $X$ and $Y$ weighted by the variance of $X$.
+
+## Check 
+
+```{r check}
+# Generates 50 points from a N(0, 1): predictors and error
+set.seed(34567) # Fixes the seed for the random generator
+x1 <- rnorm(50)
+x2 <- rnorm(50)
+x3 <- x1 + rnorm(50, sd = 0.05) # Make variables dependent
+eps <- rnorm(50)
+
+# Responses
+yLin <- -0.5 + 0.5 * x1 + 0.5 * x2 + eps
+# Data
+leastSquares3D <- data.frame(x1 = x1, x2 = x2, yLin = yLin)
+```
+
+## Coefficients {.smaller}
+
+```{r check_2}
+# Matrix X
+X <- cbind(1, x1, x2)
+# Vector Y
+Y <- yLin
+
+# Coefficients
+beta <- solve(t(X) %*% X) %*% t(X) %*% Y
+# %*% multiplies matrices
+# solve() computes the inverse of a matrix
+# t() transposes a matrix
+t(beta)
+# Output from lm
+mod <- lm(yLin ~ x1 + x2, data = leastSquares3D)
+mod$coefficients
+```
+
+
+## Other details 
+
+- The next few slides are taken from a book called `Statistics for Social Sciences: Multivariate Techniques' 
+
+- The book uses a slightly different notation: $k$ as model dimension instead of $p$, i.e. $\boldsymbol{\beta} = (\beta_1, \ldots, \beta_k)$. 
+
+
+## Other terms 
+
+<div style="text-align:center" markdown="1">
+![ ](fitted_values.png "Residuals"){width=100%}
+</div>
+
+## Geometry of linear model 
+
+The fitted value $\hat{y} \in \mathbb{R}^n$ in linear regression is exactly the projection of $y \in \mathbb{R}^n$ on to the linear subspace spanned by the columns of $X$, i.e. $\text{span}\{ X_1, X_2, \ldots, X_p\} = \text{col}(X) \subseteq \mathbb{R}^n$. 
+
+<div style="text-align:center" markdown="1">
+![ ](geometry_lm.jpg "Assumptions of the linear model model."){width=40%}
+</div>
+
+The hat matrix $H = X (X^T X)^{-1} X^T$ is $P_{col}(X)$, the projection matrix onto the column space of $X$. 
+
+## Geometry 
+
+- We will not discuss the proof or details here - but the Geometrical perspective provides better intuition than algebra !
+
+- For example, it follows easily that if $P_{col}(X)$ is the projection matrix to $\text{col}(X)$, $(I - P_{col}(X))$ is the projection matrix to its orthogonal space. 
+
+- Which means $(I - P_{col}(X))y$ will be orthogonal to everything in column space of $X$, in particular, the columns of $X$. 
+
+- <div class="red2"> This is same as saying the residuals $y - \hat{y}$ are orthogonal to each of $X_1, \ldots, X_p$. </div>
+
+## Assumptions 
+
+<div style="text-align:center" markdown="1">
+![ ](assumptions_multi.png "Assumptions of the linear model model."){width=100%}
+</div>
+
+
+## Recall:
+
+- Nothing is said about the distribution of $X_1, \ldots, X_p$ as yet. Indeed, $X_i$'s could be deterministic (called fixed design) or random (random design). 
+
+- The linear model assumes that $Y$ is continuous due to the normality of the errors. 
+
+- $X_1, \ldots, X_p$ are not required to be independent between them. 
+
+## Inference for the model coefficients 
+
+- The assumptions introduced in the previous section allow to specify what is the distribution of the random variables $\hat{\beta}_0$ and $\hat{\beta}_1$ through $\hat{\beta}_p$. 
+
+- The distributions are derived conditionally on the sample predictors $X_1, \ldots, X_n$. 
+
+
+## Distributions of the fitted coefficients
+
+
+<div style="text-align:center" markdown="1">
+![ ](mlr_distribution.png "Implications."){width=100%}
+</div>
+
+## Sampling distribution of $\hat{\beta}$
+
+A result from MVNs is that if $Y \sim \mathcal{N}_n(\mu, \Sigma)$ and $P$ is a $p\times n$ matrix,
+then $PY \sim \mathcal{N}_p(P \mu, P \Sigma P^\top$).
+
+Now, let $P = (X^\top X)^{-1} X^\top$ so that $\hat{\beta} = Py$.  Observe that
+
+- $P X \beta = (X^\top X)^{-1} X^\top X \beta = \beta$, and
+- $P P^\top = (X^\top X)^{-1} X^\top X (X^\top X)^{-1} = (X^\top X)^{-1}$
+
+since $X^\top X$ is symmetric, and then so is it's inverse.
+
+Therefore, using the MVN result above, we obtain
+$$
+\hat{\beta} = PY \sim \mathcal{N}_p (\beta, \sigma^2 (X^\top X)^{-1})
+$$
+giving the sampling distribution of $\hat{\beta}$.
+
+## Unknown $\sigma^2$
+
+<div style="text-align:center" markdown="1">
+![ ](mlr_ttest.png "Implications."){width=100%}
+</div>
+
+
+## Testing 
+
+<div style="text-align:center" markdown="1">
+![ ](mlr_testing.png "Implications."){width=100%}
+</div>
+
+## Back to R output {.smaller}
+
+```{r lmpisa2}
+boston_lm <- lm(medv ~ crim + zn + lstat, data = Boston)
+summary(boston_lm)
+```
+
+
+## Interpretation
+
+<div style="text-align:center" markdown="1">
+![ ](interpretation.png "Implications."){width=100%}
+</div>
+
+
+
+## ANOVA decomposition
+
+<div style="text-align:center" markdown="1">
+![ ](mlr_anova_decomposition.png "ANOVA Decomposition"){width=100%}
+</div>
+
+
+## ANOVA table
+
+<div style="text-align:center" markdown="1">
+![ ](mlr_anova-table.png "ANOVA Decomposition"){width=80%}
+</div>
+
+
+## Why do we care?
+
+- Look at the null hypothesis:
+\[
+	H_0: \beta_{1} = \beta_{2} = \cdots = \beta_p = 0
+\]
+
+-  Testing whether any of the variables is important?
+
+-  Let $RSS_0$ be the residual sum of squares for the model which \textbf{excludes all variables}. The F-statistic is defined by:
+
+$$
+F = \frac{(RSS_0 - RSS)/p}{RSS/(n-p-1)}, \quad \text{where } RSS_0 = \sum_{i=1}^{n} (y_i -\bar{y})^2
+$$
+
+- Under the above null, this has a $F$ distribution with $p$ and $n-p-1$ df (last slide, put $k = p$.) 
+	
+- If the $F$ statistics is `large', we reject the null and conclude that at least one $\beta_j$ is non-zero. 
+
+- In other words, not all the $X_j$'s are noise. 
+
+## In R {.smaller}
+
+```{r anova}
+model <- lm(medv~crim + lstat, data = Boston)
+summary(model)
+```
+
+## Model fit: $R^2$ 
+
+- The coefficient of determination $R^2$  is closely related with the ANOVA decomposition.
+$$
+R^2 = \frac{SSR}{SST} = \frac{SSR}{SSR + SSE} = \frac{SSR}{SSR + (n-p-1)\sigma^2}
+$$
+
+- $R^2$ measures the proportion of variation of the response variable $Y$ that is explained by the predictor $X$ through the regression. 
+
+- The proportion of total variation of $Y$ that is not explained is $1-R^2 = SSE/SST$. 
+
+- Intuitively, $R^2$ measures the tightness of the data cloud around the regression line, since is related directly with $\hat{\sigma}^2$. 
+
+## In R {.smaller}
+
+```{r}
+model <- lm(medv~crim + lstat, data = Boston)
+summary(model)
+```
+
+## Note that 
+
+- The equality $R^2 = r_{y \hat{y}}^2$ is still true for the multiple linear regression, e.g.  
+
+$$
+Y = \beta_0 + \beta_1 X_1 + \ldots + \beta_p X_p + \epsilon.
+$$
+
+- On the contrary, there is no coefficient of correlation between three or more variables, so anything like $r_{x_1x_2 \ldots x_p y}$ does not exist. 
+
+- Once again, $R^2 = r^2_{xy}$ is a specific fact for simple linear regression.
+
+
+## Check numerically 
+
+```{r Rsquares}
+# Responses generated following a linear model
+set.seed(343567) # Fixes seed, allows to generate the same random data
+x1 <- rnorm(50); x2 <- rnorm(50); eps <- rnorm(50)
+y <- -1 + 2*x1 + 3*x2 + eps
+
+# Regression model
+reg <- lm(y ~ x1+x2)
+yHat <- reg$fitted.values
+
+# Square of the correlation coefficient
+cor(y, yHat)^2
+```
+
+## Check numerically 
+
+```{r Rsquares-2}
+reg <- lm(y ~ x1+x2)
+summary(reg)
+```
+
+## Two important points 
+
+- Two common sins regarding the use of $R^2$.
+
+  + Correctness. The linear model is built on certain assumptions, such as the ones we saw before. All the inferential results are based on these assumptions being true!. A model is formally correct whenever the assumptions on which is based are not violated in the data.
+
+  + Usefulness. The usefulness of the model is a more subjective concept, but is usually measured by the accuracy on the prediction and explanation of the response $Y$ by the predictor $X$. 
+
+- For example, $Y =0X + \epsilon$ is a valid linear model, but is completely useless for predicting $Y$ from $X$.
+
+
+## Don't blindly follow R^2 {.smaller}
+
+- 
+Create data that:
+  1) does not follow a linear model
+  2) the error is heteroskedastic
+  
+$$
+Y = 1 - 3 \times X1 \times (1+ 0.25\times \sin(4 \pi X1)) + 0.25 \times \cos(X_2) + \epsilon, \quad \epsilon(0, \sigma = 0.25 \times X_1^2)
+$$
+
+```{R badRsq, echo = F, fig.asp = 0.6}
+x1 <- seq(0.15, 1, l = 100)
+set.seed(123456)
+x2 <- runif(100, -3, 3)
+eps <- rnorm(n = 100, sd = 0.25 * x1^2)
+y <- 1 - 3 * x1 * (1 + 0.25 * sin(4 * pi * x1)) + 0.25 * cos(x2) + eps
+library(plotly)
+plot_ly(x=x1, y=x2, z=y, type="scatter3d", mode="markers")
+```
+
+
+## Great $R^2$ {.smaller}
+
+```{R badRsq-2}
+# Great R^2!?
+reg <- lm(y ~ x1+x2)
+summary(reg)
+```
+
+## Matrices in R
+
+- One drawback of the $R^2$ statistic is that it is a monotonically decreasing function of the model size, i.e. the more variables you add, the higher the value of this quantity. 
+
+- It can't be used for selection if you have a nested sequence of models. 
+
+- There is another statistics on the lm output: adjusted $R^2$: this is an adjustment that starts penalizing more complex models, and there are many others - starting from simple adj-$R^2$, then AIC, BIC and eventually *LASSO*. 
+
+- We will talk about model selection and regularization later, and you might learn regression details in another course too. 
+
+- I'll finish today's class with a couple of efficiency tricks when dealing with matrices in R
+
+# Matrix operations in `R`
+
+## Multiplication 
+
+With $A$ and $B$ defined as above the matrix product $BA$ in not defined, but the product $B^T A$ is ($B^T$ denotes the transpose of $B$). 
+- The transpose of a matrix can be obtained with the function `t()`.
+```{r, echo = TRUE}
+A <- matrix(c(1, 2, 0, 1), 2)
+B <- matrix(c(1, 3, 3, 1, 4, 5), nr = 2)
+t(B) %*% A
+```
+
+## Crossprod
+
+-  A much more efficient way of computing the same matrix product is via the function `crossprod()`.
+```{r, echo = TRUE}
+all.equal(crossprod(B, A), t(B) %*% A)
+```
+- A similar function, tcrossprod(), computes the matrix product $AB^T$ whenever the product is well defined.
+
+## In-class exercise {.smaller}
+
+- Consider the matrix
+
+```{r, echo = TRUE}
+X <- cbind(1, seq(-1, 1, length = 11))
+X
+```
+- Use `crossprod()` and `tcrossprod()` to find $X^T X$ and $X X^T$. 
+- Note the dimensions of the resulting matrices. 
+
+## Matrix inversion
+
+- The inverse of a matrix can be found using `solve()`:
+
+```{r, echo = TRUE}
+Ainv <- solve(A)
+Ainv
+all.equal(Ainv %*% A, diag(2))
+```
+
+## Solve linear system 
+
+- Inverse in R uses [QR decomposition](https://en.wikipedia.org/wiki/QR_decomposition) (beyond the scope of this course).
+
+- For linear systems we don't need to compute inverses. We can use Gaussian elimination (also beyond the scope). 
+
+```{r, echo = TRUE}
+b <- c(5, 3)
+solve(A, b) # use this
+Ainv %*% b # don't use this
+```
+
+## Time comparison 
+
+- Compare execution times for the different methods of solving the Least Squares problem when the number of observations is large.
+
+-  Let us start by making up our own random data: $n \times p$ design matrix $X$ and an $n \times 1$ response vector $y$. 
+-  Take $n = 5 \times 10^5$. 
+
+```{r, echo = TRUE, cache = TRUE}
+set.seed(123)
+n <- 5e5; p <- 20
+X <- matrix(rnorm(n * p, mean = 1 : p, sd = 10), nr = n, nc = p, byrow = TRUE)
+y <- rowSums(X) + rnorm(n)
+```
+
+## OLS 
+
+- The naive approach to solve the linear regression problem is to compute the solution explicitly using matrix product and inverse: $\hat{\beta} = (X^T X)^{-1}X^T y$
+
+- Remember the cost of inverting a $p \times p$ matrix is $O(p^3)$.
+
+```{r, echo = TRUE, cache = TRUE}
+system.time(bHat1 <- solve(t(X) %*% X) %*% t(X) %*% y)
+```
+
+-  Not so naive: use `crossprod`.
+
+```{r, echo = TRUE, cache = TRUE}
+system.time(bHat2 <- solve(crossprod(X), crossprod(X, y)))
+```
+
+- Now, you should be able to write your own `lm` functions. 
+
+- Be careful about categorical predictors. 
+
+
+
+<!-- ## Inverting a matrix using Cholesky helps -->
+
+<!-- - A symmetric positive definite matrix can be factorized as:  -->
+<!-- $$ -->
+<!-- A = L L^T -->
+<!-- $$ -->
+
+<!-- ```{r, echo = TRUE, cache = TRUE} -->
+<!-- p = 1000; A = array(rnorm(p*p), c(p,p)) -->
+<!-- A = crossprod(A) -->
+<!-- ptm <- proc.time(); B = solve(A); proc.time()-ptm -->
+<!-- ptm <- proc.time(); B = chol2inv(A); proc.time()-ptm -->
+<!-- ``` -->
+
+

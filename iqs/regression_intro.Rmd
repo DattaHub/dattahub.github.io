@@ -1,0 +1,595 @@
+---
+title: "Linear Regression"
+author: "Jyotishka Datta"
+date: "`r Sys.Date()`"
+output: 
+  ioslides_presentation:
+    smaller: yes
+    logo: ../vt.png
+    css: custom.css
+    transition: faster
+---
+
+```{r setup, include=FALSE}
+options(width=80)
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F, fig.asp = 0.6, cache = TRUE)
+knit_hooks$set(no.main = function(before, options, envir) {
+    if (before) par(mar = c(4.1, 4.1, 1.1, 1.1))  # smaller margin on top
+})
+
+```
+
+## Outline 
+
+- We will start with the simplest case: univariate regression, and explain some details. 
+- The reason is that the multiple regression or generalized linear models often follow the same structure and ...
+- **Once you understand the `simple' linear regression very well, the generalizations would be quite easy.**
+- Some of the contents are taken from lecture notes on  
+
+>- "Statistics for Social Sciences II: Multivariate Techniques" by Eduardo García Portugués and from 
+>- "Introduction to Data Science: Data Analysis and Prediction Algorithms with R" by Rafael A. Irizarry.
+
+
+## Example : PISA 
+
+- PISA is a study carried out by the OECD in 65 countries with the purpose of evaluating the performance of 15-year-old pupils on mathematics, science and reading.
+
+- *Do wealthy countries tend to achieve larger average scores?*
+
+> Q1. Is the educational level of a country influenced by its economic wealth?
+
+> Q2. If so, up to what precise extent?
+   
+## Data 
+
+```{r}
+pisa <- read.csv("datasets/pisa.csv")
+str(pisa)
+```
+
+## Linear regression 
+
+- The response variable: $Y$ that we want to predict/explain.
+
+- The explanatory variable (or predictor), denoted by $X$
+  and is the variable used to predict/explain  $Y$
+- Recall the form of the linear model:
+$$
+Y = \beta_0 + \beta_1 X + \epsilon
+$$
+
+- In our case $Y$ = `MathMean` and $X$ = `logGDPp` 
+
+## First, make a plot 
+
+```{R corrplot, fig.asp = 0.5}
+library(ggplot2)
+library(dplyr)
+pisa %>% ggplot(aes(logGDPp,MathMean)) + 
+  geom_point(alpha = 0.5) + theme_bw()
+```
+
+## Linear model 
+
+```{r lmpisa}
+pisaLinearModel <- lm(MathMean ~ logGDPp, data = pisa)
+summary(pisaLinearModel)
+```
+
+## Output 
+
+- The summary gives the coefficients of the line and the $R^2$ 
+('Multiple R-squared'), which can be regarded as an indicator of the strength of the linear relation between the variables. 
+
+- ( $R^2 = 1$ is a perfect linear fit – all the points lay in a line – and $R^2 = 0$ is the poorest fit.)
+
+- The fitted regression line is:
+
+`MathMean = 185.16 + 28.79×logGDPp`
+
+- The slope coefficient is positive: there is a **positive correlation** between the wealth of a country and its performance in the PISA Mathematics test (Q1).
+- More precise: increase of 1 unit in the `logGDPp` of a country is associated with achieving, on average, `28.79` additional points in the test (Q2).
+
+## Correlation 
+
+- First we need a little review on concepts relating two random quantities, $X$ and $Y$.
+- The correlation coefficient is defined for a list of pairs  
+$(x_1, y_1), \ldots, (x_n, y_n)$ as the average of the product of the standardized values:
+
+$$
+\rho = \frac{1}{n} \sum_{i=1}^{n} \left( \frac{x_i - \mu_x}{\sigma_x} \right)  \left( \frac{y_i - \mu_y}{\sigma_y} \right) 
+$$
+
+- In R:
+```{r, eval = F}
+rho <- mean(scale(x) * scale(y))
+## or simply 
+
+rho <- cor(x,y)
+```
+
+- Correlation measures the strength of **linear** relationship. 
+- Correlation is always between -1 and +1 
+
+
+## Properties of correlation coefficient
+
+-  Always between -1 and +1, i.e. $\lvert{\rho}\rvert \le 1$.
+-  Measures the **linear** relationship. 
+-  In other words, $\rho = 0$ implies no **linear** relationship. 
+-  Also, if $X$ and $Y$ are independent, $X \perp Y$, $\rho(X,Y) = 0$.
+-  The converse of the above is not true, i.e. $X$ and $Y$ could be dependent but still have zero correlation.
+-  If $\rho > 0$, there's a positive **linear** relationship, and if $\rho <0$ there is a negative **linear** relationship. 
+
+
+## How do they look like?
+
+<div style="text-align:center" markdown="1">
+![ ](what-correlation-looks-like-1.png "Different correlation"){width=80%}
+</div>
+
+## Remember {.smaller}
+
+-  $X$ and $Y$ independent $\Rightarrow$ $\rho_{X,Y} = 0$, but not the other way round, unless $X,Y$ are jointly normal. 
+- Correlation $\not \Rightarrow$ Causation. There could be a **lurking** variable, causing a **spurious** relationship. 
+- Lots of hilarious examples in 
+[Spurious Correlations Webpage](http://tylervigen.com/spurious-correlations)
+- Example: Here $\rho_{X,Y} = 0$, but $Y = X^2$, not independent, but not **linearly dependent**. 
+
+```{r, echo = T}
+x = (-5:5)
+y = x^2 
+cor(x,y)
+```
+
+
+## "Linear" is the key word.
+
+-  Consider the following 'fake' data with a perfectly monotonically increasing relationship: $y = x^4$
+
+```{r}
+x = 1:7
+y = x^4 
+cor(x,y)
+```
+-  The correlation is high but not equal to 1 despite the perfect relationship.
+
+-  The way to take care of this is via nonparametric correlation coefficients, such as Spearman's rank correlation and Kendall's $\tau$. 
+
+-  We will talk about both of them next time! 
+
+
+## Sample correlation is a random variable
+
+- Before we continue connecting correlation to regression, let’s remind ourselves about random variability.
+
+- Just like we have a sample mean $\bar{X}$ as an estimator of the population mean $\mu$, we can estimate $\rho(X,Y)$, the population correlation coefficient by $r(X,Y)$ the sample correlation coefficient. 
+
+- We do not observe data for the entire population of interest but rather for a random sample. 
+
+- As with the sample mean and the sample variance $s^2$, the sample correlation is the most commonly used estimate of the population correlation.
+
+- This implies that the correlation we compute and use as a summary is a random variable.
+
+## Illustration 
+
+```{r}
+pisa <- na.omit(pisa) ## removes the missing values
+cor(pisa$MathMean, pisa$logGDPp)
+```
+
+- Now suppose that the original data-set was the entire population, but you only have the data for $25$ countries, not all of them. 
+
+```{r illust}
+R <- sample_n(pisa, 25, replace = TRUE) %>% 
+  summarize(r = cor(MathMean, logGDPp)) %>% pull(r)
+R
+```
+
+- If you select a different sample, you'll get a different value!
+- It is a random variable, and there must be a distribution! 
+
+## Monte Carlo
+
+- Deriving the exact distribution of $r_{xy}$ is quite difficult for a general bivariate population $(X,Y) \sim f(x,y)$.
+
+- Fortunately, we can use Monte Carlo simulations to get a very good idea about it. 
+
+- The rough idea is that we will take MANY, MANY *resamples* from the same parent sample and calculate the quantity ($r_{xy}$) for each such sample and look at their distribution. 
+
+- This is a *powerful* tool and I will talk more about these tools (if and) when we talk about resampling strategies. 
+
+## Monte Carlo {.smaller}
+
+```{r boot_cor, fig.asp = 0.3}
+B <- 5000
+N <- 25
+R <- replicate(B, {
+  sample_n(pisa, N, replace = TRUE) %>% 
+    summarize(r=cor(MathMean, logGDPp)) %>% 
+    pull(r)
+})
+qplot(R, geom = "histogram", binwidth = 0.05, color = I("black")) + theme_bw()
+```
+
+
+## Sample correlation
+
+- We see that the expected value of R is close to the population correlation:
+
+```{r}
+mean(R)
+```
+
+- and that it has a relatively high standard error relative to the range of values R can take:
+
+```{r}
+sd(R)
+```
+
+- So, when interpreting correlations, remember that correlations derived from samples are estimates containing uncertainty.
+
+## CLT
+
+- Also, note that because the sample correlation is an average of independent draws, the central limit actually applies.
+
+- Therefore, for large enough $N$, the distribution of R is approximately normal with expected value $\rho$
+
+- The standard deviation, which is somewhat complex to derive, is $\sqrt{\frac{1-r^2}{N-2}}$. We can still use this to test $H_0: \rho = 0$. 
+
+- R has a simple way to test if a correlation value is significant. 
+
+```{r cortest}
+attach(pisa)
+cor.test(MathMean, logGDPp)
+```
+
+
+## Permutation test 
+
+-  You can also use the permutation test. 
+
+-  The rough idea is that under moderate or strong dependence between the $X$ and $Y$, certain $X_i$'s are more likely to appear with certain $Y_i$'s, e.g. if $\rho$ is high, large $X$ will pair large $Y$ values and vice versa.
+
+-  On the other hand, if $\rho = 0$, all pairs are equally likely, i.e. a given $Y_i$ is as likely to pair with the $i^{th}$ observation $X_i$ as it is with any other $X_j$. 
+
+-  In other words, all the $n!$ permutations of $Y_i$'s with the $X_i$'s fixed-in-place are equally likely under the null: $H_0: \rho = 0$. 
+
+-  We can use this idea to implement the permutation test for testing significance of the correlation coefficient. 
+
+
+## Anscombe’s quartet
+
+- Correlation is not always a good summary of the relationship between two variables. 
+
+- The following four artificial datasets, referred to as Anscombe’s quartet, famously illustrate this point. All these pairs have a correlation of 0.82.
+
+- Also, look at the datasaurus dozen. [https://jumpingrivers.github.io/datasauRus/](https://jumpingrivers.github.io/datasauRus/)
+
+<div style="text-align:center" markdown="1">
+![ ](ascombe-quartet-1.png "Anscombe's quartet"){width=50%}
+</div>
+
+## Formulation 
+
+- Simple linear model: $Y = \beta_0 + \beta_1 X + \epsilon$.
+- $\beta_0$ and $\beta_1$ are known as the intercept and slope, and
+$\epsilon$ is a random variable with mean zero and independent from $X$.
+- Another way of looking at this is:
+$$
+\mathbb{E}(Y | X = x) = \beta_0 + \beta_1 X, \text{ since } \mathbb{E}(\epsilon | x) = 0.
+$$
+- LHS: conditional expectation of $Y$  given $X$ : how the mean of the random variable $Y$  is changing according to a particular value, denoted by $x$, of the random variable $X$.
+
+- we are saying is that the mean of Y is changing in a linear fashion with respect to the value of X.
+
+## Estimating $\beta$ 
+
+- One way of estimating $(\beta_0, \beta_1)$ is by minimizing the residual sum of squares: 
+
+$$
+RSS(\beta_0, \beta_1) = \sum_{i=1}^{n}(Y_i - \beta_0 - \beta_1 X_i)
+$$
+
+- Look for estimates such that:
+
+$$
+(\hat{\beta}_0, \hat{\beta}_1) = \arg \min_{(\beta_0, \beta_1) \in \mathbb{R}^2} RSS(\beta_0, \beta_1)
+$$
+- It can be seen that the minimizers of the RSS are:
+
+$$
+\hat{\beta}_0 = \bar{Y} - \hat{\beta}_1 \bar{X}, \hat{\beta}_1 = \frac{s_{xy}}{s_{x}^2}
+$$
+
+- $\bar{X}, s_{xy}, s_{x}^2$: sample mean of $Y$, covariance between $X$ and $Y$ and variance of $X$ ($s_x$ is the std. dev.)
+
+## Check 
+
+```{r check}
+attach(pisa)
+x <- logGDPp; y <- MathMean
+# Covariance
+Sxy <- cov(x,y)
+# Variance
+Sx2 <- var(x)
+# Coefficients
+beta1 <- Sxy / Sx2
+beta0 <- mean(y) - beta1 * mean(x)
+c(beta0, beta1)
+
+# Output from lm
+mod <- lm(MathMean ~ logGDPp, data = pisa)
+mod$coefficients
+```
+
+## Other terms 
+
+- Fitted values: $\hat{Y}_i = \hat{\beta}_0 + \hat\beta_1 X_i$. These are the vertical projections of $Y_1, \ldots, Y_n$ into the fitted line.
+- Residuals or estimated errors: $\hat{\epsilon}_i = Y_i - \hat{Y}_i$. These are the vertical distances between actual data $(X_i, Y_i$ and fitted data $(X_i, \hat{Y}_i)$. 
+
+<div style="text-align:center" markdown="1">
+![ ](residuals.png "Residuals"){width=40%}
+</div>
+
+## Assumptions 
+
+<div style="text-align:center" markdown="1">
+![ ](assumptions.png "Assumptions of the linear model model."){width=100%}
+</div>
+
+
+## Recall:
+
+- Nothing is said about the distribution of $X$ as yet. Indeed, $X$ could be deterministic (called fixed design) or random (random design). 
+
+- The linear model assumes that $Y$ is continuous due to the normality of the errors. 
+
+- However, $X$ can be discrete!
+
+
+## Assumptions (visually)
+
+<div style="text-align:center" markdown="1">
+![ ](linearmodel.png "The key concepts of the simple linear model. The yellow band denotes where the 95 percent of the data is, according to the model."){width=50%}
+</div>
+
+## Assumptions respected
+
+<div style="text-align:center" markdown="1">
+![ ](linearmodelgood.png "Assumptions of the linear model respected."){width=60%}
+</div>
+
+## Assumptions violated
+
+<div style="text-align:center" markdown="1">
+![ ](linearmodelbad.png "Assumptions of the linear model violated."){width=60%}
+</div>
+
+## Inference for the model coefficients 
+
+- The assumptions introduced in the previous section allow to specify what is the distribution of the random variables $\hat{\beta}_0$ and $\hat{\beta}_1$. 
+- As we will see, this is a key point for making inference on $\beta_0$ and $\beta_1$.
+- The distributions are derived conditionally on the sample predictors $X_1, \ldots, X_n$. 
+- In other words, we assume that the randomness of $Y_i = \beta_0 + \beta_1 X_i + \epsilon_i, i = 1, 2, \ldots, n$, comes only from the error terms and not from the predictors.
+
+
+## Distributions of the fitted coefficients
+
+
+<div style="text-align:center" markdown="1">
+![ ](distributions.png "Distributions of the fitted coefficient."){width=100%}
+</div>
+
+
+## Implications
+
+<div style="text-align:center" markdown="1">
+![ ](implications.png "Implications."){width=100%}
+</div>
+
+## Unknown $\sigma^2$
+
+<div style="text-align:center" markdown="1">
+![ ](sigmasquare.png "Implications."){width=100%}
+</div>
+
+
+## Distribution 
+
+<div style="text-align:center" markdown="1">
+![ ](t-test.png "Implications."){width=100%}
+</div>
+
+## Testing 
+
+<div style="text-align:center" markdown="1">
+![ ](testing.png "Implications."){width=100%}
+</div>
+
+## Back to R output {.smaller}
+
+```{r lmpisa2}
+pisaLinearModel <- lm(MathMean ~ logGDPp, data = pisa)
+summary(pisaLinearModel)
+```
+
+
+## Interpretation
+
+<div style="text-align:center" markdown="1">
+![ ](interpretation.png "Implications."){width=100%}
+</div>
+
+## ANOVA and model fit 
+
+- The variance of the error, $\sigma^2$ plays a fundamental role in the inference for the model coefficients and prediction. 
+
+- In this section we will see how the variance of $Y$ is decomposed into two parts, each one corresponding to the regression and to the error, respectively. 
+
+- This decomposition is called the ANalysis Of VAriance (ANOVA).
+
+- This will help us in evaluating the model fit. 
+
+## ANOVA 
+
+- Before explaining ANOVA, it is important to recall an interesting result: the mean of the fitted values $\hat{Y}_1, \ldots, \hat{Y}_n$ is the mean of $Y_1, Y_2, \ldots, Y_n$. 
+
+$$
+\frac{1}{n} \sum_{i=1}^{n} \hat{Y}_i = \bar{Y}
+$$
+
+- Prove! 
+
+## ANOVA decomposition
+
+<div style="text-align:center" markdown="1">
+![ ](anova_decomposition.png "ANOVA Decomposition"){width=100%}
+</div>
+
+## ANOVA decomposition
+
+<div style="text-align:center" markdown="1">
+![ ](anova_sst.png "ANOVA Decomposition"){width=60%}
+</div>
+
+
+## ANOVA decomposition
+
+<div style="text-align:center" markdown="1">
+![ ](anova_ssr.png "ANOVA Decomposition"){width=60%}
+</div>
+
+## ANOVA decomposition
+
+<div style="text-align:center" markdown="1">
+![ ](anova_sse.png "SSE"){width=60%}
+</div>
+
+## ANOVA table
+
+<div style="text-align:center" markdown="1">
+![ ](anova-table.png "ANOVA Decomposition"){width=60%}
+</div>
+
+
+## In R 
+
+```{r anova}
+# Fit a linear model 
+model <- lm(MathMean ~ ReadingMean, data = pisa)
+anova(model)
+```
+
+
+## Model fit: $R^2$ 
+
+- The coefficient of determination $R^2$  is closely related with the ANOVA decomposition.
+$$
+R^2 = \frac{SSR}{SST} = \frac{SSR}{SSR + SSE} = \frac{SSR}{SSR + (n-2)\sigma^2}
+$$
+
+- $R^2$ measures the proportion of variation of the response variable $Y$ that is explained by the predictor $X$ through the regression. 
+
+- The proportion of total variation of $Y$ that is not explained is $1-R^2 = SSE/SST$. 
+
+- Intuitively, $R^2$ measures the tightness of the data cloud around the regression line, since is related directly with $\hat{\sigma}^2$. 
+
+
+## $R^2$ and correlation 
+
+- For univariate regression, the $R^2$ is related with the sample correlation coefficient:
+$$
+R^2 = r^2_{xy}
+$$
+
+- Interestingly, it also holds that:
+$$
+R^2 = r_{y \hat{y}}^2,
+$$
+
+that is the correlation coefficient between the observed responses $(Y_1, \ldots,Y_n)$ and the fitted values $(\hat{Y}_1, \ldots, \hat{Y}_n)$.
+
+
+## Note that 
+
+- The equality $R^2 = r_{y \hat{y}}^2$ is still true for the multiple linear regression, e.g.  
+
+$$
+Y = \beta_0 + \beta_1 X_1 + \ldots + \beta_p X_p + \epsilon.
+$$
+
+- On the contrary, there is no coefficient of correlation between three or more variables, so anything like $r_{x_1x_2 \ldots x_p y}$ does not exist. 
+
+- Hence, $R^2 = r^2_{xy}$ is a specific fact for simple linear regression.
+
+
+## Check numerically 
+
+```{r Rsquares}
+# Responses generated following a linear model
+set.seed(343567) # Fixes seed, allows to generate the same random data
+x <- rnorm(50)
+eps <- rnorm(50)
+y <- -1 + 2 * x + eps
+
+# Regression model
+reg <- lm(y ~ x)
+yHat <- reg$fitted.values
+
+# Square of the correlation coefficient
+cor(y, x)^2
+
+cor(y, yHat)^2
+```
+
+## Check numerically 
+
+```{r Rsquares-2}
+summary(reg)
+```
+
+## Two important points 
+
+- Two common sins regarding the use of $R^2$.
+
+  + Correctness. The linear model is built on certain assumptions, such as the ones we saw before. All the inferential results are based on these assumptions being true!. A model is formally correct whenever the assumptions on which is based are not violated in the data.
+
+  + Usefulness. The usefulness of the model is a more subjective concept, but is usually measured by the accuracy on the prediction and explanation of the response $Y$ by the predictor $X$. 
+
+- For example, $Y =0X + \epsilon$ is a valid linear model, but is completely useless for predicting $Y$ from $X$.
+
+
+## Finally, don't blindly follow R^2 
+- 
+Create data that:
+  1) does not follow a linear model
+  2) the error is heteroskedastic
+
+```{R badRsq, fig.asp = 0.3}
+
+x <- seq(0.15, 1, l = 100)
+set.seed(123456)
+eps <- rnorm(n = 100, sd = 0.25 * x^2)
+y <- 1 - 2 * x * (1 + 0.25 * sin(4 * pi * x)) + eps
+
+data.frame(y = y, x = x) %>%  ggplot(aes(x,y)) + 
+  geom_point(alpha = 0.5) + theme_bw()
+
+```
+
+
+## Great $R^2$ 
+
+```{R badRsq-2}
+# Great R^2!?
+reg <- lm(y ~ x)
+summary(reg)
+```
+
+## Non-linear relationships
+
+<div style="text-align:center" markdown="1">
+![ ](nonlinear.png "Non-linear relationships"){width=100%}
+</div>
