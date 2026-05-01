@@ -71,7 +71,7 @@ A methodologically important paper for crime analysis. Standard Census data coun
 
 ---
 
-### Milestone: Part I Practicum
+### Milestone: Part I 
 
 By the end of Part I, you should be able to:
 
@@ -156,7 +156,7 @@ The primary ongoing research program involves spatiotemporal modeling of crime a
 
 **Entry points for a student project:**
 
-- Select one Texas city with open crime data. Construct a fishnet grid at an appropriate resolution (e.g., 250m or 500m cells). Pull ACS covariates (poverty, housing vacancy, renter share) and OpenStreetMap features (bars, transit stops, parks) as raster layers.
+- Select one Texas city with open crime data (*this is something I can help with - JD*). Construct a fishnet grid at an appropriate resolution (e.g., 250m or 500m cells). Pull ACS covariates (poverty, housing vacancy, renter share) and OpenStreetMap features (bars, transit stops, parks) as raster layers.
 - Fit a spatial regression model (e.g., spatial lag or spatial error, or a Besag-York-Mollié model if pursuing a Bayesian approach) predicting crime counts per cell.
 - Compare model performance (predictive accuracy on held-out grid cells) across two or more crime types (e.g., property vs. violent).
 - If interested in the temporal dimension: aggregate monthly crime counts and model change over time using a spatiotemporal panel structure.
@@ -190,8 +190,8 @@ This project is more self-contained and may be more feasible for a single-semest
 | 6–7 | Part II: Andresen (crime concentrations) + Wheeler & Steenbeek (RTM + ML) |
 | 8 | Part II: Sagepub methods paper; explore CPAL and Dallas data resources |
 | 9 | Part II: MRP case studies (introductory chapters) |
-| 10–end | Part III: Project work, iterating with supervisor |
+| 10–end | Part III: Write the paper|
 
 ---
 
-*Last updated: May 2026*
+*Last updated: April 2026*
