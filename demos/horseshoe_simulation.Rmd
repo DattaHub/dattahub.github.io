@@ -1,0 +1,152 @@
+---
+title: "Collapse of the Horseshoe Global Scale: A Small Simulation"
+author: "Jyotishka Datta"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                       fig.align = "center")
+```
+
+## Purpose
+
+This note reproduces, on a small and fast scale, the two qualitative patterns behind the companion theory note: as the proportion of nonzero coordinates grows (past 1/2) (i) the horseshoe global scale $\tau$ collapses toward zero, and (ii) the horseshoe misclassification probability rises sharply. 
+
+```{r libs}
+suppressMessages(library(horseshoe))
+suppressMessages(library(ggplot2))
+```
+
+## Simulation setup
+
+We use an $n\times p$ design with i.i.d. $N(0,2)$ entries, a signal of
+size 5 on a proportion `prop` of the coordinates and zero elsewhere, and
+$N(0,5)$ noise:
+
+```{r helpers}
+make_X <- function(n, p) matrix(rnorm(n * p, 0, sqrt(2)), nrow = n, ncol = p)
+
+make_beta_y <- function(X, prop, signal = 5, noise_sd = sqrt(5)) {
+  n <- nrow(X); p <- ncol(X)
+  k <- round(prop * p)
+  beta <- c(rep(signal, k), rep(0, p - k))
+  y <- as.vector(X %*% beta + rnorm(n, 0, noise_sd))
+  list(beta = beta, y = y)
+}
+
+n <- 100
+p <- 100
+props <- seq(0.1, 0.9, by = 0.05)
+```
+
+## Figure 1: collapse of $\tau$
+
+For a single design $X$, we fit the horseshoe at each sparsity level and
+keep the post-burn-in draws of $\tau$. This mirrors the `tau_hs`/`tau_box`
+computation in `DL_Simulation.R`, with the square-root Dirichlet--Laplace
+part removed.
+
+```{r tau-collapse, cache=TRUE}
+set.seed(2026)
+X <- make_X(n, p)
+
+tau_df <- do.call(rbind, lapply(props, function(prop) {
+  dat <- make_beta_y(X, prop)
+  invisible(capture.output(
+    res <- horseshoe(dat$y, X, method.tau = "truncatedCauchy",
+                      method.sigma = "Jeffreys", burn = 1000, nmc = 3000)
+  ))
+  data.frame(sparsity = prop, tau = res$TauSamples)
+}))
+tau_df$sparsity <- factor(tau_df$sparsity)
+```
+
+```{r tau-collapse-plot, fig.width=6, fig.height=4}
+tau_plot <- ggplot(tau_df, aes(x = sparsity, y = tau)) +
+  geom_boxplot(outlier.size = 0.5, fill = "grey85") +
+  labs(x = "Proportion of nonzero coordinates",
+       y = expression(tau),
+       title = "Collapse of the horseshoe global scale") +
+  theme_bw()
+tau_plot
+ggsave("Tau_hs.pdf", tau_plot, width = 6, height = 4)
+```
+
+## Figure 2: misclassification probability
+
+For each sparsity level, we draw a fresh design $X$ per replicate , fit the horseshoe, classify coordinates with `HS.var.select(..., method = "intervals")`, and average the misclassification proportion over replicates.
+
+```{r misclass, cache=TRUE}
+set.seed(2026)
+n_rep <- 20
+
+misclass_mat <- matrix(NA_real_, nrow = n_rep, ncol = length(props))
+mse_mat      <- matrix(NA_real_, nrow = n_rep, ncol = length(props))
+
+for (r in 1:n_rep) {
+  Xr <- make_X(n, p)
+  for (j in seq_along(props)) {
+    dat <- make_beta_y(Xr, props[j])
+    invisible(capture.output(
+      res <- horseshoe(dat$y, Xr, method.tau = "truncatedCauchy",
+                        method.sigma = "Jeffreys", burn = 500, nmc = 1500)
+    ))
+    index <- as.numeric(dat$beta != 0)
+    hs_ind <- HS.var.select(res, dat$y, method = "intervals")
+    misclass_mat[r, j] <- mean(hs_ind != index)
+    mse_mat[r, j]      <- mean((res$BetaHat - dat$beta)^2)
+  }
+}
+
+summarize_reps <- function(mat, props, name) {
+  m  <- colMeans(mat)
+  se <- apply(mat, 2, sd) / sqrt(nrow(mat))
+  data.frame(prop = props, mean = m, se = se,
+             ymin = m - se, ymax = m + se, metric = name)
+}
+
+misclass_summary <- summarize_reps(misclass_mat, props, "Misclassification probability")
+mse_summary      <- summarize_reps(mse_mat,      props, "Mean squared error")
+```
+
+```{r misclass-plot, fig.width=6, fig.height=4}
+mc_plot <- ggplot(misclass_summary, aes(x = prop, y = mean)) +
+  geom_ribbon(aes(ymin = pmax(ymin, 0), ymax = pmin(ymax, 1)),
+              fill = "steelblue", alpha = 0.2) +
+  geom_line(color = "steelblue") +
+  geom_point(size = 3, color = "steelblue") +
+  scale_x_continuous(breaks = props) +
+  ylim(0, 1) +
+  labs(x = "Proportion of nonzero coordinates",
+       y = "Misclassification probability",
+       title = "Horseshoe misclassification probability",
+       subtitle = paste0("Mean \u00b1 1 SE over ", n_rep, " replicates")) +
+  theme_bw()
+mc_plot
+ggsave("Sparsity_MSP_n=p.pdf", mc_plot, width = 6, height = 4)
+```
+
+```{r mse-plot, fig.width=6, fig.height=4}
+mse_plot <- ggplot(mse_summary, aes(x = prop, y = mean)) +
+  geom_ribbon(aes(ymin = pmax(ymin, 0), ymax = ymax),
+              fill = "darkorange", alpha = 0.2) +
+  geom_line(color = "darkorange") +
+  geom_point(size = 3, color = "darkorange") +
+  scale_x_continuous(breaks = props) +
+  labs(x = "Proportion of nonzero coordinates",
+       y = "Mean squared error",
+       title = "Horseshoe mean squared error",
+       subtitle = paste0("Mean \u00b1 1 SE over ", n_rep, " replicates")) +
+  theme_bw()
+mse_plot
+ggsave("MSE_n=p.pdf", mse_plot, width = 6, height = 4)
+```
+
+
+
+## Notes
+
+* `n_rep` and the MCMC lengths are kept small so the document knits in a few minutes; increase both for a smoother, lower-variance curve if you have the time before submission.
+* Both code chunks are cached (`cache=TRUE`); re-knitting without changing the code will not re-run the MCMC.
