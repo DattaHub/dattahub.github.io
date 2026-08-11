@@ -1,8 +1,14 @@
 ---
-title: "Collapse of the Horseshoe Global Scale: A Small Simulation"
+title: "Collapse of the horseshoe global shrinkage parameter"
 author: "Jyotishka Datta"
 date: "`r Sys.Date()`"
-output: html_document
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+    highlight: tango
+    code_folding: show
 ---
 
 ```{r setup, include=FALSE}
@@ -10,25 +16,62 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
                        fig.align = "center")
 ```
 
-## Purpose
+## Intro
 
-This note reproduces, on a small and fast scale, the two qualitative patterns behind the companion theory note: as the proportion of nonzero coordinates grows (past 1/2) (i) the horseshoe global scale $\tau$ collapses toward zero, and (ii) the horseshoe misclassification probability rises sharply. 
+The horseshoe prior (Carvalho et al., 2010) has been one of the most popular and successful tools in Bayesian inference for high-dimensional objects. The original HS prior was proposed for the canonical sequence model or what is also called the sparse normal means model:
+
+$$Y_i = \theta_i + \epsilon_i, \; \epsilon_i \sim N(0, \sigma^2), i = 1, \ldots, n,$$
+where the parameter of interest is $\mathbf{\theta} = (\theta_1, \ldots, \theta_n)$, and we typically assume sparsity for $\mathbf{\theta}$ in some sense, e.g., the proportion of non-zero entries goes to zero as the dimension $n \to \infty$. The horseshoe (HS) prior on $\theta_i$ can be written as a normal scale mixture with Cauchy mixing densities, i.e., 
+
+$$\theta_i \sim N(0, \sigma^2\lambda_i^2 \tau^2), \lambda_i \sim C^+(0,1), \tau \sim C^+(0,\sigma),$$
+where $C^+(0,1)$ is the half-Cauchy density defined on the positive side of the real line $(0, \infty)$. The parameter $\tau$ is a *global* shrinkage parameter as a small $\tau$ pulls everything towards 0, and the $\lambda_i$'s are called *local* shrinkage parameters as they act locally with each $\theta_i$ trying to undo the shrinkage exerted by $\tau$. 
+
+It is easy to show that the posterior mean for the sequence model under HS prior admits a nice form:
+$$E(\theta_i \mid y_i) = (1-\kappa_i)y_i, \; \kappa_i = 1/(1+\lambda_i^2 \tau^2).$$
+
+The shrinkage weight $(1-\kappa_i)$ is the amount by which an observation or input $y_i$ is shrunk towards the origin $0$, and it can be interpreted as a pseudo-posterior inclusion probability (PIP). That is because, if you assume $\theta_i$ follows a spike-and-slab prior, the posterior mean can be written as a product of the true PIP and the observation. In plain English, we can think of the following approximation to hold for HS to work well:
+
+$$1 - E\left(\frac{1}{1+\lambda_i^2 \tau^2} \mid y_i\right) = 1 - E(\kappa_i \mid y_i) \approx P(\theta_i \ne 0 \mid y_i)$$
+
+One issue with HS (or any non-conjugate set-up) is that if you integrate out $\lambda_i$, the marginal prior on $\theta_i$ does not admit a closed form (even if you treat $\tau$ as a fixed constant like 1) because Cauchy is not conjugate for Normal scale. We can still get tight upper and lower bounds and those bounds tell us that the HS prior has a spike at zero and heavy, Cauchy-like tails. (We showed in 2020 [link](https://arxiv.org/abs/1904.10939) that these bounds can be treated as priors as well, and they admit normal scale mixture representation.)
+
+The spike at zero and the heavy-tails are key properties! If you think about what the HS prior is trying to mimic: a spike-and-slab prior, i.e., a degenerate mass at zero and a slab that is heavy enough to admit large signals. We can show that it works very well both in practice and theory. My dissertation research [link](https://projecteuclid.org/journals/bayesian-analysis/volume-8/issue-1/Asymptotic-Properties-of-Bayes-Risk-for-the-Horseshoe-Prior/10.1214/13-BA805.full) was proving asymptotic Bayes oracle properties of the HS prior (in simpler terms, it attains the lower bound of Bayes risk asymptotically, under some conditions). 
+
+Since its inception, many variants and extensions have been proposed for specialized applications and modeling area, and *many* new shrinkage priors have been proposed in the literature. Beyond the canonical problems of regression and normal means, shrinkage priors have been proposed for almost all modeling areas, e.g., graphical models, grouped covariates, count data, factor models, trend filtering, spatial modeling and neural nets. Our [2019 survey](jstor.org/stable/26874188) "Lasso meets Horseshoe" has lists for both extensions and applications, but they are obviously outdated now, but I think it is a good place to start. 
+
+If you prefer a video lecture: you can watch this: [YouTube link 1](https://www.youtube.com/watch?v=X9Y4ue6DIkM) and [YouTube link 2](https://www.youtube.com/watch?v=fz9hnQE-wls)
+
+## Global shrinkage
+
+Our interest here is only in the global shrinkage parameter $\tau$. This note reproduces, on a small and fast scale, the two qualitative patterns behind the companion theory note: as the proportion of nonzero coordinates grows (past 1/2) (i) the horseshoe global scale $\tau$ collapses toward zero, and (ii) the horseshoe misclassification probability rises sharply. 
+
+Our goal is essentially to show the following empirically: 
+
+> If the proportion of non-zero parameters (or signals) cross 0.5, i.e., when the true parameter vector is "dense", the posterior of $\tau$ collapses to $0$. Subsequently, the estimation and variable selection performance of HS prior deteriorates heavily. 
+
+The original 2010 paper put a half-Cauchy prior on $\tau$, but it can be treated as a tuning parameter and there is more than one way to deal with it: 
+
+-   We can treat $\tau$ as a hyperparameter and learn via empirical Bayes, or marginak maximum likelihood estimator. 
+-   Do a full Bayes, but be careful about what prior you put on it, choices include the default half-Cauchy or uniform and their truncated versions (truncated to exclude an interval around $0$ e.g. $[0, 1/n]$). Truncation helps avoiding possible collapsing to zero if the parameter is too sparse. ^[Also, one should scale $\tau$ by $\sigma$ (e.g., use $C^+(0, \sigma)$ instead of $C^+(0,1)$), otherwise bimodality happens (Polson & Scott, 2010, section 2.4.)]
+-   Use a cross-validation (I don't like CV for this problem: it ignores the dependence between $\tau$ and $\sigma$.)
+-   An effective model size calibration which requires you to make a prior guess about the number of non-zeroes. 
+
+There are also many packages for implementing horseshoe shirnkage (and it's not too difficult anyway). We use the `horseshoe` package because it's clean and simple to use and choose the truncated Cauchy option in the package. 
+
 
 ```{r libs}
 suppressMessages(library(horseshoe))
 suppressMessages(library(ggplot2))
 ```
 
-## Simulation setup
+### Simulation setup
 
-We use an $n\times p$ design with i.i.d. $N(0,2)$ entries, a signal of
-size 5 on a proportion `prop` of the coordinates and zero elsewhere, and
-$N(0,5)$ noise:
+We use an $n\times p$ design with i.i.d. $N(0,2)$ entries, a signal of size 5 on a proportion `prop` of the coordinates and zero elsewhere, and $N(0,5)$ noise:
 
 ```{r helpers}
-make_X <- function(n, p) matrix(rnorm(n * p, 0, sqrt(2)), nrow = n, ncol = p)
+generate_X <- function(n, p) matrix(rnorm(n * p, 0, sqrt(2)), nrow = n, ncol = p)
 
-make_beta_y <- function(X, prop, signal = 5, noise_sd = sqrt(5)) {
+generate_beta_y <- function(X, prop, signal = 5, noise_sd = sqrt(5)) {
   n <- nrow(X); p <- ncol(X)
   k <- round(prop * p)
   beta <- c(rep(signal, k), rep(0, p - k))
@@ -41,19 +84,16 @@ p <- 100
 props <- seq(0.1, 0.9, by = 0.05)
 ```
 
-## Figure 1: collapse of $\tau$
+### Figure 1: collapse of $\tau$
 
-For a single design $X$, we fit the horseshoe at each sparsity level and
-keep the post-burn-in draws of $\tau$. This mirrors the `tau_hs`/`tau_box`
-computation in `DL_Simulation.R`, with the square-root Dirichlet--Laplace
-part removed.
+For a single design $X$, we fit the horseshoe at each sparsity level and keep the post-burn-in draws of $\tau$. 
 
 ```{r tau-collapse, cache=TRUE}
 set.seed(2026)
-X <- make_X(n, p)
+X <- generate_X(n, p)
 
 tau_df <- do.call(rbind, lapply(props, function(prop) {
-  dat <- make_beta_y(X, prop)
+  dat <- generate_beta_y(X, prop)
   invisible(capture.output(
     res <- horseshoe(dat$y, X, method.tau = "truncatedCauchy",
                       method.sigma = "Jeffreys", burn = 1000, nmc = 3000)
@@ -74,7 +114,7 @@ tau_plot
 ggsave("Tau_hs.pdf", tau_plot, width = 6, height = 4)
 ```
 
-## Figure 2: misclassification probability
+### Figure 2: misclassification probability
 
 For each sparsity level, we draw a fresh design $X$ per replicate , fit the horseshoe, classify coordinates with `HS.var.select(..., method = "intervals")`, and average the misclassification proportion over replicates.
 
@@ -146,7 +186,7 @@ ggsave("MSE_n=p.pdf", mse_plot, width = 6, height = 4)
 
 
 
-## Notes
+#### Notes
 
 * `n_rep` and the MCMC lengths are kept small so the document knits in a few minutes; increase both for a smoother, lower-variance curve if you have the time before submission.
 * Both code chunks are cached (`cache=TRUE`); re-knitting without changing the code will not re-run the MCMC.
