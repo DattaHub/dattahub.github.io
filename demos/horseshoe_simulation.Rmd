@@ -39,7 +39,7 @@ The spike at zero and the heavy-tails are key properties! If you think about wha
 
 Since its inception, many variants and extensions have been proposed for specialized applications and modeling area, and *many* new shrinkage priors have been proposed in the literature. Beyond the canonical problems of regression and normal means, shrinkage priors have been proposed for almost all modeling areas, e.g., graphical models, grouped covariates, count data, factor models, trend filtering, spatial modeling and neural nets. Our [2019 survey](jstor.org/stable/26874188) "Lasso meets Horseshoe" has lists for both extensions and applications, but they are obviously outdated now, but I think it is a good place to start. 
 
-If you prefer a video lecture: you can watch this: [YouTube link 1](https://www.youtube.com/watch?v=X9Y4ue6DIkM) and [YouTube link 2](https://www.youtube.com/watch?v=fz9hnQE-wls)
+If you prefer a video lecture: you can watch this: [YouTube link 1](https://www.youtube.com/watch?v=X9Y4ue6DIkM) and [YouTube link 2](https://www.youtube.com/watch?v=fz9hnQE-wls).
 
 ## Global shrinkage
 
@@ -47,16 +47,21 @@ Our interest here is only in the global shrinkage parameter $\tau$. This note re
 
 Our goal is essentially to show the following empirically: 
 
-> If the proportion of non-zero parameters (or signals) cross 0.5, i.e., when the true parameter vector is "dense", the posterior of $\tau$ collapses to $0$. Subsequently, the estimation and variable selection performance of HS prior deteriorates heavily. 
+<div style="border: 2px solid black; padding: 10px; border-radius: 5px;">
+If the proportion of non-zero parameters (or signals) cross 0.5, i.e., when the true parameter vector is "dense", the posterior of $\tau$ collapses to $0$. Subsequently, the estimation and variable selection performance of HS prior deteriorates heavily. 
+</div>
+
+
+### Hyperparameter selection
 
 The original 2010 paper put a half-Cauchy prior on $\tau$, but it can be treated as a tuning parameter and there is more than one way to deal with it: 
 
 -   We can treat $\tau$ as a hyperparameter and learn via empirical Bayes, or marginak maximum likelihood estimator. 
 -   Do a full Bayes, but be careful about what prior you put on it, choices include the default half-Cauchy or uniform and their truncated versions (truncated to exclude an interval around $0$ e.g. $[0, 1/n]$). Truncation helps avoiding possible collapsing to zero if the parameter is too sparse. ^[Also, one should scale $\tau$ by $\sigma$ (e.g., use $C^+(0, \sigma)$ instead of $C^+(0,1)$), otherwise bimodality happens (Polson & Scott, 2010, section 2.4.)]
 -   Use a cross-validation (I don't like CV for this problem: it ignores the dependence between $\tau$ and $\sigma$.)
--   An effective model size calibration which requires you to make a prior guess about the number of non-zeroes. 
+-   An effective model size calibration by Piironen & Vehtari (2017) [link](https://proceedings.mlr.press/v54/piironen17a.html) which requires you to make a prior guess about the number of non-zeroes. 
 
-There are also many packages for implementing horseshoe shirnkage (and it's not too difficult anyway). We use the `horseshoe` package because it's clean and simple to use and choose the truncated Cauchy option in the package. 
+There are also many packages for implementing horseshoe shirnkage (see the 2019 review paper for a complete list). We use the `horseshoe` package because it's clean and simple to use and choose the truncated Cauchy option in the package. 
 
 
 ```{r libs}

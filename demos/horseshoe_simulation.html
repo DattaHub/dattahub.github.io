@@ -11,7 +11,7 @@
 
 <meta name="author" content="Jyotishka Datta" />
 
-<meta name="date" content="2026-08-10" />
+<meta name="date" content="2026-08-11" />
 
 <title>Collapse of the horseshoe global shrinkage parameter</title>
 
@@ -1656,7 +1656,7 @@ border-radius: 0px;
 <h1 class="title toc-ignore">Collapse of the horseshoe global shrinkage
 parameter</h1>
 <h4 class="author">Jyotishka Datta</h4>
-<h4 class="date">2026-08-10</h4>
+<h4 class="date">2026-08-11</h4>
 
 </div>
 
@@ -1727,7 +1727,7 @@ applications, but they are obviously outdated now, but I think it is a
 good place to start.</p>
 <p>If you prefer a video lecture: you can watch this: <a href="https://www.youtube.com/watch?v=X9Y4ue6DIkM">YouTube link 1</a>
 and <a href="https://www.youtube.com/watch?v=fz9hnQE-wls">YouTube link
-2</a></p>
+2</a>.</p>
 </div>
 <div id="global-shrinkage" class="section level2">
 <h2>Global shrinkage</h2>
@@ -1738,11 +1738,13 @@ horseshoe global scale <span class="math inline">\(\tau\)</span>
 collapses toward zero, and (ii) the horseshoe misclassification
 probability rises sharply.</p>
 <p>Our goal is essentially to show the following empirically:</p>
-<blockquote>
+<div style="border: 2px solid black; padding: 10px; border-radius: 5px;">
 <p>If the proportion of non-zero parameters (or signals) cross 0.5,
 i.e., when the true parameter vector is “dense”, the posterior of <span class="math inline">\(\tau\)</span> collapses to <span class="math inline">\(0\)</span>. Subsequently, the estimation and
 variable selection performance of HS prior deteriorates heavily.</p>
-</blockquote>
+</div>
+<div id="hyperparameter-selection" class="section level3">
+<h3>Hyperparameter selection</h3>
 <p>The original 2010 paper put a half-Cauchy prior on <span class="math inline">\(\tau\)</span>, but it can be treated as a tuning
 parameter and there is more than one way to deal with it:</p>
 <ul>
@@ -1757,15 +1759,18 @@ the parameter is too sparse. <a href="#fn1" class="footnote-ref" id="fnref1"><su
 <li>Use a cross-validation (I don’t like CV for this problem: it ignores
 the dependence between <span class="math inline">\(\tau\)</span> and
 <span class="math inline">\(\sigma\)</span>.)</li>
-<li>An effective model size calibration which requires you to make a
-prior guess about the number of non-zeroes.</li>
+<li>An effective model size calibration by Piironen &amp; Vehtari (2017)
+<a href="https://proceedings.mlr.press/v54/piironen17a.html">link</a>
+which requires you to make a prior guess about the number of
+non-zeroes.</li>
 </ul>
 <p>There are also many packages for implementing horseshoe shirnkage
-(and it’s not too difficult anyway). We use the <code>horseshoe</code>
-package because it’s clean and simple to use and choose the truncated
-Cauchy option in the package.</p>
+(see the 2019 review paper for a complete list). We use the
+<code>horseshoe</code> package because it’s clean and simple to use and
+choose the truncated Cauchy option in the package.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">suppressMessages</span>(<span class="fu">library</span>(horseshoe))</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">suppressMessages</span>(<span class="fu">library</span>(ggplot2))</span></code></pre></div>
+</div>
 <div id="simulation-setup" class="section level3">
 <h3>Simulation setup</h3>
 <p>We use an <span class="math inline">\(n\times p\)</span> design with
