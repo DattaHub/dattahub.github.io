@@ -1,0 +1,731 @@
+---
+title: "Normal Distribution, CLT & Tests of Randomness"
+subtitle: "STAT 3504 : Nonparametric Statistics"
+author: "Jyotishka Datta"
+date: "Virginia Tech"
+output:
+  pdf_document:
+    toc: true
+    latex_engine: xelatex
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: [default, default-fonts, mystyle.css]
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: "16:9"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE, warning = FALSE, message = FALSE,
+  cache = TRUE,
+  fig.retina = 3, fig.align = "center",
+  fig.width = 7, fig.height = 4
+)
+```
+
+class: inverse, center, middle
+
+# Part 1: Random Variables and the Normal Distribution
+
+---
+
+## Recap: CDF and PDF
+
+A random variable $X$ is **continuous** if its CDF $F_X(x) = P(X \le x)$ satisfies:
+
+1. $F_X(x)$ is non-decreasing  
+2. $\lim_{x \to -\infty} F_X(x) = 0$ and $\lim_{x \to \infty} F_X(x) = 1$  
+3. $F_X(x)$ is right-continuous
+
+The **PDF** is the derivative: $f_X(x) = F_X'(x)$, so
+
+$$F_X(x) = \int_{-\infty}^{x} f_X(t)\,dt \qquad \text{and} \qquad \int_{-\infty}^{\infty} f_X(x)\,dx = 1$$
+
+--
+
+**Why does this matter for nonparametric statistics?**
+
+- Classical tests assume a specific $F_X$ (usually Normal)
+- Nonparametric tests only assume $F_X$ is continuous and/or that observations are IID
+- The **empirical CDF** $S_n(x) = \frac{1}{n}\sum_{i=1}^n \mathbf{1}(X_i \le x)$ estimates $F_X$ without assumptions
+
+---
+
+## The Normal Distribution
+
+We say $X \sim \mathcal{N}(\mu, \sigma^2)$ if its density is:
+
+$$f(x) = \frac{1}{\sqrt{2\pi}\,\sigma} \exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right), \qquad x \in \mathbb{R}$$
+
+- $\mu \in \mathbb{R}$: location (mean)  
+- $\sigma > 0$: scale (standard deviation)
+
+The **standard normal** $Z \sim \mathcal{N}(0,1)$ has density $\phi(z) = \frac{1}{\sqrt{2\pi}}e^{-z^2/2}$ and CDF $\Phi(z)$.
+
+--
+
+**Key properties:**
+- Symmetric and unimodal about $\mu$
+- $\mathbb{E}(X) = \mu$, $\text{Var}(X) = \sigma^2$
+- **Standardisation:** if $X \sim \mathcal{N}(\mu,\sigma^2)$ then $Z = \frac{X-\mu}{\sigma} \sim \mathcal{N}(0,1)$
+- **Location-scale:** if $X \sim \mathcal{N}(\mu,\sigma^2)$ then $aX + b \sim \mathcal{N}(a\mu+b, a^2\sigma^2)$
+
+---
+
+## The Normal Density in R
+
+.pull-left[
+```{r normal-density, fig.show='hide'}
+x <- seq(-4, 4, length.out = 500)
+
+plot(x, dnorm(x), type = "l", lwd = 2,
+     col = "#861F41", ylab = "f(x)",
+     main = "Standard Normal Density")
+
+# shade ±1 SD
+x1 <- x[x >= -1 & x <= 1]
+polygon(c(-1, x1, 1), c(0, dnorm(x1), 0),
+        col = rgb(0.525, 0.122, 0.254, 0.3),
+        border = NA)
+
+abline(v = 0, lty = 2, col = "grey50")
+text(0, 0.15, "68.3%", cex = 1.2)
+```
+
+**R functions for Normal:**
+- `dnorm(x)` — density $\phi(x)$
+- `pnorm(x)` — CDF $\Phi(x)$  
+- `qnorm(p)` — quantile $\Phi^{-1}(p)$
+- `rnorm(n)` — random samples
+]
+
+.pull-right[
+```{r normal-density, echo=FALSE, fig.width=5, fig.height=4}
+```
+]
+
+---
+
+## Simulating the CDF: Seeing $S_n \to F$
+
+**Key idea:** generate many samples from $\mathcal{N}(0,1)$ and compare the empirical CDF $S_n(x)$ to the true $\Phi(x)$.
+
+.pull-left[
+```{r ecdf-demo, echo = T, fig.show='hide'}
+set.seed(42)
+par(mfrow = c(1, 2))
+
+for (n in c(50, 500)) {
+  x_samp <- rnorm(n)
+  plot(ecdf(x_samp),
+       col  = "#861F41", lwd = 2,
+       main = paste0("n = ", n),
+       xlab = "x", ylab = "CDF",
+       xlim = c(-3.5, 3.5))
+  curve(pnorm(x), add = TRUE,
+        col = "#E5751F", lwd = 2, lty = 2)
+  legend("topleft",
+    legend = c(expression(S[n](x)),
+               expression(Phi(x))),
+    col = c("#861F41","#E5751F"),
+    lwd = 2, lty = c(1,2), bty = "n",
+    cex = 0.8)
+}
+par(mfrow = c(1, 1))
+```
+]
+
+.pull-right[
+```{r ecdf-demo, echo=FALSE, fig.width=5.5, fig.height=4}
+```
+
+The gap $\sup_x |S_n(x) - \Phi(x)|$ shrinks as $n$ grows — this is the **Glivenko–Cantelli theorem**, and it is the theoretical foundation for the KS test.
+]
+
+---
+
+## How Close Is $S_n$ to $\Phi$? A Simulation Study
+
+Let's quantify the gap across many replications.
+
+```{r glivenko-sim, fig.height=5}
+set.seed(7)
+ns <- c(10, 50, 100, 500, 1000)
+B  <- 2000   # replications
+
+sup_gaps <- sapply(ns, function(n) {
+  replicate(B, {
+    x   <- rnorm(n)
+    xs  <- sort(x)
+    Sn  <- (1:n) / n          # EDF evaluated at order stats
+    F0  <- pnorm(xs)           # true CDF at same points
+    max(abs(Sn - F0))
+  })
+})
+
+boxplot(sup_gaps, names = paste0("n=", ns),
+        col = "#861F4155", border = "#861F41",
+        ylab = expression(sup[x] * "|" * S[n](x) - Phi(x) * "|"),
+        main = "Sup-norm gap between EDF and true CDF over 2000 replications")
+abline(h = 0, lty = 2, col = "grey60")
+```
+
+---
+
+## Connecting to Sampling Distributions
+
+**Question:** what does the distribution of $\bar{X}_n$ look like as we repeat sampling?
+
+```{r sampling-dist, fig.height=3.8}
+set.seed(99); n <- 30; B <- 5000
+xbars <- replicate(B, mean(rnorm(n, mean = 2, sd = 3)))
+
+hist(xbars, breaks = 60, freq = FALSE,
+     col = "#861F4155", border = "white",
+     main = expression("Sampling distribution of" ~ bar(X)[30] ~ "from N(2,9)"),
+     xlab = expression(bar(x)))
+curve(dnorm(x, mean = 2, sd = 3/sqrt(n)), add = TRUE, col = "#E5751F", lwd = 2)
+legend("topright",
+       legend = expression(N(mu, sigma^2/n) == N(2, 0.3)),
+       col = "#E5751F", lwd = 2, bty = "n")
+```
+
+The CLT says $\bar{X}_n \approx \mathcal{N}(\mu, \sigma^2/n)$ for large $n$, regardless of the parent distribution.
+
+---
+
+class: inverse, center, middle
+
+# Part 2: Central Limit Theorem
+
+---
+
+## The Central Limit Theorem
+
+**Theorem (CLT).** Let $X_1, X_2, \ldots$ be IID with mean $\mu$ and finite variance $\sigma^2 > 0$. Then
+
+$$Z_n = \frac{\bar{X}_n - \mu}{\sigma/\sqrt{n}} \xrightarrow{d} \mathcal{N}(0,1) \quad \text{as } n \to \infty$$
+
+--
+
+**Remarkable:** the shape of the parent distribution doesn't matter. The standardised mean always converges to $\mathcal{N}(0,1)$.
+
+```{r clt-parents, fig.height=3.2}
+set.seed(1); B <- 4000; n <- 40
+parents <- list(
+  "Uniform(0,1)"    = function() runif(n),
+  "Exponential(1)"  = function() rexp(n),
+  "Poisson(2)"      = function() rpois(n, 2)
+)
+par(mfrow = c(1,3))
+for (nm in names(parents)) {
+  means <- replicate(B, { x <- parents[[nm]](); (mean(x) - mean(parents[[nm]]()))/
+    (sd(replicate(200, mean(parents[[nm]]()))) ) })
+  xbars_std <- replicate(B, {
+    x <- parents[[nm]](); (mean(x) - mean(replicate(500, mean(parents[[nm]]()))))
+  })
+  hist(replicate(B, mean(parents[[nm]]())), breaks=50, freq=FALSE,
+       col="#861F4155", border="white", main=nm, xlab="sample mean")
+}
+par(mfrow=c(1,1))
+```
+
+---
+
+## CLT: Standardised Means Converge to N(0,1)
+
+```{r clt-std, fig.height=4}
+set.seed(2); B <- 5000; n <- 40
+
+get_std_means <- function(rfun, mu, sigma) {
+  replicate(B, (mean(rfun(n)) - mu) / (sigma / sqrt(n)))
+}
+
+zm_unif <- get_std_means(function(n) runif(n), mu=0.5, sigma=sqrt(1/12))
+zm_exp  <- get_std_means(function(n) rexp(n),  mu=1,   sigma=1)
+zm_pois <- get_std_means(function(n) rpois(n,2),mu=2,  sigma=sqrt(2))
+
+par(mfrow=c(1,3))
+for (dat in list(list(zm_unif,"Uniform"), list(zm_exp,"Exponential"), list(zm_pois,"Poisson"))) {
+  hist(dat[[1]], breaks=60, freq=FALSE, col="#861F4155", border="white",
+       main=dat[[2]], xlab=expression(Z[n]))
+  curve(dnorm(x), add=TRUE, col="#E5751F", lwd=2)
+}
+par(mfrow=c(1,1))
+```
+
+Orange curve: $\mathcal{N}(0,1)$ density. All three converge regardless of parent shape.
+
+---
+
+## De Moivre–Laplace: CLT for Binomials
+
+**Special case:** if $X \sim \text{Bin}(n,p)$ then for large $n$:
+
+$$\frac{X - np}{\sqrt{np(1-p)}} \xrightarrow{d} \mathcal{N}(0,1)$$
+
+Originally proved for $p = 1/2$ by De Moivre (1733), extended to general $p$ by Laplace (1812).
+
+```{r demoivre, fig.height=3.5}
+n <- 50; p <- 0.3
+x <- 0:n
+plot(x, dbinom(x, n, p), type="h", col="#861F41", lwd=2,
+     main=paste0("Bin(", n, ",", p, ") vs N(np, np(1-p))"),
+     xlab="x", ylab="Probability / Density")
+curve(dnorm(x, mean=n*p, sd=sqrt(n*p*(1-p))), add=TRUE,
+      col="#E5751F", lwd=2)
+legend("topright", c("Binomial PMF", "Normal approx"),
+       col=c("#861F41","#E5751F"), lwd=2, bty="n")
+```
+
+Interactive demo: https://jdatta.shinyapps.io/demoivre/
+
+---
+
+class: inverse, center, middle
+
+# Part 3: Continuity Correction
+
+---
+
+## Why Do We Need a Continuity Correction?
+
+The Binomial is **discrete** — it takes only integer values. The Normal is **continuous**.
+
+When we approximate $P(X = k)$ for $X \sim \text{Bin}(n,p)$, the Normal assigns **zero** probability to any single point. We need to "spread" each integer over an interval of width 1.
+
+--
+
+.pull-left[
+**The key picture:**
+
+Each integer $k$ is represented by the interval $(k - \tfrac{1}{2},\; k + \tfrac{1}{2})$.
+
+So:
+- $P(X = k) \approx P(k - \tfrac{1}{2} < Y < k + \tfrac{1}{2})$
+- $P(X \le k) \approx P(Y \le k + \tfrac{1}{2})$  ← **add** $\tfrac{1}{2}$
+- $P(X \ge k) \approx P(Y \ge k - \tfrac{1}{2})$  ← **subtract** $\tfrac{1}{2}$
+- $P(X < k) \approx P(Y < k - \tfrac{1}{2})$
+- $P(X > k) \approx P(Y > k + \tfrac{1}{2})$
+
+where $Y \sim \mathcal{N}(np, np(1-p))$.
+]
+
+.pull-right[
+```{r cc-picture, echo=FALSE, fig.width=5, fig.height=4.5}
+n <- 20; p <- 0.5; mu <- n*p; sigma <- sqrt(n*p*(1-p))
+ks <- 6:14
+plot(ks, dbinom(ks, n, p), type="h", lwd=12,
+     col=rgb(0.525,0.122,0.254,0.5),
+     xlim=c(5,15), ylim=c(0,0.2),
+     xlab="k", ylab="", main="Bin(20,0.5): bars vs Normal")
+curve(dnorm(x, mu, sigma), add=TRUE, col="#E5751F", lwd=2)
+# show that bar for k=10 lines up with interval (9.5,10.5)
+abline(v=c(9.5,10.5), lty=2, col="steelblue")
+text(10, 0.185, "k=10\n(9.5 to 10.5)", cex=0.8, col="steelblue")
+```
+]
+
+---
+
+## The Continuity Correction Rule
+
+**Memory aid — think about what you are including:**
+
+| You want | You include | So the bound becomes |
+|----------|-------------|----------------------|
+| $P(X \le k)$ | $k$ is the last value *in* | use $k + \tfrac{1}{2}$ |
+| $P(X < k)$ | $k$ is the first value *out* | use $k - \tfrac{1}{2}$ |
+| $P(X \ge k)$ | $k$ is the first value *in* | use $k - \tfrac{1}{2}$ |
+| $P(X > k)$ | $k$ is the last value *out* | use $k + \tfrac{1}{2}$ |
+| $P(X = k)$ | $k$ is the only value | use $(k-\tfrac{1}{2},\; k+\tfrac{1}{2})$ |
+
+**Mnemonic:** *"include the boundary, add a half; exclude the boundary, subtract a half."*
+
+Formally, if $Y \sim \mathcal{N}(np, np(1-p))$:
+
+$$P(X \le k) \approx \Phi\!\left(\frac{k + \tfrac{1}{2} - np}{\sqrt{np(1-p)}}\right)$$
+
+---
+## Continuity Correction: Worked Example
+
+**Problem.** In a clinical trial, $X \sim \text{Bin}(25, 0.4)$ is the number of patients
+who respond. Find $P(X \le 8)$ using the Normal approximation.
+
+Here $np = 10$, $\sqrt{np(1-p)} = \sqrt{6} \approx 2.449$.
+
+**Which way does the correction go?**
+
+We want $P(X \le 8)$ — the value 8 is **included**, so we expand the boundary outward to $8.5$:
+
+$$P(X \le 8) \approx \Phi\!\left(\frac{8.5 - 10}{\sqrt{6}}\right) = \Phi(-0.612)$$
+
+---
+# R code for continuity corrections
+
+```{r cc-example, echo = T}
+n <- 25; p <- 0.4; mu <- n*p; sigma <- sqrt(n*p*(1-p))
+
+exact   <- pbinom(8, n, p)
+no_cc   <- pnorm(8,   mean=mu, sd=sigma)
+with_cc <- pnorm(8.5, mean=mu, sd=sigma)
+
+cat("Exact:                 ", round(exact,   4), "\n")
+cat("Normal (no CC):        ", round(no_cc,   4), "\n")
+cat("Normal (with CC):      ", round(with_cc, 4), "\n")
+```
+
+---
+## Visualising the Correction
+
+```{r cc-visual, fig.height=6}
+n <- 25; p <- 0.4; mu <- n*p; sigma <- sqrt(n*p*(1-p))
+
+# Plot Normal curve first
+curve(dnorm(x, mu, sigma), from=0, to=20, col="#E5751F", lwd=2,
+      xlab="x", ylab="Probability / Density", ylim=c(0, 0.185),
+      main="Each bar sits over an interval of width 1")
+
+# Draw each binomial probability as a rectangle of width 1
+for (k in 0:20) {
+  pk <- dbinom(k, n, p)
+  # highlight bars 0-8 (the event X <= 8)
+  fill_col <- if (k <= 8) rgb(0.525,0.122,0.254,0.5) else rgb(0.7,0.7,0.7,0.3)
+  rect(k - 0.5, 0, k + 0.5, pk, col=fill_col, border="white", lwd=0.5)
+}
+
+# Shade Normal area up to 8.5 (with CC)
+x_shade <- seq(0, 8.5, length.out=300)
+polygon(c(0, x_shade, 8.5), c(0, dnorm(x_shade, mu, sigma), 0),
+        col=rgb(0,0.5,0.8,0.25), border=NA)
+
+abline(v=8.5, lty=2, col="steelblue", lwd=2)
+text(8.5, 0.17, "cut at 8.5\n(not 8)", col="steelblue", cex=0.85, adj=-0.1)
+
+legend("topright",
+       c("Normal N(10, 6)", "Binomial bars: X \u2264 8",
+         "Binomial bars: X > 8", "Normal area with CC"),
+       col  = c("#E5751F", NA, NA, NA),
+       fill = c(NA, rgb(0.525,0.122,0.254,0.5),
+                rgb(0.7,0.7,0.7,0.3), rgb(0,0.5,0.8,0.25)),
+       border = NA, lty=c(1,NA,NA,NA), lwd=c(2,NA,NA,NA),
+       bty="n", cex=0.75)
+```
+
+---
+
+## The Random Walk Example
+
+**Problem.** A drunkard takes 120 steps, each $\pm 1$ with equal probability. What is $P(\text{ends up} \ge 10 \text{ steps from origin})$?
+
+Let $Y_i \sim \text{Bernoulli}(0.5)$, $S_{120} = \sum Y_i \sim \text{Bin}(120, 0.5)$.
+
+Position = $2S_{120} - 120$, so we need $|2S_{120} - 120| \ge 10$, i.e. $|S_{120} - 60| \ge 5$.
+
+```{r random-walk-prob, echo = TRUE}
+n <- 120; p <- 0.5; mu <- n*p; sigma <- sqrt(n*p*(1-p))
+
+# Normal approximation (with continuity correction)
+p_approx <- 2 * pnorm(55 - 0.5, mean=mu, sd=sigma)  # P(S <= 54.5) x2
+cat("Normal approx (with CC):", round(p_approx, 4), "\n")
+
+# Exact
+p_exact <- pbinom(54, n, p) * 2
+cat("Exact binomial:         ", round(p_exact, 4), "\n")
+```
+
+---
+## Approximate via simulation
+
+
+**Simulate it:**
+
+```{r random-walk-sim, echo = TRUE}
+set.seed(42); B <- 50000
+walk_ends <- replicate(B, {
+  steps <- sample(c(-1, 1), 120, replace=TRUE)
+  abs(sum(steps))
+})
+cat("Simulated probability:  ", round(mean(walk_ends >= 10), 4), "\n")
+```
+
+Interactive: https://jdatta.shinyapps.io/random-walk/
+
+---
+
+class: inverse, center, middle
+
+# Part 4: Tests of Randomness — Runs Test
+
+---
+
+## Are These Numbers Actually Random?
+
+Before applying any statistical method, a basic question is: **are our observations random, or is there some pattern?**
+
+Examples where non-randomness matters:
+- Is the sequence of winning/losing days for a stock random?
+- Are defects on an assembly line occurring randomly, or in clusters?
+- Is the sequence of male/female births in a hospital random?
+
+--
+
+The **runs test** (Wald–Wolfowitz, 1940) is the classical nonparametric test for this.
+
+**Definition.** A **run** is a maximal consecutive sequence of identical elements (or elements all on the same side of a threshold).
+
+*Example:* + + + − − + − − − + +
+
+Runs: (+ + +), (− −), (+), (− − −), (+ +) → **5 runs**
+
+---
+
+## Setting Up the Runs Test
+
+Given a sequence of observations, dichotomise them (e.g. above/below median, or head/tail):
+
+$$x_1, x_2, \ldots, x_n \quad\longrightarrow\quad \text{sequence of } + \text{ and } -$$
+
+Let:
+- $n_1$ = number of $+$ symbols
+- $n_2$ = number of $-$ symbols  
+- $n = n_1 + n_2$
+- $R$ = total number of runs
+
+**Intuition:**
+- **Too few runs** → positive serial dependence (clustering): + + + + − − − −
+- **Too many runs** → negative serial dependence (alternating): + − + − + − + −
+- **Just right** → randomness
+
+The null hypothesis is that the sequence is **random** (no serial dependence).
+
+---
+
+## Distribution of $R$ Under $H_0$
+
+Under $H_0$ (random sequence), $R$ has a known exact distribution:
+
+$$P(R = 2k) = \frac{2\binom{n_1-1}{k-1}\binom{n_2-1}{k-1}}{\binom{n}{n_1}}$$
+
+$$P(R = 2k+1) = \frac{\binom{n_1-1}{k-1}\binom{n_2-1}{k} + \binom{n_1-1}{k}\binom{n_2-1}{k-1}}{\binom{n}{n_1}}$$
+
+**For large samples** (for $n_1 > 10$ and $n_2 > 10$), we can use CLT:
+
+$$\mu_R = \frac{2n_1 n_2}{n} + 1, \qquad \sigma_R^2 = \frac{2n_1 n_2(2n_1 n_2 - n)}{n^2(n-1)}$$
+
+$$Z = \frac{R - \mu_R}{\sigma_R} \overset{\cdot}{\sim} \mathcal{N}(0,1)$$
+
+---
+
+## Runs Test by Hand: Example
+
+**Data.** Stock returns: up (U) or down (D) over 20 trading days:
+
+$$U\,U\,D\,D\,D\,U\,U\,U\,D\,U\,D\,D\,U\,U\,U\,U\,D\,D\,U\,D$$
+
+```{r runs-byhand-1, echo = TRUE}
+seq_raw <- c("U","U","D","D","D","U","U","U","D","U",
+             "D","D","U","U","U","U","D","D","U","D")
+
+n1 <- sum(seq_raw == "U"); n2 <- sum(seq_raw == "D")
+cat("n1 (U):", n1, "  n2 (D):", n2, "  n:", n1+n2, "\n")
+
+# Count runs manually
+runs_vec <- rle(seq_raw)$lengths   # run-length encoding
+R <- length(runs_vec)
+cat("Run lengths:", runs_vec, "\n")
+cat("Number of runs R:", R, "\n")
+```
+
+---
+## Runs Test by Hand: Example
+
+
+```{r runs-byhand-2, echo = T}
+# Expected and SD under H0
+mu_R  <- 2*n1*n2/(n1+n2) + 1
+sig_R <- sqrt(2*n1*n2*(2*n1*n2 - (n1+n2)) / ((n1+n2)^2 / (n1+n2-1)))
+cat("Expected runs:", round(mu_R, 2), "  SD:", round(sig_R, 2), "\n")
+
+Z <- (R - mu_R) / sig_R
+cat("Z statistic:", round(Z, 3), "  Two-sided p-value:", round(2*pnorm(-abs(Z)), 4), "\n")
+```
+
+
+---
+
+## Using `randtests` or `tseries` in R
+
+```{r runs-r, echo = T, warning=FALSE}
+# install.packages("randtests")
+library(randtests)
+
+# Encode as numeric: U=1, D=0
+x_num <- ifelse(seq_raw == "U", 1, 0)
+runs.test(x_num, threshold = 0.5)
+
+```
+
+---
+## On numeric vectors
+
+The `runs.test` function in `randtests` works on numeric vectors, dichotomising at the median by default.
+
+```{r runs-continuous, echo = T}
+# For continuous data: dichotomise at median
+set.seed(42)
+y <- rnorm(40)   # truly random
+runs.test(y)     # should NOT reject
+```
+
+---
+
+## Visualising Runs
+
+```{r runs-visual, fig.height=6}
+seq_df <- data.frame(
+  idx  = 1:20,
+  val  = ifelse(seq_raw == "U", 1, -1),
+  grp  = seq_raw
+)
+
+# colour by run
+run_ids <- rep(seq_along(rle(seq_raw)$lengths), rle(seq_raw)$lengths)
+
+plot(1:20, seq_df$val, type="n", ylim=c(-1.5,1.5),
+     xlab="Day", ylab="", yaxt="n",
+     main="Stock returns sequence: U=Up, D=Down")
+axis(2, at=c(-1,1), labels=c("D","U"))
+abline(h=0, lty=2, col="grey70")
+
+cols <- rep(c("#861F41","#E5751F"), ceiling(max(run_ids)/2))[run_ids]
+for (i in 1:20) {
+  lines(c(i-0.4, i+0.4), c(seq_df$val[i], seq_df$val[i]),
+        col=cols[i], lwd=6)
+}
+# mark run boundaries
+boundaries <- which(diff(run_ids) != 0) + 0.5
+abline(v=boundaries, lty=3, col="steelblue")
+text(10, -1.4, paste("R =", R, "runs"), cex=1.2, font=2)
+```
+
+---
+
+## Simulating the Null Distribution of $R$
+
+.pull-left[
+Let's verify the Normal approximation by simulation.
+
+```{r runs-null-dist-idea, echo = T}
+set.seed(42)
+n1 <- 10; n2 <- 10; n <- n1 + n2
+base_seq <- c(rep(1, n1), rep(0, n2))
+
+# Simulate R under H0 by random permutation
+R_null <- replicate(10000, {
+  perm <- sample(base_seq)
+  length(rle(perm)$lengths)
+})
+```
+]
+
+.pull-right[
+```{r runs-null-dist, fig.height=5}
+mu_R  <- 2*n1*n2/n + 1
+sig_R <- sqrt(2*n1*n2*(2*n1*n2-n) / (n^2*(n-1)))
+
+hist(R_null, breaks=30, freq=FALSE,
+     col="#861F4155", border="white",
+     main=expression("Simulated null distribution of R"),
+     xlab="Number of runs R")
+curve(dnorm(x, mu_R, sig_R), add=TRUE, col="#E5751F", lwd=2)
+legend("topright", c("Simulated","Normal approx"),
+       fill=c("#861F4155",NA), col=c(NA,"#E5751F"),
+       border=NA, lty=c(NA,1), lwd=c(NA,2), bty="n")
+```
+]
+
+---
+
+## Runs Test for Non-Randomness: A Structured Example
+
+What does a **non-random** sequence look like, and does the runs test catch it?
+
+```{r runs-power, echo = T, fig.height=3.5}
+clustered <- c(rep(1,10), rep(0,10)) # Clustered sequence 
+alternating <- rep(c(1,0), 10) # Alternating sequence 
+random_seq <- sample(c(rep(1,10), rep(0,10))) # Truly random
+
+results <- data.frame(
+  Type      = c("Clustered", "Alternating", "Random"),
+  Runs      = c(length(rle(clustered)$lengths),
+                length(rle(alternating)$lengths),
+                length(rle(random_seq)$lengths)),
+  P_value   = c(runs.test(clustered)$p.value,
+                runs.test(alternating)$p.value,
+                runs.test(random_seq)$p.value)
+)
+print(results)
+```
+
+---
+
+## Runs Test: Key Points and Limitations
+
+**What the runs test detects:**
+- Serial dependence: whether adjacent observations tend to be similar (or alternate)
+- Trends (values systematically increasing or decreasing also affect run counts)
+
+**What it does NOT detect:**
+- Distributional shape (use KS, AD, or Shapiro–Wilks for that)
+- Dependence between non-adjacent observations
+- Non-stationarity beyond simple trends
+
+--
+
+**Gibbons & Chakraborti**
+- The test is **exact** for any $n_1, n_2$ using the combinatorial distribution of $R$
+- The Normal approximation is good for $n_1 > 10$ and $n_2 > 10$
+- A **one-sided** test (lower tail only) detects clustering; two-sided detects both clustering and alternation
+- The test is **distribution-free**: the same critical values apply regardless of the original distribution of $X_i$
+
+
+---
+
+## Summary
+
+.pull-left[
+**Normal Distribution**
+- Defined by $\mu$ (location) and $\sigma^2$ (scale)
+- Density $\phi(x)$, CDF $\Phi(x)$: use `dnorm`, `pnorm`, `qnorm`, `rnorm`
+- Standardisation: $Z = (X-\mu)/\sigma \sim \mathcal{N}(0,1)$
+
+**CLT**
+- $\bar{X}_n \approx \mathcal{N}(\mu, \sigma^2/n)$ for large $n$
+- Works for any parent distribution (finite variance)
+- Verified empirically: $S_n(x) \to \Phi(x)$ pointwise and uniformly
+
+**Continuity Correction**
+- Needed when approximating discrete by continuous
+- Add $\tfrac{1}{2}$ when the boundary is *included*; subtract when *excluded*
+]
+
+.pull-right[
+**Runs Test**
+- Tests for serial independence (randomness of sequence)
+- $R$ = number of runs; exact distribution known
+- Normal approximation valid for $n_1, n_2 > 10$
+- Use `runs.test()` from `randtests` package
+- Two-sided: detects both clustering and alternation
+
+**Big picture**
+- These are the last parametric/foundational tools
+- Everything from next week onward replaces distributional assumptions with **ranks**, **permutations**, or **resampling**
+- The CLT will reappear as the justification for large-sample approximations in rank tests
+]
+
+---
+

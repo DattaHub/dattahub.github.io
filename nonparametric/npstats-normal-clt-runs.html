@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Normal Distribution, CLT &amp; Tests of Randomness</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Jyotishka Datta" />
+    <script src="libs/header-attrs-2.28/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="mystyle.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Normal Distribution, CLT &amp; Tests of Randomness
+]
+.subtitle[
+## STAT 3504 : Nonparametric Statistics
+]
+.author[
+### Jyotishka Datta
+]
+.date[
+### Virginia Tech
+]
+
+---
+
+
+
+
+class: inverse, center, middle
+
+# Part 1: Random Variables and the Normal Distribution
+
+---
+
+## Recap: CDF and PDF
+
+A random variable `\(X\)` is **continuous** if its CDF `\(F_X(x) = P(X \le x)\)` satisfies:
+
+1. `\(F_X(x)\)` is non-decreasing  
+2. `\(\lim_{x \to -\infty} F_X(x) = 0\)` and `\(\lim_{x \to \infty} F_X(x) = 1\)`  
+3. `\(F_X(x)\)` is right-continuous
+
+The **PDF** is the derivative: `\(f_X(x) = F_X'(x)\)`, so
+
+`$$F_X(x) = \int_{-\infty}^{x} f_X(t)\,dt \qquad \text{and} \qquad \int_{-\infty}^{\infty} f_X(x)\,dx = 1$$`
+
+--
+
+**Why does this matter for nonparametric statistics?**
+
+- Classical tests assume a specific `\(F_X\)` (usually Normal)
+- Nonparametric tests only assume `\(F_X\)` is continuous and/or that observations are IID
+- The **empirical CDF** `\(S_n(x) = \frac{1}{n}\sum_{i=1}^n \mathbf{1}(X_i \le x)\)` estimates `\(F_X\)` without assumptions
+
+---
+
+## The Normal Distribution
+
+We say `\(X \sim \mathcal{N}(\mu, \sigma^2)\)` if its density is:
+
+`$$f(x) = \frac{1}{\sqrt{2\pi}\,\sigma} \exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right), \qquad x \in \mathbb{R}$$`
+
+- `\(\mu \in \mathbb{R}\)`: location (mean)  
+- `\(\sigma &gt; 0\)`: scale (standard deviation)
+
+The **standard normal** `\(Z \sim \mathcal{N}(0,1)\)` has density `\(\phi(z) = \frac{1}{\sqrt{2\pi}}e^{-z^2/2}\)` and CDF `\(\Phi(z)\)`.
+
+--
+
+**Key properties:**
+- Symmetric and unimodal about `\(\mu\)`
+- `\(\mathbb{E}(X) = \mu\)`, `\(\text{Var}(X) = \sigma^2\)`
+- **Standardisation:** if `\(X \sim \mathcal{N}(\mu,\sigma^2)\)` then `\(Z = \frac{X-\mu}{\sigma} \sim \mathcal{N}(0,1)\)`
+- **Location-scale:** if `\(X \sim \mathcal{N}(\mu,\sigma^2)\)` then `\(aX + b \sim \mathcal{N}(a\mu+b, a^2\sigma^2)\)`
+
+---
+
+## The Normal Density in R
+
+.pull-left[
+
+
+**R functions for Normal:**
+- `dnorm(x)` — density `\(\phi(x)\)`
+- `pnorm(x)` — CDF `\(\Phi(x)\)`  
+- `qnorm(p)` — quantile `\(\Phi^{-1}(p)\)`
+- `rnorm(n)` — random samples
+]
+
+.pull-right[
+&lt;img src="npstats-normal-clt-runs_files/figure-html/normal-density-1.png" width="360" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+## Simulating the CDF: Seeing `\(S_n \to F\)`
+
+**Key idea:** generate many samples from `\(\mathcal{N}(0,1)\)` and compare the empirical CDF `\(S_n(x)\)` to the true `\(\Phi(x)\)`.
+
+.pull-left[
+
+``` r
+set.seed(42)
+par(mfrow = c(1, 2))
+
+for (n in c(50, 500)) {
+  x_samp &lt;- rnorm(n)
+  plot(ecdf(x_samp),
+       col  = "#861F41", lwd = 2,
+       main = paste0("n = ", n),
+       xlab = "x", ylab = "CDF",
+       xlim = c(-3.5, 3.5))
+  curve(pnorm(x), add = TRUE,
+        col = "#E5751F", lwd = 2, lty = 2)
+  legend("topleft",
+    legend = c(expression(S[n](x)),
+               expression(Phi(x))),
+    col = c("#861F41","#E5751F"),
+    lwd = 2, lty = c(1,2), bty = "n",
+    cex = 0.8)
+}
+```
+
+``` r
+par(mfrow = c(1, 1))
+```
+]
+
+.pull-right[
+&lt;img src="npstats-normal-clt-runs_files/figure-html/ecdf-demo-1.png" width="396" style="display: block; margin: auto;" /&gt;
+
+The gap `\(\sup_x |S_n(x) - \Phi(x)|\)` shrinks as `\(n\)` grows — this is the **Glivenko–Cantelli theorem**, and it is the theoretical foundation for the KS test.
+]
+
+---
+
+## How Close Is `\(S_n\)` to `\(\Phi\)`? A Simulation Study
+
+Let's quantify the gap across many replications.
+
+&lt;img src="npstats-normal-clt-runs_files/figure-html/glivenko-sim-1.png" width="504" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Connecting to Sampling Distributions
+
+**Question:** what does the distribution of `\(\bar{X}_n\)` look like as we repeat sampling?
+
+&lt;img src="npstats-normal-clt-runs_files/figure-html/sampling-dist-1.png" width="504" style="display: block; margin: auto;" /&gt;
+
+The CLT says `\(\bar{X}_n \approx \mathcal{N}(\mu, \sigma^2/n)\)` for large `\(n\)`, regardless of the parent distribution.
+
+---
+
+class: inverse, center, middle
+
+# Part 2: Central Limit Theorem
+
+---
+
+## The Central Limit Theorem
+
+**Theorem (CLT).** Let `\(X_1, X_2, \ldots\)` be IID with mean `\(\mu\)` and finite variance `\(\sigma^2 &gt; 0\)`. Then
+
+`$$Z_n = \frac{\bar{X}_n - \mu}{\sigma/\sqrt{n}} \xrightarrow{d} \mathcal{N}(0,1) \quad \text{as } n \to \infty$$`
+
+--
+
+**Remarkable:** the shape of the parent distribution doesn't matter. The standardised mean always converges to `\(\mathcal{N}(0,1)\)`.
+
+&lt;img src="npstats-normal-clt-runs_files/figure-html/clt-parents-1.png" width="504" style="display: block; margin: auto;" /&gt;
+
+---
+
+## CLT: Standardised Means Converge to N(0,1)
+
+&lt;img src="npstats-normal-clt-runs_files/figure-html/clt-std-1.png" width="504" style="display: block; margin: auto;" /&gt;
+
+Orange curve: `\(\mathcal{N}(0,1)\)` density. All three converge regardless of parent shape.
+
+---
+
+## De Moivre–Laplace: CLT for Binomials
+
+**Special case:** if `\(X \sim \text{Bin}(n,p)\)` then for large `\(n\)`:
+
+`$$\frac{X - np}{\sqrt{np(1-p)}} \xrightarrow{d} \mathcal{N}(0,1)$$`
+
+Originally proved for `\(p = 1/2\)` by De Moivre (1733), extended to general `\(p\)` by Laplace (1812).
+
+&lt;img src="npstats-normal-clt-runs_files/figure-html/demoivre-1.png" width="504" style="display: block; margin: auto;" /&gt;
+
+Interactive demo: https://jdatta.shinyapps.io/demoivre/
+
+---
+
+class: inverse, center, middle
+
+# Part 3: Continuity Correction
+
+---
+
+## Why Do We Need a Continuity Correction?
+
+The Binomial is **discrete** — it takes only integer values. The Normal is **continuous**.
+
+When we approximate `\(P(X = k)\)` for `\(X \sim \text{Bin}(n,p)\)`, the Normal assigns **zero** probability to any single point. We need to "spread" each integer over an interval of width 1.
+
+--
+
+.pull-left[
+**The key picture:**
+
+Each integer `\(k\)` is represented by the interval `\((k - \tfrac{1}{2},\; k + \tfrac{1}{2})\)`.
+
+So:
+- `\(P(X = k) \approx P(k - \tfrac{1}{2} &lt; Y &lt; k + \tfrac{1}{2})\)`
+- `\(P(X \le k) \approx P(Y \le k + \tfrac{1}{2})\)`  ← **add** `\(\tfrac{1}{2}\)`
+- `\(P(X \ge k) \approx P(Y \ge k - \tfrac{1}{2})\)`  ← **subtract** `\(\tfrac{1}{2}\)`
+- `\(P(X &lt; k) \approx P(Y &lt; k - \tfrac{1}{2})\)`
+- `\(P(X &gt; k) \approx P(Y &gt; k + \tfrac{1}{2})\)`
+
+where `\(Y \sim \mathcal{N}(np, np(1-p))\)`.
+]
+
+.pull-right[
+&lt;img src="npstats-normal-clt-runs_files/figure-html/cc-picture-1.png" width="360" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+## The Continuity Correction Rule
+
+**Memory aid — think about what you are including:**
+
+| You want | You include | So the bound becomes |
+|----------|-------------|----------------------|
+| `\(P(X \le k)\)` | `\(k\)` is the last value *in* | use `\(k + \tfrac{1}{2}\)` |
+| `\(P(X &lt; k)\)` | `\(k\)` is the first value *out* | use `\(k - \tfrac{1}{2}\)` |
+| `\(P(X \ge k)\)` | `\(k\)` is the first value *in* | use `\(k - \tfrac{1}{2}\)` |
+| `\(P(X &gt; k)\)` | `\(k\)` is the last value *out* | use `\(k + \tfrac{1}{2}\)` |
+| `\(P(X = k)\)` | `\(k\)` is the only value | use `\((k-\tfrac{1}{2},\; k+\tfrac{1}{2})\)` |
+
+**Mnemonic:** *"include the boundary, add a half; exclude the boundary, subtract a half."*
+
+Formally, if `\(Y \sim \mathcal{N}(np, np(1-p))\)`:
+
+`$$P(X \le k) \approx \Phi\!\left(\frac{k + \tfrac{1}{2} - np}{\sqrt{np(1-p)}}\right)$$`
+
+---
+## Continuity Correction: Worked Example
+
+**Problem.** In a clinical trial, `\(X \sim \text{Bin}(25, 0.4)\)` is the number of patients
+who respond. Find `\(P(X \le 8)\)` using the Normal approximation.
+
+Here `\(np = 10\)`, `\(\sqrt{np(1-p)} = \sqrt{6} \approx 2.449\)`.
+
+**Which way does the correction go?**
+
+We want `\(P(X \le 8)\)` — the value 8 is **included**, so we expand the boundary outward to `\(8.5\)`:
+
+`$$P(X \le 8) \approx \Phi\!\left(\frac{8.5 - 10}{\sqrt{6}}\right) = \Phi(-0.612)$$`
+
+---
+# R code for continuity corrections
+
+
+``` r
+n &lt;- 25; p &lt;- 0.4; mu &lt;- n*p; sigma &lt;- sqrt(n*p*(1-p))
+
+exact   &lt;- pbinom(8, n, p)
+no_cc   &lt;- pnorm(8,   mean=mu, sd=sigma)
+with_cc &lt;- pnorm(8.5, mean=mu, sd=sigma)
+
+cat("Exact:                 ", round(exact,   4), "\n")
+```
+
+```
+## Exact:                  0.2735
+```
+
+``` r
+cat("Normal (no CC):        ", round(no_cc,   4), "\n")
+```
+
+```
+## Normal (no CC):         0.2071
+```
+
+``` r
+cat("Normal (with CC):      ", round(with_cc, 4), "\n")
+```
+
+```
+## Normal (with CC):       0.2701
+```
+
+---
+## Visualising the Correction
+
+&lt;img src="npstats-normal-clt-runs_files/figure-html/cc-visual-1.png" width="504" style="display: block; margin: auto;" /&gt;
+
+---
+
+## The Random Walk Example
+
+**Problem.** A drunkard takes 120 steps, each `\(\pm 1\)` with equal probability. What is `\(P(\text{ends up} \ge 10 \text{ steps from origin})\)`?
+
+Let `\(Y_i \sim \text{Bernoulli}(0.5)\)`, `\(S_{120} = \sum Y_i \sim \text{Bin}(120, 0.5)\)`.
+
+Position = `\(2S_{120} - 120\)`, so we need `\(|2S_{120} - 120| \ge 10\)`, i.e. `\(|S_{120} - 60| \ge 5\)`.
+
+
+``` r
+n &lt;- 120; p &lt;- 0.5; mu &lt;- n*p; sigma &lt;- sqrt(n*p*(1-p))
+
+# Normal approximation (with continuity correction)
+p_approx &lt;- 2 * pnorm(55 - 0.5, mean=mu, sd=sigma)  # P(S &lt;= 54.5) x2
+cat("Normal approx (with CC):", round(p_approx, 4), "\n")
+```
+
+```
+## Normal approx (with CC): 0.3153
+```
+
+``` r
+# Exact
+p_exact &lt;- pbinom(54, n, p) * 2
+cat("Exact binomial:         ", round(p_exact, 4), "\n")
+```
+
+```
+## Exact binomial:          0.3153
+```
+
+---
+## Approximate via simulation
+
+
+**Simulate it:**
+
+
+``` r
+set.seed(42); B &lt;- 50000
+walk_ends &lt;- replicate(B, {
+  steps &lt;- sample(c(-1, 1), 120, replace=TRUE)
+  abs(sum(steps))
+})
+cat("Simulated probability:  ", round(mean(walk_ends &gt;= 10), 4), "\n")
+```
+
+```
+## Simulated probability:   0.4121
+```
+
+Interactive: https://jdatta.shinyapps.io/random-walk/
+
+---
+
+class: inverse, center, middle
+
+# Part 4: Tests of Randomness — Runs Test
+
+---
+
+## Are These Numbers Actually Random?
+
+Before applying any statistical method, a basic question is: **are our observations random, or is there some pattern?**
+
+Examples where non-randomness matters:
+- Is the sequence of winning/losing days for a stock random?
+- Are defects on an assembly line occurring randomly, or in clusters?
+- Is the sequence of male/female births in a hospital random?
+
+--
+
+The **runs test** (Wald–Wolfowitz, 1940) is the classical nonparametric test for this.
+
+**Definition.** A **run** is a maximal consecutive sequence of identical elements (or elements all on the same side of a threshold).
+
+*Example:* + + + − − + − − − + +
+
+Runs: (+ + +), (− −), (+), (− − −), (+ +) → **5 runs**
+
+---
+
+## Setting Up the Runs Test
+
+Given a sequence of observations, dichotomise them (e.g. above/below median, or head/tail):
+
+`$$x_1, x_2, \ldots, x_n \quad\longrightarrow\quad \text{sequence of } + \text{ and } -$$`
+
+Let:
+- `\(n_1\)` = number of `\(+\)` symbols
+- `\(n_2\)` = number of `\(-\)` symbols  
+- `\(n = n_1 + n_2\)`
+- `\(R\)` = total number of runs
+
+**Intuition:**
+- **Too few runs** → positive serial dependence (clustering): + + + + − − − −
+- **Too many runs** → negative serial dependence (alternating): + − + − + − + −
+- **Just right** → randomness
+
+The null hypothesis is that the sequence is **random** (no serial dependence).
+
+---
+
+## Distribution of `\(R\)` Under `\(H_0\)`
+
+Under `\(H_0\)` (random sequence), `\(R\)` has a known exact distribution:
+
+`$$P(R = 2k) = \frac{2\binom{n_1-1}{k-1}\binom{n_2-1}{k-1}}{\binom{n}{n_1}}$$`
+
+`$$P(R = 2k+1) = \frac{\binom{n_1-1}{k-1}\binom{n_2-1}{k} + \binom{n_1-1}{k}\binom{n_2-1}{k-1}}{\binom{n}{n_1}}$$`
+
+**For large samples** (for `\(n_1 &gt; 10\)` and `\(n_2 &gt; 10\)`), we can use CLT:
+
+`$$\mu_R = \frac{2n_1 n_2}{n} + 1, \qquad \sigma_R^2 = \frac{2n_1 n_2(2n_1 n_2 - n)}{n^2(n-1)}$$`
+
+`$$Z = \frac{R - \mu_R}{\sigma_R} \overset{\cdot}{\sim} \mathcal{N}(0,1)$$`
+
+---
+
+## Runs Test by Hand: Example
+
+**Data.** Stock returns: up (U) or down (D) over 20 trading days:
+
+`$$U\,U\,D\,D\,D\,U\,U\,U\,D\,U\,D\,D\,U\,U\,U\,U\,D\,D\,U\,D$$`
+
+
+``` r
+seq_raw &lt;- c("U","U","D","D","D","U","U","U","D","U",
+             "D","D","U","U","U","U","D","D","U","D")
+
+n1 &lt;- sum(seq_raw == "U"); n2 &lt;- sum(seq_raw == "D")
+cat("n1 (U):", n1, "  n2 (D):", n2, "  n:", n1+n2, "\n")
+```
+
+```
+## n1 (U): 11   n2 (D): 9   n: 20
+```
+
+``` r
+# Count runs manually
+runs_vec &lt;- rle(seq_raw)$lengths   # run-length encoding
+R &lt;- length(runs_vec)
+cat("Run lengths:", runs_vec, "\n")
+```
+
+```
+## Run lengths: 2 3 3 1 1 2 4 2 1 1
+```
+
+``` r
+cat("Number of runs R:", R, "\n")
+```
+
+```
+## Number of runs R: 10
+```
+
+---
+## Runs Test by Hand: Example
+
+
+
+``` r
+# Expected and SD under H0
+mu_R  &lt;- 2*n1*n2/(n1+n2) + 1
+sig_R &lt;- sqrt(2*n1*n2*(2*n1*n2 - (n1+n2)) / ((n1+n2)^2 / (n1+n2-1)))
+cat("Expected runs:", round(mu_R, 2), "  SD:", round(sig_R, 2), "\n")
+```
+
+```
+## Expected runs: 10.9   SD: 40.92
+```
+
+``` r
+Z &lt;- (R - mu_R) / sig_R
+cat("Z statistic:", round(Z, 3), "  Two-sided p-value:", round(2*pnorm(-abs(Z)), 4), "\n")
+```
+
+```
+## Z statistic: -0.022   Two-sided p-value: 0.9825
+```
+
+
+---
+
+## Using `randtests` or `tseries` in R
+
+
+``` r
+# install.packages("randtests")
+library(randtests)
+
+# Encode as numeric: U=1, D=0
+x_num &lt;- ifelse(seq_raw == "U", 1, 0)
+runs.test(x_num, threshold = 0.5)
+```
+
+```
+## 
+## 	Runs Test
+## 
+## data:  x_num
+## statistic = -0.41793, runs = 10, n1 = 11, n2 = 9, n = 20, p-value =
+## 0.676
+## alternative hypothesis: nonrandomness
+```
+
+---
+## On numeric vectors
+
+The `runs.test` function in `randtests` works on numeric vectors, dichotomising at the median by default.
+
+
+``` r
+# For continuous data: dichotomise at median
+set.seed(42)
+y &lt;- rnorm(40)   # truly random
+runs.test(y)     # should NOT reject
+```
+
+```
+## 
+## 	Runs Test
+## 
+## data:  y
+## statistic = -0.64072, runs = 19, n1 = 20, n2 = 20, n = 40, p-value =
+## 0.5217
+## alternative hypothesis: nonrandomness
+```
+
+---
+
+## Visualising Runs
+
+&lt;img src="npstats-normal-clt-runs_files/figure-html/runs-visual-1.png" width="504" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Simulating the Null Distribution of `\(R\)`
+
+.pull-left[
+Let's verify the Normal approximation by simulation.
+
+
+``` r
+set.seed(42)
+n1 &lt;- 10; n2 &lt;- 10; n &lt;- n1 + n2
+base_seq &lt;- c(rep(1, n1), rep(0, n2))
+
+# Simulate R under H0 by random permutation
+R_null &lt;- replicate(10000, {
+  perm &lt;- sample(base_seq)
+  length(rle(perm)$lengths)
+})
+```
+]
+
+.pull-right[
+&lt;img src="npstats-normal-clt-runs_files/figure-html/runs-null-dist-1.png" width="504" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+## Runs Test for Non-Randomness: A Structured Example
+
+What does a **non-random** sequence look like, and does the runs test catch it?
+
+
+``` r
+clustered &lt;- c(rep(1,10), rep(0,10)) # Clustered sequence 
+alternating &lt;- rep(c(1,0), 10) # Alternating sequence 
+random_seq &lt;- sample(c(rep(1,10), rep(0,10))) # Truly random
+
+results &lt;- data.frame(
+  Type      = c("Clustered", "Alternating", "Random"),
+  Runs      = c(length(rle(clustered)$lengths),
+                length(rle(alternating)$lengths),
+                length(rle(random_seq)$lengths)),
+  P_value   = c(runs.test(clustered)$p.value,
+                runs.test(alternating)$p.value,
+                runs.test(random_seq)$p.value)
+)
+print(results)
+```
+
+```
+##          Type Runs      P_value
+## 1   Clustered    2 0.0000354623
+## 2 Alternating   20 0.0000354623
+## 3      Random    9 0.3581287434
+```
+
+---
+
+## Runs Test: Key Points and Limitations
+
+**What the runs test detects:**
+- Serial dependence: whether adjacent observations tend to be similar (or alternate)
+- Trends (values systematically increasing or decreasing also affect run counts)
+
+**What it does NOT detect:**
+- Distributional shape (use KS, AD, or Shapiro–Wilks for that)
+- Dependence between non-adjacent observations
+- Non-stationarity beyond simple trends
+
+--
+
+**Gibbons &amp; Chakraborti**
+- The test is **exact** for any `\(n_1, n_2\)` using the combinatorial distribution of `\(R\)`
+- The Normal approximation is good for `\(n_1 &gt; 10\)` and `\(n_2 &gt; 10\)`
+- A **one-sided** test (lower tail only) detects clustering; two-sided detects both clustering and alternation
+- The test is **distribution-free**: the same critical values apply regardless of the original distribution of `\(X_i\)`
+
+
+---
+
+## Summary
+
+.pull-left[
+**Normal Distribution**
+- Defined by `\(\mu\)` (location) and `\(\sigma^2\)` (scale)
+- Density `\(\phi(x)\)`, CDF `\(\Phi(x)\)`: use `dnorm`, `pnorm`, `qnorm`, `rnorm`
+- Standardisation: `\(Z = (X-\mu)/\sigma \sim \mathcal{N}(0,1)\)`
+
+**CLT**
+- `\(\bar{X}_n \approx \mathcal{N}(\mu, \sigma^2/n)\)` for large `\(n\)`
+- Works for any parent distribution (finite variance)
+- Verified empirically: `\(S_n(x) \to \Phi(x)\)` pointwise and uniformly
+
+**Continuity Correction**
+- Needed when approximating discrete by continuous
+- Add `\(\tfrac{1}{2}\)` when the boundary is *included*; subtract when *excluded*
+]
+
+.pull-right[
+**Runs Test**
+- Tests for serial independence (randomness of sequence)
+- `\(R\)` = number of runs; exact distribution known
+- Normal approximation valid for `\(n_1, n_2 &gt; 10\)`
+- Use `runs.test()` from `randtests` package
+- Two-sided: detects both clustering and alternation
+
+**Big picture**
+- These are the last parametric/foundational tools
+- Everything from next week onward replaces distributional assumptions with **ranks**, **permutations**, or **resampling**
+- The CLT will reappear as the justification for large-sample approximations in rank tests
+]
+
+---
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
