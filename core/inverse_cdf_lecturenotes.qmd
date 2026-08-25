@@ -1,0 +1,409 @@
+---
+title: "CDF, Probability Integral Transformation, and Random Variable Generation"
+author: "Jyotishka Datta"
+date: last-modified
+
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    embed-resources: true
+    code-fold: false
+    fig-cap-location: bottom
+    smooth-scroll: true
+    self-contained: true
+
+execute:
+  echo: true
+  warning: false
+  message: false
+  cache: true
+
+editor: visual
+---
+
+# Introduction
+
+Simulation is one of the most important tools in modern statistics,
+machine learning, data science, Bayesian computation, and stochastic
+modeling. Many statistical procedures rely on our ability to generate
+random observations from probability distributions whose theoretical
+properties are already known.
+
+Modern statistical software makes simulation appear effortless.
+For example, a single call to `rnorm()` generates observations from a
+Normal distribution and `rexp()` generates observations from an
+Exponential distribution. However, these functions conceal a large amount of mathematical structure and numerical computation.
+
+The purpose of these notes is to develop the ideas that make random
+variable generation possible. Along the way we review probability
+distribution functions, cumulative distribution functions, quantiles,
+inverse transformations, and several fundamental simulation algorithms.
+
+Understanding these concepts is important because many practical
+applications require simulation from probability distributions that are
+not available as built-in functions. Once the underlying principles are
+understood, new simulation algorithms can be constructed whenever a
+distribution is specified mathematically.
+
+## Learning Objectives
+
+After completing these notes, students should be able to:
+
+* Describe the difference between a probability distribution function
+  and a cumulative distribution function.
+* Interpret quantiles and percentiles.
+* Explain the probability integral transformation.
+* Generate random observations using inverse-CDF methods.
+* Implement the Box-Muller algorithm for generating Normal random
+  variables.
+* Understand the role of Jacobians in random-variable transformations.
+* Generate points uniformly from a two-dimensional disk.
+
+# Sampling Random Numbers in R
+
+R provides a large collection of built-in probability distributions.
+Each distribution is accompanied by four related functions that perform
+different tasks. A key advantage of R is that the naming convention is
+remarkably consistent. Once the convention is learned for one
+distribution, it applies almost universally.
+
+The suffix identifies the distribution itself, whereas the prefix
+indicates the operation being performed.
+
+| Prefix | Meaning |
+|----------|----------|
+| d | Density or probability mass function |
+| p | Cumulative distribution function |
+| q | Quantile (inverse CDF) |
+| r | Random generation |
+
+The following distributions are among the most commonly used.
+
+| Distribution | Suffix |
+|-------------|---------|
+| Normal | norm |
+| Binomial | binom |
+| Poisson | pois |
+| Exponential | exp |
+| Uniform | unif |
+| Student t | t |
+| Chi-square | chisq |
+| F | f |
+
+For example,
+
+* `dnorm()` evaluates the Normal density.
+* `pnorm()` evaluates the Normal CDF.
+* `qnorm()` computes Normal quantiles.
+* `rnorm()` generates Normal random variables.
+
+Consequently, learning one naming convention provides immediate access
+to a large family of probability models.
+
+# Probability Distribution Functions
+
+## Discrete Random Variables
+
+For a discrete random variable, probability is assigned to individual
+outcomes. The probability distribution function, often called the
+probability mass function (PMF), tells us how likely each possible
+value is.
+
+Mathematically, the PMF is defined as: 
+
+$$
+f(x)=P(X=x).
+$$
+
+The value of the function at a particular point is an actual
+probability. Consequently,
+
+$$
+0 \le f(x) \le 1,
+$$
+
+and the probabilities across all possible values of the random variable
+must sum to one. Formally, if a discrete random variable takes the values in a set $\{x_1, x_2, \ldots, x_k \}$, then we must have:
+
+$$
+\sum_{i=1}^{k} P(X = x_i) = \sum_{i=1}^{k} f(x_i) = 1
+$$
+
+A common example is the Binomial distribution. If
+
+$$
+X\sim\text{Binomial}(n,p),
+$$
+
+then the probability that exactly \(x\) successes occur is
+
+$$
+f(x)= \binom{n}{x} p^x(1-p)^{n-x}.
+$$
+
+The binomial model appears whenever we count the number of successes in
+a fixed number of independent trials. 
+
+We often say that a Binomial random variable gives the number of successes in $n$ tosses of a coin with probability of head $p$. The coin toss is obviously an artifact for any binary experiment where the outcomes can be $0$ and $1$ or "success" and "failure". 
+
+A discrete random variable can also take countably infinite values, e.g., all non-negative integers in the set $\{0, 1, 2, \ldots, \infty\}$. The most prime example is Poisson. A Poisson random variable is typically used to model the number of events that occurs in either a defined space or time or space-and-time, e.g., the number of emails that you receive in your inbox on a given day from 8 to 10 am. It has just one parameter $\lambda$, and the PMF is:
+
+$$
+P(X = x) = e^{-\lambda} \frac{\lambda^x}{x|}, \quad x \in \{0, 1, 2, \ldots, \infty \}, \quad \lambda \ge 0
+$$
+
+It is instructive to see that the PMF adds up to 1 over the entire line of non-negative integers. 
+
+### Example
+
+For a Binomial random variable, `pbinom` gives $P(X\le 3).$ The two other parameters are the size $n$ and probability of success $p$. 
+
+
+```{r}
+pbinom(3, size = 5, prob = 0.4)
+```
+
+
+
+
+## Continuous Random Variables
+
+Continuous random variables behave differently from discrete random
+variables. 
+
+The first major difference is that, for a continuous variable, the density function $f(x)$ does not directly represent a probability.
+
+For example, $f(23)$ for a Normal density is simply the height of the curve at $x=23$. This distinction is important because probabilities for continuous variables are obtained through areas under the density curve rather than heights of the curve. 
+
+In fact, for any single point on the real line: 
+
+$$
+P(X=x)=0 \quad \text{for} \quad x \in \mathbb{R}, \quad \text{where} \; X \; \text{is a continuous r.v.}
+$$
+
+This is true for every continuous distribution. That is, for a continuous random variable, only intervals have nonzero probability, such as
+
+$$
+P(a\le X\le b) = \int_{a}^{b} f(x) dx, \; \text{where} \; -\infty < a  \le b < \infty.
+$$
+
+So, what does the density function measure? We need to think analytically to understand this. Let $(a-h, a + h)$ be a infinitessimally small interval of length $2h$. The probability that a continuous random variable belongs to this interval can be calculated as:
+
+$$
+P(a - h\le X\le a + h) = \int_{a-h}^{a + h} f(x) dx \approx f(a) \times \text{length of the interval} = f(a) \times 2h
+$$
+Similarly, consider another such small interval $(b-h, b + h)$, and the probability $P(b - h\le X\le b + h)  \approx f(b) \times 2h$. 
+
+Now, if $a$ and $b$ are points on the real line such that $f(a) > f(b)$, then using the above approximation, we can say 
+
+$$
+P(a - h\le X\le a + h) > P(b - h\le X\le b + h) 
+$$
+
+So, it is more probable that $X$ will fall in a tiny interval near $a$ than it will fall in an interval of the same size near $b$, that is, the **relative importance** of the point $a$ is higher than the point $b$. The point where $f(x)$ is highest is called the **mode**: the most probable value. 
+
+
+
+# Cumulative Distribution Functions
+
+Although density functions are useful for visualizing the shape of a
+distribution, cumulative distribution functions are often more useful
+for practical calculations.
+
+The cumulative distribution function (CDF) answers a simple question:
+
+> What is the probability that the random variable is less than or
+> equal to a specified value?
+
+Formally, for any random variable, irrespective of whether it is discrete or continuous, the definition of CDF is:
+
+$$
+F(x)=P(X\le x).
+$$
+
+Because probabilities accumulate as we move from left to right, every
+CDF has the following properties:
+
+1. It never decreases.
+2. It is bounded between 0 and 1.
+3. It approaches 0 far to the left.
+4. It approaches 1 far to the right.
+
+These properties make the CDF one of the most important objects in
+probability theory. In fact, knowing the CDF completely determines the
+distribution.
+
+For a discrete random variable, 
+
+$$F(x)=\sum_{t\le x} f(t).$$
+
+For a continuous random variable:
+
+$$F(x) = \int_{-\infty}^{x} f(s) ds$$
+
+
+
+
+# Visualizing the CDF
+
+You can use `p` prefix for getting the values of the CDF for named random variables, as mentioned before, and we can use those values to plot. The `p` function can also take whole vectors and return the CDF at each observation. 
+
+Here is a small script to plot the Binomial CDF where $n = 30$ and $p = 0.5$. 
+
+```{r}
+vals <- (0:30)
+
+binomial_cdf <- pbinom(vals, 30, 0.5)
+plot(binomial_cdf, type = "s")
+points(binomial_cdf, pch = 15, col = "red")
+```
+
+Alternatively, we can use the `curve` function in `R` that will take a function as an argument, like we pass on `pnorm` as the first argument here. We plot the normal CDF from $5$ to $35$ where the normal distribution has mean = 20 and standard deviation 4. 
+
+```{r}
+curve(pnorm(x, mean = 20, sd = 4),from = 5, to = 35, xlab = "x", ylab = "F(x)", main = "Normal CDF")
+```
+
+Both graphs show the cumulative probability associated with each value of \(x\). The curve increases from 0 to 1 and never decreases.
+
+
+# Empirical CDF
+
+In many real applications we do not know the distribution from which our data were generated. Instead, we are given a sample and must infer the underlying distribution.
+
+One approach is to estimate the density using histograms or kernel
+density estimators. Another is to estimate the cumulative distribution
+function directly.
+
+The empirical CDF (ECDF) is simply the proportion of observations less
+than or equal to a given value.
+
+As the sample size grows, the ECDF increasingly resembles the true
+population CDF. Consequently, the ECDF provides a powerful
+nonparametric summary of a sample without requiring any distributional
+assumptions.
+
+Like the theoretical CDF, we can also plot the empirical CDF much in the same way. See the example below: here the step function is an estimate of the unknown population CDF using observed data.
+
+```{r}
+sample1 <- rnorm(1000, mean = 20, sd = 4)
+
+plot(ecdf(sample1), xlab = "x", ylab = "Empirical CDF", main = "Empirical CDF of Simulated Normal Sample"
+)
+```
+
+
+# Quantiles and Percentiles
+
+The next concept we need is the quantile. A quantile is the value that cuts off a specified proportion of the distribution.
+
+For example:
+
+* The 50th percentile is the median.
+* The 25th percentile is the first quartile.
+* The 75th percentile is the third quartile.
+
+The general problem is:
+
+> Find the value \(x\) such that the probability to its left equals
+> a specified value \(p\).
+
+Mathematically,
+
+$$
+P(X\le x)=p.
+$$
+
+Since
+
+$$
+F(x)=P(X\le x),
+$$
+
+the problem becomes solving
+
+$$
+F(x)=p.
+$$
+
+The solution is written
+
+$$
+x=F^{-1}(p),
+$$
+
+which is why quantiles are often called inverse CDF calculations. 
+
+However, a CDF $F$ is only required to be a weakly monotonic and right-continuous function so the inverse of $F$ might not be unique. For example, the CDF for a discrete random variable has jumps at every point of its support. See the Binomial CDF below. 
+
+```{r, echo = F}
+vals <- 0:10
+binomial_cdf <- pbinom(vals, 10, 0.5)
+
+plot(vals, binomial_cdf, type = "s",
+     xlab = "x", ylab = "F(x)",
+     main = "Bin(10, 0.5) CDF: inverse is not unique")
+points(vals, binomial_cdf, pch = 15, col = "red")
+
+# Pick p in a flat region — between pbinom(4) and pbinom(5)
+p_level <- 0.377   # sits in the flat stretch after x=4
+
+# Two horizontal lines: one at p_level, one just below the next jump
+abline(h = p_level, lty = 2, col = "steelblue", lwd = 1.5)
+abline(h = pbinom(4, 10, 0.5), lty = 2, col = "steelblue", lwd = 1.5)
+
+# Vertical line at x=5 (the jump point where F first exceeds p_level)
+abline(v = 5, lty = 2, col = "#861F41", lwd = 1.5)
+
+# Annotate
+text(5.2, 0.1, "x = 5", col = "#861F41", cex = 0.85, adj = 0)
+
+arrows(x0 = 1.5, y0 = 0.377, x1 = 5, y1 = 0.45,
+       length = 0.1, col = "steelblue")
+text(1.2, 0.30, "all p in here\nmap to x = 5",
+     col = "steelblue", cex = 0.75, adj = 0)
+
+```
+
+For handling such cases, we use the idea of the generalized inverse function using the infimum. 
+
+$$
+F^{-1}(u) = \text{inf} \{x \mid F(x) \ge u \} \quad 0 \le u \le 1
+$$
+
+Quantiles play an important role in confidence intervals, hypothesis
+testing, simulation, and risk analysis.
+
+# The Probability Integral Transform
+
+## Theorem
+
+Suppose $X$ has continuous CDF $F.$ Then, $U = F(X)$ has a Uniform(0,1) distribution.
+
+Conversely, if $U\sim\text{Uniform}(0,1),$ then $X=F^{-1}(U)$ has distribution function $F$.
+
+### Proof:
+
+**Proof.**
+
+$$
+\begin{align}
+&\Pr(F^{-1}(U) \leq x) \\
+&= \Pr(U \leq F(x)) \qquad (F \text{ is right-continuous, so } \{u : F^{-1}(u) \leq x\} = \{u : u \leq F(x)\}) \\
+&= F(x) \qquad\qquad\quad\ \ (\text{because } \Pr(U \leq u) = u \text{, when } U \text{ is uniform on } [0,1])
+\end{align}
+$$
+This result forms the basis of inverse transform sampling or inverse CDF sampling, which is our next result. 
+
+
+# Key Takeaways
+
+- Every distribution in R uses the prefixes `d`, `p`, `q`, and `r` for the density/mass function, CDF, quantile function, and random generation.
+- For a discrete variable the PMF value *is* a probability; for a continuous variable the density is only a height, and probability comes from area under the curve over an interval.
+- The CDF $F(x) = P(X \le x)$ is defined for both discrete and continuous variables, is non-decreasing, and runs from 0 to 1 — it fully determines the distribution.
+- The empirical CDF estimates $F$ directly from a sample and converges to it as the sample grows, giving a nonparametric summary with no distributional assumptions.
+- Quantiles are obtained by inverting the CDF; when $F$ has flat stretches or jumps the inverse need not be unique, which is why we use the generalized inverse $F^{-1}(u) = \inf\{x \mid F(x) \ge u\}$.
+
+
