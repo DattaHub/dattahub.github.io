@@ -241,8 +241,22 @@ blog](https://sketchplanations.com/goodharts-law "https://sketchplanations.com/g
 
 ## General CLT {.center}
 
-![Illustration of the Central Limit Theorem — details in
-slide](art/clt-1.png){fig-alt="Details in slide" width="90%"}
+**Setup.** If $X \sim \text{Binomial}(n, p)$ then
+
+$$\mathbb{E}(X) = np, \qquad \text{Var}(X) = np(1-p)$$
+
+**Theorem (De Moivre--Laplace).** The standardised binomial converges in
+distribution to the standard normal:
+
+$$Z_n = \frac{X - np}{\sqrt{np(1-p)}} \xrightarrow{d} \mathcal{N}(0, 1) \quad \text{as } n \to \infty$$
+
+That is, for any fixed $a < b$,
+
+$$P(a \leq Z_n \leq b) \to \Phi(b) - \Phi(a)$$
+
+> **Historical note.** Proved for $p = \tfrac{1}{2}$ by De Moivre (1733)
+> and extended to general $p$ by Laplace (1812). This is the oldest
+> version of the CLT.
 
 ##  {.center}
 

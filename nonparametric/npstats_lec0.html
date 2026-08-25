@@ -471,8 +471,16 @@ Jyotishka Datta
 </section>
 <section id="general-clt" class="slide level2 center">
 <h2>General CLT</h2>
-
-<img data-src="art/clt-1.png" style="width:90.0%" alt="Details in slide" class="r-stretch quarto-figure-center"><p class="caption">Illustration of the Central Limit Theorem — details in slide</p></section>
+<p><strong>Setup.</strong> If <span class="math inline">\(X \sim \text{Binomial}(n, p)\)</span> then</p>
+<p><span class="math display">\[\mathbb{E}(X) = np, \qquad \text{Var}(X) = np(1-p)\]</span></p>
+<p><strong>Theorem (De Moivre–Laplace).</strong> The standardised binomial converges in distribution to the standard normal:</p>
+<p><span class="math display">\[Z_n = \frac{X - np}{\sqrt{np(1-p)}} \xrightarrow{d} \mathcal{N}(0, 1) \quad \text{as } n \to \infty\]</span></p>
+<p>That is, for any fixed <span class="math inline">\(a &lt; b\)</span>,</p>
+<p><span class="math display">\[P(a \leq Z_n \leq b) \to \Phi(b) - \Phi(a)\]</span></p>
+<blockquote>
+<p><strong>Historical note.</strong> Proved for <span class="math inline">\(p = \tfrac{1}{2}\)</span> by De Moivre (1733) and extended to general <span class="math inline">\(p\)</span> by Laplace (1812). This is the oldest version of the CLT.</p>
+</blockquote>
+</section>
 <section id="section" class="slide level2 center">
 <h2></h2>
 

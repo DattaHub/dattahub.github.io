@@ -1,0 +1,202 @@
+---
+title: "Proof Sketch: Central Limit Theorem"
+subtitle: "Nonparametric Statistics"
+author: "Jyotishka Datta"
+date: "Virginia Tech"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: [default, default-fonts]
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: "16:9"
+---
+
+## The Central Limit Theorem
+
+**Theorem (CLT).** Let $X_1, X_2, \ldots$ be IID with mean $\mu$ and finite 
+variance $\sigma^2 > 0$. Then
+
+$$Z_n = \frac{\bar{X}_n - \mu}{\sigma/\sqrt{n}} \xrightarrow{d} \mathcal{N}(0,1) 
+\quad \text{as } n \to \infty$$
+
+**Proof strategy.** It suffices to show that the moment generating function (MGF) 
+of $Z_n$ converges to $e^{t^2/2}$ for all $t$, since $e^{t^2/2}$ is the MGF 
+of $\mathcal{N}(0,1)$.
+
+This follows from a theorem in analysis: if $M_{X_n}(t) \to M_X(t)$ for all $t$ 
+in a neighbourhood of zero, then $X_n \xrightarrow{d} X$.
+
+---
+
+## What is a Moment Generating Function?
+
+**Definition.** The moment generating function (MGF) of a random variable $X$ is
+
+$$M_X(t) = \mathbb{E}(e^{tX}) = \int_{-\infty}^{\infty} e^{tx} f(x)\, dx$$
+
+for all $t$ in some open interval around zero where the expectation is finite.
+
+--
+
+**Why "moment generating"?** Differentiating $k$ times and evaluating at $t = 0$ 
+recovers the $k$-th moment of $X$:
+
+$$M_X^{(k)}(0) = \mathbb{E}(X^k)$$
+
+For example:
+- $M_X'(0) = \mathbb{E}(X)$
+- $M_X''(0) = \mathbb{E}(X^2)$, so $\text{Var}(X) = M_X''(0) - [M_X'(0)]^2$
+
+--
+
+**Why do we use it in the CLT proof?** Two reasons:
+
+1. **Uniqueness.** If two random variables have the same MGF in a neighbourhood 
+   of zero, they have the same distribution.
+
+2. **Independence.** If $X$ and $Y$ are independent, 
+   $M_{X+Y}(t) = M_X(t) \cdot M_Y(t)$. This is the key factorisation used in Step 2.
+
+---
+
+## MGF: Two Examples
+
+**Example 1.** $X \sim \mathcal{N}(0, 1)$.
+
+$$M_X(t) = \mathbb{E}(e^{tX}) = \int_{-\infty}^{\infty} e^{tx} \frac{1}{\sqrt{2\pi}} e^{-x^2/2}\, dx = e^{t^2/2}$$
+
+This is why $e^{t^2/2}$ appears as the target in the CLT proof: it is simply 
+the MGF of the standard normal.
+
+--
+
+**Example 2.** $X \sim \text{Bernoulli}(p)$.
+
+$$M_X(t) = \mathbb{E}(e^{tX}) = (1-p)\, e^{t \cdot 0} + p\, e^{t \cdot 1} = 1 - p + p e^t$$
+
+Check: $M_X'(0) = p e^t \big|_{t=0} = p = \mathbb{E}(X)$. $\checkmark$
+
+--
+
+**Limitation.** The MGF does not always exist. For example, the Cauchy 
+distribution has $\mathbb{E}(e^{tX}) = \infty$ for all $t \neq 0$. 
+In such cases we use the **characteristic function** $\varphi_X(t) = \mathbb{E}(e^{itX})$, 
+which always exists since $|e^{itX}| = 1$.
+
+
+---
+
+## Step 1: Standardise the Summands
+
+Define centred and scaled versions of the $X_i$:
+
+$$Y_i = \frac{X_i - \mu}{\sigma}$$
+
+Then $\mathbb{E}(Y_i) = 0$, $\text{Var}(Y_i) = 1$, and the standardised sum becomes:
+
+$$Z_n = \frac{1}{\sqrt{n}} \sum_{i=1}^{n} Y_i$$
+
+Let $M_Y(t) = \mathbb{E}(e^{tY})$ denote the common MGF of each $Y_i$.
+
+We assume $M_Y(t)$ exists in some open interval around $t = 0$.
+
+---
+
+## Step 2: Factor the MGF Using Independence
+
+$$M_{Z_n}(t) = \mathbb{E}\!\left(\exp\!\left\{t Z_n\right\}\right) 
+= \mathbb{E}\!\left(\exp\!\left\{\frac{t}{\sqrt{n}} \sum_{i=1}^{n} Y_i\right\}\right)$$
+
+Since $Y_1, \ldots, Y_n$ are independent:
+
+$$= \prod_{i=1}^{n} \mathbb{E}\!\left(\exp\!\left\{\frac{t}{\sqrt{n}} Y_i\right\}\right) 
+= \left[M_Y\!\left(\frac{t}{\sqrt{n}}\right)\right]^n$$
+
+This step uses independence in a critical way. Without it, the MGF does not 
+factor, and the proof breaks down.
+
+---
+
+## Step 3: Taylor Expand the MGF
+
+Expand $M_Y(s)$ in a Taylor series about $s = 0$:
+
+$$M_Y(s) = M_Y(0) + s\, M_Y'(0) + \frac{s^2}{2} M_Y''(0) + O(s^3)$$
+
+Recall that $M_Y(0) = 1$, $M_Y'(0) = \mathbb{E}(Y) = 0$, and 
+$M_Y''(0) = \mathbb{E}(Y^2) = \text{Var}(Y) = 1$. Therefore:
+
+$$M_Y(s) = 1 + \frac{s^2}{2} + O(s^3)$$
+
+Now substitute $s = t/\sqrt{n}$:
+
+$$M_Y\!\left(\frac{t}{\sqrt{n}}\right) = 1 + \frac{t^2}{2n} + O(n^{-3/2})$$
+
+---
+
+## Step 4: Take the Limit
+
+Substituting back:
+
+$$M_{Z_n}(t) = \left[1 + \frac{t^2}{2n} + O(n^{-3/2})\right]^n$$
+
+Using the standard limit: if $a_n \to a$ then $\left(1 + \dfrac{a_n}{n}\right)^n \to e^a$,
+
+$$M_{Z_n}(t) \to e^{t^2/2} \quad \text{as } n \to \infty \qquad \square$$
+
+Since $e^{t^2/2}$ is the MGF of $\mathcal{N}(0,1)$, we conclude 
+$Z_n \xrightarrow{d} \mathcal{N}(0,1)$.
+
+---
+
+## Conditions 
+
+**The proof requires three things:**
+
+1. **Existence of the MGF** near $t = 0$, so the Taylor expansion in Step 3 is valid.
+
+2. **Independence**, used in Step 2 to factor the joint expectation into a product.
+
+3. **Finite variance**, used in Step 3 to identify the $s^2/2$ coefficient.
+
+--
+
+**What the proof does not need:**
+
+Any specific distributional form for $X_i$. The shape of the parent distribution 
+completely disappears by Step 4. This is why the result is universal.
+
+--
+
+**Limitation.** The MGF need not exist for all distributions -- for example, 
+heavy-tailed distributions such as the Cauchy have no finite moments at all.  
+The rigorous general proof uses **characteristic functions** 
+$\varphi(t) = \mathbb{E}(e^{itX})$ instead, which always exist, and the 
+argument is identical in structure.
+
+---
+
+## Connection to Nonparametric Statistics
+
+The CLT will reappear throughout this course as the justification for 
+large-sample approximations to p-values in rank-based tests.
+
+For example:
+
+- The **Wilcoxon signed-rank statistic** $T^+$ has a known exact distribution 
+  under $H_0$, but for large $n$ we use a Normal approximation via the CLT.
+
+- The **Wilcoxon rank-sum statistic** $W$ similarly converges to Normal under $H_0$.
+
+- The **runs statistic** $R$ converges to Normal under the null of randomness.
+
+In each case, the CLT applies to a sum of (approximately) independent terms, 
+and the proof structure is the same as above.
+
+> Nonparametric methods often provide an alternative: **exact finite-sample 
+> results based on ranks**, which do not require the CLT at all. These exact 
+> results are one of the main advantages of nonparametric inference for 
+> small sample sizes.
