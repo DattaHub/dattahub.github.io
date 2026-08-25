@@ -6,11 +6,11 @@
 <script src="npstats_lec0_files/libs/quarto-html/tippy.umd.min.js"></script>
 <link href="npstats_lec0_files/libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="npstats_lec0_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="npstats_lec0_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.6.42">
+<link href="npstats_lec0_files/libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.8.25">
 
   <meta name="author" content="Jyotishka Datta">
-  <meta name="dcterms.date" content="2026-08-24">
+  <meta name="dcterms.date" content="2026-08-25">
   <title>Nonparametric Statistics</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -30,8 +30,9 @@
       vertical-align: middle;
     }
     /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
     pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
     pre > code.sourceCode > span:empty { height: 1.2em; }
     .sourceCode { overflow: visible; }
     code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -42,7 +43,7 @@
     }
     @media print {
     pre > code.sourceCode { white-space: pre-wrap; }
-    pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
     }
     pre.numberSource code
       { counter-reset: source-line 0; }
@@ -95,7 +96,7 @@
     code span.vs { color: #20794d; } /* VerbatimString */
     code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="npstats_lec0_files/libs/revealjs/dist/theme/quarto-2f366650f320edcfcf53d73c80250a32.css">
+  <link rel="stylesheet" href="npstats_lec0_files/libs/revealjs/dist/theme/quarto-534cd8e3a96973385dffff3f4709048d.css">
   <link href="npstats_lec0_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="npstats_lec0_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="npstats_lec0_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -210,7 +211,7 @@ Jyotishka Datta
     </div>
 </div>
 
-  <p class="date">2026-08-24</p>
+  <p class="date">2026-08-25</p>
 </section>
 <section id="about-me" class="slide level2">
 <h2>About Me</h2>
@@ -238,23 +239,10 @@ Jyotishka Datta
 <ol type="1">
 <li>Why nonparametric? Parametric vs.&nbsp;distribution-free inference; Pitman efficiency</li>
 <li>Permutation tests: the unifying idea behind most of what follows</li>
-<li>Bootstrap and resampling, confidence intervals, bootstrap hypothesis tests</li>
+<li>Simulation and resampling, basics of Monte Carlo, Bootstrap hypothesis tests</li>
 <li>Ranks and order statistics (just enough theory to understand what follows)</li>
 <li>One-sample and paired-sample tests: sign test, Wilcoxon signed-rank test</li>
 <li>Two-sample tests: Mann–Whitney, Wilcoxon rank-sum, and permutation-based alternatives</li>
-<li>Multiple-sample methods: Kruskal–Wallis and Friedman tests</li>
-</ol>
-</section>
-<section id="outline-of-this-course-part-ii" class="slide level2 scrollable">
-<h2>Outline of This Course — Part II</h2>
-<p><strong>More Advanced Topics</strong></p>
-<ol type="1">
-<li>Rank-based linear models — ranks inside <code>lm()</code>, Spearman and Kendall correlation</li>
-<li>Goodness-of-fit tests: KS, Lilliefors, Anderson–Darling</li>
-<li>Kernel Density Estimation and <span class="math inline">\(k\)</span>-nearest neighbors</li>
-<li>Bootstrap in depth : bootstrap in regression, the parametric bootstrap</li>
-<li>Survival Analysis: Kaplan–Meier estimator and log-rank test</li>
-<li>Implement all of the above in <code>R</code>, with and without packages</li>
 </ol>
 <div class="callout callout-note callout-titled callout-style-default">
 <div class="callout-body">
@@ -265,7 +253,31 @@ Jyotishka Datta
 <p><strong>Note</strong></p>
 </div>
 <div class="callout-content">
-<p>If you have taken CMDA 2006 with me, some of these will feel familiar, but the treatment will be faster and more theoretical throughout. This is only a tentative list of topics and may change to accommodate this class.</p>
+<p>If you have taken CMDA 2006 with me, some of these will feel familiar, but the treatment will be faster and more theoretical throughout. The two courses share some common material alongside topics unique to each. This is only a tentative list of topics and may change to accommodate this class.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="outline-of-this-course-part-ii" class="slide level2 scrollable">
+<h2>Outline of This Course — Part II</h2>
+<p><strong>More Advanced Topics</strong></p>
+<ol type="1">
+<li>Rank-based linear models — ranks inside <code>lm()</code>, Spearman and Kendall correlation</li>
+<li>Goodness-of-fit tests: KS, Lilliefors, Anderson–Darling</li>
+<li>Kernel Density Estimation and <span class="math inline">\(k\)</span>-nearest neighbors</li>
+<li>Survival Analysis: Kaplan–Meier estimator and log-rank test</li>
+</ol>
+<p>Implement all of the above in <code>R</code>, with and without packages</p>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>If you have taken CMDA 2006 with me, some of these will feel familiar, but the treatment will be faster and more theoretical throughout. The two courses share some common material alongside topics unique to each. This is only a tentative list of topics and may change to accommodate this class.</p>
 </div>
 </div>
 </div>
@@ -350,7 +362,7 @@ Jyotishka Datta
 <li>Extensions will <strong>not</strong> be granted. Assignments accepted up to 24 hours late with a 20% penalty.</li>
 <li>You may discuss assignments with others, but <strong>what you turn in must be your own work</strong>.</li>
 <li>No sharing of written work or solutions.</li>
-<li>We grade <strong>solutions, not answers</strong> — show your work. Answers without justification receive no credit.</li>
+<li>We grade <strong>solutions, not answers</strong>. Show your work. Answers without justification receive no credit.</li>
 <li>All homework will have one week to submit unless otherwise announced.</li>
 <li>The <strong>lowest homework grade</strong> will be dropped.</li>
 </ul>
@@ -376,12 +388,29 @@ Jyotishka Datta
 </div>
 </div>
 </section>
-<section id="some-references" class="slide level2 scrollable">
-<h2>Some References</h2>
+<section id="my-personal-take" class="slide level2">
+<h2>My personal take</h2>
+
+<img data-src="images/Screenshot%202026-08-06%20114704.png" alt="A slide for Terence Tao's talk: Mathematics and AI" class="r-stretch quarto-figure-center"><p class="caption">A slide for Terence Tao’s talk: Mathematics in the age of AI</p></section>
+<section id="my-personal-take-contd." class="slide level2">
+<h2>My personal take (contd.)</h2>
+
+<img data-src="images/Screenshot%202026-08-06%20114818.png" alt="Slide from Terence Tao's talk: Leiden declaration" class="r-stretch quarto-figure-center"><p class="caption">Slide from the same talk showing Leiden declaration (<a href="https://leidendeclaration.ai/" class="uri">https://leidendeclaration.ai/</a>)</p></section>
+<section id="goodharts-law" class="slide level2">
+<h2>Goodhart’s Law</h2>
+
+<img data-src="images/goodharts_law.avif" alt="An image showing Goodhart's Law" class="r-stretch quarto-figure-center"><p class="caption">Goodhart’s Law (Source: <a href="https://sketchplanations.com/goodharts-law" title="https://sketchplanations.com/goodharts-law">sketchplanation blog</a>)</p></section>
+<section id="back-to-logistics-references" class="slide level2 scrollable">
+<h2>Back to logistics: References</h2>
 <ul>
 <li>No required textbook. Following the lecture slides should be sufficient for tests.</li>
-<li>Primary reference for concepts and homework:<br>
-<strong>Nonparametric Statistical Inference, 5th ed.</strong> — Gibbons &amp; Chakraborti</li>
+<li>Optional:<br>
+
+<ol type="1">
+<li><em>Nonparametric Statistical Inference</em><strong>, 5th ed.</strong> Gibbons &amp; Chakraborti<br>
+</li>
+<li><em>Monty the Null Hippopotamus, Exploring Statistical Foundations Through Simulation,</em> Robert B. Gramacy. Chapman Hall/CRC.&nbsp;<a href="https://bobby.gramacy.com/hipp0/" class="uri">https://bobby.gramacy.com/hipp0/</a></li>
+</ol></li>
 <li>Other references:
 <ol type="1">
 <li>Higgins. <em>Introduction to Modern Nonparametric Statistics.</em></li>
@@ -415,13 +444,13 @@ Jyotishka Datta
 <section id="parametric-and-nonparametric-statistics" class="slide level2">
 <h2>Parametric and Nonparametric Statistics</h2>
 <ul>
-<li><strong>Parameter:</strong> A constant (usually unspecified) that characterises a population — broadly includes any description of population characteristics.</li>
+<li><strong>Parameter:</strong> A constant (usually unspecified) that characterizes a population: broadly includes any description of population characteristics.</li>
 <li><strong>Statistic:</strong> A function of observations that does not depend on unknown parameters.</li>
-<li><strong>Inference:</strong> Using statistics to infer something about the population — mainly estimation and hypothesis testing. What makes it <em>scientific</em> is the ability to make statements about accuracy or reliability.</li>
+<li><strong>Inference:</strong> Using statistics to infer something about the population: mainly estimation and hypothesis testing. What makes it <em>scientific</em> is the ability to make statements about accuracy or reliability.</li>
 </ul>
 <div class="fragment">
 <ul>
-<li>Some statistics are more popular than others, e.g.&nbsp;sample mean vs.&nbsp;median. <strong>Why?</strong></li>
+<li>Some statistics are more popular than others, e.g.&nbsp;sample mean vs. median. <strong>Why?</strong></li>
 </ul>
 </div>
 <div class="fragment">
@@ -536,8 +565,8 @@ Jyotishka Datta
 <h2>Tests Based on Normality</h2>
 <p>There is nothing exceptional about the <span class="math inline">\(z\)</span>-test.</p>
 <ul>
-<li>If <span class="math inline">\(\sigma^2\)</span> is unknown and estimated by <span class="math inline">\(S^2\)</span> → <strong><span class="math inline">\(t\)</span>-test</strong></li>
-<li>Single sample → <strong>paired <span class="math inline">\(t\)</span>-test</strong> → <strong>two-sample <span class="math inline">\(t\)</span>-test</strong> → <strong>ANOVA (<span class="math inline">\(K\)</span> samples)</strong></li>
+<li>If <span class="math inline">\(\sigma^2\)</span> is unknown and estimated by <span class="math inline">\(S^2\)</span> → <span class="math inline">\(t\)</span>-test</li>
+<li>Single sample → <strong>paired</strong> <span class="math inline">\(t\)</span>-test → <strong>two-sample</strong> <span class="math inline">\(t\)</span>-test → <strong>ANOVA (</strong><span class="math inline">\(K\)</span> samples)</li>
 </ul>
 <p>All of these are parametric tests that are:</p>
 <ul>
@@ -550,6 +579,10 @@ Jyotishka Datta
 <h2>Sample Size Requirements for Parametric Tests with Non-Normal Data</h2>
 <p>Parametric tests can still be used with non-normal data, given sufficient sample size:</p>
 <table class="caption-top">
+<colgroup>
+<col style="width: 42%">
+<col style="width: 57%">
+</colgroup>
 <thead>
 <tr class="header">
 <th>Parametric Analysis</th>
@@ -581,7 +614,7 @@ Jyotishka Datta
 <h2>Non-Parametric Methods</h2>
 <ul>
 <li>The main attraction: <strong>fewer assumptions</strong> about the underlying distribution.</li>
-<li><strong>Advantage:</strong> Robustness — inference remains valid under model misspecification.</li>
+<li><strong>Advantage:</strong> Robustness (inference remains valid under model misspecification.)</li>
 </ul>
 <div class="fragment">
 <ul>
@@ -598,7 +631,7 @@ Jyotishka Datta
 </div>
 <div class="fragment">
 <blockquote>
-<p>“The basic idea of nonparametric inference is to use data to infer an unknown quantity while making as few assumptions as possible.”</p>
+<p>“<em>The basic idea of nonparametric inference is to use data to infer an unknown quantity while making as few assumptions as possible.</em>”</p>
 </blockquote>
 </div>
 </section>
@@ -607,7 +640,7 @@ Jyotishka Datta
 <ul>
 <li>“Nonparametric” is actually a <strong>misnomer</strong>. A more accurate term: <strong>Distribution-Free Statistics</strong>.</li>
 <li>Some prefer the term <strong>infinite-dimensional inference</strong>.</li>
-<li>We will still estimate and test hypotheses about parameters — but the <strong>form of the distribution is not assumed</strong>.</li>
+<li>We will still estimate and test hypotheses about parameters but the <strong>form of the distribution is not assumed</strong>.</li>
 </ul>
 <div class="fragment">
 <ul>
@@ -627,7 +660,7 @@ Jyotishka Datta
 </section>
 <section id="the-first-nonparametric-test" class="slide level2">
 <h2>The First Nonparametric Test</h2>
-<p>These anecdotes are mainly from Sprent &amp; Smeeton’s book and <em>The Lady Tasting Tea</em> by David Salsburg.</p>
+<p>These anecdotes are mainly from Sprent &amp; Smeeton’s textbook and <em>The Lady Tasting Tea</em> by David Salsburg.</p>
 <p>The first chapter of the Book of Daniel records that on the orders of Nebuchadnezzar certain favoured children were to be specially fed on the king’s meat and wine for 3 years. Reluctant to defile himself with such luxuries, Daniel pleaded that he and three of his brethren be fed instead on pulse for 10 days. After that time the four were declared ‘fairer and fatter in flesh than all of the children which did eat the portion of the king’s meat’. This evidence was taken on commonsense grounds to prove the superiority of a diet of pulse.</p>
 <p>Although the biblical analysis is informal, it contains the seed of a nonparametric test.</p>
 </section>
@@ -635,7 +668,7 @@ Jyotishka Datta
 <h2>Early History</h2>
 <p><strong>John Arbuthnot (1710)</strong> observed that in each year from 1629 to 1710, the number of males christened in London exceeded the number of females. He used this to test whether the birth ratio was 1:1. (<strong>Binomial test?</strong>)</p>
 <p>Data: <a href="https://www.openintro.org/data/index.php?data=arbuthnot" class="uri">https://www.openintro.org/data/index.php?data=arbuthnot</a></p>
-<p><strong>Francis Galton (1892)</strong> developed a measure — which he called a “centissimal scale” — to assess agreement between patterns (categorical data) on corresponding fingertips on left and right hands.</p>
+<p><strong>Francis Galton (1892)</strong> developed a measure, which he called a “centissimal scale”, to assess agreement between patterns (categorical data) on corresponding fingertips on left and right hands.</p>
 <p><strong>Karl Pearson (1900)</strong> proposed the well-known <strong>chi-squared goodness-of-fit test</strong> for any discrete distribution.</p>
 <p><strong>C. Spearman (1904)</strong> defined the <strong>rank correlation coefficient</strong> that bears his name.</p>
 </section>
@@ -644,7 +677,7 @@ Jyotishka Datta
 <ul>
 <li><strong>Frank Wilcoxon</strong>, working at American Cyanamide in the 1940s, was frustrated by the sensitivity of <span class="math inline">\(t\)</span>-tests and ANOVA to outliers.</li>
 <li>He developed a nonparametric test that did not rely on distribution parameters, published in <strong>Biometrics (1945)</strong>.</li>
-<li>He reportedly submitted the paper hoping it would be rejected so referees could point out his mistakes — but it was accepted, because no such methods had existed before.</li>
+<li>He reportedly submitted the paper hoping it would be rejected so referees could point out his mistakes but it was accepted, because no such methods had existed before.</li>
 </ul>
 <div class="fragment">
 <ul>
@@ -657,7 +690,7 @@ Jyotishka Datta
 <section id="kolmogorov-and-smirnov" class="slide level2">
 <h2>Kolmogorov and Smirnov</h2>
 <ul>
-<li>In the <strong>1930s</strong>, Andrei <strong>Kolmogorov</strong> and his student <strong>Smirnov</strong> developed a different test for comparing two distributions — without using any parameters.</li>
+<li>In the <strong>1930s</strong>, Andrei <strong>Kolmogorov</strong> and his student <strong>Smirnov</strong> developed a different test for comparing two distributions without using any parameters.</li>
 <li>This is the <strong>KS test</strong>, which you will study in detail.</li>
 </ul>
 <p>Both tests allowed analysis <strong>without estimating distribution parameters</strong>, marking a shift in statistical methodology from Pearson’s era.</p>
@@ -701,9 +734,9 @@ Jyotishka Datta
 <li><strong>R.R. Bahadur and L.J. Jimmie Savage (1956)</strong> identified issues with outliers affecting nonparametric test reliability.</li>
 </ul>
 <blockquote>
-<p>“If outliers are <strong>rare and completely wrong observations</strong>, then nonparametric methods <strong>reduce their influence</strong> on the analysis. If outliers are <strong>part of a systemic contamination</strong> of the data, then shifting to nonparametric will <strong>make matters worse</strong>.”</p>
+<p>“<em>If outliers are <strong>rare and completely wrong observations</strong>, then nonparametric methods <strong>reduce their influence</strong> on the analysis. If outliers are <strong>part of a systemic contamination</strong> of the data, then shifting to nonparametric will <strong>make matters worse</strong>.</em>”</p>
 </blockquote>
-<p>I will describe the Bahadur–Savage result because it is striking and beautiful — but the mathematical tools needed to prove it are beyond the scope of this course.</p>
+<p>I will describe the Bahadur–Savage result because it is striking and beautiful but the mathematical tools needed to prove it are (unfortunately!) beyond the scope of this course.</p>
 </section>
 <section id="survival-analysis" class="slide level2">
 <h2>Survival Analysis</h2>
@@ -753,16 +786,16 @@ Jyotishka Datta
 </ul>
 </section></section>
 <section>
-<section id="parametric-vs.-nonparametric-details" class="title-slide slide level1 center" data-background-color="#861F41">
-<h1>Parametric vs.&nbsp;Nonparametric — Details</h1>
+<section id="parametric-vs.-nonparametric" class="title-slide slide level1 center" data-background-color="#861F41">
+<h1>Parametric vs.&nbsp;Nonparametric</h1>
 
 </section>
-<section id="parametric-inference-iq-example" class="slide level2">
-<h2>Parametric Inference — IQ Example</h2>
+<section id="parametric-inference-the-iq-example" class="slide level2">
+<h2>Parametric Inference: the IQ Example</h2>
 <p><strong>Example:</strong> Scores on a certain IQ test are normally distributed with <span class="math inline">\(\sigma^2 = 100\)</span>. Eighteen girls of similar age had scores:</p>
 <p><span class="math display">\[114,\ 81,\ 87,\ 114,\ 113,\ 87,\ 111,\ 89,\ 93,\ 108,\ 99,\ 93,\ 100,\ 95,\ 93,\ 95,\ 106,\ 108\]</span></p>
 <p><strong>Question:</strong> Is the mean IQ significantly greater than 100?</p>
-<p><strong><span class="math inline">\(H_0\)</span>:</strong> <span class="math inline">\(\mu = 100\)</span> <span class="math inline">\(\quad\)</span> <strong><span class="math inline">\(H_A\)</span>:</strong> <span class="math inline">\(\mu &gt; 100\)</span></p>
+<p><span class="math inline">\(H_0\)</span>: <span class="math inline">\(\mu = 100\)</span> <span class="math inline">\(\quad\)</span> <span class="math inline">\(H_A\)</span>: <span class="math inline">\(\mu &gt; 100\)</span></p>
 <p>→ Carry out a <span class="math inline">\(z\)</span>-test based on the normality assumption.</p>
 <p>Conclusions are valid <strong>as long as the assumptions are valid.</strong></p>
 </section>
@@ -789,7 +822,7 @@ Jyotishka Datta
 <ul>
 <li>In many applications, there is <strong>no prior knowledge</strong> of the underlying distribution.</li>
 <li>If parametric assumptions are violated, parametric test procedures can give <strong>misleading or wrong results</strong>.</li>
-<li>For studies with <strong>small sample sizes (<span class="math inline">\(n \leq 30\)</span>)</strong>, Normal approximations do not work well.</li>
+<li>For studies with <strong>small sample sizes (</strong><span class="math inline">\(n \leq 30\)</span>), Normal approximations do not work well.</li>
 </ul>
 <div class="fragment">
 <ul>
@@ -820,18 +853,21 @@ Jyotishka Datta
 <section id="simplest-method-the-sign-test" class="slide level2 scrollable">
 <h2>Simplest Method: The Sign Test</h2>
 <ul>
-<li>With correct assumptions (e.g.&nbsp;normality), parametric methods are more efficient — but often not by as much as you’d think.<sup>1</sup></li>
-<li>Many nonparametric methods convert raw values to <strong>ranks</strong> and analyse those — which can be “wasteful” if a valid parametric alternative exists.</li>
+<li>With correct assumptions (e.g.&nbsp;normality), parametric methods are more efficient but often not by as much as you’d think.<sup>1</sup></li>
+<li>Many nonparametric methods convert raw values to <strong>ranks</strong> and analyse those which can be “wasteful” if a valid parametric alternative exists.</li>
 </ul>
 <p><strong>The simplest nonparametric test: Sign test</strong></p>
-<p>For the IQ scores of 18 girls (median = 100), roughly half of them should lie above 100 and half below — if the true median is 100.</p>
+<p>For the IQ scores of 18 girls (median = 100), roughly half of them should lie above 100 and half below if the true median is 100.</p>
 <ul>
 <li>Let <span class="math inline">\(K_{100}\)</span> = number of observations <strong>above</strong> 100.</li>
-<li><strong>If <span class="math inline">\(K_{100}\)</span> is too high or too low, the median is away from 100.</strong></li>
+<li><strong>If</strong> <span class="math inline">\(K_{100}\)</span> is too high or too low, the median is away from
+<ol start="100" type="1">
+<li></li>
+</ol></li>
 </ul>
 <aside><ol class="aside-footnotes"><li id="fn1"><p>The large-sample efficiency of the Wilcoxon test vs.&nbsp;<span class="math inline">\(t\)</span>-test is <span class="math inline">\(3/\pi \approx 0.955\)</span>.</p></li></ol></aside></section>
 <section id="sign-test-calculation" class="slide level2 smaller">
-<h2>Sign Test — Calculation</h2>
+<h2>Sign Test – Calculation</h2>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -922,7 +958,7 @@ Jyotishka Datta
 </div>
 <div class="fragment">
 <p>Calculate the probability of observing 7 or fewer heads in 18 tosses of a fair coin — or just use R:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="fu">binom.test</span>(<span class="dv">7</span>, <span class="dv">18</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="fu">binom.test</span>(<span class="dv">7</span>, <span class="dv">18</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="sign-test-r-output" class="slide level2">
@@ -940,7 +976,7 @@ probability of success
              0.3888889</code></pre>
 <ul>
 <li>P-value = <span class="math inline">\(P(\text{successes} \leq 7 \mid H_0\text{: Median IQ} = 100) = 0.4807\)</span></li>
-<li>We <strong>fail to reject <span class="math inline">\(H_0\)</span></strong>: not enough evidence of a difference.</li>
+<li>We <strong>fail to reject</strong> <span class="math inline">\(H_0\)</span>: not enough evidence of a difference.</li>
 <li>The sign test is intuitive enough that anyone can understand the idea — we will revisit it in more detail.</li>
 </ul>
 </section>
@@ -948,8 +984,8 @@ probability of success
 <h2>Parametric Inference (Arbuthnot Example)</h2>
 <p><strong>Example:</strong> John Arbuthnot (1710) recorded the number of male and female christenings in London for each year from 1629 to 1710. The data are available at: <a href="https://www.openintro.org/data/index.php?data=arbuthnot" class="uri">https://www.openintro.org/data/index.php?data=arbuthnot</a></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a>arbuthnot <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"https://www.openintro.org/data/csv/arbuthnot.csv"</span>)</span>
-<span id="cb3-2"><a href=""></a><span class="fu">head</span>(arbuthnot)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a>arbuthnot <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"https://www.openintro.org/data/csv/arbuthnot.csv"</span>)</span>
+<span id="cb3-2"><a href=""></a><span class="fu">head</span>(arbuthnot)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  year boys girls
 1 1629 5218  4683
@@ -988,9 +1024,9 @@ probability of success
 <li>We can use a <strong>sign test</strong> — or equivalently, an exact binomial test:</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a>arbuthnot <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"https://www.openintro.org/data/csv/arbuthnot.csv"</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a>arbuthnot <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"https://www.openintro.org/data/csv/arbuthnot.csv"</span>)</span>
 <span id="cb5-2"><a href=""></a>K <span class="ot">&lt;-</span> <span class="fu">sum</span>(arbuthnot<span class="sc">$</span>boys <span class="sc">&gt;</span> arbuthnot<span class="sc">$</span>girls)</span>
-<span id="cb5-3"><a href=""></a><span class="fu">binom.test</span>(K, <span class="fu">nrow</span>(arbuthnot), <span class="at">alternative =</span> <span class="st">"greater"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-3"><a href=""></a><span class="fu">binom.test</span>(K, <span class="fu">nrow</span>(arbuthnot), <span class="at">alternative =</span> <span class="st">"greater"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
     Exact binomial test
@@ -1013,7 +1049,7 @@ probability of success
 </div>
 <div class="fragment">
 <div class="r-fit-text">
-<p><strong>Answer:</strong> It completely ignores the <strong>actual magnitudes</strong> — low power (inefficient)!</p>
+<p><strong>Answer:</strong> It completely ignores the <strong>actual magnitudes</strong>: might result in low power (inefficient)!</p>
 </div>
 </div>
 </section>
@@ -1021,8 +1057,8 @@ probability of success
 <h2>Parametric Tests and Their Nonparametric Alternatives</h2>
 <table class="caption-top">
 <colgroup>
-<col style="width: 39%">
-<col style="width: 60%">
+<col style="width: 40%">
+<col style="width: 59%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1057,10 +1093,10 @@ probability of success
 <section id="other-nonparametric-methods" class="slide level2">
 <h2>Other Nonparametric Methods</h2>
 <ul>
-<li><p>Most of these methods are very simple — in fact you can often derive them by <strong>replacing an observation with its rank</strong> (either within its own sample or a pooled sample).</p></li>
-<li><p>I will show how many of these methods can be derived using ideas from <strong>linear regression</strong> — via the simple <code>lm()</code> function in R — after we have understood them as standalone methods.</p></li>
-<li><p>Some popular nonparametric procedures are <strong>not alternatives</strong> but standalone tools — for example, the <strong>Bootstrap</strong>, which we will learn later.</p></li>
-<li><p>There are also more advanced methods I won’t be able to cover: nonparametric regression, wavelets, nonparametric Bayes (e.g.&nbsp;Dirichlet processes).</p></li>
+<li><p>Most of these methods are very simple, in fact you can often derive them by <strong>replacing an observation with its rank</strong> (either within its own sample or a pooled sample).</p></li>
+<li><p>I will show how many of these methods can be derived using ideas from <strong>linear regression</strong> via the simple <code>lm()</code> function in R after we have understood them as standalone methods.</p></li>
+<li><p>Some popular nonparametric procedures are <strong>not alternatives</strong> but standalone tools. For example, the <strong>Bootstrap</strong>, which we will learn later.</p></li>
+<li><p>There are also more advanced methods I won’t be able to cover: nonparametric regression, wavelets, nonparametric Bayes (e.g. Dirichlet processes).</p></li>
 </ul>
 </section>
 <section id="reasons-to-use-nonparametric-vs.-parametric-methods" class="slide level2 scrollable">
@@ -1086,19 +1122,16 @@ probability of success
 </section>
 <section id="whats-next" class="slide level2">
 <h2>What’s Next</h2>
-<div class="fragment">
-<p>Please also fill out the <strong>survey about your R background</strong> on Canvas.</p>
-</div>
 </section>
-<section class="slide level2">
-
+<section id="please-also-fill-out-the-survey-about-your-r-background-on-canvas." class="slide level2">
+<h2>Please also fill out the <strong>survey about your R background</strong> on Canvas.</h2>
 
 </section></section>
 
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">
-<p>STAT 3504 — Virginia Tech | Jyotishka Datta</p>
+<p>STAT 3504 | Virginia Tech | Jyotishka Datta</p>
 </div>
 </div></div>
 
@@ -1389,190 +1422,173 @@ probability of success
     
 
     <script id="quarto-html-after-body" type="application/javascript">
-    window.document.addEventListener("DOMContentLoaded", function (event) {
-      const toggleBodyColorMode = (bsSheetEl) => {
-        const mode = bsSheetEl.getAttribute("data-mode");
-        const bodyEl = window.document.querySelector("body");
-        if (mode === "dark") {
-          bodyEl.classList.add("quarto-dark");
-          bodyEl.classList.remove("quarto-light");
-        } else {
-          bodyEl.classList.add("quarto-light");
-          bodyEl.classList.remove("quarto-dark");
-        }
-      }
-      const toggleBodyColorPrimary = () => {
-        const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
-        if (bsSheetEl) {
-          toggleBodyColorMode(bsSheetEl);
-        }
-      }
-      toggleBodyColorPrimary();  
-      const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
-      tabsets.forEach(function(tabset) {
-        const tabby = new Tabby('#' + tabset.id);
-      });
-      const isCodeAnnotation = (el) => {
-        for (const clz of el.classList) {
-          if (clz.startsWith('code-annotation-')) {                     
-            return true;
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {                     
+              return true;
+            }
           }
+          return false;
         }
-        return false;
-      }
-      const onCopySuccess = function(e) {
-        // button target
-        const button = e.trigger;
-        // don't keep focus
-        button.blur();
-        // flash "checked"
-        button.classList.add('code-copy-button-checked');
-        var currentTitle = button.getAttribute("title");
-        button.setAttribute("title", "Copied!");
-        let tooltip;
-        if (window.bootstrap) {
-          button.setAttribute("data-bs-toggle", "tooltip");
-          button.setAttribute("data-bs-placement", "left");
-          button.setAttribute("data-bs-title", "Copied!");
-          tooltip = new bootstrap.Tooltip(button, 
-            { trigger: "manual", 
-              customClass: "code-copy-button-tooltip",
-              offset: [0, -8]});
-          tooltip.show();    
-        }
-        setTimeout(function() {
-          if (tooltip) {
-            tooltip.hide();
-            button.removeAttribute("data-bs-title");
-            button.removeAttribute("data-bs-toggle");
-            button.removeAttribute("data-bs-placement");
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copied!");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copied!");
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();    
           }
-          button.setAttribute("title", currentTitle);
-          button.classList.remove('code-copy-button-checked');
-        }, 1000);
-        // clear code selection
-        e.clearSelection();
-      }
-      const getTextToCopy = function(trigger) {
-          const codeEl = trigger.previousElementSibling.cloneNode(true);
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+          const outerScaffold = trigger.parentElement.cloneNode(true);
+          const codeEl = outerScaffold.querySelector('code');
           for (const childEl of codeEl.children) {
             if (isCodeAnnotation(childEl)) {
               childEl.remove();
             }
           }
           return codeEl.innerText;
-      }
-      const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-        text: getTextToCopy
-      });
-      clipboard.on('success', onCopySuccess);
-      if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-        const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-          text: getTextToCopy,
-          container: window.document.getElementById('quarto-embedded-source-code-modal')
-        });
-        clipboardModal.on('success', onCopySuccess);
-      }
-        var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-        var mailtoRegex = new RegExp(/^mailto:/);
-          var filterRegex = new RegExp('/' + window.location.host + '/');
-        var isInternal = (href) => {
-            return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
         }
-        // Inspect non-navigation links and adorn them if external
-     	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-        for (var i=0; i<links.length; i++) {
-          const link = links[i];
-          if (!isInternal(link.href)) {
-            // undo the damage that might have been done by quarto-nav.js in the case of
-            // links that we want to consider external
-            if (link.dataset.originalHref !== undefined) {
-              link.href = link.dataset.originalHref;
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp('/' + window.location.host + '/');
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+          }
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
             }
           }
-        }
-      function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-        const config = {
-          allowHTML: true,
-          maxWidth: 500,
-          delay: 100,
-          arrow: false,
-          appendTo: function(el) {
-              return el.closest('section.slide') || el.parentElement;
-          },
-          interactive: true,
-          interactiveBorder: 10,
-          theme: 'light-border',
-          placement: 'bottom-start',
-        };
-        if (contentFn) {
-          config.content = contentFn;
-        }
-        if (onTriggerFn) {
-          config.onTrigger = onTriggerFn;
-        }
-        if (onUntriggerFn) {
-          config.onUntrigger = onUntriggerFn;
-        }
-          config['offset'] = [0,0];
-          config['maxWidth'] = 700;
-        window.tippy(el, config); 
-      }
-      const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-      for (var i=0; i<noterefs.length; i++) {
-        const ref = noterefs[i];
-        tippyHover(ref, function() {
-          // use id or data attribute instead here
-          let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-          try { href = new URL(href).hash; } catch {}
-          const id = href.replace(/^#\/?/, "");
-          const note = window.document.getElementById(id);
-          if (note) {
-            return note.innerHTML;
-          } else {
-            return "";
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
           }
-        });
-      }
-      const findCites = (el) => {
-        const parentEl = el.parentElement;
-        if (parentEl) {
-          const cites = parentEl.dataset.cites;
-          if (cites) {
-            return {
-              el,
-              cites: cites.split(' ')
-            };
-          } else {
-            return findCites(el.parentElement)
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
           }
-        } else {
-          return undefined;
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config); 
         }
-      };
-      var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-      for (var i=0; i<bibliorefs.length; i++) {
-        const ref = bibliorefs[i];
-        const citeInfo = findCites(ref);
-        if (citeInfo) {
-          tippyHover(citeInfo.el, function() {
-            var popup = window.document.createElement('div');
-            citeInfo.cites.forEach(function(cite) {
-              var citeDiv = window.document.createElement('div');
-              citeDiv.classList.add('hanging-indent');
-              citeDiv.classList.add('csl-entry');
-              var biblioDiv = window.document.getElementById('ref-' + cite);
-              if (biblioDiv) {
-                citeDiv.innerHTML = biblioDiv.innerHTML;
-              }
-              popup.appendChild(citeDiv);
-            });
-            return popup.innerHTML;
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
           });
         }
-      }
-    });
-    </script>
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
+            }
+          } else {
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
+            });
+          }
+        }
+      });
+      </script>
     
 
 </body></html>
