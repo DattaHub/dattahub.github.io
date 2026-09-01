@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Jyotishka Datta">
+
+<title>Tests of Randomness: The Runs Test</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="runs-test-lecture-notes_files/libs/clipboard/clipboard.min.js"></script>
+<script src="runs-test-lecture-notes_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="runs-test-lecture-notes_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="runs-test-lecture-notes_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="runs-test-lecture-notes_files/libs/quarto-html/popper.min.js"></script>
+<script src="runs-test-lecture-notes_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="runs-test-lecture-notes_files/libs/quarto-html/anchor.min.js"></script>
+<link href="runs-test-lecture-notes_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="runs-test-lecture-notes_files/libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="runs-test-lecture-notes_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="runs-test-lecture-notes_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="runs-test-lecture-notes_files/libs/bootstrap/bootstrap-4d7f0bce1131f3e5f9547cd857cfbfc8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="runs-test-lecture-notes_files/libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+
+<script src="runs-test-lecture-notes_files/libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+<style>
+:root { --vt-maroon: #861F41; --vt-orange: #E5751F; }
+h1, h2, h3 { color: var(--vt-maroon); }
+.callout-important { border-left-color: var(--vt-orange); }
+</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-test-randomness" id="toc-why-test-randomness" class="nav-link active" data-scroll-target="#why-test-randomness"><span class="header-section-number">1</span> Why test randomness?</a></li>
+  <li><a href="#runs-in-a-binary-sequence" id="toc-runs-in-a-binary-sequence" class="nav-link" data-scroll-target="#runs-in-a-binary-sequence"><span class="header-section-number">2</span> Runs in a binary sequence</a></li>
+  <li><a href="#hypotheses-and-null-model" id="toc-hypotheses-and-null-model" class="nav-link" data-scroll-target="#hypotheses-and-null-model"><span class="header-section-number">3</span> Hypotheses and null model</a></li>
+  <li><a href="#exact-null-distribution" id="toc-exact-null-distribution" class="nav-link" data-scroll-target="#exact-null-distribution"><span class="header-section-number">4</span> Exact null distribution</a>
+  <ul class="collapse">
+  <li><a href="#why-the-formulas-have-this-form" id="toc-why-the-formulas-have-this-form" class="nav-link" data-scroll-target="#why-the-formulas-have-this-form"><span class="header-section-number">4.1</span> Why the formulas have this form</a></li>
+  </ul></li>
+  <li><a href="#mean-and-variance-under-randomness" id="toc-mean-and-variance-under-randomness" class="nav-link" data-scroll-target="#mean-and-variance-under-randomness"><span class="header-section-number">5</span> Mean and variance under randomness</a>
+  <ul class="collapse">
+  <li><a href="#optional-continuity-correction" id="toc-optional-continuity-correction" class="nav-link" data-scroll-target="#optional-continuity-correction"><span class="header-section-number">5.1</span> Optional continuity correction</a></li>
+  </ul></li>
+  <li><a href="#a-complete-hand-calculation" id="toc-a-complete-hand-calculation" class="nav-link" data-scroll-target="#a-complete-hand-calculation"><span class="header-section-number">6</span> A complete hand calculation</a></li>
+  <li><a href="#base-r-implementation" id="toc-base-r-implementation" class="nav-link" data-scroll-target="#base-r-implementation"><span class="header-section-number">7</span> Base-R implementation</a>
+  <ul class="collapse">
+  <li><a href="#a-note-on-two-sided-exact-p-values" id="toc-a-note-on-two-sided-exact-p-values" class="nav-link" data-scroll-target="#a-note-on-two-sided-exact-p-values"><span class="header-section-number">7.1</span> A note on two-sided exact p-values</a></li>
+  </ul></li>
+  <li><a href="#visualizing-runs" id="toc-visualizing-runs" class="nav-link" data-scroll-target="#visualizing-runs"><span class="header-section-number">8</span> Visualizing runs</a></li>
+  <li><a href="#simulating-the-null-distribution" id="toc-simulating-the-null-distribution" class="nav-link" data-scroll-target="#simulating-the-null-distribution"><span class="header-section-number">9</span> Simulating the null distribution</a></li>
+  <li><a href="#contrasting-three-sequences" id="toc-contrasting-three-sequences" class="nav-link" data-scroll-target="#contrasting-three-sequences"><span class="header-section-number">10</span> Contrasting three sequences</a></li>
+  <li><a href="#continuous-observations-dichotomizing-at-a-threshold" id="toc-continuous-observations-dichotomizing-at-a-threshold" class="nav-link" data-scroll-target="#continuous-observations-dichotomizing-at-a-threshold"><span class="header-section-number">11</span> Continuous observations: dichotomizing at a threshold</a>
+  <ul class="collapse">
+  <li><a href="#ties-at-the-threshold" id="toc-ties-at-the-threshold" class="nav-link" data-scroll-target="#ties-at-the-threshold"><span class="header-section-number">11.1</span> Ties at the threshold</a></li>
+  </ul></li>
+  <li><a href="#using-an-r-package" id="toc-using-an-r-package" class="nav-link" data-scroll-target="#using-an-r-package"><span class="header-section-number">12</span> Using an R package</a></li>
+  <li><a href="#relationship-to-the-two-sample-waldwolfowitz-test" id="toc-relationship-to-the-two-sample-waldwolfowitz-test" class="nav-link" data-scroll-target="#relationship-to-the-two-sample-waldwolfowitz-test"><span class="header-section-number">13</span> Relationship to the two-sample Wald–Wolfowitz test</a></li>
+  <li><a href="#what-the-test-detects" id="toc-what-the-test-detects" class="nav-link" data-scroll-target="#what-the-test-detects"><span class="header-section-number">14</span> What the test detects</a></li>
+  <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations"><span class="header-section-number">15</span> Limitations</a></li>
+  <li><a href="#recommended-reporting" id="toc-recommended-reporting" class="nav-link" data-scroll-target="#recommended-reporting"><span class="header-section-number">16</span> Recommended reporting</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">17</span> Summary</a></li>
+  <li><a href="#practice-problems" id="toc-practice-problems" class="nav-link" data-scroll-target="#practice-problems"><span class="header-section-number">18</span> Practice problems</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Tests of Randomness: The Runs Test</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+<p class="subtitle lead">Lecture notes for STAT 3504</p>
+</div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author">Jyotishka Datta </p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            Virginia Tech
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-test-randomness" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Why test randomness?</h1>
+<p>Many methods begin with an assumption that observations arrive in a random order or are serially independent. A dataset can have a reasonable histogram and still contain a strong sequential pattern.</p>
+<p>Examples include:</p>
+<ul>
+<li>winning and losing days for a stock;</li>
+<li>defective and nondefective items on a production line;</li>
+<li>treatment successes and failures over time;</li>
+<li>measurements above and below a target;</li>
+<li>residuals from a fitted model.</li>
+</ul>
+<p>A <strong>runs test</strong> asks whether the ordering contains too much clustering or too much alternation to be compatible with randomness.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A runs test is about <strong>order</strong>. If the observations are shuffled, their numerical values do not change, but the number of runs usually does.</p>
+</div>
+</div>
+</section>
+<section id="runs-in-a-binary-sequence" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Runs in a binary sequence</h1>
+<p>A <strong>run</strong> is a maximal consecutive block of identical symbols.</p>
+<p>For example,</p>
+<p><span class="math display">\[
++\,+\,+\;-\,-\;+\;-\,-\,-\;+\,+
+\]</span></p>
+<p>has the five runs</p>
+<p><span class="math display">\[
+(+++)\quad(--)\quad(+)\quad(---)\quad(++).
+\]</span></p>
+<p>Let</p>
+<ul>
+<li><span class="math inline">\(n_1\)</span> be the number of symbols of type 1 (for example, <span class="math inline">\(+\)</span>);</li>
+<li><span class="math inline">\(n_2\)</span> be the number of symbols of type 2 (for example, <span class="math inline">\(-\)</span>);</li>
+<li><span class="math inline">\(n=n_1+n_2\)</span>;</li>
+<li><span class="math inline">\(R\)</span> be the total number of runs.</li>
+</ul>
+<p>Interpretation:</p>
+<ul>
+<li>unusually <strong>small</strong> <span class="math inline">\(R\)</span>: clustering or positive serial association;</li>
+<li>unusually <strong>large</strong> <span class="math inline">\(R\)</span>: alternation or negative serial association;</li>
+<li>moderate <span class="math inline">\(R\)</span>: compatible with random ordering.</li>
+</ul>
+</section>
+<section id="hypotheses-and-null-model" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Hypotheses and null model</h1>
+<p>For the one-sample binary runs test, the null hypothesis is</p>
+<p><span class="math display">\[
+H_0:\text{ conditional on }n_1\text{ and }n_2,\text{ every ordering is equally likely.}
+\]</span></p>
+<p>Common alternatives are:</p>
+<ul>
+<li>lower-tailed: the sequence is clustered, so <span class="math inline">\(R\)</span> is too small;</li>
+<li>upper-tailed: the sequence alternates too often, so <span class="math inline">\(R\)</span> is too large;</li>
+<li>two-sided: the ordering is nonrandom in either direction.</li>
+</ul>
+<p>Conditioning on <span class="math inline">\(n_1\)</span> and <span class="math inline">\(n_2\)</span> is important. Under <span class="math inline">\(H_0\)</span>, there are</p>
+<p><span class="math display">\[
+\binom{n}{n_1}
+\]</span></p>
+<p>possible binary orderings, each with the same probability.</p>
+</section>
+<section id="exact-null-distribution" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Exact null distribution</h1>
+<p>The exact distribution depends only on <span class="math inline">\(n_1\)</span> and <span class="math inline">\(n_2\)</span>.</p>
+<p>For an even number of runs, <span class="math inline">\(R=2k\)</span>,</p>
+<p><span class="math display">\[
+P(R=2k)
+=
+\frac{2\binom{n_1-1}{k-1}\binom{n_2-1}{k-1}}
+{\binom{n}{n_1}}.
+\]</span></p>
+<p>For an odd number of runs, <span class="math inline">\(R=2k+1\)</span>,</p>
+<p><span class="math display">\[
+P(R=2k+1)
+=
+\frac{
+\binom{n_1-1}{k}\binom{n_2-1}{k-1}
++
+\binom{n_1-1}{k-1}\binom{n_2-1}{k}
+}
+{\binom{n}{n_1}}.
+\]</span></p>
+<p>The possible values satisfy</p>
+<p><span class="math display">\[
+2\le R\le
+\begin{cases}
+2\min(n_1,n_2)+1, &amp; n_1\ne n_2,\\
+2n_1, &amp; n_1=n_2.
+\end{cases}
+\]</span></p>
+<p>If one symbol never occurs, then <span class="math inline">\(R=1\)</span> and no meaningful two-symbol runs test is possible.</p>
+<section id="why-the-formulas-have-this-form" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="why-the-formulas-have-this-form"><span class="header-section-number">4.1</span> Why the formulas have this form</h2>
+<p>Suppose <span class="math inline">\(R=2k\)</span>. The sequence must start with one symbol and end with the other, so each symbol forms exactly <span class="math inline">\(k\)</span> positive-length blocks. Splitting <span class="math inline">\(n_1\)</span> objects into <span class="math inline">\(k\)</span> nonempty blocks can be done in</p>
+<p><span class="math display">\[
+\binom{n_1-1}{k-1}
+\]</span></p>
+<p>ways, and similarly for the second symbol. The factor <span class="math inline">\(2\)</span> chooses which symbol starts the sequence.</p>
+<p>For <span class="math inline">\(R=2k+1\)</span>, the sequence starts and ends with the same symbol. One symbol has <span class="math inline">\(k+1\)</span> blocks and the other has <span class="math inline">\(k\)</span> blocks; the two terms correspond to which symbol has the extra block.</p>
+</section>
+</section>
+<section id="mean-and-variance-under-randomness" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Mean and variance under randomness</h1>
+<p>Under <span class="math inline">\(H_0\)</span>,</p>
+<p><span class="math display">\[
+E(R)=\mu_R=1+\frac{2n_1n_2}{n},
+\]</span></p>
+<p>and</p>
+<p><span class="math display">\[
+\operatorname{Var}(R)=\sigma_R^2
+=
+\frac{2n_1n_2\left(2n_1n_2-n\right)}
+{n^2(n-1)}.
+\]</span></p>
+<p>For sufficiently large <span class="math inline">\(n_1\)</span> and <span class="math inline">\(n_2\)</span>,</p>
+<p><span class="math display">\[
+Z=\frac{R-\mu_R}{\sigma_R}
+\mathrel{\dot\sim}N(0,1).
+\]</span></p>
+<p>A common classroom guideline is to prefer the exact distribution when either group is small and to regard the Normal approximation as comfortable when both <span class="math inline">\(n_1\)</span> and <span class="math inline">\(n_2\)</span> exceed about <span class="math inline">\(10\)</span>. This is a rule of thumb, not a theorem.</p>
+<section id="optional-continuity-correction" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="optional-continuity-correction"><span class="header-section-number">5.1</span> Optional continuity correction</h2>
+<p>Since <span class="math inline">\(R\)</span> is discrete, a continuity correction may be used:</p>
+<p><span class="math display">\[
+Z_{\mathrm{cc}}=
+\begin{cases}
+\dfrac{R+0.5-\mu_R}{\sigma_R}, &amp; R&lt;\mu_R,\\[8pt]
+\dfrac{R-0.5-\mu_R}{\sigma_R}, &amp; R&gt;\mu_R,\\[8pt]
+0, &amp; R=\mu_R.
+\end{cases}
+\]</span></p>
+<p>Software packages differ in whether they use a correction. Consequently, two implementations can report slightly different large-sample p-values.</p>
+</section>
+</section>
+<section id="a-complete-hand-calculation" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> A complete hand calculation</h1>
+<p>Consider the sequence of stock-market directions over <span class="math inline">\(20\)</span> days:</p>
+<p><span class="math display">\[
+U\,U\,D\,D\,D\,U\,U\,U\,D\,U\,D\,D\,U\,U\,U\,U\,D\,D\,U\,D.
+\]</span></p>
+<p>The run decomposition is</p>
+<p><span class="math display">\[
+(UU)(DDD)(UUU)(D)(U)(DD)(UUUU)(DD)(U)(D),
+\]</span></p>
+<p>so</p>
+<p><span class="math display">\[
+R=10,\qquad n_1=11,\qquad n_2=9,\qquad n=20.
+\]</span></p>
+<p>The null mean and standard deviation are</p>
+<p><span class="math display">\[
+\mu_R=1+\frac{2(11)(9)}{20}=10.9,
+\]</span></p>
+<p><span class="math display">\[
+\sigma_R
+=
+\sqrt{
+\frac{2(11)(9)\{2(11)(9)-20\}}
+{20^2(19)}
+}
+\approx2.1535.
+\]</span></p>
+<p>Without continuity correction,</p>
+<p><span class="math display">\[
+Z=\frac{10-10.9}{2.1535}\approx-0.4179,
+\]</span></p>
+<p>which gives a two-sided Normal p-value of approximately <span class="math inline">\(0.676\)</span>. There is no evidence here of a nonrandom ordering.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>seq_raw <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"U"</span>,<span class="st">"U"</span>,<span class="st">"D"</span>,<span class="st">"D"</span>,<span class="st">"D"</span>,<span class="st">"U"</span>,<span class="st">"U"</span>,<span class="st">"U"</span>,<span class="st">"D"</span>,<span class="st">"U"</span>,</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>             <span class="st">"D"</span>,<span class="st">"D"</span>,<span class="st">"U"</span>,<span class="st">"U"</span>,<span class="st">"U"</span>,<span class="st">"U"</span>,<span class="st">"D"</span>,<span class="st">"D"</span>,<span class="st">"U"</span>,<span class="st">"D"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>n1 <span class="ot">&lt;-</span> <span class="fu">sum</span>(seq_raw <span class="sc">==</span> <span class="st">"U"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>n2 <span class="ot">&lt;-</span> <span class="fu">sum</span>(seq_raw <span class="sc">==</span> <span class="st">"D"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>n  <span class="ot">&lt;-</span> n1 <span class="sc">+</span> n2</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>R  <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">rle</span>(seq_raw)<span class="sc">$</span>lengths)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>mu_R <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span>n1<span class="sc">*</span>n2<span class="sc">/</span>n</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>var_R <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">*</span>n1<span class="sc">*</span>n2<span class="sc">*</span>(<span class="dv">2</span><span class="sc">*</span>n1<span class="sc">*</span>n2 <span class="sc">-</span> n)<span class="sc">/</span>(n<span class="sc">^</span><span class="dv">2</span><span class="sc">*</span>(n <span class="sc">-</span> <span class="dv">1</span>))</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>sd_R <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(var_R)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> (R <span class="sc">-</span> mu_R)<span class="sc">/</span>sd_R</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>p_normal <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">*</span><span class="fu">pnorm</span>(<span class="sc">-</span><span class="fu">abs</span>(z))</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">n1 =</span> n1, <span class="at">n2 =</span> n2, <span class="at">runs =</span> R,</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">expected_runs =</span> mu_R, <span class="at">sd_runs =</span> sd_R,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">z =</span> z, <span class="at">p_value =</span> p_normal)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>           n1            n2          runs expected_runs       sd_runs 
+   11.0000000     9.0000000    10.0000000    10.9000000     2.1534550 
+            z       p_value 
+   -0.4179330     0.6759961 </code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The variance denominator is <span class="math inline">\(n^2(n-1)\)</span>. Writing the algebra incorrectly can produce an impossible standard deviation larger than the entire range of <span class="math inline">\(R\)</span>.</p>
+</div>
+</div>
+</section>
+<section id="base-r-implementation" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Base-R implementation</h1>
+<p>The following functions count runs, compute the exact null distribution, and perform exact or Normal tests without requiring an external package.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>count_runs <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(x) <span class="sc">==</span> <span class="dv">0</span>) <span class="fu">return</span>(<span class="dv">0</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span> <span class="sc">+</span> <span class="fu">sum</span>(x[<span class="sc">-</span><span class="dv">1</span>] <span class="sc">!=</span> x[<span class="sc">-</span><span class="fu">length</span>(x)])</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>runs_moments <span class="ot">&lt;-</span> <span class="cf">function</span>(n1, n2) {</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> n1 <span class="sc">+</span> n2</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (n1 <span class="sc">&lt;</span> <span class="dv">1</span> <span class="sc">||</span> n2 <span class="sc">&lt;</span> <span class="dv">1</span>) <span class="fu">stop</span>(<span class="st">"Both symbol types must occur."</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span>n1<span class="sc">*</span>n2<span class="sc">/</span>n</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  variance <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">*</span>n1<span class="sc">*</span>n2<span class="sc">*</span>(<span class="dv">2</span><span class="sc">*</span>n1<span class="sc">*</span>n2 <span class="sc">-</span> n)<span class="sc">/</span>(n<span class="sc">^</span><span class="dv">2</span><span class="sc">*</span>(n <span class="sc">-</span> <span class="dv">1</span>))</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">mean =</span> mu, <span class="at">variance =</span> variance, <span class="at">sd =</span> <span class="fu">sqrt</span>(variance))</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>runs_pmf <span class="ot">&lt;-</span> <span class="cf">function</span>(n1, n2) {</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (n1 <span class="sc">&lt;</span> <span class="dv">1</span> <span class="sc">||</span> n2 <span class="sc">&lt;</span> <span class="dv">1</span>) <span class="fu">stop</span>(<span class="st">"Both symbol types must occur."</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> n1 <span class="sc">+</span> n2</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  choose0 <span class="ot">&lt;-</span> <span class="cf">function</span>(a, b) {</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (a <span class="sc">&lt;</span> <span class="dv">0</span> <span class="sc">||</span> b <span class="sc">&lt;</span> <span class="dv">0</span> <span class="sc">||</span> b <span class="sc">&gt;</span> a) <span class="dv">0</span> <span class="cf">else</span> <span class="fu">choose</span>(a, b)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  r_max <span class="ot">&lt;-</span> <span class="cf">if</span> (n1 <span class="sc">==</span> n2) <span class="dv">2</span><span class="sc">*</span>n1 <span class="cf">else</span> <span class="dv">2</span><span class="sc">*</span><span class="fu">min</span>(n1, n2) <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  r_values <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">:</span>r_max</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>  denom <span class="ot">&lt;-</span> <span class="fu">choose</span>(n, n1)</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  probability <span class="ot">&lt;-</span> <span class="fu">vapply</span>(r_values, <span class="cf">function</span>(r) {</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (r <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">0</span>) {</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>      k <span class="ot">&lt;-</span> r<span class="sc">/</span><span class="dv">2</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>      <span class="dv">2</span><span class="sc">*</span><span class="fu">choose0</span>(n1 <span class="sc">-</span> <span class="dv">1</span>, k <span class="sc">-</span> <span class="dv">1</span>)<span class="sc">*</span><span class="fu">choose0</span>(n2 <span class="sc">-</span> <span class="dv">1</span>, k <span class="sc">-</span> <span class="dv">1</span>)<span class="sc">/</span>denom</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>      k <span class="ot">&lt;-</span> (r <span class="sc">-</span> <span class="dv">1</span>)<span class="sc">/</span><span class="dv">2</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>      (<span class="fu">choose0</span>(n1 <span class="sc">-</span> <span class="dv">1</span>, k)<span class="sc">*</span><span class="fu">choose0</span>(n2 <span class="sc">-</span> <span class="dv">1</span>, k <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>       <span class="fu">choose0</span>(n1 <span class="sc">-</span> <span class="dv">1</span>, k <span class="sc">-</span> <span class="dv">1</span>)<span class="sc">*</span><span class="fu">choose0</span>(n2 <span class="sc">-</span> <span class="dv">1</span>, k))<span class="sc">/</span>denom</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  }, <span class="fu">numeric</span>(<span class="dv">1</span>))</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">runs =</span> r_values, <span class="at">probability =</span> probability)</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>runs_test_binary <span class="ot">&lt;-</span> <span class="cf">function</span>(x,</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>                             <span class="at">alternative =</span> <span class="fu">c</span>(<span class="st">"two.sided"</span>, <span class="st">"less"</span>, <span class="st">"greater"</span>),</span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>                             <span class="at">method =</span> <span class="fu">c</span>(<span class="st">"exact"</span>, <span class="st">"normal"</span>),</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>                             <span class="at">continuity =</span> <span class="cn">FALSE</span>) {</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>  alternative <span class="ot">&lt;-</span> <span class="fu">match.arg</span>(alternative)</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>  method <span class="ot">&lt;-</span> <span class="fu">match.arg</span>(method)</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(<span class="fu">unique</span>(x)) <span class="sc">!=</span> <span class="dv">2</span>L) <span class="fu">stop</span>(<span class="st">"x must contain exactly two symbol types."</span>)</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(x)</span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>  counts <span class="ot">&lt;-</span> <span class="fu">table</span>(x)</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>  n1 <span class="ot">&lt;-</span> <span class="fu">unname</span>(counts[<span class="dv">1</span>L])</span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>  n2 <span class="ot">&lt;-</span> <span class="fu">unname</span>(counts[<span class="dv">2</span>L])</span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>  R <span class="ot">&lt;-</span> <span class="fu">count_runs</span>(x)</span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>  moments <span class="ot">&lt;-</span> <span class="fu">runs_moments</span>(n1, n2)</span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (method <span class="sc">==</span> <span class="st">"exact"</span>) {</span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>    tab <span class="ot">&lt;-</span> <span class="fu">runs_pmf</span>(n1, n2)</span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>    lower <span class="ot">&lt;-</span> <span class="fu">sum</span>(tab<span class="sc">$</span>probability[tab<span class="sc">$</span>runs <span class="sc">&lt;=</span> R])</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>    upper <span class="ot">&lt;-</span> <span class="fu">sum</span>(tab<span class="sc">$</span>probability[tab<span class="sc">$</span>runs <span class="sc">&gt;=</span> R])</span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>    p <span class="ot">&lt;-</span> <span class="cf">switch</span>(alternative,</span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>      <span class="at">less =</span> lower,</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>      <span class="at">greater =</span> upper,</span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>      <span class="at">two.sided =</span> <span class="fu">min</span>(<span class="dv">1</span>, <span class="dv">2</span><span class="sc">*</span><span class="fu">min</span>(lower, upper))</span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>    statistic <span class="ot">&lt;-</span> R</span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>    shift <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (continuity <span class="sc">&amp;&amp;</span> R <span class="sc">&lt;</span> moments[<span class="st">"mean"</span>]) shift <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (continuity <span class="sc">&amp;&amp;</span> R <span class="sc">&gt;</span> moments[<span class="st">"mean"</span>]) shift <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.5</span></span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>    z <span class="ot">&lt;-</span> (R <span class="sc">+</span> shift <span class="sc">-</span> moments[<span class="st">"mean"</span>])<span class="sc">/</span>moments[<span class="st">"sd"</span>]</span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a>    p <span class="ot">&lt;-</span> <span class="cf">switch</span>(alternative,</span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>      <span class="at">less =</span> <span class="fu">pnorm</span>(z),</span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>      <span class="at">greater =</span> <span class="fu">pnorm</span>(z, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a>      <span class="at">two.sided =</span> <span class="dv">2</span><span class="sc">*</span><span class="fu">pnorm</span>(<span class="sc">-</span><span class="fu">abs</span>(z))</span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a>    statistic <span class="ot">&lt;-</span> z</span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(</span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> method,</span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>    <span class="at">alternative =</span> alternative,</span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>    <span class="at">n1 =</span> n1,</span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>    <span class="at">n2 =</span> n2,</span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>    <span class="at">runs =</span> R,</span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>    <span class="at">null_mean =</span> <span class="fu">unname</span>(moments[<span class="st">"mean"</span>]),</span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a>    <span class="at">null_sd =</span> <span class="fu">unname</span>(moments[<span class="st">"sd"</span>]),</span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a>    <span class="at">statistic =</span> <span class="fu">unname</span>(statistic),</span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_value =</span> <span class="fu">unname</span>(p)</span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Apply both methods to the stock sequence:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">runs_test_binary</span>(seq_raw, <span class="at">method =</span> <span class="st">"exact"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$method
+[1] "exact"
+
+$alternative
+[1] "two.sided"
+
+$n1
+[1] 9
+
+$n2
+[1] 11
+
+$runs
+[1] 10
+
+$null_mean
+[1] 10.9
+
+$null_sd
+[1] 2.153455
+
+$statistic
+[1] 10
+
+$p_value
+[1] 0.8599667</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">runs_test_binary</span>(seq_raw, <span class="at">method =</span> <span class="st">"normal"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$method
+[1] "normal"
+
+$alternative
+[1] "two.sided"
+
+$n1
+[1] 9
+
+$n2
+[1] 11
+
+$runs
+[1] 10
+
+$null_mean
+[1] 10.9
+
+$null_sd
+[1] 2.153455
+
+$statistic
+[1] -0.417933
+
+$p_value
+[1] 0.6759961</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">runs_test_binary</span>(seq_raw, <span class="at">method =</span> <span class="st">"normal"</span>, <span class="at">continuity =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$method
+[1] "normal"
+
+$alternative
+[1] "two.sided"
+
+$n1
+[1] 9
+
+$n2
+[1] 11
+
+$runs
+[1] 10
+
+$null_mean
+[1] 10.9
+
+$null_sd
+[1] 2.153455
+
+$statistic
+[1] -0.185748
+
+$p_value
+[1] 0.8526424</code></pre>
+</div>
+</div>
+<section id="a-note-on-two-sided-exact-p-values" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="a-note-on-two-sided-exact-p-values"><span class="header-section-number">7.1</span> A note on two-sided exact p-values</h2>
+<p>For a discrete statistic, “two-sided” is not unique. Common conventions include:</p>
+<ol type="1">
+<li>twice the smaller tail probability;</li>
+<li>summing probabilities of outcomes whose null probability is no larger than that of the observed outcome;</li>
+<li>ordering outcomes by distance from <span class="math inline">\(E(R)\)</span>.</li>
+</ol>
+<p>The function above uses twice the smaller tail, capped at <span class="math inline">\(1\)</span>. A software package may use a different convention, so exact two-sided p-values can differ slightly even when all calculations are correct. One-sided exact p-values are unambiguous once the direction is specified.</p>
+</section>
+</section>
+<section id="visualizing-runs" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Visualizing runs</h1>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="runs-test-lecture-notes_files/figure-html/visualize-runs-1.png" class="img-fluid figure-img" width="864"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Vertical dotted lines mark changes from one run to the next.</p>
+</section>
+<section id="simulating-the-null-distribution" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Simulating the null distribution</h1>
+<p>Under <span class="math inline">\(H_0\)</span>, we can hold the counts fixed and randomly permute the sequence.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3504</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>n1 <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>n2 <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>base_sequence <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span>, n1), <span class="fu">rep</span>(<span class="dv">0</span>, n2))</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>R_null <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">20000</span>, <span class="fu">count_runs</span>(<span class="fu">sample</span>(base_sequence)))</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(R_null, <span class="at">probability =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="fu">min</span>(R_null) <span class="sc">-</span> <span class="fl">0.5</span>, <span class="fu">max</span>(R_null) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">by =</span> <span class="dv">1</span>),</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="st">"#861F41"</span>, <span class="at">border =</span> <span class="st">"white"</span>,</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Number of runs"</span>, <span class="at">main =</span> <span class="st">"Permutation null distribution"</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>mom <span class="ot">&lt;-</span> <span class="fu">runs_moments</span>(n1, n2)</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, mom[<span class="st">"mean"</span>], mom[<span class="st">"sd"</span>]), <span class="at">add =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">col =</span> <span class="st">"#E5751F"</span>, <span class="at">lwd =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="runs-test-lecture-notes_files/figure-html/null-simulation-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This simulation is not needed when the exact combinatorial distribution is available, but it makes the null model concrete: the values are fixed, and only their order is randomized.</p>
+</section>
+<section id="contrasting-three-sequences" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Contrasting three sequences</h1>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>clustered <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">10</span>), <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">10</span>))</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>alternating <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>), <span class="dv">10</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>random_order <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">10</span>), <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">10</span>)))</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>examples <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">Clustered =</span> clustered,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">Alternating =</span> alternating,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">Random_order =</span> random_order</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">names</span>(examples), <span class="cf">function</span>(name) {</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">runs_test_binary</span>(examples[[name]], <span class="at">method =</span> <span class="st">"exact"</span>)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">sequence =</span> name, <span class="at">runs =</span> fit<span class="sc">$</span>runs, <span class="at">p_value =</span> fit<span class="sc">$</span>p_value)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>results</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["sequence"],"name":[1],"type":["chr"],"align":["left"]},{"label":["runs"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["p_value"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"Clustered","2":"2","3":"2.165018e-05"},{"1":"Alternating","2":"20","3":"2.165018e-05"},{"1":"Random_order","2":"11","3":"1.000000e+00"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>The clustered and alternating sequences are both nonrandom, but they occupy opposite tails of the runs distribution.</p>
+</section>
+<section id="continuous-observations-dichotomizing-at-a-threshold" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Continuous observations: dichotomizing at a threshold</h1>
+<p>For quantitative observations <span class="math inline">\(Y_1,\ldots,Y_n\)</span>, a common procedure is to encode</p>
+<p><span class="math display">\[
+X_i=
+\begin{cases}
++, &amp; Y_i&gt;c,\\
+-, &amp; Y_i&lt;c,
+\end{cases}
+\]</span></p>
+<p>where <span class="math inline">\(c\)</span> is a prespecified target or the sample median.</p>
+<p>Using the median tends to balance <span class="math inline">\(n_1\)</span> and <span class="math inline">\(n_2\)</span>, which improves power. However, dichotomization discards magnitude information: a value barely above the median is treated the same as an extreme value.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">40</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>threshold <span class="ot">&lt;-</span> <span class="fu">median</span>(y)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>symbols <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(y <span class="sc">&gt;</span> threshold, <span class="st">"+"</span>, <span class="st">"-"</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">runs_test_binary</span>(symbols, <span class="at">method =</span> <span class="st">"exact"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$method
+[1] "exact"
+
+$alternative
+[1] "two.sided"
+
+$n1
+[1] 20
+
+$n2
+[1] 20
+
+$runs
+[1] 19
+
+$null_mean
+[1] 21
+
+$null_sd
+[1] 3.121472
+
+$statistic
+[1] 19
+
+$p_value
+[1] 0.6285567</code></pre>
+</div>
+</div>
+<section id="ties-at-the-threshold" class="level2" data-number="11.1">
+<h2 data-number="11.1" class="anchored" data-anchor-id="ties-at-the-threshold"><span class="header-section-number">11.1</span> Ties at the threshold</h2>
+<p>If some observations equal <span class="math inline">\(c\)</span>, decide on a rule before testing. Possibilities include:</p>
+<ul>
+<li>remove observations equal to <span class="math inline">\(c\)</span> and join the remaining sequence;</li>
+<li>assign ties by a prespecified scientific rule;</li>
+<li>use a method designed explicitly for ties.</li>
+</ul>
+<p>Do not assign ties after looking for the choice that produces the smallest p-value. If many observations tie, the ordinary two-symbol runs test may be inappropriate.</p>
+</section>
+</section>
+<section id="using-an-r-package" class="level1" data-number="12">
+<h1 data-number="12"><span class="header-section-number">12</span> Using an R package</h1>
+<p>The <code>randtests</code> package provides <code>runs.test()</code>.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages("randtests")</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randtests)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>x_num <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(seq_raw <span class="sc">==</span> <span class="st">"U"</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">runs.test</span>(x_num, <span class="at">threshold =</span> <span class="fl">0.5</span>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Numeric observations are commonly split at the median.</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="fu">runs.test</span>(y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>When comparing output, check:</p>
+<ul>
+<li>whether an exact or Normal method is used;</li>
+<li>whether a continuity correction is used;</li>
+<li>how ties are handled;</li>
+<li>how the two-sided p-value is defined;</li>
+<li>which alternative corresponds to clustering or alternation.</li>
+</ul>
+</section>
+<section id="relationship-to-the-two-sample-waldwolfowitz-test" class="level1" data-number="13">
+<h1 data-number="13"><span class="header-section-number">13</span> Relationship to the two-sample Wald–Wolfowitz test</h1>
+<p>The phrase “runs test” is also used for a two-sample problem:</p>
+<ol type="1">
+<li>pool observations from two independent samples;</li>
+<li>sort the pooled values;</li>
+<li>label each ordered value by its sample of origin;</li>
+<li>count runs of sample labels.</li>
+</ol>
+<p>Too few runs suggest the two populations differ. This is related to, but conceptually distinct from, testing serial randomness in one observed sequence. In one-sample randomness problems, the original time or spatial order must be preserved.</p>
+</section>
+<section id="what-the-test-detects" class="level1" data-number="14">
+<h1 data-number="14"><span class="header-section-number">14</span> What the test detects</h1>
+<p>The test is sensitive to simple local ordering patterns:</p>
+<ul>
+<li>clustering of similar signs;</li>
+<li>excessive alternation;</li>
+<li>some trends, when values are coded relative to a fixed threshold;</li>
+<li>persistent stretches above or below a center line.</li>
+</ul>
+<p>It is attractive because, conditional on <span class="math inline">\(n_1\)</span> and <span class="math inline">\(n_2\)</span>, its null distribution is distribution-free.</p>
+</section>
+<section id="limitations" class="level1" data-number="15">
+<h1 data-number="15"><span class="header-section-number">15</span> Limitations</h1>
+<p>A nonsignificant result does <strong>not</strong> prove independence or randomness. The runs test can miss:</p>
+<ul>
+<li>dependence at lags greater than one;</li>
+<li>periodic patterns that happen to generate an ordinary number of runs;</li>
+<li>changes in variance with no change in signs;</li>
+<li>nonlinear dependence;</li>
+<li>patterns lost through dichotomization.</li>
+</ul>
+<p>It is also possible for a sequence to have a highly unusual ordering but a moderate number of runs.</p>
+<p>For richer time-series diagnostics, consider autocorrelation plots, Ljung–Box tests, change-point methods, or application-specific models. Those procedures test different aspects of structure.</p>
+</section>
+<section id="recommended-reporting" class="level1" data-number="16">
+<h1 data-number="16"><span class="header-section-number">16</span> Recommended reporting</h1>
+<p>A concise report should include:</p>
+<ul>
+<li>the threshold or coding rule;</li>
+<li><span class="math inline">\(n_1\)</span>, <span class="math inline">\(n_2\)</span>, and observed <span class="math inline">\(R\)</span>;</li>
+<li>whether the test was exact or approximate;</li>
+<li>whether a continuity correction was used;</li>
+<li>the alternative and p-value;</li>
+<li>a contextual conclusion.</li>
+</ul>
+<p>Example:</p>
+<blockquote class="blockquote">
+<p>Coding each day as up or down produced <span class="math inline">\(n_1=11\)</span> up days, <span class="math inline">\(n_2=9\)</span> down days, and <span class="math inline">\(R=10\)</span> runs. A two-sided runs test gave a large p-value, so the data do not provide evidence that the ordering departs from randomness. This does not establish full serial independence.</p>
+</blockquote>
+</section>
+<section id="summary" class="level1" data-number="17">
+<h1 data-number="17"><span class="header-section-number">17</span> Summary</h1>
+<ol type="1">
+<li>A run is a maximal block of identical symbols.</li>
+<li>Too few runs indicate clustering; too many indicate excessive alternation.</li>
+<li>Under <span class="math inline">\(H_0\)</span>, all orderings with fixed <span class="math inline">\(n_1\)</span> and <span class="math inline">\(n_2\)</span> are equally likely.</li>
+<li>The exact distribution is combinatorial and distribution-free.</li>
+<li>For large groups, <span class="math display">\[
+Z=\frac{R-\mu_R}{\sigma_R}
+\mathrel{\dot\sim}N(0,1).
+\]</span></li>
+<li>Preserve the original order, state the coding rule, and handle ties transparently.</li>
+<li>A runs test examines one kind of sequential structure; it is not a universal test of independence.</li>
+</ol>
+</section>
+<section id="practice-problems" class="level1" data-number="18">
+<h1 data-number="18"><span class="header-section-number">18</span> Practice problems</h1>
+<ol type="1">
+<li><p>Count the runs in <span class="math display">\[
+A\,A\,B\,A\,B\,B\,B\,A\,A\,B.
+\]</span> Identify <span class="math inline">\(n_1\)</span>, <span class="math inline">\(n_2\)</span>, and <span class="math inline">\(R\)</span>.</p></li>
+<li><p>For <span class="math inline">\(n_1=12\)</span> and <span class="math inline">\(n_2=8\)</span>, compute <span class="math inline">\(E(R)\)</span> and <span class="math inline">\(\operatorname{SD}(R)\)</span>.</p></li>
+<li><p>Explain why a sequence with <span class="math inline">\(R=2\)</span> is evidence for clustering, while a sequence with the largest possible <span class="math inline">\(R\)</span> is evidence for alternation.</p></li>
+<li><p>Construct two different binary sequences with the same <span class="math inline">\(n_1\)</span>, <span class="math inline">\(n_2\)</span>, and <span class="math inline">\(R\)</span>. What does this demonstrate about the information retained by the test statistic?</p></li>
+<li><p>Simulate the null distribution for <span class="math inline">\(n_1=n_2=15\)</span> and compare it with the exact PMF from <code>runs_pmf(15, 15)</code>.</p></li>
+</ol>
+<!-- -->
+
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Tests of Randomness: The Runs Test"</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "Lecture notes for STAT 3504"</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Jyotishka Datta"</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="an">institute:</span><span class="co"> "Virginia Tech"</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co">    toc-depth: 3</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co">    number-sections: true</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: show</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="co">    theme: cosmo</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="co">    df-print: paged</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="an">execute:</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="co">  warning: false</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="co">  message: false</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="co">  freeze: auto</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="an">header-includes:</span><span class="co"> |</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="co">  &lt;style&gt;</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="co">  :root { --vt-maroon: #861F41; --vt-orange: #E5751F; }</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a><span class="co">  h1, h2, h3 { color: var(--vt-maroon); }</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a><span class="co">  .callout-important { border-left-color: var(--vt-orange); }</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a><span class="co">  &lt;/style&gt;</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a><span class="fu"># Why test randomness?</span></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>Many methods begin with an assumption that observations arrive in a random order or are serially independent. A dataset can have a reasonable histogram and still contain a strong sequential pattern.</span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>Examples include:</span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>winning and losing days for a stock;</span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>defective and nondefective items on a production line;</span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>treatment successes and failures over time;</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>measurements above and below a target;</span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>residuals from a fitted model.</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>A **runs test** asks whether the ordering contains too much clustering or too much alternation to be compatible with randomness.</span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>::: {.callout-important}</span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>A runs test is about **order**. If the observations are shuffled, their numerical values do not change, but the number of runs usually does.</span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a><span class="fu"># Runs in a binary sequence</span></span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>A **run** is a maximal consecutive block of identical symbols.</span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>For example,</span>
+<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a>+\,+\,+\;-\,-\;+\;-\,-\,-\;+\,+</span>
+<span id="cb15-53"><a href="#cb15-53" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-54"><a href="#cb15-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-55"><a href="#cb15-55" aria-hidden="true" tabindex="-1"></a>has the five runs</span>
+<span id="cb15-56"><a href="#cb15-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-57"><a href="#cb15-57" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-58"><a href="#cb15-58" aria-hidden="true" tabindex="-1"></a>(+++)\quad(--)\quad(+)\quad(---)\quad(++).</span>
+<span id="cb15-59"><a href="#cb15-59" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-60"><a href="#cb15-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-61"><a href="#cb15-61" aria-hidden="true" tabindex="-1"></a>Let</span>
+<span id="cb15-62"><a href="#cb15-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-63"><a href="#cb15-63" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$n_1$ be the number of symbols of type 1 (for example, $+$);</span>
+<span id="cb15-64"><a href="#cb15-64" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$n_2$ be the number of symbols of type 2 (for example, $-$);</span>
+<span id="cb15-65"><a href="#cb15-65" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$n=n_1+n_2$;</span>
+<span id="cb15-66"><a href="#cb15-66" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$R$ be the total number of runs.</span>
+<span id="cb15-67"><a href="#cb15-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-68"><a href="#cb15-68" aria-hidden="true" tabindex="-1"></a>Interpretation:</span>
+<span id="cb15-69"><a href="#cb15-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-70"><a href="#cb15-70" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>unusually **small** $R$: clustering or positive serial association;</span>
+<span id="cb15-71"><a href="#cb15-71" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>unusually **large** $R$: alternation or negative serial association;</span>
+<span id="cb15-72"><a href="#cb15-72" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>moderate $R$: compatible with random ordering.</span>
+<span id="cb15-73"><a href="#cb15-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-74"><a href="#cb15-74" aria-hidden="true" tabindex="-1"></a><span class="fu"># Hypotheses and null model</span></span>
+<span id="cb15-75"><a href="#cb15-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-76"><a href="#cb15-76" aria-hidden="true" tabindex="-1"></a>For the one-sample binary runs test, the null hypothesis is</span>
+<span id="cb15-77"><a href="#cb15-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-78"><a href="#cb15-78" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-79"><a href="#cb15-79" aria-hidden="true" tabindex="-1"></a>H_0:\text{ conditional on }n_1\text{ and }n_2,\text{ every ordering is equally likely.}</span>
+<span id="cb15-80"><a href="#cb15-80" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-81"><a href="#cb15-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-82"><a href="#cb15-82" aria-hidden="true" tabindex="-1"></a>Common alternatives are:</span>
+<span id="cb15-83"><a href="#cb15-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-84"><a href="#cb15-84" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>lower-tailed: the sequence is clustered, so $R$ is too small;</span>
+<span id="cb15-85"><a href="#cb15-85" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>upper-tailed: the sequence alternates too often, so $R$ is too large;</span>
+<span id="cb15-86"><a href="#cb15-86" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>two-sided: the ordering is nonrandom in either direction.</span>
+<span id="cb15-87"><a href="#cb15-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-88"><a href="#cb15-88" aria-hidden="true" tabindex="-1"></a>Conditioning on $n_1$ and $n_2$ is important. Under $H_0$, there are</span>
+<span id="cb15-89"><a href="#cb15-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-90"><a href="#cb15-90" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-91"><a href="#cb15-91" aria-hidden="true" tabindex="-1"></a>\binom{n}{n_1}</span>
+<span id="cb15-92"><a href="#cb15-92" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-93"><a href="#cb15-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-94"><a href="#cb15-94" aria-hidden="true" tabindex="-1"></a>possible binary orderings, each with the same probability.</span>
+<span id="cb15-95"><a href="#cb15-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-96"><a href="#cb15-96" aria-hidden="true" tabindex="-1"></a><span class="fu"># Exact null distribution</span></span>
+<span id="cb15-97"><a href="#cb15-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-98"><a href="#cb15-98" aria-hidden="true" tabindex="-1"></a>The exact distribution depends only on $n_1$ and $n_2$.</span>
+<span id="cb15-99"><a href="#cb15-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-100"><a href="#cb15-100" aria-hidden="true" tabindex="-1"></a>For an even number of runs, $R=2k$,</span>
+<span id="cb15-101"><a href="#cb15-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-102"><a href="#cb15-102" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-103"><a href="#cb15-103" aria-hidden="true" tabindex="-1"></a>P(R=2k)</span>
+<span id="cb15-104"><a href="#cb15-104" aria-hidden="true" tabindex="-1"></a>=</span>
+<span id="cb15-105"><a href="#cb15-105" aria-hidden="true" tabindex="-1"></a>\frac{2\binom{n_1-1}{k-1}\binom{n_2-1}{k-1}}</span>
+<span id="cb15-106"><a href="#cb15-106" aria-hidden="true" tabindex="-1"></a>{\binom{n}{n_1}}.</span>
+<span id="cb15-107"><a href="#cb15-107" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-108"><a href="#cb15-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-109"><a href="#cb15-109" aria-hidden="true" tabindex="-1"></a>For an odd number of runs, $R=2k+1$,</span>
+<span id="cb15-110"><a href="#cb15-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-111"><a href="#cb15-111" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-112"><a href="#cb15-112" aria-hidden="true" tabindex="-1"></a>P(R=2k+1)</span>
+<span id="cb15-113"><a href="#cb15-113" aria-hidden="true" tabindex="-1"></a>=</span>
+<span id="cb15-114"><a href="#cb15-114" aria-hidden="true" tabindex="-1"></a>\frac{</span>
+<span id="cb15-115"><a href="#cb15-115" aria-hidden="true" tabindex="-1"></a>\binom{n_1-1}{k}\binom{n_2-1}{k-1}</span>
+<span id="cb15-116"><a href="#cb15-116" aria-hidden="true" tabindex="-1"></a>+</span>
+<span id="cb15-117"><a href="#cb15-117" aria-hidden="true" tabindex="-1"></a>\binom{n_1-1}{k-1}\binom{n_2-1}{k}</span>
+<span id="cb15-118"><a href="#cb15-118" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-119"><a href="#cb15-119" aria-hidden="true" tabindex="-1"></a>{\binom{n}{n_1}}.</span>
+<span id="cb15-120"><a href="#cb15-120" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-121"><a href="#cb15-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-122"><a href="#cb15-122" aria-hidden="true" tabindex="-1"></a>The possible values satisfy</span>
+<span id="cb15-123"><a href="#cb15-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-124"><a href="#cb15-124" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-125"><a href="#cb15-125" aria-hidden="true" tabindex="-1"></a>2\le R\le</span>
+<span id="cb15-126"><a href="#cb15-126" aria-hidden="true" tabindex="-1"></a>\begin{cases}</span>
+<span id="cb15-127"><a href="#cb15-127" aria-hidden="true" tabindex="-1"></a>2\min(n_1,n_2)+1, &amp; n_1\ne n_2,<span class="sc">\\</span></span>
+<span id="cb15-128"><a href="#cb15-128" aria-hidden="true" tabindex="-1"></a>2n_1, &amp; n_1=n_2.</span>
+<span id="cb15-129"><a href="#cb15-129" aria-hidden="true" tabindex="-1"></a>\end{cases}</span>
+<span id="cb15-130"><a href="#cb15-130" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-131"><a href="#cb15-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-132"><a href="#cb15-132" aria-hidden="true" tabindex="-1"></a>If one symbol never occurs, then $R=1$ and no meaningful two-symbol runs test is possible.</span>
+<span id="cb15-133"><a href="#cb15-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-134"><a href="#cb15-134" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why the formulas have this form</span></span>
+<span id="cb15-135"><a href="#cb15-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-136"><a href="#cb15-136" aria-hidden="true" tabindex="-1"></a>Suppose $R=2k$. The sequence must start with one symbol and end with the other, so each symbol forms exactly $k$ positive-length blocks. Splitting $n_1$ objects into $k$ nonempty blocks can be done in</span>
+<span id="cb15-137"><a href="#cb15-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-138"><a href="#cb15-138" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-139"><a href="#cb15-139" aria-hidden="true" tabindex="-1"></a>\binom{n_1-1}{k-1}</span>
+<span id="cb15-140"><a href="#cb15-140" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-141"><a href="#cb15-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-142"><a href="#cb15-142" aria-hidden="true" tabindex="-1"></a>ways, and similarly for the second symbol. The factor $2$ chooses which symbol starts the sequence.</span>
+<span id="cb15-143"><a href="#cb15-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-144"><a href="#cb15-144" aria-hidden="true" tabindex="-1"></a>For $R=2k+1$, the sequence starts and ends with the same symbol. One symbol has $k+1$ blocks and the other has $k$ blocks; the two terms correspond to which symbol has the extra block.</span>
+<span id="cb15-145"><a href="#cb15-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-146"><a href="#cb15-146" aria-hidden="true" tabindex="-1"></a><span class="fu"># Mean and variance under randomness</span></span>
+<span id="cb15-147"><a href="#cb15-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-148"><a href="#cb15-148" aria-hidden="true" tabindex="-1"></a>Under $H_0$,</span>
+<span id="cb15-149"><a href="#cb15-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-150"><a href="#cb15-150" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-151"><a href="#cb15-151" aria-hidden="true" tabindex="-1"></a>E(R)=\mu_R=1+\frac{2n_1n_2}{n},</span>
+<span id="cb15-152"><a href="#cb15-152" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-153"><a href="#cb15-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-154"><a href="#cb15-154" aria-hidden="true" tabindex="-1"></a>and</span>
+<span id="cb15-155"><a href="#cb15-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-156"><a href="#cb15-156" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-157"><a href="#cb15-157" aria-hidden="true" tabindex="-1"></a>\operatorname{Var}(R)=\sigma_R^2</span>
+<span id="cb15-158"><a href="#cb15-158" aria-hidden="true" tabindex="-1"></a>=</span>
+<span id="cb15-159"><a href="#cb15-159" aria-hidden="true" tabindex="-1"></a>\frac{2n_1n_2\left(2n_1n_2-n\right)}</span>
+<span id="cb15-160"><a href="#cb15-160" aria-hidden="true" tabindex="-1"></a>{n^2(n-1)}.</span>
+<span id="cb15-161"><a href="#cb15-161" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-162"><a href="#cb15-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-163"><a href="#cb15-163" aria-hidden="true" tabindex="-1"></a>For sufficiently large $n_1$ and $n_2$,</span>
+<span id="cb15-164"><a href="#cb15-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-165"><a href="#cb15-165" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-166"><a href="#cb15-166" aria-hidden="true" tabindex="-1"></a>Z=\frac{R-\mu_R}{\sigma_R}</span>
+<span id="cb15-167"><a href="#cb15-167" aria-hidden="true" tabindex="-1"></a>\mathrel{\dot\sim}N(0,1).</span>
+<span id="cb15-168"><a href="#cb15-168" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-169"><a href="#cb15-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-170"><a href="#cb15-170" aria-hidden="true" tabindex="-1"></a>A common classroom guideline is to prefer the exact distribution when either group is small and to regard the Normal approximation as comfortable when both $n_1$ and $n_2$ exceed about $10$. This is a rule of thumb, not a theorem.</span>
+<span id="cb15-171"><a href="#cb15-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-172"><a href="#cb15-172" aria-hidden="true" tabindex="-1"></a><span class="fu">## Optional continuity correction</span></span>
+<span id="cb15-173"><a href="#cb15-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-174"><a href="#cb15-174" aria-hidden="true" tabindex="-1"></a>Since $R$ is discrete, a continuity correction may be used:</span>
+<span id="cb15-175"><a href="#cb15-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-176"><a href="#cb15-176" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-177"><a href="#cb15-177" aria-hidden="true" tabindex="-1"></a>Z_{\mathrm{cc}}=</span>
+<span id="cb15-178"><a href="#cb15-178" aria-hidden="true" tabindex="-1"></a>\begin{cases}</span>
+<span id="cb15-179"><a href="#cb15-179" aria-hidden="true" tabindex="-1"></a>\dfrac{R+0.5-\mu_R}{\sigma_R}, &amp; R&lt;\mu_R,<span class="sc">\\</span><span class="co">[</span><span class="ot">8pt</span><span class="co">]</span></span>
+<span id="cb15-180"><a href="#cb15-180" aria-hidden="true" tabindex="-1"></a>\dfrac{R-0.5-\mu_R}{\sigma_R}, &amp; R&gt;\mu_R,<span class="sc">\\</span><span class="co">[</span><span class="ot">8pt</span><span class="co">]</span></span>
+<span id="cb15-181"><a href="#cb15-181" aria-hidden="true" tabindex="-1"></a>0, &amp; R=\mu_R.</span>
+<span id="cb15-182"><a href="#cb15-182" aria-hidden="true" tabindex="-1"></a>\end{cases}</span>
+<span id="cb15-183"><a href="#cb15-183" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-184"><a href="#cb15-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-185"><a href="#cb15-185" aria-hidden="true" tabindex="-1"></a>Software packages differ in whether they use a correction. Consequently, two implementations can report slightly different large-sample p-values.</span>
+<span id="cb15-186"><a href="#cb15-186" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-187"><a href="#cb15-187" aria-hidden="true" tabindex="-1"></a><span class="fu"># A complete hand calculation</span></span>
+<span id="cb15-188"><a href="#cb15-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-189"><a href="#cb15-189" aria-hidden="true" tabindex="-1"></a>Consider the sequence of stock-market directions over $20$ days:</span>
+<span id="cb15-190"><a href="#cb15-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-191"><a href="#cb15-191" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-192"><a href="#cb15-192" aria-hidden="true" tabindex="-1"></a>U\,U\,D\,D\,D\,U\,U\,U\,D\,U\,D\,D\,U\,U\,U\,U\,D\,D\,U\,D.</span>
+<span id="cb15-193"><a href="#cb15-193" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-194"><a href="#cb15-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-195"><a href="#cb15-195" aria-hidden="true" tabindex="-1"></a>The run decomposition is</span>
+<span id="cb15-196"><a href="#cb15-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-197"><a href="#cb15-197" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-198"><a href="#cb15-198" aria-hidden="true" tabindex="-1"></a>(UU)(DDD)(UUU)(D)(U)(DD)(UUUU)(DD)(U)(D),</span>
+<span id="cb15-199"><a href="#cb15-199" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-200"><a href="#cb15-200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-201"><a href="#cb15-201" aria-hidden="true" tabindex="-1"></a>so</span>
+<span id="cb15-202"><a href="#cb15-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-203"><a href="#cb15-203" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-204"><a href="#cb15-204" aria-hidden="true" tabindex="-1"></a>R=10,\qquad n_1=11,\qquad n_2=9,\qquad n=20.</span>
+<span id="cb15-205"><a href="#cb15-205" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-206"><a href="#cb15-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-207"><a href="#cb15-207" aria-hidden="true" tabindex="-1"></a>The null mean and standard deviation are</span>
+<span id="cb15-208"><a href="#cb15-208" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-209"><a href="#cb15-209" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-210"><a href="#cb15-210" aria-hidden="true" tabindex="-1"></a>\mu_R=1+\frac{2(11)(9)}{20}=10.9,</span>
+<span id="cb15-211"><a href="#cb15-211" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-212"><a href="#cb15-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-213"><a href="#cb15-213" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-214"><a href="#cb15-214" aria-hidden="true" tabindex="-1"></a>\sigma_R</span>
+<span id="cb15-215"><a href="#cb15-215" aria-hidden="true" tabindex="-1"></a>=</span>
+<span id="cb15-216"><a href="#cb15-216" aria-hidden="true" tabindex="-1"></a>\sqrt{</span>
+<span id="cb15-217"><a href="#cb15-217" aria-hidden="true" tabindex="-1"></a>\frac{2(11)(9)<span class="sc">\{</span>2(11)(9)-20<span class="sc">\}</span>}</span>
+<span id="cb15-218"><a href="#cb15-218" aria-hidden="true" tabindex="-1"></a>{20^2(19)}</span>
+<span id="cb15-219"><a href="#cb15-219" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-220"><a href="#cb15-220" aria-hidden="true" tabindex="-1"></a>\approx2.1535.</span>
+<span id="cb15-221"><a href="#cb15-221" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-222"><a href="#cb15-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-223"><a href="#cb15-223" aria-hidden="true" tabindex="-1"></a>Without continuity correction,</span>
+<span id="cb15-224"><a href="#cb15-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-225"><a href="#cb15-225" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-226"><a href="#cb15-226" aria-hidden="true" tabindex="-1"></a>Z=\frac{10-10.9}{2.1535}\approx-0.4179,</span>
+<span id="cb15-227"><a href="#cb15-227" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-228"><a href="#cb15-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-229"><a href="#cb15-229" aria-hidden="true" tabindex="-1"></a>which gives a two-sided Normal p-value of approximately $0.676$. There is no evidence here of a nonrandom ordering.</span>
+<span id="cb15-230"><a href="#cb15-230" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-233"><a href="#cb15-233" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb15-234"><a href="#cb15-234" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: stock-example</span></span>
+<span id="cb15-235"><a href="#cb15-235" aria-hidden="true" tabindex="-1"></a>seq_raw <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"U"</span>,<span class="st">"U"</span>,<span class="st">"D"</span>,<span class="st">"D"</span>,<span class="st">"D"</span>,<span class="st">"U"</span>,<span class="st">"U"</span>,<span class="st">"U"</span>,<span class="st">"D"</span>,<span class="st">"U"</span>,</span>
+<span id="cb15-236"><a href="#cb15-236" aria-hidden="true" tabindex="-1"></a>             <span class="st">"D"</span>,<span class="st">"D"</span>,<span class="st">"U"</span>,<span class="st">"U"</span>,<span class="st">"U"</span>,<span class="st">"U"</span>,<span class="st">"D"</span>,<span class="st">"D"</span>,<span class="st">"U"</span>,<span class="st">"D"</span>)</span>
+<span id="cb15-237"><a href="#cb15-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-238"><a href="#cb15-238" aria-hidden="true" tabindex="-1"></a>n1 <span class="ot">&lt;-</span> <span class="fu">sum</span>(seq_raw <span class="sc">==</span> <span class="st">"U"</span>)</span>
+<span id="cb15-239"><a href="#cb15-239" aria-hidden="true" tabindex="-1"></a>n2 <span class="ot">&lt;-</span> <span class="fu">sum</span>(seq_raw <span class="sc">==</span> <span class="st">"D"</span>)</span>
+<span id="cb15-240"><a href="#cb15-240" aria-hidden="true" tabindex="-1"></a>n  <span class="ot">&lt;-</span> n1 <span class="sc">+</span> n2</span>
+<span id="cb15-241"><a href="#cb15-241" aria-hidden="true" tabindex="-1"></a>R  <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">rle</span>(seq_raw)<span class="sc">$</span>lengths)</span>
+<span id="cb15-242"><a href="#cb15-242" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-243"><a href="#cb15-243" aria-hidden="true" tabindex="-1"></a>mu_R <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span>n1<span class="sc">*</span>n2<span class="sc">/</span>n</span>
+<span id="cb15-244"><a href="#cb15-244" aria-hidden="true" tabindex="-1"></a>var_R <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">*</span>n1<span class="sc">*</span>n2<span class="sc">*</span>(<span class="dv">2</span><span class="sc">*</span>n1<span class="sc">*</span>n2 <span class="sc">-</span> n)<span class="sc">/</span>(n<span class="sc">^</span><span class="dv">2</span><span class="sc">*</span>(n <span class="sc">-</span> <span class="dv">1</span>))</span>
+<span id="cb15-245"><a href="#cb15-245" aria-hidden="true" tabindex="-1"></a>sd_R <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(var_R)</span>
+<span id="cb15-246"><a href="#cb15-246" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> (R <span class="sc">-</span> mu_R)<span class="sc">/</span>sd_R</span>
+<span id="cb15-247"><a href="#cb15-247" aria-hidden="true" tabindex="-1"></a>p_normal <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">*</span><span class="fu">pnorm</span>(<span class="sc">-</span><span class="fu">abs</span>(z))</span>
+<span id="cb15-248"><a href="#cb15-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-249"><a href="#cb15-249" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">n1 =</span> n1, <span class="at">n2 =</span> n2, <span class="at">runs =</span> R,</span>
+<span id="cb15-250"><a href="#cb15-250" aria-hidden="true" tabindex="-1"></a>  <span class="at">expected_runs =</span> mu_R, <span class="at">sd_runs =</span> sd_R,</span>
+<span id="cb15-251"><a href="#cb15-251" aria-hidden="true" tabindex="-1"></a>  <span class="at">z =</span> z, <span class="at">p_value =</span> p_normal)</span>
+<span id="cb15-252"><a href="#cb15-252" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-253"><a href="#cb15-253" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-254"><a href="#cb15-254" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb15-255"><a href="#cb15-255" aria-hidden="true" tabindex="-1"></a>The variance denominator is $n^2(n-1)$. Writing the algebra incorrectly can produce an impossible standard deviation larger than the entire range of $R$.</span>
+<span id="cb15-256"><a href="#cb15-256" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb15-257"><a href="#cb15-257" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-258"><a href="#cb15-258" aria-hidden="true" tabindex="-1"></a><span class="fu"># Base-R implementation</span></span>
+<span id="cb15-259"><a href="#cb15-259" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-260"><a href="#cb15-260" aria-hidden="true" tabindex="-1"></a>The following functions count runs, compute the exact null distribution, and perform exact or Normal tests without requiring an external package.</span>
+<span id="cb15-261"><a href="#cb15-261" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-264"><a href="#cb15-264" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb15-265"><a href="#cb15-265" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: runs-functions</span></span>
+<span id="cb15-266"><a href="#cb15-266" aria-hidden="true" tabindex="-1"></a>count_runs <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb15-267"><a href="#cb15-267" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(x) <span class="sc">==</span> <span class="dv">0</span>) <span class="fu">return</span>(<span class="dv">0</span>)</span>
+<span id="cb15-268"><a href="#cb15-268" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span> <span class="sc">+</span> <span class="fu">sum</span>(x[<span class="sc">-</span><span class="dv">1</span>] <span class="sc">!=</span> x[<span class="sc">-</span><span class="fu">length</span>(x)])</span>
+<span id="cb15-269"><a href="#cb15-269" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-270"><a href="#cb15-270" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-271"><a href="#cb15-271" aria-hidden="true" tabindex="-1"></a>runs_moments <span class="ot">&lt;-</span> <span class="cf">function</span>(n1, n2) {</span>
+<span id="cb15-272"><a href="#cb15-272" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> n1 <span class="sc">+</span> n2</span>
+<span id="cb15-273"><a href="#cb15-273" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (n1 <span class="sc">&lt;</span> <span class="dv">1</span> <span class="sc">||</span> n2 <span class="sc">&lt;</span> <span class="dv">1</span>) <span class="fu">stop</span>(<span class="st">"Both symbol types must occur."</span>)</span>
+<span id="cb15-274"><a href="#cb15-274" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span>n1<span class="sc">*</span>n2<span class="sc">/</span>n</span>
+<span id="cb15-275"><a href="#cb15-275" aria-hidden="true" tabindex="-1"></a>  variance <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">*</span>n1<span class="sc">*</span>n2<span class="sc">*</span>(<span class="dv">2</span><span class="sc">*</span>n1<span class="sc">*</span>n2 <span class="sc">-</span> n)<span class="sc">/</span>(n<span class="sc">^</span><span class="dv">2</span><span class="sc">*</span>(n <span class="sc">-</span> <span class="dv">1</span>))</span>
+<span id="cb15-276"><a href="#cb15-276" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">mean =</span> mu, <span class="at">variance =</span> variance, <span class="at">sd =</span> <span class="fu">sqrt</span>(variance))</span>
+<span id="cb15-277"><a href="#cb15-277" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-278"><a href="#cb15-278" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-279"><a href="#cb15-279" aria-hidden="true" tabindex="-1"></a>runs_pmf <span class="ot">&lt;-</span> <span class="cf">function</span>(n1, n2) {</span>
+<span id="cb15-280"><a href="#cb15-280" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (n1 <span class="sc">&lt;</span> <span class="dv">1</span> <span class="sc">||</span> n2 <span class="sc">&lt;</span> <span class="dv">1</span>) <span class="fu">stop</span>(<span class="st">"Both symbol types must occur."</span>)</span>
+<span id="cb15-281"><a href="#cb15-281" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> n1 <span class="sc">+</span> n2</span>
+<span id="cb15-282"><a href="#cb15-282" aria-hidden="true" tabindex="-1"></a>  choose0 <span class="ot">&lt;-</span> <span class="cf">function</span>(a, b) {</span>
+<span id="cb15-283"><a href="#cb15-283" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (a <span class="sc">&lt;</span> <span class="dv">0</span> <span class="sc">||</span> b <span class="sc">&lt;</span> <span class="dv">0</span> <span class="sc">||</span> b <span class="sc">&gt;</span> a) <span class="dv">0</span> <span class="cf">else</span> <span class="fu">choose</span>(a, b)</span>
+<span id="cb15-284"><a href="#cb15-284" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb15-285"><a href="#cb15-285" aria-hidden="true" tabindex="-1"></a>  r_max <span class="ot">&lt;-</span> <span class="cf">if</span> (n1 <span class="sc">==</span> n2) <span class="dv">2</span><span class="sc">*</span>n1 <span class="cf">else</span> <span class="dv">2</span><span class="sc">*</span><span class="fu">min</span>(n1, n2) <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb15-286"><a href="#cb15-286" aria-hidden="true" tabindex="-1"></a>  r_values <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">:</span>r_max</span>
+<span id="cb15-287"><a href="#cb15-287" aria-hidden="true" tabindex="-1"></a>  denom <span class="ot">&lt;-</span> <span class="fu">choose</span>(n, n1)</span>
+<span id="cb15-288"><a href="#cb15-288" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-289"><a href="#cb15-289" aria-hidden="true" tabindex="-1"></a>  probability <span class="ot">&lt;-</span> <span class="fu">vapply</span>(r_values, <span class="cf">function</span>(r) {</span>
+<span id="cb15-290"><a href="#cb15-290" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (r <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">0</span>) {</span>
+<span id="cb15-291"><a href="#cb15-291" aria-hidden="true" tabindex="-1"></a>      k <span class="ot">&lt;-</span> r<span class="sc">/</span><span class="dv">2</span></span>
+<span id="cb15-292"><a href="#cb15-292" aria-hidden="true" tabindex="-1"></a>      <span class="dv">2</span><span class="sc">*</span><span class="fu">choose0</span>(n1 <span class="sc">-</span> <span class="dv">1</span>, k <span class="sc">-</span> <span class="dv">1</span>)<span class="sc">*</span><span class="fu">choose0</span>(n2 <span class="sc">-</span> <span class="dv">1</span>, k <span class="sc">-</span> <span class="dv">1</span>)<span class="sc">/</span>denom</span>
+<span id="cb15-293"><a href="#cb15-293" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb15-294"><a href="#cb15-294" aria-hidden="true" tabindex="-1"></a>      k <span class="ot">&lt;-</span> (r <span class="sc">-</span> <span class="dv">1</span>)<span class="sc">/</span><span class="dv">2</span></span>
+<span id="cb15-295"><a href="#cb15-295" aria-hidden="true" tabindex="-1"></a>      (<span class="fu">choose0</span>(n1 <span class="sc">-</span> <span class="dv">1</span>, k)<span class="sc">*</span><span class="fu">choose0</span>(n2 <span class="sc">-</span> <span class="dv">1</span>, k <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb15-296"><a href="#cb15-296" aria-hidden="true" tabindex="-1"></a>       <span class="fu">choose0</span>(n1 <span class="sc">-</span> <span class="dv">1</span>, k <span class="sc">-</span> <span class="dv">1</span>)<span class="sc">*</span><span class="fu">choose0</span>(n2 <span class="sc">-</span> <span class="dv">1</span>, k))<span class="sc">/</span>denom</span>
+<span id="cb15-297"><a href="#cb15-297" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb15-298"><a href="#cb15-298" aria-hidden="true" tabindex="-1"></a>  }, <span class="fu">numeric</span>(<span class="dv">1</span>))</span>
+<span id="cb15-299"><a href="#cb15-299" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-300"><a href="#cb15-300" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">runs =</span> r_values, <span class="at">probability =</span> probability)</span>
+<span id="cb15-301"><a href="#cb15-301" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-302"><a href="#cb15-302" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-303"><a href="#cb15-303" aria-hidden="true" tabindex="-1"></a>runs_test_binary <span class="ot">&lt;-</span> <span class="cf">function</span>(x,</span>
+<span id="cb15-304"><a href="#cb15-304" aria-hidden="true" tabindex="-1"></a>                             <span class="at">alternative =</span> <span class="fu">c</span>(<span class="st">"two.sided"</span>, <span class="st">"less"</span>, <span class="st">"greater"</span>),</span>
+<span id="cb15-305"><a href="#cb15-305" aria-hidden="true" tabindex="-1"></a>                             <span class="at">method =</span> <span class="fu">c</span>(<span class="st">"exact"</span>, <span class="st">"normal"</span>),</span>
+<span id="cb15-306"><a href="#cb15-306" aria-hidden="true" tabindex="-1"></a>                             <span class="at">continuity =</span> <span class="cn">FALSE</span>) {</span>
+<span id="cb15-307"><a href="#cb15-307" aria-hidden="true" tabindex="-1"></a>  alternative <span class="ot">&lt;-</span> <span class="fu">match.arg</span>(alternative)</span>
+<span id="cb15-308"><a href="#cb15-308" aria-hidden="true" tabindex="-1"></a>  method <span class="ot">&lt;-</span> <span class="fu">match.arg</span>(method)</span>
+<span id="cb15-309"><a href="#cb15-309" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(<span class="fu">unique</span>(x)) <span class="sc">!=</span> <span class="dv">2</span>L) <span class="fu">stop</span>(<span class="st">"x must contain exactly two symbol types."</span>)</span>
+<span id="cb15-310"><a href="#cb15-310" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-311"><a href="#cb15-311" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(x)</span>
+<span id="cb15-312"><a href="#cb15-312" aria-hidden="true" tabindex="-1"></a>  counts <span class="ot">&lt;-</span> <span class="fu">table</span>(x)</span>
+<span id="cb15-313"><a href="#cb15-313" aria-hidden="true" tabindex="-1"></a>  n1 <span class="ot">&lt;-</span> <span class="fu">unname</span>(counts[<span class="dv">1</span>L])</span>
+<span id="cb15-314"><a href="#cb15-314" aria-hidden="true" tabindex="-1"></a>  n2 <span class="ot">&lt;-</span> <span class="fu">unname</span>(counts[<span class="dv">2</span>L])</span>
+<span id="cb15-315"><a href="#cb15-315" aria-hidden="true" tabindex="-1"></a>  R <span class="ot">&lt;-</span> <span class="fu">count_runs</span>(x)</span>
+<span id="cb15-316"><a href="#cb15-316" aria-hidden="true" tabindex="-1"></a>  moments <span class="ot">&lt;-</span> <span class="fu">runs_moments</span>(n1, n2)</span>
+<span id="cb15-317"><a href="#cb15-317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-318"><a href="#cb15-318" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (method <span class="sc">==</span> <span class="st">"exact"</span>) {</span>
+<span id="cb15-319"><a href="#cb15-319" aria-hidden="true" tabindex="-1"></a>    tab <span class="ot">&lt;-</span> <span class="fu">runs_pmf</span>(n1, n2)</span>
+<span id="cb15-320"><a href="#cb15-320" aria-hidden="true" tabindex="-1"></a>    lower <span class="ot">&lt;-</span> <span class="fu">sum</span>(tab<span class="sc">$</span>probability[tab<span class="sc">$</span>runs <span class="sc">&lt;=</span> R])</span>
+<span id="cb15-321"><a href="#cb15-321" aria-hidden="true" tabindex="-1"></a>    upper <span class="ot">&lt;-</span> <span class="fu">sum</span>(tab<span class="sc">$</span>probability[tab<span class="sc">$</span>runs <span class="sc">&gt;=</span> R])</span>
+<span id="cb15-322"><a href="#cb15-322" aria-hidden="true" tabindex="-1"></a>    p <span class="ot">&lt;-</span> <span class="cf">switch</span>(alternative,</span>
+<span id="cb15-323"><a href="#cb15-323" aria-hidden="true" tabindex="-1"></a>      <span class="at">less =</span> lower,</span>
+<span id="cb15-324"><a href="#cb15-324" aria-hidden="true" tabindex="-1"></a>      <span class="at">greater =</span> upper,</span>
+<span id="cb15-325"><a href="#cb15-325" aria-hidden="true" tabindex="-1"></a>      <span class="at">two.sided =</span> <span class="fu">min</span>(<span class="dv">1</span>, <span class="dv">2</span><span class="sc">*</span><span class="fu">min</span>(lower, upper))</span>
+<span id="cb15-326"><a href="#cb15-326" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-327"><a href="#cb15-327" aria-hidden="true" tabindex="-1"></a>    statistic <span class="ot">&lt;-</span> R</span>
+<span id="cb15-328"><a href="#cb15-328" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb15-329"><a href="#cb15-329" aria-hidden="true" tabindex="-1"></a>    shift <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb15-330"><a href="#cb15-330" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (continuity <span class="sc">&amp;&amp;</span> R <span class="sc">&lt;</span> moments[<span class="st">"mean"</span>]) shift <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb15-331"><a href="#cb15-331" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (continuity <span class="sc">&amp;&amp;</span> R <span class="sc">&gt;</span> moments[<span class="st">"mean"</span>]) shift <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.5</span></span>
+<span id="cb15-332"><a href="#cb15-332" aria-hidden="true" tabindex="-1"></a>    z <span class="ot">&lt;-</span> (R <span class="sc">+</span> shift <span class="sc">-</span> moments[<span class="st">"mean"</span>])<span class="sc">/</span>moments[<span class="st">"sd"</span>]</span>
+<span id="cb15-333"><a href="#cb15-333" aria-hidden="true" tabindex="-1"></a>    p <span class="ot">&lt;-</span> <span class="cf">switch</span>(alternative,</span>
+<span id="cb15-334"><a href="#cb15-334" aria-hidden="true" tabindex="-1"></a>      <span class="at">less =</span> <span class="fu">pnorm</span>(z),</span>
+<span id="cb15-335"><a href="#cb15-335" aria-hidden="true" tabindex="-1"></a>      <span class="at">greater =</span> <span class="fu">pnorm</span>(z, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb15-336"><a href="#cb15-336" aria-hidden="true" tabindex="-1"></a>      <span class="at">two.sided =</span> <span class="dv">2</span><span class="sc">*</span><span class="fu">pnorm</span>(<span class="sc">-</span><span class="fu">abs</span>(z))</span>
+<span id="cb15-337"><a href="#cb15-337" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-338"><a href="#cb15-338" aria-hidden="true" tabindex="-1"></a>    statistic <span class="ot">&lt;-</span> z</span>
+<span id="cb15-339"><a href="#cb15-339" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb15-340"><a href="#cb15-340" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-341"><a href="#cb15-341" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(</span>
+<span id="cb15-342"><a href="#cb15-342" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> method,</span>
+<span id="cb15-343"><a href="#cb15-343" aria-hidden="true" tabindex="-1"></a>    <span class="at">alternative =</span> alternative,</span>
+<span id="cb15-344"><a href="#cb15-344" aria-hidden="true" tabindex="-1"></a>    <span class="at">n1 =</span> n1,</span>
+<span id="cb15-345"><a href="#cb15-345" aria-hidden="true" tabindex="-1"></a>    <span class="at">n2 =</span> n2,</span>
+<span id="cb15-346"><a href="#cb15-346" aria-hidden="true" tabindex="-1"></a>    <span class="at">runs =</span> R,</span>
+<span id="cb15-347"><a href="#cb15-347" aria-hidden="true" tabindex="-1"></a>    <span class="at">null_mean =</span> <span class="fu">unname</span>(moments[<span class="st">"mean"</span>]),</span>
+<span id="cb15-348"><a href="#cb15-348" aria-hidden="true" tabindex="-1"></a>    <span class="at">null_sd =</span> <span class="fu">unname</span>(moments[<span class="st">"sd"</span>]),</span>
+<span id="cb15-349"><a href="#cb15-349" aria-hidden="true" tabindex="-1"></a>    <span class="at">statistic =</span> <span class="fu">unname</span>(statistic),</span>
+<span id="cb15-350"><a href="#cb15-350" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_value =</span> <span class="fu">unname</span>(p)</span>
+<span id="cb15-351"><a href="#cb15-351" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb15-352"><a href="#cb15-352" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-353"><a href="#cb15-353" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-354"><a href="#cb15-354" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-355"><a href="#cb15-355" aria-hidden="true" tabindex="-1"></a>Apply both methods to the stock sequence:</span>
+<span id="cb15-356"><a href="#cb15-356" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-359"><a href="#cb15-359" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb15-360"><a href="#cb15-360" aria-hidden="true" tabindex="-1"></a><span class="fu">runs_test_binary</span>(seq_raw, <span class="at">method =</span> <span class="st">"exact"</span>)</span>
+<span id="cb15-361"><a href="#cb15-361" aria-hidden="true" tabindex="-1"></a><span class="fu">runs_test_binary</span>(seq_raw, <span class="at">method =</span> <span class="st">"normal"</span>)</span>
+<span id="cb15-362"><a href="#cb15-362" aria-hidden="true" tabindex="-1"></a><span class="fu">runs_test_binary</span>(seq_raw, <span class="at">method =</span> <span class="st">"normal"</span>, <span class="at">continuity =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-363"><a href="#cb15-363" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-364"><a href="#cb15-364" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-365"><a href="#cb15-365" aria-hidden="true" tabindex="-1"></a><span class="fu">## A note on two-sided exact p-values</span></span>
+<span id="cb15-366"><a href="#cb15-366" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-367"><a href="#cb15-367" aria-hidden="true" tabindex="-1"></a>For a discrete statistic, “two-sided” is not unique. Common conventions include:</span>
+<span id="cb15-368"><a href="#cb15-368" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-369"><a href="#cb15-369" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>twice the smaller tail probability;</span>
+<span id="cb15-370"><a href="#cb15-370" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>summing probabilities of outcomes whose null probability is no larger than that of the observed outcome;</span>
+<span id="cb15-371"><a href="#cb15-371" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>ordering outcomes by distance from $E(R)$.</span>
+<span id="cb15-372"><a href="#cb15-372" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-373"><a href="#cb15-373" aria-hidden="true" tabindex="-1"></a>The function above uses twice the smaller tail, capped at $1$. A software package may use a different convention, so exact two-sided p-values can differ slightly even when all calculations are correct. One-sided exact p-values are unambiguous once the direction is specified.</span>
+<span id="cb15-374"><a href="#cb15-374" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-375"><a href="#cb15-375" aria-hidden="true" tabindex="-1"></a><span class="fu"># Visualizing runs</span></span>
+<span id="cb15-376"><a href="#cb15-376" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-379"><a href="#cb15-379" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb15-380"><a href="#cb15-380" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: visualize-runs</span></span>
+<span id="cb15-381"><a href="#cb15-381" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 9</span></span>
+<span id="cb15-382"><a href="#cb15-382" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3.8</span></span>
+<span id="cb15-383"><a href="#cb15-383" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb15-384"><a href="#cb15-384" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(seq_raw <span class="sc">==</span> <span class="st">"U"</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb15-385"><a href="#cb15-385" aria-hidden="true" tabindex="-1"></a>cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"#E5751F"</span>, <span class="st">"#861F41"</span>)</span>
+<span id="cb15-386"><a href="#cb15-386" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">seq_along</span>(x), x, <span class="at">type =</span> <span class="st">"s"</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">col =</span> <span class="st">"#861F41"</span>,</span>
+<span id="cb15-387"><a href="#cb15-387" aria-hidden="true" tabindex="-1"></a>     <span class="at">xaxt =</span> <span class="st">"n"</span>, <span class="at">yaxt =</span> <span class="st">"n"</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.25</span>, <span class="fl">1.25</span>),</span>
+<span id="cb15-388"><a href="#cb15-388" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Day"</span>, <span class="at">ylab =</span> <span class="st">"Direction"</span>, <span class="at">main =</span> <span class="st">"Runs in the observed sequence"</span>)</span>
+<span id="cb15-389"><a href="#cb15-389" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">1</span>, <span class="at">at =</span> <span class="fu">seq_along</span>(x))</span>
+<span id="cb15-390"><a href="#cb15-390" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">2</span>, <span class="at">at =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"D"</span>, <span class="st">"U"</span>), <span class="at">las =</span> <span class="dv">1</span>)</span>
+<span id="cb15-391"><a href="#cb15-391" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="fu">seq_along</span>(x), x, <span class="at">pch =</span> <span class="dv">21</span>, <span class="at">bg =</span> cols[x <span class="sc">+</span> <span class="dv">1</span>], <span class="at">col =</span> <span class="st">"white"</span>, <span class="at">cex =</span> <span class="fl">1.6</span>)</span>
+<span id="cb15-392"><a href="#cb15-392" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="fu">which</span>(<span class="fu">diff</span>(x) <span class="sc">!=</span> <span class="dv">0</span>) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">col =</span> <span class="st">"gray65"</span>, <span class="at">lty =</span> <span class="dv">3</span>)</span>
+<span id="cb15-393"><a href="#cb15-393" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-394"><a href="#cb15-394" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-395"><a href="#cb15-395" aria-hidden="true" tabindex="-1"></a>Vertical dotted lines mark changes from one run to the next.</span>
+<span id="cb15-396"><a href="#cb15-396" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-397"><a href="#cb15-397" aria-hidden="true" tabindex="-1"></a><span class="fu"># Simulating the null distribution</span></span>
+<span id="cb15-398"><a href="#cb15-398" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-399"><a href="#cb15-399" aria-hidden="true" tabindex="-1"></a>Under $H_0$, we can hold the counts fixed and randomly permute the sequence.</span>
+<span id="cb15-400"><a href="#cb15-400" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-403"><a href="#cb15-403" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb15-404"><a href="#cb15-404" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: null-simulation</span></span>
+<span id="cb15-405"><a href="#cb15-405" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 8</span></span>
+<span id="cb15-406"><a href="#cb15-406" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4.8</span></span>
+<span id="cb15-407"><a href="#cb15-407" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3504</span>)</span>
+<span id="cb15-408"><a href="#cb15-408" aria-hidden="true" tabindex="-1"></a>n1 <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb15-409"><a href="#cb15-409" aria-hidden="true" tabindex="-1"></a>n2 <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb15-410"><a href="#cb15-410" aria-hidden="true" tabindex="-1"></a>base_sequence <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span>, n1), <span class="fu">rep</span>(<span class="dv">0</span>, n2))</span>
+<span id="cb15-411"><a href="#cb15-411" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-412"><a href="#cb15-412" aria-hidden="true" tabindex="-1"></a>R_null <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">20000</span>, <span class="fu">count_runs</span>(<span class="fu">sample</span>(base_sequence)))</span>
+<span id="cb15-413"><a href="#cb15-413" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-414"><a href="#cb15-414" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(R_null, <span class="at">probability =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb15-415"><a href="#cb15-415" aria-hidden="true" tabindex="-1"></a>     <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="fu">min</span>(R_null) <span class="sc">-</span> <span class="fl">0.5</span>, <span class="fu">max</span>(R_null) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">by =</span> <span class="dv">1</span>),</span>
+<span id="cb15-416"><a href="#cb15-416" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="st">"#861F41"</span>, <span class="at">border =</span> <span class="st">"white"</span>,</span>
+<span id="cb15-417"><a href="#cb15-417" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Number of runs"</span>, <span class="at">main =</span> <span class="st">"Permutation null distribution"</span>)</span>
+<span id="cb15-418"><a href="#cb15-418" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-419"><a href="#cb15-419" aria-hidden="true" tabindex="-1"></a>mom <span class="ot">&lt;-</span> <span class="fu">runs_moments</span>(n1, n2)</span>
+<span id="cb15-420"><a href="#cb15-420" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, mom[<span class="st">"mean"</span>], mom[<span class="st">"sd"</span>]), <span class="at">add =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb15-421"><a href="#cb15-421" aria-hidden="true" tabindex="-1"></a>      <span class="at">col =</span> <span class="st">"#E5751F"</span>, <span class="at">lwd =</span> <span class="dv">3</span>)</span>
+<span id="cb15-422"><a href="#cb15-422" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-423"><a href="#cb15-423" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-424"><a href="#cb15-424" aria-hidden="true" tabindex="-1"></a>This simulation is not needed when the exact combinatorial distribution is available, but it makes the null model concrete: the values are fixed, and only their order is randomized.</span>
+<span id="cb15-425"><a href="#cb15-425" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-426"><a href="#cb15-426" aria-hidden="true" tabindex="-1"></a><span class="fu"># Contrasting three sequences</span></span>
+<span id="cb15-427"><a href="#cb15-427" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-430"><a href="#cb15-430" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb15-431"><a href="#cb15-431" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: sequence-contrast</span></span>
+<span id="cb15-432"><a href="#cb15-432" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12</span>)</span>
+<span id="cb15-433"><a href="#cb15-433" aria-hidden="true" tabindex="-1"></a>clustered <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">10</span>), <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">10</span>))</span>
+<span id="cb15-434"><a href="#cb15-434" aria-hidden="true" tabindex="-1"></a>alternating <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>), <span class="dv">10</span>)</span>
+<span id="cb15-435"><a href="#cb15-435" aria-hidden="true" tabindex="-1"></a>random_order <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">10</span>), <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">10</span>)))</span>
+<span id="cb15-436"><a href="#cb15-436" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-437"><a href="#cb15-437" aria-hidden="true" tabindex="-1"></a>examples <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb15-438"><a href="#cb15-438" aria-hidden="true" tabindex="-1"></a>  <span class="at">Clustered =</span> clustered,</span>
+<span id="cb15-439"><a href="#cb15-439" aria-hidden="true" tabindex="-1"></a>  <span class="at">Alternating =</span> alternating,</span>
+<span id="cb15-440"><a href="#cb15-440" aria-hidden="true" tabindex="-1"></a>  <span class="at">Random_order =</span> random_order</span>
+<span id="cb15-441"><a href="#cb15-441" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-442"><a href="#cb15-442" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-443"><a href="#cb15-443" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">names</span>(examples), <span class="cf">function</span>(name) {</span>
+<span id="cb15-444"><a href="#cb15-444" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">runs_test_binary</span>(examples[[name]], <span class="at">method =</span> <span class="st">"exact"</span>)</span>
+<span id="cb15-445"><a href="#cb15-445" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">sequence =</span> name, <span class="at">runs =</span> fit<span class="sc">$</span>runs, <span class="at">p_value =</span> fit<span class="sc">$</span>p_value)</span>
+<span id="cb15-446"><a href="#cb15-446" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb15-447"><a href="#cb15-447" aria-hidden="true" tabindex="-1"></a>results</span>
+<span id="cb15-448"><a href="#cb15-448" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-449"><a href="#cb15-449" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-450"><a href="#cb15-450" aria-hidden="true" tabindex="-1"></a>The clustered and alternating sequences are both nonrandom, but they occupy opposite tails of the runs distribution.</span>
+<span id="cb15-451"><a href="#cb15-451" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-452"><a href="#cb15-452" aria-hidden="true" tabindex="-1"></a><span class="fu"># Continuous observations: dichotomizing at a threshold</span></span>
+<span id="cb15-453"><a href="#cb15-453" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-454"><a href="#cb15-454" aria-hidden="true" tabindex="-1"></a>For quantitative observations $Y_1,\ldots,Y_n$, a common procedure is to encode</span>
+<span id="cb15-455"><a href="#cb15-455" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-456"><a href="#cb15-456" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-457"><a href="#cb15-457" aria-hidden="true" tabindex="-1"></a>X_i=</span>
+<span id="cb15-458"><a href="#cb15-458" aria-hidden="true" tabindex="-1"></a>\begin{cases}</span>
+<span id="cb15-459"><a href="#cb15-459" aria-hidden="true" tabindex="-1"></a>+, &amp; Y_i&gt;c,<span class="sc">\\</span></span>
+<span id="cb15-460"><a href="#cb15-460" aria-hidden="true" tabindex="-1"></a>-, &amp; Y_i&lt;c,</span>
+<span id="cb15-461"><a href="#cb15-461" aria-hidden="true" tabindex="-1"></a>\end{cases}</span>
+<span id="cb15-462"><a href="#cb15-462" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-463"><a href="#cb15-463" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-464"><a href="#cb15-464" aria-hidden="true" tabindex="-1"></a>where $c$ is a prespecified target or the sample median.</span>
+<span id="cb15-465"><a href="#cb15-465" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-466"><a href="#cb15-466" aria-hidden="true" tabindex="-1"></a>Using the median tends to balance $n_1$ and $n_2$, which improves power. However, dichotomization discards magnitude information: a value barely above the median is treated the same as an extreme value.</span>
+<span id="cb15-467"><a href="#cb15-467" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-470"><a href="#cb15-470" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb15-471"><a href="#cb15-471" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: numeric-example</span></span>
+<span id="cb15-472"><a href="#cb15-472" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb15-473"><a href="#cb15-473" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">40</span>)</span>
+<span id="cb15-474"><a href="#cb15-474" aria-hidden="true" tabindex="-1"></a>threshold <span class="ot">&lt;-</span> <span class="fu">median</span>(y)</span>
+<span id="cb15-475"><a href="#cb15-475" aria-hidden="true" tabindex="-1"></a>symbols <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(y <span class="sc">&gt;</span> threshold, <span class="st">"+"</span>, <span class="st">"-"</span>)</span>
+<span id="cb15-476"><a href="#cb15-476" aria-hidden="true" tabindex="-1"></a><span class="fu">runs_test_binary</span>(symbols, <span class="at">method =</span> <span class="st">"exact"</span>)</span>
+<span id="cb15-477"><a href="#cb15-477" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-478"><a href="#cb15-478" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-479"><a href="#cb15-479" aria-hidden="true" tabindex="-1"></a><span class="fu">## Ties at the threshold</span></span>
+<span id="cb15-480"><a href="#cb15-480" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-481"><a href="#cb15-481" aria-hidden="true" tabindex="-1"></a>If some observations equal $c$, decide on a rule before testing. Possibilities include:</span>
+<span id="cb15-482"><a href="#cb15-482" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-483"><a href="#cb15-483" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>remove observations equal to $c$ and join the remaining sequence;</span>
+<span id="cb15-484"><a href="#cb15-484" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>assign ties by a prespecified scientific rule;</span>
+<span id="cb15-485"><a href="#cb15-485" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>use a method designed explicitly for ties.</span>
+<span id="cb15-486"><a href="#cb15-486" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-487"><a href="#cb15-487" aria-hidden="true" tabindex="-1"></a>Do not assign ties after looking for the choice that produces the smallest p-value. If many observations tie, the ordinary two-symbol runs test may be inappropriate.</span>
+<span id="cb15-488"><a href="#cb15-488" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-489"><a href="#cb15-489" aria-hidden="true" tabindex="-1"></a><span class="fu"># Using an R package</span></span>
+<span id="cb15-490"><a href="#cb15-490" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-491"><a href="#cb15-491" aria-hidden="true" tabindex="-1"></a>The <span class="in">`randtests`</span> package provides <span class="in">`runs.test()`</span>.</span>
+<span id="cb15-492"><a href="#cb15-492" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-495"><a href="#cb15-495" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb15-496"><a href="#cb15-496" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb15-497"><a href="#cb15-497" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages("randtests")</span></span>
+<span id="cb15-498"><a href="#cb15-498" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randtests)</span>
+<span id="cb15-499"><a href="#cb15-499" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-500"><a href="#cb15-500" aria-hidden="true" tabindex="-1"></a>x_num <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(seq_raw <span class="sc">==</span> <span class="st">"U"</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb15-501"><a href="#cb15-501" aria-hidden="true" tabindex="-1"></a><span class="fu">runs.test</span>(x_num, <span class="at">threshold =</span> <span class="fl">0.5</span>)</span>
+<span id="cb15-502"><a href="#cb15-502" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-503"><a href="#cb15-503" aria-hidden="true" tabindex="-1"></a><span class="co"># Numeric observations are commonly split at the median.</span></span>
+<span id="cb15-504"><a href="#cb15-504" aria-hidden="true" tabindex="-1"></a><span class="fu">runs.test</span>(y)</span>
+<span id="cb15-505"><a href="#cb15-505" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-506"><a href="#cb15-506" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-507"><a href="#cb15-507" aria-hidden="true" tabindex="-1"></a>When comparing output, check:</span>
+<span id="cb15-508"><a href="#cb15-508" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-509"><a href="#cb15-509" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>whether an exact or Normal method is used;</span>
+<span id="cb15-510"><a href="#cb15-510" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>whether a continuity correction is used;</span>
+<span id="cb15-511"><a href="#cb15-511" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>how ties are handled;</span>
+<span id="cb15-512"><a href="#cb15-512" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>how the two-sided p-value is defined;</span>
+<span id="cb15-513"><a href="#cb15-513" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>which alternative corresponds to clustering or alternation.</span>
+<span id="cb15-514"><a href="#cb15-514" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-515"><a href="#cb15-515" aria-hidden="true" tabindex="-1"></a><span class="fu"># Relationship to the two-sample Wald–Wolfowitz test</span></span>
+<span id="cb15-516"><a href="#cb15-516" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-517"><a href="#cb15-517" aria-hidden="true" tabindex="-1"></a>The phrase “runs test” is also used for a two-sample problem:</span>
+<span id="cb15-518"><a href="#cb15-518" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-519"><a href="#cb15-519" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>pool observations from two independent samples;</span>
+<span id="cb15-520"><a href="#cb15-520" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>sort the pooled values;</span>
+<span id="cb15-521"><a href="#cb15-521" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>label each ordered value by its sample of origin;</span>
+<span id="cb15-522"><a href="#cb15-522" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>count runs of sample labels.</span>
+<span id="cb15-523"><a href="#cb15-523" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-524"><a href="#cb15-524" aria-hidden="true" tabindex="-1"></a>Too few runs suggest the two populations differ. This is related to, but conceptually distinct from, testing serial randomness in one observed sequence. In one-sample randomness problems, the original time or spatial order must be preserved.</span>
+<span id="cb15-525"><a href="#cb15-525" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-526"><a href="#cb15-526" aria-hidden="true" tabindex="-1"></a><span class="fu"># What the test detects</span></span>
+<span id="cb15-527"><a href="#cb15-527" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-528"><a href="#cb15-528" aria-hidden="true" tabindex="-1"></a>The test is sensitive to simple local ordering patterns:</span>
+<span id="cb15-529"><a href="#cb15-529" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-530"><a href="#cb15-530" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>clustering of similar signs;</span>
+<span id="cb15-531"><a href="#cb15-531" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>excessive alternation;</span>
+<span id="cb15-532"><a href="#cb15-532" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>some trends, when values are coded relative to a fixed threshold;</span>
+<span id="cb15-533"><a href="#cb15-533" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>persistent stretches above or below a center line.</span>
+<span id="cb15-534"><a href="#cb15-534" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-535"><a href="#cb15-535" aria-hidden="true" tabindex="-1"></a>It is attractive because, conditional on $n_1$ and $n_2$, its null distribution is distribution-free.</span>
+<span id="cb15-536"><a href="#cb15-536" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-537"><a href="#cb15-537" aria-hidden="true" tabindex="-1"></a><span class="fu"># Limitations</span></span>
+<span id="cb15-538"><a href="#cb15-538" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-539"><a href="#cb15-539" aria-hidden="true" tabindex="-1"></a>A nonsignificant result does **not** prove independence or randomness. The runs test can miss:</span>
+<span id="cb15-540"><a href="#cb15-540" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-541"><a href="#cb15-541" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>dependence at lags greater than one;</span>
+<span id="cb15-542"><a href="#cb15-542" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>periodic patterns that happen to generate an ordinary number of runs;</span>
+<span id="cb15-543"><a href="#cb15-543" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>changes in variance with no change in signs;</span>
+<span id="cb15-544"><a href="#cb15-544" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>nonlinear dependence;</span>
+<span id="cb15-545"><a href="#cb15-545" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>patterns lost through dichotomization.</span>
+<span id="cb15-546"><a href="#cb15-546" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-547"><a href="#cb15-547" aria-hidden="true" tabindex="-1"></a>It is also possible for a sequence to have a highly unusual ordering but a moderate number of runs.</span>
+<span id="cb15-548"><a href="#cb15-548" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-549"><a href="#cb15-549" aria-hidden="true" tabindex="-1"></a>For richer time-series diagnostics, consider autocorrelation plots, Ljung–Box tests, change-point methods, or application-specific models. Those procedures test different aspects of structure.</span>
+<span id="cb15-550"><a href="#cb15-550" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-551"><a href="#cb15-551" aria-hidden="true" tabindex="-1"></a><span class="fu"># Recommended reporting</span></span>
+<span id="cb15-552"><a href="#cb15-552" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-553"><a href="#cb15-553" aria-hidden="true" tabindex="-1"></a>A concise report should include:</span>
+<span id="cb15-554"><a href="#cb15-554" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-555"><a href="#cb15-555" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>the threshold or coding rule;</span>
+<span id="cb15-556"><a href="#cb15-556" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$n_1$, $n_2$, and observed $R$;</span>
+<span id="cb15-557"><a href="#cb15-557" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>whether the test was exact or approximate;</span>
+<span id="cb15-558"><a href="#cb15-558" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>whether a continuity correction was used;</span>
+<span id="cb15-559"><a href="#cb15-559" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>the alternative and p-value;</span>
+<span id="cb15-560"><a href="#cb15-560" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>a contextual conclusion.</span>
+<span id="cb15-561"><a href="#cb15-561" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-562"><a href="#cb15-562" aria-hidden="true" tabindex="-1"></a>Example:</span>
+<span id="cb15-563"><a href="#cb15-563" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-564"><a href="#cb15-564" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; Coding each day as up or down produced $n_1=11$ up days, $n_2=9$ down days, and $R=10$ runs. A two-sided runs test gave a large p-value, so the data do not provide evidence that the ordering departs from randomness. This does not establish full serial independence.</span></span>
+<span id="cb15-565"><a href="#cb15-565" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-566"><a href="#cb15-566" aria-hidden="true" tabindex="-1"></a><span class="fu"># Summary</span></span>
+<span id="cb15-567"><a href="#cb15-567" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-568"><a href="#cb15-568" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>A run is a maximal block of identical symbols.</span>
+<span id="cb15-569"><a href="#cb15-569" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Too few runs indicate clustering; too many indicate excessive alternation.</span>
+<span id="cb15-570"><a href="#cb15-570" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Under $H_0$, all orderings with fixed $n_1$ and $n_2$ are equally likely.</span>
+<span id="cb15-571"><a href="#cb15-571" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>The exact distribution is combinatorial and distribution-free.</span>
+<span id="cb15-572"><a href="#cb15-572" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>For large groups,</span>
+<span id="cb15-573"><a href="#cb15-573" aria-hidden="true" tabindex="-1"></a>   $$</span>
+<span id="cb15-574"><a href="#cb15-574" aria-hidden="true" tabindex="-1"></a>   Z=\frac{R-\mu_R}{\sigma_R}</span>
+<span id="cb15-575"><a href="#cb15-575" aria-hidden="true" tabindex="-1"></a>   \mathrel{\dot\sim}N(0,1).</span>
+<span id="cb15-576"><a href="#cb15-576" aria-hidden="true" tabindex="-1"></a>   $$</span>
+<span id="cb15-577"><a href="#cb15-577" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>Preserve the original order, state the coding rule, and handle ties transparently.</span>
+<span id="cb15-578"><a href="#cb15-578" aria-hidden="true" tabindex="-1"></a><span class="ss">7. </span>A runs test examines one kind of sequential structure; it is not a universal test of independence.</span>
+<span id="cb15-579"><a href="#cb15-579" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-580"><a href="#cb15-580" aria-hidden="true" tabindex="-1"></a><span class="fu"># Practice problems</span></span>
+<span id="cb15-581"><a href="#cb15-581" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-582"><a href="#cb15-582" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Count the runs in</span>
+<span id="cb15-583"><a href="#cb15-583" aria-hidden="true" tabindex="-1"></a>   $$</span>
+<span id="cb15-584"><a href="#cb15-584" aria-hidden="true" tabindex="-1"></a>   A\,A\,B\,A\,B\,B\,B\,A\,A\,B.</span>
+<span id="cb15-585"><a href="#cb15-585" aria-hidden="true" tabindex="-1"></a>   $$</span>
+<span id="cb15-586"><a href="#cb15-586" aria-hidden="true" tabindex="-1"></a>   Identify $n_1$, $n_2$, and $R$.</span>
+<span id="cb15-587"><a href="#cb15-587" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-588"><a href="#cb15-588" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>For $n_1=12$ and $n_2=8$, compute $E(R)$ and $\operatorname{SD}(R)$.</span>
+<span id="cb15-589"><a href="#cb15-589" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-590"><a href="#cb15-590" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Explain why a sequence with $R=2$ is evidence for clustering, while a sequence with the largest possible $R$ is evidence for alternation.</span>
+<span id="cb15-591"><a href="#cb15-591" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-592"><a href="#cb15-592" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Construct two different binary sequences with the same $n_1$, $n_2$, and $R$. What does this demonstrate about the information retained by the test statistic?</span>
+<span id="cb15-593"><a href="#cb15-593" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-594"><a href="#cb15-594" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Simulate the null distribution for $n_1=n_2=15$ and compare it with the exact PMF from <span class="in">`runs_pmf(15, 15)`</span>.</span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

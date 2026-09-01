@@ -1,0 +1,578 @@
+---
+title: "Tests of Randomness: The Runs Test"
+subtitle: "Lecture notes for STAT 3504"
+author: "Jyotishka Datta"
+institute: "Virginia Tech"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: show
+    code-tools: true
+    theme: cosmo
+    df-print: paged
+execute:
+  warning: false
+  message: false
+  freeze: auto
+header-includes: |
+  <style>
+  :root { --vt-maroon: #861F41; --vt-orange: #E5751F; }
+  h1, h2, h3 { color: var(--vt-maroon); }
+  .callout-important { border-left-color: var(--vt-orange); }
+  </style>
+---
+
+# Why test randomness?
+
+Many methods begin with an assumption that observations arrive in a random order or are serially independent. A dataset can have a reasonable histogram and still contain a strong sequential pattern.
+
+Examples include:
+
+- winning and losing days for a stock;
+- defective and nondefective items on a production line;
+- treatment successes and failures over time;
+- measurements above and below a target;
+- residuals from a fitted model.
+
+A **runs test** asks whether the ordering contains too much clustering or too much alternation to be compatible with randomness.
+
+::: {.callout-important}
+A runs test is about **order**. If the observations are shuffled, their numerical values do not change, but the number of runs usually does.
+:::
+
+# Runs in a binary sequence
+
+A **run** is a maximal consecutive block of identical symbols.
+
+For example,
+
+$$
++\,+\,+\;-\,-\;+\;-\,-\,-\;+\,+
+$$
+
+has the five runs
+
+$$
+(+++)\quad(--)\quad(+)\quad(---)\quad(++).
+$$
+
+Let
+
+- $n_1$ be the number of symbols of type 1 (for example, $+$);
+- $n_2$ be the number of symbols of type 2 (for example, $-$);
+- $n=n_1+n_2$;
+- $R$ be the total number of runs.
+
+Interpretation:
+
+- unusually **small** $R$: clustering or positive serial association;
+- unusually **large** $R$: alternation or negative serial association;
+- moderate $R$: compatible with random ordering.
+
+# Hypotheses and null model
+
+For the one-sample binary runs test, the null hypothesis is
+
+$$
+H_0:\text{ conditional on }n_1\text{ and }n_2,\text{ every ordering is equally likely.}
+$$
+
+Common alternatives are:
+
+- lower-tailed: the sequence is clustered, so $R$ is too small;
+- upper-tailed: the sequence alternates too often, so $R$ is too large;
+- two-sided: the ordering is nonrandom in either direction.
+
+Conditioning on $n_1$ and $n_2$ is important. Under $H_0$, there are
+
+$$
+\binom{n}{n_1}
+$$
+
+possible binary orderings, each with the same probability.
+
+# Exact null distribution
+
+The exact distribution depends only on $n_1$ and $n_2$.
+
+For an even number of runs, $R=2k$,
+
+$$
+P(R=2k)
+=
+\frac{2\binom{n_1-1}{k-1}\binom{n_2-1}{k-1}}
+{\binom{n}{n_1}}.
+$$
+
+For an odd number of runs, $R=2k+1$,
+
+$$
+P(R=2k+1)
+=
+\frac{
+\binom{n_1-1}{k}\binom{n_2-1}{k-1}
++
+\binom{n_1-1}{k-1}\binom{n_2-1}{k}
+}
+{\binom{n}{n_1}}.
+$$
+
+The possible values satisfy
+
+$$
+2\le R\le
+\begin{cases}
+2\min(n_1,n_2)+1, & n_1\ne n_2,\\
+2n_1, & n_1=n_2.
+\end{cases}
+$$
+
+If one symbol never occurs, then $R=1$ and no meaningful two-symbol runs test is possible.
+
+## Why the formulas have this form
+
+Suppose $R=2k$. The sequence must start with one symbol and end with the other, so each symbol forms exactly $k$ positive-length blocks. Splitting $n_1$ objects into $k$ nonempty blocks can be done in
+
+$$
+\binom{n_1-1}{k-1}
+$$
+
+ways, and similarly for the second symbol. The factor $2$ chooses which symbol starts the sequence.
+
+For $R=2k+1$, the sequence starts and ends with the same symbol. One symbol has $k+1$ blocks and the other has $k$ blocks; the two terms correspond to which symbol has the extra block.
+
+# Mean and variance under randomness
+
+Under $H_0$,
+
+$$
+E(R)=\mu_R=1+\frac{2n_1n_2}{n},
+$$
+
+and
+
+$$
+\operatorname{Var}(R)=\sigma_R^2
+=
+\frac{2n_1n_2\left(2n_1n_2-n\right)}
+{n^2(n-1)}.
+$$
+
+For sufficiently large $n_1$ and $n_2$,
+
+$$
+Z=\frac{R-\mu_R}{\sigma_R}
+\mathrel{\dot\sim}N(0,1).
+$$
+
+A common classroom guideline is to prefer the exact distribution when either group is small and to regard the Normal approximation as comfortable when both $n_1$ and $n_2$ exceed about $10$. This is a rule of thumb, not a theorem.
+
+## Optional continuity correction
+
+Since $R$ is discrete, a continuity correction may be used:
+
+$$
+Z_{\mathrm{cc}}=
+\begin{cases}
+\dfrac{R+0.5-\mu_R}{\sigma_R}, & R<\mu_R,\\[8pt]
+\dfrac{R-0.5-\mu_R}{\sigma_R}, & R>\mu_R,\\[8pt]
+0, & R=\mu_R.
+\end{cases}
+$$
+
+Software packages differ in whether they use a correction. Consequently, two implementations can report slightly different large-sample p-values.
+
+# A complete hand calculation
+
+Consider the sequence of stock-market directions over $20$ days:
+
+$$
+U\,U\,D\,D\,D\,U\,U\,U\,D\,U\,D\,D\,U\,U\,U\,U\,D\,D\,U\,D.
+$$
+
+The run decomposition is
+
+$$
+(UU)(DDD)(UUU)(D)(U)(DD)(UUUU)(DD)(U)(D),
+$$
+
+so
+
+$$
+R=10,\qquad n_1=11,\qquad n_2=9,\qquad n=20.
+$$
+
+The null mean and standard deviation are
+
+$$
+\mu_R=1+\frac{2(11)(9)}{20}=10.9,
+$$
+
+$$
+\sigma_R
+=
+\sqrt{
+\frac{2(11)(9)\{2(11)(9)-20\}}
+{20^2(19)}
+}
+\approx2.1535.
+$$
+
+Without continuity correction,
+
+$$
+Z=\frac{10-10.9}{2.1535}\approx-0.4179,
+$$
+
+which gives a two-sided Normal p-value of approximately $0.676$. There is no evidence here of a nonrandom ordering.
+
+```{r}
+#| label: stock-example
+seq_raw <- c("U","U","D","D","D","U","U","U","D","U",
+             "D","D","U","U","U","U","D","D","U","D")
+
+n1 <- sum(seq_raw == "U")
+n2 <- sum(seq_raw == "D")
+n  <- n1 + n2
+R  <- length(rle(seq_raw)$lengths)
+
+mu_R <- 1 + 2*n1*n2/n
+var_R <- 2*n1*n2*(2*n1*n2 - n)/(n^2*(n - 1))
+sd_R <- sqrt(var_R)
+z <- (R - mu_R)/sd_R
+p_normal <- 2*pnorm(-abs(z))
+
+c(n1 = n1, n2 = n2, runs = R,
+  expected_runs = mu_R, sd_runs = sd_R,
+  z = z, p_value = p_normal)
+```
+
+::: {.callout-note}
+The variance denominator is $n^2(n-1)$. Writing the algebra incorrectly can produce an impossible standard deviation larger than the entire range of $R$.
+:::
+
+# Base-R implementation
+
+The following functions count runs, compute the exact null distribution, and perform exact or Normal tests without requiring an external package.
+
+```{r}
+#| label: runs-functions
+count_runs <- function(x) {
+  if (length(x) == 0) return(0)
+  1 + sum(x[-1] != x[-length(x)])
+}
+
+runs_moments <- function(n1, n2) {
+  n <- n1 + n2
+  if (n1 < 1 || n2 < 1) stop("Both symbol types must occur.")
+  mu <- 1 + 2*n1*n2/n
+  variance <- 2*n1*n2*(2*n1*n2 - n)/(n^2*(n - 1))
+  c(mean = mu, variance = variance, sd = sqrt(variance))
+}
+
+runs_pmf <- function(n1, n2) {
+  if (n1 < 1 || n2 < 1) stop("Both symbol types must occur.")
+  n <- n1 + n2
+  choose0 <- function(a, b) {
+    if (a < 0 || b < 0 || b > a) 0 else choose(a, b)
+  }
+  r_max <- if (n1 == n2) 2*n1 else 2*min(n1, n2) + 1
+  r_values <- 2:r_max
+  denom <- choose(n, n1)
+
+  probability <- vapply(r_values, function(r) {
+    if (r %% 2 == 0) {
+      k <- r/2
+      2*choose0(n1 - 1, k - 1)*choose0(n2 - 1, k - 1)/denom
+    } else {
+      k <- (r - 1)/2
+      (choose0(n1 - 1, k)*choose0(n2 - 1, k - 1) +
+       choose0(n1 - 1, k - 1)*choose0(n2 - 1, k))/denom
+    }
+  }, numeric(1))
+
+  data.frame(runs = r_values, probability = probability)
+}
+
+runs_test_binary <- function(x,
+                             alternative = c("two.sided", "less", "greater"),
+                             method = c("exact", "normal"),
+                             continuity = FALSE) {
+  alternative <- match.arg(alternative)
+  method <- match.arg(method)
+  if (length(unique(x)) != 2L) stop("x must contain exactly two symbol types.")
+
+  x <- as.factor(x)
+  counts <- table(x)
+  n1 <- unname(counts[1L])
+  n2 <- unname(counts[2L])
+  R <- count_runs(x)
+  moments <- runs_moments(n1, n2)
+
+  if (method == "exact") {
+    tab <- runs_pmf(n1, n2)
+    lower <- sum(tab$probability[tab$runs <= R])
+    upper <- sum(tab$probability[tab$runs >= R])
+    p <- switch(alternative,
+      less = lower,
+      greater = upper,
+      two.sided = min(1, 2*min(lower, upper))
+    )
+    statistic <- R
+  } else {
+    shift <- 0
+    if (continuity && R < moments["mean"]) shift <- 0.5
+    if (continuity && R > moments["mean"]) shift <- -0.5
+    z <- (R + shift - moments["mean"])/moments["sd"]
+    p <- switch(alternative,
+      less = pnorm(z),
+      greater = pnorm(z, lower.tail = FALSE),
+      two.sided = 2*pnorm(-abs(z))
+    )
+    statistic <- z
+  }
+
+  list(
+    method = method,
+    alternative = alternative,
+    n1 = n1,
+    n2 = n2,
+    runs = R,
+    null_mean = unname(moments["mean"]),
+    null_sd = unname(moments["sd"]),
+    statistic = unname(statistic),
+    p_value = unname(p)
+  )
+}
+```
+
+Apply both methods to the stock sequence:
+
+```{r}
+runs_test_binary(seq_raw, method = "exact")
+runs_test_binary(seq_raw, method = "normal")
+runs_test_binary(seq_raw, method = "normal", continuity = TRUE)
+```
+
+## A note on two-sided exact p-values
+
+For a discrete statistic, “two-sided” is not unique. Common conventions include:
+
+1. twice the smaller tail probability;
+2. summing probabilities of outcomes whose null probability is no larger than that of the observed outcome;
+3. ordering outcomes by distance from $E(R)$.
+
+The function above uses twice the smaller tail, capped at $1$. A software package may use a different convention, so exact two-sided p-values can differ slightly even when all calculations are correct. One-sided exact p-values are unambiguous once the direction is specified.
+
+# Visualizing runs
+
+```{r}
+#| label: visualize-runs
+#| fig-width: 9
+#| fig-height: 3.8
+#| echo: false
+x <- ifelse(seq_raw == "U", 1, 0)
+cols <- c("#E5751F", "#861F41")
+plot(seq_along(x), x, type = "s", lwd = 3, col = "#861F41",
+     xaxt = "n", yaxt = "n", ylim = c(-0.25, 1.25),
+     xlab = "Day", ylab = "Direction", main = "Runs in the observed sequence")
+axis(1, at = seq_along(x))
+axis(2, at = c(0, 1), labels = c("D", "U"), las = 1)
+points(seq_along(x), x, pch = 21, bg = cols[x + 1], col = "white", cex = 1.6)
+abline(v = which(diff(x) != 0) + 0.5, col = "gray65", lty = 3)
+```
+
+Vertical dotted lines mark changes from one run to the next.
+
+# Simulating the null distribution
+
+Under $H_0$, we can hold the counts fixed and randomly permute the sequence.
+
+```{r}
+#| label: null-simulation
+#| fig-width: 8
+#| fig-height: 4.8
+set.seed(3504)
+n1 <- 10
+n2 <- 10
+base_sequence <- c(rep(1, n1), rep(0, n2))
+
+R_null <- replicate(20000, count_runs(sample(base_sequence)))
+
+hist(R_null, probability = TRUE,
+     breaks = seq(min(R_null) - 0.5, max(R_null) + 0.5, by = 1),
+     col = "#861F41", border = "white",
+     xlab = "Number of runs", main = "Permutation null distribution")
+
+mom <- runs_moments(n1, n2)
+curve(dnorm(x, mom["mean"], mom["sd"]), add = TRUE,
+      col = "#E5751F", lwd = 3)
+```
+
+This simulation is not needed when the exact combinatorial distribution is available, but it makes the null model concrete: the values are fixed, and only their order is randomized.
+
+# Contrasting three sequences
+
+```{r}
+#| label: sequence-contrast
+set.seed(12)
+clustered <- c(rep(1, 10), rep(0, 10))
+alternating <- rep(c(1, 0), 10)
+random_order <- sample(c(rep(1, 10), rep(0, 10)))
+
+examples <- list(
+  Clustered = clustered,
+  Alternating = alternating,
+  Random_order = random_order
+)
+
+results <- do.call(rbind, lapply(names(examples), function(name) {
+  fit <- runs_test_binary(examples[[name]], method = "exact")
+  data.frame(sequence = name, runs = fit$runs, p_value = fit$p_value)
+}))
+results
+```
+
+The clustered and alternating sequences are both nonrandom, but they occupy opposite tails of the runs distribution.
+
+# Continuous observations: dichotomizing at a threshold
+
+For quantitative observations $Y_1,\ldots,Y_n$, a common procedure is to encode
+
+$$
+X_i=
+\begin{cases}
++, & Y_i>c,\\
+-, & Y_i<c,
+\end{cases}
+$$
+
+where $c$ is a prespecified target or the sample median.
+
+Using the median tends to balance $n_1$ and $n_2$, which improves power. However, dichotomization discards magnitude information: a value barely above the median is treated the same as an extreme value.
+
+```{r}
+#| label: numeric-example
+set.seed(42)
+y <- rnorm(40)
+threshold <- median(y)
+symbols <- ifelse(y > threshold, "+", "-")
+runs_test_binary(symbols, method = "exact")
+```
+
+## Ties at the threshold
+
+If some observations equal $c$, decide on a rule before testing. Possibilities include:
+
+- remove observations equal to $c$ and join the remaining sequence;
+- assign ties by a prespecified scientific rule;
+- use a method designed explicitly for ties.
+
+Do not assign ties after looking for the choice that produces the smallest p-value. If many observations tie, the ordinary two-symbol runs test may be inappropriate.
+
+# Using an R package
+
+The `randtests` package provides `runs.test()`.
+
+```{r}
+#| eval: false
+# install.packages("randtests")
+library(randtests)
+
+x_num <- ifelse(seq_raw == "U", 1, 0)
+runs.test(x_num, threshold = 0.5)
+
+# Numeric observations are commonly split at the median.
+runs.test(y)
+```
+
+When comparing output, check:
+
+- whether an exact or Normal method is used;
+- whether a continuity correction is used;
+- how ties are handled;
+- how the two-sided p-value is defined;
+- which alternative corresponds to clustering or alternation.
+
+# Relationship to the two-sample Wald–Wolfowitz test
+
+The phrase “runs test” is also used for a two-sample problem:
+
+1. pool observations from two independent samples;
+2. sort the pooled values;
+3. label each ordered value by its sample of origin;
+4. count runs of sample labels.
+
+Too few runs suggest the two populations differ. This is related to, but conceptually distinct from, testing serial randomness in one observed sequence. In one-sample randomness problems, the original time or spatial order must be preserved.
+
+# What the test detects
+
+The test is sensitive to simple local ordering patterns:
+
+- clustering of similar signs;
+- excessive alternation;
+- some trends, when values are coded relative to a fixed threshold;
+- persistent stretches above or below a center line.
+
+It is attractive because, conditional on $n_1$ and $n_2$, its null distribution is distribution-free.
+
+# Limitations
+
+A nonsignificant result does **not** prove independence or randomness. The runs test can miss:
+
+- dependence at lags greater than one;
+- periodic patterns that happen to generate an ordinary number of runs;
+- changes in variance with no change in signs;
+- nonlinear dependence;
+- patterns lost through dichotomization.
+
+It is also possible for a sequence to have a highly unusual ordering but a moderate number of runs.
+
+For richer time-series diagnostics, consider autocorrelation plots, Ljung–Box tests, change-point methods, or application-specific models. Those procedures test different aspects of structure.
+
+# Recommended reporting
+
+A concise report should include:
+
+- the threshold or coding rule;
+- $n_1$, $n_2$, and observed $R$;
+- whether the test was exact or approximate;
+- whether a continuity correction was used;
+- the alternative and p-value;
+- a contextual conclusion.
+
+Example:
+
+> Coding each day as up or down produced $n_1=11$ up days, $n_2=9$ down days, and $R=10$ runs. A two-sided runs test gave a large p-value, so the data do not provide evidence that the ordering departs from randomness. This does not establish full serial independence.
+
+# Summary
+
+1. A run is a maximal block of identical symbols.
+2. Too few runs indicate clustering; too many indicate excessive alternation.
+3. Under $H_0$, all orderings with fixed $n_1$ and $n_2$ are equally likely.
+4. The exact distribution is combinatorial and distribution-free.
+5. For large groups,
+   $$
+   Z=\frac{R-\mu_R}{\sigma_R}
+   \mathrel{\dot\sim}N(0,1).
+   $$
+6. Preserve the original order, state the coding rule, and handle ties transparently.
+7. A runs test examines one kind of sequential structure; it is not a universal test of independence.
+
+# Practice problems
+
+1. Count the runs in
+   $$
+   A\,A\,B\,A\,B\,B\,B\,A\,A\,B.
+   $$
+   Identify $n_1$, $n_2$, and $R$.
+
+2. For $n_1=12$ and $n_2=8$, compute $E(R)$ and $\operatorname{SD}(R)$.
+
+3. Explain why a sequence with $R=2$ is evidence for clustering, while a sequence with the largest possible $R$ is evidence for alternation.
+
+4. Construct two different binary sequences with the same $n_1$, $n_2$, and $R$. What does this demonstrate about the information retained by the test statistic?
+
+5. Simulate the null distribution for $n_1=n_2=15$ and compare it with the exact PMF from `runs_pmf(15, 15)`.
