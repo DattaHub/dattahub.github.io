@@ -1,0 +1,240 @@
+---
+title: "The Pareto Distribution: Heavy Tails, Broken Inference, and the 80/20 Rule"
+author: "Jyotishka Datta"
+date: last-modified
+
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    embed-resources: true
+    code-fold: false
+    fig-cap-location: bottom
+    smooth-scroll: true
+    self-contained: true
+
+execute:
+  echo: true
+  warning: false
+  message: false
+  cache: true
+
+editor: visual
+---
+
+# Overview
+
+In the previous notes we learned to generate random variables by inverting the CDF, and to estimate expectations by Monte Carlo averaging, justified by the Law of Large Numbers and the Central Limit Theorem. This note is a cautionary tale about that last step. The CLT is not a law of nature that always applies: there are assumptions like having a finite variance, and CLT doesn't hold when that assumption fails. 
+
+The **Pareto distribution** is the classic setting where this happens. It is the popular model for income, wealth, city sizes, and file sizes, and it is where Vilfredo Pareto's famous "80/20 rule" comes from. It also has no built-in generator in `R`, so it is a natural showcase for inverse-transform sampling. We develop its properties, then use simulation to watch normal-theory confidence intervals fail, and finish with the 80/20 rule.
+
+::: callout-note
+## Prerequisites 
+
+You need to know the inverse CDF transformation trick and the basics of Monte Carlo, i.e., you can approximate an expectation by an average over a large number of samples. 
+:::
+
+# The Pareto Distribution
+
+The (Type I) Pareto distribution has a **scale** parameter $x_m > 0$, and a **shape** parameter $\alpha > 0$, called the **tail index**.  The scale is a floor below which no values occur. 
+
+For $x \ge x_m$,
+
+$$
+f(x) = \frac{\alpha\, x_m^{\alpha}}{x^{\alpha+1}},
+\qquad
+F(x) = 1 - \left(\frac{x_m}{x}\right)^{\alpha},
+\qquad
+S(x) = 1 - F(x) = \left(\frac{x_m}{x}\right)^{\alpha}.
+$$
+
+The density is strictly decreasing, so the **mode** sits at the left edge $x_m$, and the **median** is $x_m\, 2^{1/\alpha}$. Inverting the CDF gives the quantile function. This is what we need for the random number generation. 
+
+$$
+F^{-1}(u) = x_m\,(1-u)^{-1/\alpha}, \qquad u \in [0,1).
+$$
+
+## Moments and their existence
+
+The defining feature of the Pareto is that **its moments can be infinite**. The $k$-th moment is finite only when the shape exceeds $k$:
+
+$$
+\mathbb{E}[X^k] = \frac{\alpha\, x_m^{k}}{\alpha - k}
+\quad (\alpha > k),
+\qquad \text{and diverges when } \alpha \le k.
+$$
+
+Specializing gives the mean and variance:
+
+| Quantity | Formula | Finite only when |
+|------------------------|------------------------|------------------------|
+| Mean $\mathbb{E}[X]$ | $\dfrac{\alpha\, x_m}{\alpha - 1}$ | $\alpha > 1$ |
+| Variance $\operatorname{Var}(X)$ | $\dfrac{\alpha\, x_m^{2}}{(\alpha-1)^2(\alpha-2)}$ | $\alpha > 2$ |
+| $k$-th moment | $\dfrac{\alpha\, x_m^{k}}{\alpha - k}$ | $\alpha > k$ |
+
+Empirically, income has a tail index around $\alpha \in (1.5, 3)$ and wealth near $1.5$, so, you will often find real data where the tail index is in the range $1 < \alpha < 2$. That is, it could happen in practice that for such data **the theoretical true mean exists but the variance is infinite.** 
+
+## Generating Pareto Draws
+
+Because base R has no `rpareto()`, we build one by inverting the CDF exactly as in the inverse-transform notes: solving $u = F(x)$ gives $x = x_m/(1-u)^{1/\alpha}$.
+
+```{r}
+#| label: setup-pareto
+set.seed(3504)
+
+## Inverse-CDF sampler for Pareto(xm, alpha)
+## CDF:  F(x) = 1 - (xm/x)^alpha,  x >= xm
+## Solve u = F(x)  ->  x = xm / (1 - u)^(1/alpha)
+rpareto <- function(n, xm, alpha) {
+  u <- runif(n)
+  xm / (1 - u)^(1 / alpha)
+}
+
+## True CDF, for checking the sampler
+ppareto <- function(x, xm, alpha) ifelse(x < xm, 0, 1 - (xm / x)^alpha)
+```
+
+As a sanity check, we generate "income" data above a \$30{,}000 floor with $\alpha = 2$ and confirm the empirical CDF of the draws matches the true CDF.
+
+```{r}
+#| label: fig-ecdf-check
+#| fig-cap: "Empirical CDF of 100 simulated Pareto incomes (grey steps) against the true Pareto CDF (red). The close agreement confirms the inverse-transform sampler is correct."
+#| fig-alt: "A grey step function rising from the 30000 floor toward 1, closely tracking a smooth red curve labelled as the true CDF."
+xm    <- 30000   # income floor (scale parameter)
+alpha <- 2       # tail index (smaller alpha = heavier tail = more inequality)
+
+income <- rpareto(100, xm, alpha)
+
+plot(ecdf(income), xlim = c(xm, 3e5), col = "grey40",
+     main = "Pareto income: generated ECDF vs true CDF",
+     xlab = "income ($)", ylab = "F(x)")
+curve(ppareto(x, xm, alpha), add = TRUE, col = "red", lwd = 2)
+legend("bottomright", c("generated (ecdf)", "true F(x)"),
+       col = c("grey40", "red"), lwd = c(1, 2), bty = "n")
+```
+
+# Undercoverage of CLT
+
+Recall the standard 95% confidence interval for a mean,
+
+$$
+\bar{X} \pm 1.96\,\frac{s}{\sqrt{n}},
+$$
+
+whose justification is the CLT: $\bar{X}$ is approximately normal with standard error $\sigma/\sqrt{n}$, estimated by $s/\sqrt{n}$. But the CLT **requires a finite variance**. Take $\alpha = 1.5$: the mean exists and equals
+
+$$
+\mathbb{E}[X] = \frac{\alpha\, x_m}{\alpha - 1}
+= \frac{1.5 \times 30000}{0.5} = 90000,
+$$
+
+but the variance is infinite. The sample standard deviation $s$ is then estimating something that does not exist. Let us see how badly it fails by simulation. 
+
+First, look at the sampling distribution of the sample mean over 5000 simulated samples of size $n = 200$.
+
+```{r}
+#| label: fig-sampling-dist
+#| fig-cap: "Sampling distribution of the sample mean for Pareto(30000, 1.5) with n = 200, over 5000 replications (top 2% trimmed for legibility). The red line marks the true mean of 90000. Instead of a symmetric bell, the distribution is strongly right-skewed."
+#| fig-alt: "A strongly right-skewed histogram of sample means with a long tail to the right. A red vertical line at 90000 sits to the right of the histogram's peak, not at its center."
+alpha_h   <- 1.5
+n         <- 200
+reps      <- 5000
+true_mean <- alpha_h * xm / (alpha_h - 1)   # = 90000
+
+means <- replicate(reps, mean(rpareto(n, xm, alpha_h)))
+
+## Trim the top 2% only so the long tail does not swamp the plot
+m_plot <- means[means <= quantile(means, 0.98)]
+hist(m_plot, breaks = 40, probability = TRUE,
+     main = "Sampling distribution of the sample mean (alpha = 1.5)",
+     xlab = "sample mean of income (top 2% trimmed)")
+abline(v = true_mean, col = "red", lwd = 2)
+```
+
+Even at $n = 200$, the sampling distribution is nowhere near the symmetric bell the CLT promises for well-behaved data: it is sharply right-skewed, with a heavy tail of samples whose mean is dragged far above the truth by a single enormous observation. 
+
+Now, let us look at the consequence for the confidence interval. We build the textbook 95% interval on each of the 5000 samples and calculate how often it actually covers the true mean. 
+
+```{r}
+#| label: coverage
+covered <- replicate(reps, {
+  x  <- rpareto(n, xm, alpha_h)
+  ci <- mean(x) + c(-1, 1) * 1.96 * sd(x) / sqrt(n)
+  ci[1] <= true_mean & true_mean <= ci[2]
+})
+
+mean(covered)   # nominal coverage is 0.95
+```
+
+The empirical coverage `r mean(covered)` comes out **well below the nominal 0.95**. The interval that is supposed to catch the true mean 95% of the time misses far more often than advertised, because the skewed, heavy-tailed sampling distribution makes the symmetric normal interval both mis-centered and too short. Reporting that interval would systematically overstate your confidence.
+
+::: callout-warning
+## The lesson
+
+The formula $\bar{X} \pm 1.96\, s/\sqrt{n}$ is based on CLT, and validity of CLT rests on a finite variance, and for heavy-tailed data like income or wealth that assumption can fail. This is a central motivation for the nonparametric and resampling methods in this course: rank-based summaries (like the median) and the bootstrap remain trustworthy where the normal-theory mean does not. When in doubt about the tail, **simulate the coverage** rather than trust the Z-score based formula.
+:::
+
+# Digressions
+
+You can skip this part on the first reading, and you don't necessarily need to know these properties of Pareto law to appreciate the next chapter. However, the point of learning is to not always travel in a straight line to the destination but sometimes go on a little side-tours. Who knows, maybe someday these digressions will prove to be useful. 
+
+## Digression 1: The 80/20 Rule (the Pareto Principle)
+
+Pareto's original observation was that a small share of the population holds a large share of the income. The Pareto distribution reproduces this exactly, and we can say precisely which $\alpha$ gives the famous "80/20" split.
+
+Fix a threshold $t \ge x_m$. Two fractions matter: the share of the **population** above $t$, which is the survival function
+
+$$
+p = S(t) = \left(\frac{x_m}{t}\right)^{\alpha},
+$$
+
+and the share of **total income** earned above $t$, which (integrating $x f(x)$ above $t$ and dividing by the mean) works out to
+
+$$
+w = \left(\frac{x_m}{t}\right)^{\alpha - 1}.
+$$
+
+Both depend on the threshold through the same base $x_m/t$, so eliminating $t$ gives a scale-free relationship between the two shares:
+
+$$
+\boxed{\,w = p^{\,1 - 1/\alpha}\,}.
+$$
+
+The income share of the richest fraction $p$ depends **only** on the tail index. Setting $p = \tfrac{1}{5}$ (top 20%) and $w = \tfrac{4}{5}$ (80% of income) and solving gives the exact tail index of the classic rule:
+
+$$
+\frac{4}{5} = \left(\frac{1}{5}\right)^{1 - 1/\alpha}
+\quad\Longrightarrow\quad
+\alpha = \frac{\ln 5}{\ln 4} \approx 1.161.
+$$
+
+(More generally, a "top $p$ holds $w$" economy corresponds to $\alpha = \ln p / (\ln p - \ln w)$.) Let us confirm the 80/20 split numerically by generating a large sample at this $\alpha$ and comparing the income of the top 20% to the total.
+
+```{r}
+#| label: pareto-8020
+inc <- rpareto(1e5, xm, alpha = log(5) / log(4))
+cut <- quantile(inc, 0.80)                 # the 80th percentile threshold
+(top20pc <- sum(inc[inc >= cut]) / sum(inc))         # share of income held by the top 20%
+```
+
+The result `r top20pc` is close to the theoretical **0.80**. So, at $\alpha = \ln 5 / \ln 4$, the top 20% of earners hold about 80% of total income. This is the Pareto principle, demonstrated on a simulated data. Smaller $\alpha$ (a heavier tail) concentrates income even more; larger $\alpha$ spreads it out.
+
+## Digression 2: the tail is scale-free.
+
+Conditioning on exceeding any threshold $t \ge x_m$ returns another Pareto with the *same* shape $\alpha$:
+
+$$
+P(X > x \mid X > t) = \left(\frac{t}{x}\right)^{\alpha}, \qquad x \ge t.
+$$
+
+Taking logs of the survival function, $\log S(x) = \alpha \log x_m - \alpha \log
+x$, shows that a Pareto tail is a **straight line of slope** $-\alpha$ on log-log axes. That straight line is the visual fingerprint of a power law, and the reason $\log(X/x_m) \sim \text{Exponential}(\alpha)$. This is what makes the Hill estimator $\hat\alpha = 1/\overline{\log(x_i/x_m)}$ the natural way to estimate the tail index.
+
+# Summary
+
+-   The **Pareto distribution** $f(x) = \alpha x_m^{\alpha}/x^{\alpha+1}$ ($x \ge x_m$) is the standard heavy-tailed model for income and wealth; it has no base-R generator, so we sample it by inverting its CDF, $x = x_m/(1-u)^{1/\alpha}$.
+-   Its $k$-th moment is finite **only if** $\alpha > k$: the mean needs $\alpha > 1$ and the variance needs $\alpha > 2$. Real income and wealth often sit in $1 < \alpha < 2$, where the mean exists but the variance is infinite.
+-   With infinite variance the **CLT fails**, and the textbook interval $\bar{X} \pm 1.96\, s/\sqrt{n}$ under-covers: our simulation shows coverage well below the nominal 95%. This motivates rank-based and resampling methods.
+-   On log-log axes a Pareto tail is a **straight line of slope** $-\alpha$ (with a negative sign). This is the fingerprint of a power law and the basis of the [Hill tail-index estimator](https://en.wikipedia.org/wiki/Heavy-tailed_distribution#Hill's_tail-index_estimator).
+-   The **80/20 rule** is exact: the income share of the top fraction $p$ is $w = p^{1 - 1/\alpha}$, and $\alpha = \ln 5/\ln 4 \approx 1.16$ produces the classic split where the top 20% hold 80% of income.
