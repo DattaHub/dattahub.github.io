@@ -1,0 +1,360 @@
+---
+title: "Monte Carlo Estimation: Estimating Expectations by Averaging"
+author: "Jyotishka Datta"
+date: last-modified
+
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    embed-resources: true
+    code-fold: false
+    fig-cap-location: bottom
+    smooth-scroll: true
+    self-contained: true
+
+execute:
+  echo: true
+  warning: false
+  message: false
+  cache: true
+
+editor: visual
+---
+
+# Overview
+
+In the previous notes we learned how to **generate** random draws by a few different methods:\
+1. Inverse transform \
+2. Using Jacobian for variable transformation, e.g., Box–Muller, and sampling uniformly on the disk. \
+\
+This note answers the natural follow-up question: once we can produce samples, what do we *do* with them? The answer is **Monte Carlo estimation**: using a sample average to approximate a quantity we cannot compute in closed form.
+
+The idea is deceptively simple. To learn something about a distribution, draw from it and average. What makes the method trustworthy is a pair of classical theorems: the **Law of Large Numbers**, which says the average converges to the right answer, and the **Central Limit Theorem**, which tells us how far off the average is likely to be. Those two results are the whole justification, and they are the heart of these notes.
+
+::: callout-note
+## Prerequisites from the previous notes
+
+We assume you can generate draws from standard distributions in R (`rnorm`, `runif`, `rexp`, and the inverse-transform / Box–Muller ideas). We also use the Law of Large Numbers and Central Limit Theorem, which you have seen in our probability refresher.
+:::
+
+# From Sampling to Estimation
+
+Most quantities we care about in statistics can be written as an **expectation** of some function of a random variable. Let $X$ have density $f$, and let $g$ be a function of interest. We want
+
+$$
+\theta = \mathbb{E}[g(X)] = \int g(x)\, f(x)\, dx,
+$$
+
+assuming the integral is finite, $\int |g(x)|\, f(x)\, dx < \infty$. Different choices of $g$ recover familiar targets:
+
+-   $g(x) = x$ gives the **mean**, $\mathbb{E}[X]$.
+-   $g(x) = x^2$ gives $\mathbb{E}[X^2]$ (and with the mean, the variance).
+-   $g(x) = \mathbb{1}\{a \le x \le b\}$ gives a **probability**, $P(a \le X \le b)$, since the expectation of an indicator is the probability of the event.
+
+For a simple $g$ and a familiar $f$ we can often do the integral by hand. But for a general $g$, or a $f$ that is only known up to its shape, the integral may have no closed form. This is where sampling rescues us.
+
+## The Monte Carlo Estimator
+
+Suppose we can draw an independent sample $X_1, X_2, \ldots, X_N$ from $f$. The **Monte Carlo estimator** of $\theta$ is simply the sample average of $g$ evaluated at the draws:
+
+$$
+\hat{\theta}_N = \frac{1}{N} \sum_{i=1}^{N} g(X_i).
+$$
+
+That is the entire method. We replace an integral we cannot do with an average we can compute. The rest of these notes is about *why we are allowed to do this* and *how much to trust the result*.
+
+# Integrals as Expectations
+
+Before justifying the estimator, it is worth seeing how flexible it is. Any definite integral can be rewritten as an expectation and then estimated by averaging. To integrate an arbitrary function $h$ over a finite interval $(a, b)$, multiply and divide by the length of the interval:
+
+$$
+\int_a^b h(x)\, dx = (b - a) \int_a^b h(x)\, \frac{1}{b-a}\, dx
+= (b - a)\, \mathbb{E}\!\left[ h(U) \right],
+\qquad U \sim \text{Uniform}(a, b),
+$$
+
+because $\tfrac{1}{b-a}$ is exactly the density of a $\text{Uniform}(a, b)$ random variable. So we draw uniform points, average $h$ over them, and rescale by the interval length. (The uniform proposal is convenient but rarely optimal for precision, we'll return to this point under importance sampling.)
+
+As a concrete example, consider the awkward integrand $h(x) = \sin(x\cos x)$ over $(0, 2\pi)$, which has no elementary antiderivative.
+
+```{r}
+set.seed(3504)
+
+h <- function(x) sin(x * cos(x))
+a <- 0
+b <- 2 * pi
+N <- 100000
+
+u <- runif(N, min = a, max = b)
+gvals <- h(u)
+
+estimate <- (b - a) * mean(gvals)
+std_error <- (b - a) * sd(gvals) / sqrt(N)
+
+c(estimate = estimate, std_error = std_error)
+```
+
+We can check the estimate against R's deterministic integrator:
+
+```{r}
+integrate(function(x) sin(x * cos(x)), lower = 0, upper = 2 * pi)
+```
+
+The Monte Carlo value agrees to within its reported standard error. On a one-dimensional problem like this, deterministic quadrature is of course the better tool but the Monte Carlo recipe keeps working, essentially unchanged, in high dimensions where quadrature becomes hopeless. That robustness is its real selling point.
+
+# Why It Works: The Law of Large Numbers
+
+Two properties make $\hat{\theta}_N$ a good estimator.
+
+**It is unbiased.** Each term $g(X_i)$ has expectation $\theta$ by construction, so
+
+$$
+\mathbb{E}[\hat{\theta}_N]
+= \frac{1}{N} \sum_{i=1}^{N} \mathbb{E}[g(X_i)]
+= \frac{1}{N} \cdot N \theta = \theta.
+$$
+
+On average, across many hypothetical repetitions of the whole simulation, the estimator lands exactly on the target.
+
+**It is consistent.** The Strong Law of Large Numbers states that for independent, identically distributed draws,
+
+$$
+\hat{\theta}_N = \frac{1}{N} \sum_{i=1}^{N} g(X_i)
+\;\xrightarrow{\text{a.s.}}\;
+\int g(x)\, f(x)\, dx = \theta
+\qquad \text{as } N \to \infty.
+$$
+
+In words: with enough draws, the estimate and the true value are guaranteed to be close. Consistency is the theoretical guarantee for the whole enterprise. It says the answer we want is recoverable simply by taking $N$ large.
+
+# How Accurate Is It: Standard Error and the CLT
+
+Consistency tells us the estimator *eventually* gets there, but not how large $N$ must be. For that we need the size of the random error, and this is where the Central Limit Theorem enters.
+
+Let $\sigma^2 = \text{Var}(g(X))$, and assume it is finite. Because the draws are independent, the variance of the average is
+
+$$
+\text{Var}(\hat{\theta}_N) = \frac{\sigma^2}{N},
+$$
+
+and the CLT sharpens this into a full distributional statement:
+
+$$
+\sqrt{N}\,\bigl(\hat{\theta}_N - \theta\bigr)
+\;\xrightarrow{d}\;
+\mathcal{N}(0, \sigma^2).
+$$
+
+Equivalently, for large $N$, $\hat{\theta}_N$ is approximately $\mathcal{N}\!\left(\theta,\ \sigma^2/N\right)$. Since we do not know $\sigma^2$, we estimate it from the same sample, giving the **Monte Carlo standard error**
+
+$$
+\widehat{\text{se}}
+= \frac{s}{\sqrt{N}},
+\qquad
+s^2 = \frac{1}{N-1} \sum_{i=1}^{N} \bigl(g(X_i) - \hat{\theta}_N\bigr)^2 .
+$$
+
+An approximate 95% confidence interval for $\theta$ follows immediately:
+
+$$
+\hat{\theta}_N \;\pm\; 1.96\,\frac{s}{\sqrt{N}} .
+$$
+
+::: callout-important
+## The $1/\sqrt{N}$ rule
+
+The standard error shrinks like $1/\sqrt{N}$, not $1/N$. To **halve** the error you must **quadruple** the sample size; for one more decimal place of accuracy you need roughly 100 times as many draws. This slow rate is the price of Monte Carlo, but the rate itself does **not** depend on the dimension of the problem, which is precisely why Monte Carlo beats grid-based integration in high dimensions. (The constant $\sigma$ can still grow with dimension, so a hard problem is still hard; it is the *rate* that stays dimension-free.)
+:::
+
+## Worked Example: A Predicted Probability from a Logistic Model
+
+Suppose a fitted logistic-regression model is
+
+$$
+\text{logit}\bigl(P(Y = 1 \mid X_1, X_2)\bigr)
+= 0.7 + 2.1\,X_1 - 1.3\,X_2 + \epsilon,
+\qquad \epsilon \sim \mathcal{N}(0, 1.43).
+$$
+
+We want the predicted probability that a subject with $X_1 = 1$ and $X_2 = 1$ responds with $Y = 1$, together with a 95% confidence interval, based on 1000 Monte Carlo replications.
+
+For this subject the linear predictor is $0.7 + 2.1 - 1.3 = 1.5$, so its logit-transformed probability is random with distribution $Z \sim \mathcal{N}(1.5, 1.43)$. The quantity of interest is the expected probability
+
+$$
+\theta = \mathbb{E}\!\left[\frac{1}{1 + e^{-Z}}\right],
+\qquad Z \sim \mathcal{N}(1.5, 1.43),
+$$
+
+which is an integral of the logistic sigmoid against a normal density with no closed form. Monte Carlo handles it directly: draw $Z$ values, push them through the sigmoid, and average.
+
+```{r}
+set.seed(3504)
+
+N <- 1000
+z <- rnorm(N, mean = 1.5, sd = sqrt(1.43))
+
+sigmoid <- function(z) 1 / (1 + exp(-z))
+p <- sigmoid(z)
+
+phat <- mean(p)
+se <- sd(p) / sqrt(N)
+ci <- phat + c(-1, 1) * 1.96 * se
+
+c(estimate = phat, std_error = se, lower = ci[1], upper = ci[2])
+```
+
+The point estimate is the average sigmoid value; the standard error and interval come straight from the CLT formulas above. Reporting the interval alongside the estimate is crucial as it provides an idea of the uncertainty.
+
+## Watching the Estimate Converge
+
+It is instructive to watch the running estimate settle down as draws accumulate, with a band showing $\pm 1.96$ standard errors. The estimate should wander inside a band that narrows like $1/\sqrt{N}$.
+
+```{r}
+#| label: fig-convergence
+#| fig-cap: "Running Monte Carlo estimate of the predicted probability as the number of draws grows, with a shaded 95% error band that narrows like 1/sqrt(N)."
+#| fig-alt: "A line showing the running average settling toward a horizontal limit near 0.79, surrounded by a shaded band that is wide at the left and narrows steadily to the right as the sample size increases."
+set.seed(3504)
+
+N <- 5000
+z <- rnorm(N, mean = 1.5, sd = sqrt(1.43))
+p <- sigmoid(z)
+
+k <- seq_len(N)
+running_mean <- cumsum(p) / k
+running_var <- (cumsum(p^2) - k * running_mean^2) / pmax(k - 1, 1)
+running_se <- sqrt(running_var / k)
+
+upper <- running_mean + 1.96 * running_se
+lower <- running_mean - 1.96 * running_se
+
+plot(k, running_mean, type = "n",
+     ylim = range(lower[-1], upper[-1]),
+     xlab = "Number of draws (N)",
+     ylab = "Running estimate of theta",
+     main = "Convergence of the Monte Carlo Estimate")
+polygon(c(k, rev(k)), c(upper, rev(lower)),
+        col = rgb(0.52, 0.12, 0.25, 0.15), border = NA)
+lines(k, running_mean, col = "#861F41", lwd = 1.5)
+abline(h = running_mean[N], lty = 2, col = "gray40")
+```
+
+# Importance Sampling: When You Cannot Sample from the Target
+
+The estimator so far assumes we can draw from $f$ itself. Often we cannot, because the target density may be known only up to a shape, or be concentrated in a region that ordinary sampling rarely visits. **Importance sampling** is a way to estimate $\mathbb{E}[g(X)]$ using draws from a *different*, convenient distribution.
+
+Let $q$ be a **proposal** density that is easy to sample from, chosen so that $q(x) > 0$ wherever $g(x)f(x) \neq 0$. Multiply and divide by $q$:
+
+$$
+\theta = \int g(x)\, f(x)\, dx
+= \int g(x)\, \frac{f(x)}{q(x)}\, q(x)\, dx
+= \mathbb{E}_q\!\left[ g(X)\, \frac{f(X)}{q(X)} \right].
+$$
+
+Now the expectation is taken over $q$, so we can estimate it by drawing $X_1, \ldots, X_N \sim q$ and averaging, with each term reweighted:
+
+$$
+\hat{\theta}_N^{\,\text{IS}}
+= \frac{1}{N} \sum_{i=1}^{N} g(X_i)\, w(X_i),
+\qquad
+w(x) = \frac{f(x)}{q(x)}.
+$$
+
+The ratios $w(x) = f(x)/q(x)$ are the **importance weights**; they correct for the fact that we sampled from the "wrong" distribution. The Strong Law of Large Numbers again guarantees consistency, exactly as before.
+
+**Choosing the proposal.** In principle any $q$ with the right support works. In practice the choice is everything, because it controls the variance of the estimator: we want $q$ to put its mass where $|g(x)|\,f(x)$ is large. Just as with rejection sampling, importance sampling succeeds when the proposal closely matches the target and fails badly when it does not.
+
+**Unknown normalizing constants.** A useful bonus: because the weights enter as a ratio, the normalizing constants of $f$ and $q$ cancel. Using **self-normalized** weights
+
+$$
+\tilde{w}(X_i) = \frac{w(X_i)}{\sum_{j=1}^{N} w(X_j)},
+\qquad
+\hat{\theta}_N^{\,\text{SNIS}} = \sum_{i=1}^{N} \tilde{w}(X_i)\, g(X_i),
+$$
+
+we can estimate $\theta$ knowing $f$ and $q$ only up to a constant — which is the usual situation in Bayesian computation.
+
+## Example: A Rare-Event Probability
+
+Importance sampling shines when the naive estimator is starved of information. Suppose the target is standard normal and we want the tail probability $\theta = P(X > 3) = \mathbb{E}[\mathbb{1}\{X > 3\}]$. Naive Monte Carlo wastes almost every draw below 3; a proposal shifted into the tail spends its draws where they matter.
+
+```{r}
+set.seed(3504)
+
+N <- 10000
+truth <- pnorm(3, lower.tail = FALSE)
+
+# Naive Monte Carlo: draw from the target N(0,1)
+x_naive <- rnorm(N)
+naive <- x_naive > 3
+naive_est <- mean(naive)
+naive_se <- sd(naive) / sqrt(N)
+
+# Importance sampling: proposal N(4, 1), shifted into the tail
+x_is <- rnorm(N, mean = 4, sd = 1)
+w <- dnorm(x_is) / dnorm(x_is, mean = 4, sd = 1)
+terms <- (x_is > 3) * w
+is_est <- mean(terms)
+is_se <- sd(terms) / sqrt(N)
+
+round(rbind(
+  naive       = c(estimate = naive_est, std_error = naive_se),
+  importance  = c(estimate = is_est,    std_error = is_se),
+  truth       = c(estimate = truth,     std_error = NA)
+), 5)
+```
+
+Both estimates are close to the truth, but the importance-sampling standard error is dramatically smaller for the same number of draws — the payoff from steering the proposal toward the region that matters.
+
+::: callout-note
+## A related idea: Sampling–Importance–Resampling (SIR)
+
+The same weights power a *sampling* method, not just an estimator. In Sampling–Importance–Resampling one draws a large pool from $q$, then resamples from that pool with probabilities proportional to the importance weights; the survivors approximate draws from $f$, without needing the bound $M$ that rejection sampling requires. We mention it here only to place it in the family; it is not needed for the estimation results above.
+:::
+
+# Advanced Extension: Adaptive Rejection Sampling
+
+::: callout-note
+## Optional 
+
+This section goes past what an introductory treatment requires. It is included for completeness and for students who want to see how the sampling machinery is pushed further; it is safe to skip on a first pass.
+:::
+
+Ordinary rejection sampling needs an envelope $M q(x) \ge f(x)$, and finding a tight constant $M$ by hand is awkward. **Adaptive rejection sampling (ARS)** removes that burden — but only for **log-concave** densities, meaning $\log f$ is concave (its derivative is non-increasing). Many common densities qualify: the normal, the gamma with shape $> 1$, and the likelihoods arising in generalized linear models with canonical links.
+
+The key idea is to build the envelope *adaptively* in the log domain, where concavity makes the geometry easy:
+
+-   Start from a small grid of points $x_1, \ldots, x_m$ and draw the **tangent lines** to $\log f$ at those points. Because $\log f$ is concave, every tangent lies **above** the curve, so the tangents form a piecewise-linear upper hull and exponentiating turns it into a piecewise-exponential envelope that is easy to sample from.
+-   Optionally, the **chords** connecting consecutive grid points lie *below* $\log f$ and give a cheap lower bound. This "squeeze" often lets us accept a proposal without ever evaluating the (possibly expensive) target $f$.
+-   Each time a proposal is **rejected**, we add that point to the grid and refine the hull. The envelope therefore tightens automatically as sampling proceeds, and the acceptance rate climbs toward one.
+
+The tighter the tangent hull, the higher the acceptance probability, which can be shown to be the reciprocal of the envelope's total area so refinement directly buys efficiency.
+
+**Drawback.** ARS carries real bookkeeping cost: tracking the intersection points of all those tangent segments is fiddly, and the whole construction relies on one-dimensional concavity. It does **not** generalize gracefully to high dimensions, where the intersecting hyperplanes become unmanageable.
+
+In practice one rarely codes ARS from scratch; the `ars` package implements the Gilks–Wild algorithm directly.
+
+```{r}
+#| eval: true
+# install.packages("ars")
+library(ars)
+
+# Sample from a standard normal by supplying log f and its derivative.
+logf  <- function(x) -x^2 / 2
+dlogf <- function(x) -x
+
+draws <- ars(n = 1000, f = logf, fprima = dlogf)
+hist(draws, probability = TRUE, breaks = 40,
+     main = "Adaptive Rejection Sampling: N(0,1)")
+curve(dnorm(x), add = TRUE, col = "#861F41", lwd = 2)
+```
+
+# Key Takeaways
+
+-   **Monte Carlo estimation** approximates any expectation $\theta = \mathbb{E}[g(X)] = \int g(x) f(x)\, dx$ by the sample average $\hat{\theta}_N = \tfrac{1}{N}\sum_i g(X_i)$ of draws from $f$.
+-   Choosing $g$ recovers means ($g(x)=x$), moments ($g(x)=x^2$), and probabilities ($g(x)=\mathbb{1}\{\cdot\}$); any definite integral can be rewritten as an expectation and estimated the same way.
+-   The **Law of Large Numbers** makes the estimator unbiased and consistent.
+-   The **Central Limit Theorem** gives the accuracy: the standard error is $s/\sqrt{N}$, yielding the interval $\hat{\theta}_N \pm 1.96\, s/\sqrt{N}$. The error falls like $1/\sqrt{N}$ (quadruple the draws to halve it), at a rate that does not depend on dimension.
+-   **Importance sampling** estimates $\mathbb{E}[g(X)]$ using draws from a proposal $q$, reweighting by $w = f/q$; a well-chosen proposal sharply reduces variance, and self-normalized weights sidestep unknown normalizing constants.
+-   **Adaptive rejection sampling** (optional) builds a self-tightening envelope for log-concave densities, at the cost of bookkeeping and a restriction to low dimensions.

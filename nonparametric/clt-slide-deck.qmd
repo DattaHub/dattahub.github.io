@@ -1,0 +1,432 @@
+---
+title: "The Central Limit Theorem"
+author: "Jyotishka Datta"
+institute: "Virginia Tech"
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    chalkboard: true
+    preview-links: auto
+    transition: fade
+    incremental: false
+    width: 1280
+    height: 720
+execute:
+  echo: true
+  warning: false
+  message: false
+  freeze: auto
+header-includes: |
+  <style>
+  :root { --vt-maroon: #861F41; --vt-orange: #E5751F; }
+  .reveal h1, .reveal h2 { color: var(--vt-maroon); }
+  .reveal strong { color: var(--vt-maroon); }
+  .reveal .slide-number { color: var(--vt-maroon); }
+  .callout { border-left: 0.35rem solid var(--vt-orange); padding-left: 1rem; }
+  .small { font-size: 0.72em; }
+  .center { text-align: center; }
+  </style>
+---
+
+## Today's question
+
+Suppose the population is skewed, discrete, or otherwise very non-Normal.
+
+::: {.callout}
+Why does the sample mean often have an approximately Normal distribution?
+:::
+
+By the end, you should be able to:
+
+- state the Central Limit Theorem;
+- distinguish a population distribution from a sampling distribution;
+- compute probabilities for sample means, sums, and proportions;
+- judge when a Normal approximation is reasonable.
+
+---
+
+## Three distributions—not one
+
+1. **Population distribution:** the distribution of one observation, $X$.
+2. **Sample distribution:** the values $X_1,\ldots,X_n$ in one observed sample.
+3. **Sampling distribution:** the distribution of a statistic, such as $\bar X_n$, over repeated samples.
+
+::: {.fragment}
+The CLT is a statement about the **sampling distribution** of a standardized sum or mean.
+:::
+
+---
+
+## A thought experiment
+
+Start with a strongly right-skewed population:
+
+```{r}
+#| label: population-shape
+#| fig-width: 7
+#| fig-height: 4
+#| echo: false
+x <- seq(0, 10, length.out = 500)
+plot(x, dexp(x), type = "l", lwd = 4, col = "#861F41",
+     xlab = "x", ylab = "Density", main = "Population: Exponential(1)")
+polygon(c(x, rev(x)), c(dexp(x), rep(0, length(x))),
+        col = adjustcolor("#E5751F", 0.25), border = NA)
+lines(x, dexp(x), lwd = 4, col = "#861F41")
+```
+
+If we repeatedly average $n$ independent observations, what shape will those averages have?
+
+---
+
+## Repeated sampling
+
+```{r}
+#| label: sampling-distributions
+#| fig-width: 10
+#| fig-height: 4.7
+#| fig-align: center
+#| echo: false
+set.seed(3504)
+B <- 30000
+ns <- c(1, 5, 30)
+oldpar <- par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+for (n in ns) {
+  means <- replicate(B, mean(rexp(n)))
+  hist(means, probability = TRUE, breaks = 45,
+       col = adjustcolor("#861F41", 0.68), border = "white",
+       main = paste("n =", n), xlab = expression(bar(X)))
+  curve(dnorm(x, mean = 1, sd = 1/sqrt(n)), add = TRUE,
+        col = "#E5751F", lwd = 3)
+}
+par(oldpar)
+```
+
+The center stays at $\mu=1$, the spread shrinks, and the shape becomes more Normal.
+
+---
+
+## The Central Limit Theorem
+
+Let $X_1,X_2,\ldots$ be IID with
+
+$$
+E(X_i)=\mu, \qquad \operatorname{Var}(X_i)=\sigma^2<\infty.
+$$
+
+Then
+
+$$
+Z_n=\frac{\bar X_n-\mu}{\sigma/\sqrt n}
+\xrightarrow{d} N(0,1)
+\qquad \text{as }n\to\infty.
+$$
+
+Equivalently, for sufficiently large $n$,
+
+$$
+\bar X_n \mathrel{\dot\sim} N\!\left(\mu,\frac{\sigma^2}{n}\right).
+$$
+
+::: {.fragment}
+The population itself does **not** become Normal. The distribution of the standardized mean does.
+:::
+
+---
+
+## What changes as $n$ grows?
+
+For $\bar X_n$:
+
+$$
+E(\bar X_n)=\mu,
+\qquad
+\operatorname{Var}(\bar X_n)=\frac{\sigma^2}{n},
+\qquad
+\operatorname{SE}(\bar X_n)=\frac{\sigma}{\sqrt n}.
+$$
+
+- **Center:** remains at $\mu$.
+- **Spread:** decreases at rate $1/\sqrt n$.
+- **Shape:** becomes approximately Normal under the CLT conditions.
+
+Doubling $n$ does not halve the standard error. To halve it, multiply $n$ by $4$.
+
+---
+
+## The standardized picture
+
+```{r}
+#| label: standardized-means
+#| fig-width: 8
+#| fig-height: 4.6
+#| echo: false
+set.seed(17)
+B <- 40000
+n <- 30
+z <- replicate(B, {
+  xb <- mean(rexp(n))
+  (xb - 1)/(1/sqrt(n))
+})
+hist(z, probability = TRUE, breaks = 50,
+     col = adjustcolor("#861F41", 0.68), border = "white",
+     xlab = expression(Z[n]), main = "Standardized means from an Exponential population")
+curve(dnorm(x), add = TRUE, col = "#E5751F", lwd = 4)
+legend("topright", c("Simulation", "N(0,1)"),
+       fill = c("#861F41", NA), border = c("#861F41", NA),
+       lty = c(NA, 1), lwd = c(NA, 4), col = c(NA, "#E5751F"), bty = "n")
+```
+
+---
+
+## A practical CLT workflow
+
+For a probability involving a sample mean:
+
+1. Identify $\mu$, $\sigma$, and $n$.
+2. Check independence and whether the sample size is plausible.
+3. Use
+   $$\bar X\mathrel{\dot\sim}N\!\left(\mu,\frac{\sigma^2}{n}\right).$$
+4. Standardize the boundary:
+   $$z=\frac{\text{boundary}-\mu}{\sigma/\sqrt n}.$$
+5. Use $\Phi$, a Normal table, or `pnorm()`.
+6. Interpret the probability in context.
+
+---
+
+## Worked example: coffee fill volume
+
+A machine fills cups with mean $\mu=12.0$ oz and standard deviation $\sigma=0.6$ oz. Individual fills are somewhat skewed. For a random sample of $n=36$ cups, approximate
+
+$$P(11.9<\bar X<12.2).$$
+
+The standard error is
+
+$$
+\frac{0.6}{\sqrt{36}}=0.1.
+$$
+
+Therefore,
+
+$$
+P(11.9<\bar X<12.2)
+\approx P\left(-1<Z<2\right)
+=\Phi(2)-\Phi(-1).
+$$
+
+```{r}
+pnorm(2) - pnorm(-1)
+```
+
+---
+
+## Sums are covered too
+
+Let $S_n=X_1+\cdots+X_n$. Since $S_n=n\bar X_n$,
+
+$$
+\frac{S_n-n\mu}{\sigma\sqrt n}
+\xrightarrow{d}N(0,1),
+$$
+
+so
+
+$$
+S_n\mathrel{\dot\sim}N(n\mu,n\sigma^2).
+$$
+
+::: {.callout}
+For a **mean**, the standard deviation is $\sigma/\sqrt n$.  
+For a **sum**, the standard deviation is $\sigma\sqrt n$.
+:::
+
+---
+
+## Worked example: total demand
+
+Daily demand has mean $42$ units and standard deviation $9$ units. Assume demands on different days are IID. Over $50$ days, approximate
+
+$$P(S_{50}>2200).
+$$
+
+Under the CLT,
+
+$$
+S_{50}\mathrel{\dot\sim}N(50\cdot42,50\cdot9^2)
+=N(2100,4050).
+$$
+
+Thus
+
+$$
+z=\frac{2200-2100}{9\sqrt{50}}\approx 1.571.
+$$
+
+```{r}
+1 - pnorm((2200 - 50*42)/(9*sqrt(50)))
+```
+
+---
+
+## Bernoulli variables and sample proportions
+
+If $X_i\sim\operatorname{Bernoulli}(p)$, then
+
+$$
+\bar X=\hat p, \qquad E(\hat p)=p,
+\qquad \operatorname{SE}(\hat p)=\sqrt{\frac{p(1-p)}{n}}.
+$$
+
+The CLT gives
+
+$$
+\frac{\hat p-p}{\sqrt{p(1-p)/n}}
+\mathrel{\dot\sim}N(0,1).
+$$
+
+A common rule of thumb is that both $np$ and $n(1-p)$ should be at least about $10$ for a comfortable Normal approximation.
+
+---
+
+## De Moivre–Laplace: Binomial CLT
+
+If $X\sim\operatorname{Bin}(n,p)$, then
+
+$$
+\frac{X-np}{\sqrt{np(1-p)}}
+\xrightarrow{d}N(0,1).
+$$
+
+Therefore,
+
+$$
+X\mathrel{\dot\sim}N\bigl(np,np(1-p)\bigr).
+$$
+
+Because $X$ is discrete and the Normal distribution is continuous, a **continuity correction** usually improves the approximation.
+
+---
+
+## Continuity correction
+
+Let $Y\sim N(np,np(1-p))$. Translate integer outcomes into intervals of width $1$:
+
+| Binomial probability | Normal approximation |
+|---|---|
+| $P(X\le k)$ | $P(Y\le k+0.5)$ |
+| $P(X<k)$ | $P(Y<k-0.5)$ |
+| $P(X\ge k)$ | $P(Y\ge k-0.5)$ |
+| $P(X>k)$ | $P(Y>k+0.5)$ |
+| $P(X=k)$ | $P(k-0.5<Y<k+0.5)$ |
+
+**Memory aid:** move the Normal boundary outward so that it covers exactly the integer outcomes you want.
+
+---
+
+## Binomial example
+
+Let $X\sim\operatorname{Bin}(25,0.4)$. Approximate $P(X\le8)$.
+
+$$
+\mu=np=10,
+\qquad
+\sigma=\sqrt{np(1-p)}=\sqrt6.
+$$
+
+With continuity correction,
+
+$$
+P(X\le8)
+\approx
+\Phi\!\left(\frac{8.5-10}{\sqrt6}\right).
+$$
+
+```{r}
+c(
+  exact = pbinom(8, 25, 0.4),
+  normal_no_correction = pnorm(8, 10, sqrt(6)),
+  normal_with_correction = pnorm(8.5, 10, sqrt(6))
+)
+```
+
+---
+
+## How large must $n$ be?
+
+There is no universal cutoff.
+
+- Nearly symmetric, light-tailed populations: modest $n$ may work well.
+- Strong skewness: larger $n$ is needed.
+- Rare-event Bernoulli data: check both $np$ and $n(1-p)$.
+- Heavy tails: convergence may be very slow.
+- Infinite variance: the classical CLT does not apply.
+
+::: {.fragment}
+“$n\ge30$” is a rough classroom mnemonic—not a theorem.
+:::
+
+---
+
+## Conditions and warning signs
+
+The classical version assumes:
+
+- observations are independent;
+- observations are identically distributed;
+- the common mean exists;
+- the common variance is finite.
+
+Be cautious with:
+
+- time series or spatial dependence;
+- a few extreme observations;
+- samples dominated by one cluster;
+- very skewed populations with small $n$;
+- Cauchy-like heavy tails.
+
+---
+
+## What the CLT does **not** say
+
+- It does not say the raw data are Normal.
+- It does not guarantee a good approximation for every $n$.
+- It does not make dependence disappear.
+- It does not justify ignoring infinite or unstable variance.
+- It does not say $\bar X$ is exactly Normal—unless the population is Normal.
+
+---
+
+## Quick check
+
+A population has mean $80$ and standard deviation $24$. For samples of size $64$:
+
+1. What is the approximate distribution of $\bar X$?
+2. What is $P(77<\bar X<85)$?
+3. If the sample size becomes $256$, what happens to the standard error?
+
+. . .
+
+**Answers:**
+
+$$
+\bar X\mathrel{\dot\sim}N(80,3^2),
+$$
+
+$$
+P(77<\bar X<85)\approx\Phi(5/3)-\Phi(-1),
+$$
+
+and the standard error falls from $3$ to $1.5$.
+
+---
+
+## Takeaways
+
+1. The CLT concerns the distribution of a **standardized sum or mean**.
+2. For large $n$,
+   $$\bar X\mathrel{\dot\sim}N\!\left(\mu,\frac{\sigma^2}{n}\right).$$
+3. The mean stays centered at $\mu$ while its standard error shrinks as $1/\sqrt n$.
+4. Sums, proportions, and Binomial counts are direct applications.
+5. Independence, finite variance, skewness, and tail behavior determine whether the approximation is credible.
+
+## Questions?
