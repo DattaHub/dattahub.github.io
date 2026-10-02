@@ -1,0 +1,2261 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="twosample_tests_files/libs/clipboard/clipboard.min.js"></script>
+<script src="twosample_tests_files/libs/quarto-html/tabby.min.js"></script>
+<script src="twosample_tests_files/libs/quarto-html/popper.min.js"></script>
+<script src="twosample_tests_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="twosample_tests_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="twosample_tests_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="twosample_tests_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.6.42">
+
+  <meta name="author" content="Jyotishka Datta">
+  <title>Two-Sample Tests</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="twosample_tests_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="twosample_tests_files/libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #003b4f; background-color: #f1f3f5; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #003b4f; } /* Normal */
+    code span.al { color: #ad0000; } /* Alert */
+    code span.an { color: #5e5e5e; } /* Annotation */
+    code span.at { color: #657422; } /* Attribute */
+    code span.bn { color: #ad0000; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #003b4f; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #20794d; } /* Char */
+    code span.cn { color: #8f5902; } /* Constant */
+    code span.co { color: #5e5e5e; } /* Comment */
+    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+    code span.dt { color: #ad0000; } /* DataType */
+    code span.dv { color: #ad0000; } /* DecVal */
+    code span.er { color: #ad0000; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #ad0000; } /* Float */
+    code span.fu { color: #4758ab; } /* Function */
+    code span.im { color: #00769e; } /* Import */
+    code span.in { color: #5e5e5e; } /* Information */
+    code span.kw { color: #003b4f; font-weight: bold; } /* Keyword */
+    code span.op { color: #5e5e5e; } /* Operator */
+    code span.ot { color: #003b4f; } /* Other */
+    code span.pp { color: #ad0000; } /* Preprocessor */
+    code span.sc { color: #5e5e5e; } /* SpecialChar */
+    code span.ss { color: #20794d; } /* SpecialString */
+    code span.st { color: #20794d; } /* String */
+    code span.va { color: #111111; } /* Variable */
+    code span.vs { color: #20794d; } /* VerbatimString */
+    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="twosample_tests_files/libs/revealjs/dist/theme/quarto-dc38fce0468f2dd9da2a4550fa8b6fcf.css">
+  <link href="twosample_tests_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="twosample_tests_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="twosample_tests_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="twosample_tests_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Two-Sample Tests</h1>
+  <p class="subtitle">Nonparametric Statistics</p>
+
+<div class="quarto-title-authors">
+<div class="quarto-title-author">
+<div class="quarto-title-author-name">
+Jyotishka Datta 
+</div>
+        <p class="quarto-title-affiliation">
+            Virginia Tech
+          </p>
+    </div>
+</div>
+
+</section>
+<section class="slide level2">
+
+<!--
+  ACCESSIBILITY NOTES (WCAG 2.1 AA / ADA Title II)
+  ------------------------------------------------
+  * Every image carries fig-alt. Decorative chrome (the repeated VT logo) is
+    given alt="" + aria-hidden via a11y-fixes.html so AT does not announce it
+    on all 70 slides.
+  * All tabular data is real HTML/Markdown with <th> + scope, not pictures of
+    tables, so screen readers can announce row/column headers.
+  * Colour emphasis from the Beamer source is reproduced through the classes in
+    custom.scss, every one of which clears 4.5:1 against white. Colour is never
+    the only carrier of meaning.
+  * MathJax (not KaTeX) is used because it exposes MathML + speech text to AT.
+  * FIGURE PATHS: LaTeX resolves extensions automatically; HTML cannot. Stems
+    are unchanged from the .tex; ".png" is assumed. If your art/ files are .pdf
+    or .eps, convert them (see README-accessibility.md) or change the extension.
+-->
+<div class="hidden">
+<p><span class="math display">\[
+\newcommand{\NormRV}{\mathcal{N}}
+\newcommand{\iid}{\stackrel{\text{iid}}{\sim}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\half}{\tfrac{1}{2}}
+\newcommand{\quart}{\tfrac{1}{4}}
+\newcommand{\abs}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\dif}{\mathrm{d}}
+\]</span></p>
+</div>
+</section>
+<section>
+<section id="two-sample-problem" class="title-slide slide level1 center">
+<h1>Two-sample problem</h1>
+
+</section>
+<section id="outlines" class="slide level2">
+<h2>Outlines</h2>
+<ul>
+<li><span class="hl-orange">T-Test</span></li>
+<li><span class="hl-orange">Permutation Test</span></li>
+<li><span class="hl-orange">Choice of Test statistics for Permutation Test</span></li>
+<li><span class="hl-rust">Random sampling permutation</span></li>
+<li><span class="hl-rust">Wilcoxon Rank Sum Test</span></li>
+<li><span class="hl-magenta">Using R to do all of these.</span></li>
+</ul>
+</section></section>
+<section>
+<section id="two-sample-t-test" class="title-slide slide level1 center">
+<h1>Two-sample t-test</h1>
+
+</section>
+<section id="two-sample-t-test-1" class="slide level2">
+<h2>Two-sample t-test</h2>
+<ul>
+<li>Two samples from two populations (not necessarily of the same size!)</li>
+<li>Denote them by <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>.</li>
+<li>We have <span class="math inline">\(m\)</span> observations <span class="math inline">\(X_1, \ldots, X_{m}\)</span> in group 1 and <span class="math inline">\(n\)</span> observations <span class="math inline">\(Y_1, \ldots, Y_{n}\)</span> in group 2.</li>
+<li>Assume <span class="math inline">\(X_1, \ldots, X_{m} \sim \NormRV(\mu_X, \sigma_X^2)\)</span> and <span class="math inline">\(Y_1, \ldots, Y_{n} \sim \NormRV(\mu_Y, \sigma_Y^2)\)</span></li>
+<li>Could they have the same mean? That is: <span class="math inline">\(\mu_X = \mu_Y\)</span>?</li>
+<li>The quantity of interest is <span class="math inline">\(D_{obs}\)</span>, e.g.&nbsp;difference in means. <span class="math inline">\(H_0: \mu_X - \mu_Y = 0\)</span> vs.&nbsp;<span class="math inline">\(H_a: \mu_X - \mu_Y \neq 0, \; &gt; 0 \; &lt;0\)</span>.</li>
+</ul>
+</section>
+<section id="one-sided-vs.-two-sided" class="slide level2">
+<h2>One-sided vs.&nbsp;Two-sided</h2>
+<ul>
+<li>In general, we can test if the difference is some pre-specified <span class="math inline">\(\Delta_0\)</span>.</li>
+<li>Recall that we can have one-sided alternatives, either lower-tail or upper-tail or two-sided or two-tail alternative.</li>
+<li>Usually, the one-sided alternative is clear from the question or context: are you just trying to see if the two means are different or are you trying to see if one group (e.g.&nbsp;treatment) has a higher mean than the other (e.g.&nbsp;control)?
+<ul>
+<li><span class="math inline">\(H_0: \mu_X - \mu_Y \geq \Delta_0\)</span> vs <span class="math inline">\(H_a: \mu_X - \mu_Y &lt; \Delta_0\)</span> (lower-tail)</li>
+<li><span class="math inline">\(H_0: \mu_X - \mu_Y \leq \Delta_0\)</span> vs <span class="math inline">\(H_a: \mu_X - \mu_Y &gt; \Delta_0\)</span> (upper-tail)</li>
+<li><span class="math inline">\(H_0: \mu_X - \mu_Y = \Delta_0\)</span> vs <span class="math inline">\(H_a: \mu_X - \mu_Y \neq \Delta_0\)</span> (two-tail)</li>
+</ul></li>
+<li>Also, remember that P-values for two-sided tests are twice the P-values for one-sided tests.</li>
+</ul>
+</section>
+<section id="two-sample-t-test-2" class="slide level2">
+<h2>Two-sample t-test</h2>
+<ul>
+<li>Estimator for the difference <span class="math inline">\(\mu_X - \mu_Y\)</span> = <span class="math inline">\(\bar{X} - \bar{Y}\)</span> = Difference of the sample means.</li>
+<li>We can calculate the variance of <span class="math inline">\(\bar{X} - \bar{Y}\)</span> using the same idea as we used for variance of a single sample mean, and assuming <span class="math inline">\(X_i\)</span>’s and <span class="math inline">\(Y_j\)</span>’s are independent.</li>
+</ul>
+<p><span class="math display">\[
+\Var(\bar{X} - \bar{Y}) = \Var(X)/m + \Var(Y)/n = \sigma_X^2/m + \sigma_Y^2/n.
+\]</span></p>
+<ul>
+<li>Note: Independence is crucial: without it, the formula above will have an extra term.</li>
+<li>Now, similar to one sample, variance of <span class="math inline">\(X_i\)</span> can be estimated unbiasedly by <span class="math inline">\(s_X^2\)</span> and variance of <span class="math inline">\(Y_j\)</span>’s are by <span class="math inline">\(s_Y^2\)</span>. (Using <span class="math inline">\(\approx\)</span> to denote estimation.)</li>
+</ul>
+<p><span class="math display">\[
+s_X^2/m + s_Y^2/n \approx \sigma_X^2/m + \sigma_Y^2/n
+\]</span></p>
+</section>
+<section id="assumption-of-equal-variance" class="slide level2">
+<h2>Assumption of Equal Variance</h2>
+<ul>
+<li>Assume equal variances (<span class="math inline">\(\sigma_X^2 = \sigma_Y^2 \equiv \sigma^2\)</span>). We can estimate the common variance by “pooling” the samples together:</li>
+</ul>
+<p><span class="math display">\[
+\begin{aligned}
+s_p^2 &amp; = \frac{\sum_{i=1}^{m} (X_i- \bar{X})^2 + \sum_{j=1}^{n}(Y_i - \bar{Y})^2}{m + n - 2} \\
+&amp; = \frac{(m-1)s_X^2 + (n-1)s_Y^2}{m + n - 2} = \text{ pooled estimator of variance}.
+\end{aligned}
+\]</span></p>
+<ul>
+<li><strong>Test Statistic:</strong></li>
+</ul>
+<p><span class="math display">\[
+t=\frac{(\bar{X}-\bar{Y})-\Delta_0}{s_p\sqrt{\frac{1}{m}+\frac{1}{n}}} \sim t_{m+n-2}
+\]</span></p>
+<ul>
+<li>Here <span class="math inline">\(s_p\)</span> is the pooled standard deviation.</li>
+</ul>
+</section>
+<section id="without-equal-variance" class="slide level2">
+<h2>Without Equal Variance</h2>
+<ul>
+<li>If we do not assume the equality of variances, then the form of the t-test statistics is simpler:</li>
+</ul>
+<p><span class="math display">\[
+t=\frac{(\bar{X}-\bar{Y})-\Delta_0}{\sqrt{s_X^2/m + s_Y^2/n}} \sim t_{k}
+\]</span></p>
+<ul>
+<li>Unfortunately, this statistic does not have a t distribution.</li>
+<li>A t distribution replaces the <span class="math inline">\(\NormRV(0, 1)\)</span> distribution only when a single standard deviation <span class="math inline">\(\sigma\)</span> in a z-statistic is replaced by its sample standard deviation (s).</li>
+<li>In this case, we replace two standard deviations (<span class="math inline">\(\sigma_x\)</span> and <span class="math inline">\(\sigma_y\)</span>) by their estimates which does not produce a statistic having a t distribution.</li>
+<li>However, we can approximate the distribution of the two-sample t statistic by using the <span class="math inline">\(t(k)\)</span> distribution with an approximation for the degrees of freedom <span class="math inline">\(k\)</span>.</li>
+</ul>
+</section>
+<section id="software-approximation" class="slide level2">
+<h2>Software approximation</h2>
+<p>We noted earlier that the two-sample t statistic does not have an exact t distribution. Moreover, the exact distribution changes as the unknown population standard deviations <span class="math inline">\(\sigma_1\)</span> and <span class="math inline">\(\sigma_2\)</span> change. However, the distribution can be approximated by a t distribution with degrees of freedom given by</p>
+<p><span class="math display">\[
+df = \frac{(s_X^2/m + s_Y^2/n)^2}{\frac{1}{m-1} (s_x^2/m)^2 + \frac{1}{n-1} (s_Y^2/n)^2}
+\]</span></p>
+<p>Two options:</p>
+<ol type="1">
+<li>Use a value of <span class="math inline">\(df\)</span> that is calculated from the data. In general, it will not be a whole number.</li>
+<li>Use <span class="math inline">\(df\)</span> equal to the smaller of <span class="math inline">\(m-1\)</span> and <span class="math inline">\(n-1\)</span>.</li>
+</ol>
+<p>We will see the first one in <span class="smallcaps">R</span>, shortly.</p>
+</section>
+<section id="p-value-and-inference" class="slide level2">
+<h2>P-value and Inference</h2>
+<ul>
+<li>The sampling distribution of the <span class="math inline">\(t\)</span>-test statistics in the equal variance case follows a Student’s <span class="math inline">\(t\)</span> distribution with <span class="math inline">\(m+n-2\)</span> degrees of freedom.</li>
+<li>We have also seen the approximation of the degrees of freedom for the unequal variance case.</li>
+<li>We can now calculate P-value for testing.</li>
+<li>We fix an <span class="math inline">\(\alpha\)</span> as significance level and if the P-value is less than <span class="math inline">\(\alpha\)</span>, we reject the null hypothesis. If not, we say we do not have enough evidence to reject the null.</li>
+</ul>
+</section>
+<section id="r-codes" class="slide level2">
+<h2>R codes</h2>
+<ul>
+<li>Translating this into <span class="smallcaps">R</span> is straightforward.</li>
+<li>The standard <span class="smallcaps">R</span> function for t-test is:</li>
+</ul>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="fu">t.test</span>(x, <span class="at">y =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-2"><a href=""></a>       <span class="at">alternative =</span> <span class="fu">c</span>(<span class="st">"two.sided"</span>, <span class="st">"less"</span>, <span class="st">"greater"</span>),</span>
+<span id="cb1-3"><a href=""></a>       <span class="at">mu =</span> <span class="dv">0</span>, <span class="at">paired =</span> <span class="cn">FALSE</span>, <span class="at">var.equal =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-4"><a href=""></a>       <span class="at">conf.level =</span> <span class="fl">0.95</span>, ...)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section></section>
+<section>
+<section id="permutation-test" class="title-slide slide level1 center">
+<h1>Permutation test</h1>
+
+</section>
+<section id="steps-for-a-two-sample-permutation-test" class="slide level2">
+<h2>Steps for a two-sample permutation test</h2>
+<ul>
+<li>Suppose we have <span class="math inline">\(m\)</span> observations <span class="math inline">\(X_1, \ldots, X_m\)</span> in group 1 and <span class="math inline">\(n\)</span> observations <span class="math inline">\(Y_1, \ldots, Y_n\)</span> in group 2. The quantity of interest is <span class="math inline">\(D_{obs}\)</span>, e.g.&nbsp;difference in means. <span class="math inline">\(H_0: \mu_X - \mu_Y = 0\)</span> vs.&nbsp;<span class="math inline">\(H_L: \mu_X - \mu_Y \neq 0, \; &gt; 0 \; &lt;0\)</span>.</li>
+<li>Permute the <span class="math inline">\(m+n\)</span> observations so that <span class="math inline">\(m\)</span> are in group 1 and <span class="math inline">\(n\)</span> are in group 2. R command is <code>combn</code>.</li>
+<li>Calculate the statistics of interest <span class="math inline">\(D\)</span> for all possible permutations: <span class="math inline">\(\binom{m+n}{m} = (m+n)!/m!n!\)</span>.</li>
+<li>Calculate the p-values accordingly:</li>
+</ul>
+<p><span class="math display">\[
+p =
+\begin{cases}
+\frac{\# |D| \geq |D_{obs}|}{\binom{m+n}{m}} &amp; \mbox{two-sided} \\[2ex]
+\frac{\# D \geq D_{obs}}{\binom{m+n}{m}} &amp; \mbox{upper-tailed, one-sided} \\[2ex]
+\frac{\# D \leq D_{obs}}{\binom{m+n}{m}} &amp; \mbox{lower-tailed, one-sided}
+\end{cases}
+\]</span></p>
+</section>
+<section id="recap-with-last-example" class="slide level2">
+<h2>Recap with last example</h2>
+<ul>
+<li>Suppose you have data on two testing methods: new and old. The raw data is as follows:</li>
+</ul>
+<table class="data-table caption-top" data-quarto-postprocess="true">
+<caption>Scores for the new and traditional testing methods, with group means and medians.</caption>
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th" scope="col">Method</th>
+<th colspan="3" data-quarto-table-cell-role="th" scope="colgroup">Score</th>
+<th data-quarto-table-cell-role="th" scope="col">Mean</th>
+<th data-quarto-table-cell-role="th" scope="col">Median</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th" scope="row">New X</td>
+<td>37</td>
+<td>55</td>
+<td>57</td>
+<td>49.7</td>
+<td>55</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th" scope="row">Traditional Y</td>
+<td>23</td>
+<td>31</td>
+<td>70</td>
+<td>41.3</td>
+<td>31</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Difference in medians: <span class="math inline">\(median(X) - median(Y) = 21\)</span>, Difference in means: <span class="math inline">\(\bar{X} - \bar{Y} = 8.3\)</span>.</li>
+<li>Question: Is the difference significant?</li>
+<li>Parametric test: <span class="math inline">\(t\)</span>-test with <span class="math inline">\(\bar{X} - \bar{Y}\)</span>. Sample size too low to know if normality assumptions are appropriate.</li>
+<li>Can we test the difference without any distributional assumption?</li>
+</ul>
+</section>
+<section id="permutation-test-1" class="slide level2">
+<h2>Permutation Test</h2>
+<ul>
+<li>Let <span class="math inline">\(\Delta = \mu_X - \mu_Y\)</span>, <span class="math inline">\(\mu_X,\mu_Y\)</span> could be any measure of central tendency (mean, median, mode).</li>
+<li>Test <span class="math inline">\(H_0: \Delta = 0\)</span> vs.&nbsp;<span class="math inline">\(H_L: \Delta \neq 0\)</span> or <span class="math inline">\(\Delta &gt; 0\)</span> etc.</li>
+<li><strong>Intuition:</strong> If there is no difference between the two samples, we can partition the <span class="math inline">\((m+n)\)</span> observations in any way between the two groups and the statistics of interest (e.g.&nbsp;mean difference) should be similar to the one observed. In other words, all possible shufflings are equally likely, and under the null hypothesis of no difference the group labels do not matter.</li>
+<li>For this example: <span class="math inline">\(\binom{6}{3} = 20\)</span>. We can manually list all <span class="math inline">\(20\)</span> permutations!!</li>
+</ul>
+</section>
+<section id="permutation-table" class="slide level2">
+<h2>All 20 permutations</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="art/permut1.jpg" style="width:80.0%" alt="Screenshot of a 20-row table. Each row is one of the 20 ways of splitting the six scores 37, 55, 57, 23, 31 and 70 into a group of three X values and a group of three Y values. Two right-hand columns give, for each split, the resulting difference in means (Delta 1 j star) and difference in medians (Delta 2 j star). The observed split sits in the first row with a mean difference of 8.3 and a median difference of 21; seven of the twenty mean differences are at least as large as 8.3 and four of the twenty median differences are at least as large as 21."></p>
+<figcaption>Table of all 20 permutations of the 6 observations. Each row gives one test-statistics value.</figcaption>
+</figure>
+</div>
+</section>
+<section id="permutation-distribution-and-p-value" class="slide level2">
+<h2>Permutation distribution and p-value</h2>
+<ul>
+<li><p>The column <span class="math inline">\(\Delta_{1j}^*\)</span> and <span class="math inline">\(\Delta_{2j}^*\)</span> give the permutation distribution of <span class="math inline">\(\Delta_1\)</span> = difference in means, and <span class="math inline">\(\Delta_2\)</span> = difference in medians respectively.</p></li>
+<li><p>The permutation distribution is an appropriate reference distribution for determining the p-value for the test.</p></li>
+<li><p>Recall p-value is the probability that the test statistic is more extreme than the observed one under the null hypothesis.</p></li>
+</ul>
+<p><span class="math display">\[
+\mbox{p-value} = \frac{\# D \geq D_{obs}}{\binom{m+n}{m}} \quad \mbox{one-sided}
+\]</span></p>
+<ul>
+<li>This example: p-value: 7/20 = 0.35 (mean) and p-value = 4/20 = 0.2 (median).</li>
+</ul>
+</section>
+<section id="choice-of-test-statistics" class="slide level2">
+<h2>Choice of test statistics</h2>
+<p>The permutation test can be done with a few different test-statistics:</p>
+<ol type="1">
+<li>Usual difference in means: <span class="math inline">\(\Delta_1 = \bar{X} - \bar{Y}\)</span>.</li>
+<li>The sum of observations from either group: Let <span class="math inline">\(S_X\)</span>, <span class="math inline">\(S_Y\)</span> be sum of observations from Group 1 and Group 2, and <span class="math inline">\(S = S_X + S_Y\)</span>, respectively. Then:</li>
+</ol>
+<p><span class="math display">\[
+\bar{X} - \bar{Y} = \frac{S_X}{m} - \frac{S_Y}{n} = \frac{S_X}{m} - \frac{S - S_X}{n} = S_X\left( \frac{1}{m} + \frac{1}{n} \right) - \frac{S}{n}.
+\]</span></p>
+<p>Using sum of observations in either group will lead to the same result as using mean difference as <span class="math inline">\(S\)</span> is same for all permutations.</p>
+<ol start="3" type="1">
+<li>We don’t use the t-test, but we can steal the test-statistics: standardized difference in means.</li>
+<li>Difference in median: Robust to outliers.</li>
+<li>Difference of trimmed means: can reduce the influence of extreme observations; requires symmetry of the distribution. E.g. 10% trimmed mean is the mean of all observations after deleting the top 5% largest and the bottom 5% smallest values.</li>
+</ol>
+</section>
+<section id="choice-of-test-statistics-contd." class="slide level2">
+<h2>Choice of test statistics (contd.)</h2>
+<p><strong>Some Recommendations.</strong></p>
+<ol type="1">
+<li>If data are symmetric without outliers: Use difference in means.</li>
+<li>Symmetric but have outliers: use difference in trimmed means</li>
+<li>Asymmetric: use difference in medians.</li>
+<li><strong>Safest option:</strong> When in doubt, use median.</li>
+</ol>
+</section>
+<section id="random-sampling-permutation" class="slide level2">
+<h2>Random sampling permutation</h2>
+<ul>
+<li>As <span class="math inline">\(m\)</span> and <span class="math inline">\(n\)</span> increase, the number of permutations could be too large. For example, <span class="math inline">\(\binom{16}{8}= 12870, \binom{20}{10}=1{,}84{,}756\)</span>.</li>
+<li>It is not feasible to exhaust all of those permutations.</li>
+</ul>
+<p><strong>An approximate permutation p-value:</strong></p>
+<ol type="1">
+<li>take a random sample of say, <span class="math inline">\(R = 1000\)</span> permutations.</li>
+<li>calculate the statistic of interest <span class="math inline">\(D\)</span> for each permutation sample.</li>
+<li>approximate the p-value using the reference distribution formed by the <span class="math inline">\(R\)</span> permutation statistics in the same manner as the exact permutation test The approximation improves as R increases.</li>
+<li>The standard error for approximate p-value: <span class="math inline">\(\sqrt{\{p(1-p)\}/R}\)</span> where <span class="math inline">\(p\)</span> is the exact p-value.</li>
+<li>If true <span class="math inline">\(p = 0.05\)</span> and you take <span class="math inline">\(R = 1000\)</span> samples, margin of error is <span class="math inline">\(\sqrt{0.5\times 0.95 / 1000} = 0.00689202437\)</span>.</li>
+</ol>
+</section>
+<section id="permutation-test-pouring-times" class="slide level2">
+<h2>Permutation Test: Pouring Times</h2>
+<p>We use the pouring-times data: testing whether before-lunch times tend to be <strong>shorter</strong> than after-lunch times.</p>
+<p><span class="math display">\[H_0: F_{\text{before}} = F_{\text{after}} \qquad H_1: \mu_{\text{before}} &lt; \mu_{\text{after}}\]</span></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href=""></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">12.6</span>, <span class="fl">11.2</span>, <span class="fl">11.4</span>,  <span class="fl">9.4</span>, <span class="fl">13.2</span>, <span class="fl">12.0</span>)   <span class="co"># before lunch</span></span>
+<span id="cb2-2"><a href=""></a>y <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">16.4</span>, <span class="fl">15.4</span>, <span class="fl">14.1</span>, <span class="fl">14.0</span>, <span class="fl">13.4</span>, <span class="fl">11.3</span>)   <span class="co"># after lunch</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="r-code-for-permutation-test" class="slide level2">
+<h2>R code for permutation test</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb3-2"><a href=""></a>B        <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<span id="cb3-3"><a href=""></a>combined <span class="ot">&lt;-</span> <span class="fu">c</span>(x, y)</span>
+<span id="cb3-4"><a href=""></a>m        <span class="ot">&lt;-</span> <span class="fu">length</span>(x)</span>
+<span id="cb3-5"><a href=""></a>n        <span class="ot">&lt;-</span> <span class="fu">length</span>(y)</span>
+<span id="cb3-6"><a href=""></a>N        <span class="ot">&lt;-</span> m <span class="sc">+</span> n</span>
+<span id="cb3-7"><a href=""></a></span>
+<span id="cb3-8"><a href=""></a><span class="co"># Observed test statistic</span></span>
+<span id="cb3-9"><a href=""></a>T_obs <span class="ot">&lt;-</span> <span class="fu">mean</span>(x) <span class="sc">-</span> <span class="fu">mean</span>(y)</span>
+<span id="cb3-10"><a href=""></a>T_obs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -2.466667</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a><span class="do">## [1] -3.316667</span></span>
+<span id="cb5-2"><a href=""></a></span>
+<span id="cb5-3"><a href=""></a><span class="co"># Monte Carlo permutation distribution</span></span>
+<span id="cb5-4"><a href=""></a>T_perm <span class="ot">&lt;-</span> <span class="fu">replicate</span>(B, {</span>
+<span id="cb5-5"><a href=""></a>  perm <span class="ot">&lt;-</span> <span class="fu">sample</span>(combined)</span>
+<span id="cb5-6"><a href=""></a>  <span class="fu">mean</span>(perm[<span class="dv">1</span><span class="sc">:</span>m]) <span class="sc">-</span> <span class="fu">mean</span>(perm[(m<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>N])</span>
+<span id="cb5-7"><a href=""></a>})</span>
+<span id="cb5-8"><a href=""></a></span>
+<span id="cb5-9"><a href=""></a><span class="co"># One-sided p-value: P(T &lt;= T_obs) since H_1: mu_before &lt; mu_after</span></span>
+<span id="cb5-10"><a href=""></a>(p_perm <span class="ot">&lt;-</span> <span class="fu">mean</span>(T_perm <span class="sc">&lt;=</span> T_obs))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.006</code></pre>
+</div>
+</div>
+<ul>
+<li>The p-value is 0.006 and we can reject the null hypothesis since this is less than <span class="math inline">\(\alpha = 0.05\)</span>.</li>
+</ul>
+</section>
+<section id="we-can-compare-with-the-t-test" class="slide level2">
+<h2>We can compare with the t-test!</h2>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Welch Two Sample t-test
+
+data:  x and y
+t = -2.7536, df = 9.3075, p-value = 0.01084
+alternative hypothesis: true difference in means is less than 0
+95 percent confidence interval:
+       -Inf -0.8307318
+sample estimates:
+mean of x mean of y 
+ 11.63333  14.10000 </code></pre>
+</div>
+</div>
+<p>The permutation test leads to the same conclusion as the t-test.</p>
+</section>
+<section id="visualization" class="slide level2">
+<h2>Visualization</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="twosample_tests_files/figure-revealjs/perm-plot-1.png" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="exact-permutation" class="slide level2">
+<h2>Exact Permutation</h2>
+<p>For <span class="math inline">\(m = n = 6\)</span> there are <span class="math inline">\(\binom{12}{6} = 924\)</span> permutations: small enough to enumerate <strong>exactly</strong>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href=""></a><span class="co"># All ways to choose m positions out of N for group X</span></span>
+<span id="cb8-2"><a href=""></a>all_combs <span class="ot">&lt;-</span> <span class="fu">combn</span>(N, m)   <span class="co"># each column is one assignment</span></span>
+<span id="cb8-3"><a href=""></a></span>
+<span id="cb8-4"><a href=""></a>T_exact <span class="ot">&lt;-</span> <span class="fu">apply</span>(all_combs, <span class="dv">2</span>, <span class="cf">function</span>(idx) {</span>
+<span id="cb8-5"><a href=""></a>  <span class="fu">mean</span>(combined[idx]) <span class="sc">-</span> <span class="fu">mean</span>(combined[<span class="sc">-</span>idx])</span>
+<span id="cb8-6"><a href=""></a>})</span>
+<span id="cb8-7"><a href=""></a></span>
+<span id="cb8-8"><a href=""></a><span class="co"># Exact one-sided p-value</span></span>
+<span id="cb8-9"><a href=""></a>(p_perm_exact <span class="ot">&lt;-</span> <span class="fu">mean</span>(T_exact <span class="sc">&lt;=</span> T_obs))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.00974026</code></pre>
+</div>
+</div>
+<p>The p-value for the permutation test if we use all possible permutations is 0.0097403.</p>
+<p>The p-value for <span class="math inline">\(B = 500\)</span> permutations was 0.006, not too far off!</p>
+</section></section>
+<section>
+<section id="wilcoxon-rank-sum-test" class="title-slide slide level1 center">
+<h1>Wilcoxon rank-sum test</h1>
+
+</section>
+<section id="recap-two-sample-problem" class="slide level2">
+<h2>Recap: Two-sample Problem</h2>
+<ul>
+<li>Sign-test and Signed-rank test: applicable to both one-sample as well as paired-sample problems.</li>
+<li>Paired-sample: Also called Matched-pair problem. Two dependent samples, where pairing makes sense, or a single sample from a bivariate population. Examples: Before and After a ‘treatment’.</li>
+<li>First step for paired-sample problems is to take the difference between the matched pairs <span class="math inline">\(\Rightarrow\)</span> reduces to a one-sample problem.</li>
+</ul>
+</section>
+<section id="paired-samples-vs.-indep.-samples" class="slide level2">
+<h2>Paired samples vs.&nbsp;Indep. samples</h2>
+<ul>
+<li>General two-sample problem: Two ‘mutually independent’ random samples, possibly of different sizes.</li>
+<li>In practice: you will just observe the experiment and the data – whether the samples are mutually independent or paired will depend on the experiment.</li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Technically, all the two-sample methods can be applied to any matched-pair data – but ignoring the ‘pairing’ information means loss of power.</li>
+</ul>
+</div>
+</section>
+<section id="different-modeling-assumptions" class="slide level2">
+<h2>Different modeling assumptions</h2>
+<ul>
+<li>The performance of the test depends on the <strong>modeling assumptions</strong> and how close they are to the reality.</li>
+<li>If normality assumption is valid, <span class="math inline">\(t\)</span>-test is the most powerful test.</li>
+<li>In reality, we make a varying degree of assumptions.
+<ol type="1">
+<li>Location/shift model.</li>
+<li>Scale model.</li>
+<li>Location-scale model.</li>
+</ol></li>
+<li>We can also operate with just the assumption of <strong>IID-ness</strong>, <strong>Continuity</strong>.</li>
+<li>Tests that make relatively fewer assumptions are more robust against <strong>model misspecification</strong>, they will reject if there is any departure at all.</li>
+<li>The very generality of these tests weakens them against specific alternatives.</li>
+</ul>
+<div class="fragment">
+<ul>
+<li>‘Very general’ tests: Wald-Wolfowitz runs test, <span class="hl-green">Kolmogorov-Smirnov</span> two-sample test.</li>
+</ul>
+</div>
+</section>
+<section id="location-model" class="slide level2">
+<h2>Location model</h2>
+<ul>
+<li>One common assumption is <em>location model</em> or <em>shift model</em>. <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> populations are exactly the same except for an unknown shift <span class="math inline">\(\delta\)</span>, i.e., <span class="math inline">\(X\)</span> is distributed as <span class="math inline">\(Y-\delta\)</span>.</li>
+</ul>
+<p><span class="math display">\[
+F_Y(a) = P(Y \le a) = P(X \le a - \delta) = F_X(a - \delta), \mbox{for all } a \mbox{ and } \delta \neq 0
+\]</span></p>
+<ul>
+<li>Permutation Test and Wilcoxon rank-sum test. <span class="math inline">\(H_0: \delta = 0\)</span> vs.&nbsp;<span class="math inline">\(H_1: \delta &gt; 0 / &lt;0 / \neq 0\)</span>.</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="art/location_shift_normal.png" style="width:30.0%" alt="Two overlaid histograms of random samples on a common horizontal axis. The first sample, from a standard normal distribution, is centred at 0; the second, from a normal distribution with mean 3 and the same unit standard deviation, has an identically shaped bell but is shifted three units to the right. The two curves have the same spread and overlap only in their tails, illustrating a pure location shift."></p>
+<figcaption><span class="math inline">\(\NormRV(0,1)\)</span> vs.&nbsp;<span class="math inline">\(\NormRV(3,1)\)</span> random samples.</figcaption>
+</figure>
+</div>
+</section>
+<section id="scale-model" class="slide level2">
+<h2>Scale model</h2>
+<ul>
+<li>Another assumption about the underlying model is called the scale model, which assumes <span class="hl-navy">the <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> populations are the same except for a scale factor <span class="math inline">\(\sigma\)</span></span></li>
+</ul>
+<p><span class="math display">\[
+F_Y(a) = P(Y \le a) = P(X \le a \times \sigma) = F_X( a \sigma)
+\]</span></p>
+<ul>
+<li>This means <span class="math inline">\(X/\sigma\)</span> and <span class="math inline">\(Y\)</span> has the same distribution, or <span class="math inline">\(X\)</span> and <span class="math inline">\(Y \sigma\)</span> have the same distribution.</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="art/scale_shift.png" style="width:60.0%" alt="Two overlaid histograms of random samples sharing the same centre at 0 but differing in spread. The first sample, with standard deviation 2, is tall and narrow; the second, with standard deviation 4, is lower and much wider, with observations reaching roughly twice as far into both tails. The centres coincide, so the difference is purely one of scale."></p>
+<figcaption><span class="math inline">\(\NormRV(0,2)\)</span> vs.&nbsp;<span class="math inline">\(\NormRV(0,4)\)</span> random samples.</figcaption>
+</figure>
+</div>
+</section>
+<section id="location-scale-model" class="slide level2">
+<h2>Location-scale model</h2>
+<ul>
+<li>Now, can you tell me what is a location-scale model?</li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Easiest to write in three parameters: location for <span class="math inline">\(X\)</span> = <span class="math inline">\(\mu_X\)</span>, location for <span class="math inline">\(Y\)</span> = <span class="math inline">\(\mu_Y\)</span>, and scale = <span class="math inline">\(\sigma\)</span>.</li>
+<li><span class="math inline">\((X - \mu_X)/\sigma\)</span> and <span class="math inline">\(Y-\mu_Y\)</span> are identically distributed.</li>
+<li>Location-scale model: <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> have same distribution, except for a location and scale shift.</li>
+</ul>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="art/location_scale_shift.png" style="width:60.0%" alt="Two overlaid histograms of random samples that differ in both centre and spread. The first, with mean minus 1 and standard deviation 2, is narrower and sits to the left; the second, with mean 1 and standard deviation 4, is wider, flatter and shifted to the right. The two differences — in location and in scale — are present at the same time."></p>
+<figcaption><span class="math inline">\(\NormRV(-1,2)\)</span> vs.&nbsp;<span class="math inline">\(\NormRV(1,4)\)</span> random samples.</figcaption>
+</figure>
+</div>
+</section>
+<section id="alternatives-and-general-strategy" class="slide level2">
+<h2>Alternatives and General Strategy</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li>The null hypothesis is almost always that the two population distributions are identical and it is completely unspecified.</li>
+<li>The most general alternatives are:
+<ol type="1">
+<li>Two sided: <span class="math inline">\(H_A: F_Y(x) \neq F_X(x)\)</span> for some <span class="math inline">\(x\)</span>.</li>
+<li>One sided: <span class="math inline">\(H_A: F_Y(x) \geq F_X(x)\)</span> for all <span class="math inline">\(x\)</span>, and <span class="math inline">\(F_Y(x) &gt; F_X(x)\)</span> for some <span class="math inline">\(x\)</span>. (<span class="math inline">\(X\)</span> is <strong>stochastically larger</strong> than <span class="math inline">\(Y\)</span>, denoted as <span class="math inline">\(X \stackrel{st}{&gt;} Y\)</span>).</li>
+<li>The wikipedia page: <a href="https://en.wikipedia.org/wiki/Stochastic_ordering">stochastic ordering</a>.</li>
+</ol></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="art/stoch_large.png" style="width:100.0%" alt="A two-panel figure. The top panel shows two histograms, one centred at 0 and one centred at 3, with little overlap. The bottom panel shows the two corresponding empirical cumulative distribution functions: the curve for the sample centred at 0 rises first and lies entirely above and to the left of the curve for the sample centred at 3, which never crosses it. This non-crossing of the two CDFs is what it means for one sample to be stochastically larger than the other."></p>
+<figcaption><span class="math inline">\(\NormRV(3,1) \stackrel{st}{&gt;} \NormRV(0,1)\)</span>: Histogram and CDF.</figcaption>
+</figure>
+</div>
+</div></div>
+</section>
+<section id="strategy" class="slide level2">
+<h2>Strategy</h2>
+<ul>
+<li>Under the null, the two random samples <span class="math inline">\(X_1, \ldots, X_m\)</span> and <span class="math inline">\(Y_1, \ldots, Y_n\)</span> can be considered as a single random sample of size <span class="math inline">\(N = (m+n)\)</span> drawn from the common continuous but unspecified population.</li>
+<li>Then the observed order configuration of <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> sample is one of the <span class="math inline">\(\binom{m+n}{m}\)</span> possible equally likely arrangements.</li>
+<li>If null is not true: <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> will not be randomly mixed – there will be a pattern how the original <span class="math inline">\(X\)</span>’s and <span class="math inline">\(Y\)</span>’s are ordered in the combined sample.</li>
+<li>Two-sample NP tests try to come up with a function that can detect this departure.</li>
+</ul>
+</section>
+<section id="location-shift-model" class="slide level2">
+<h2>Location-shift model</h2>
+<p>Jump to: <a href="#/wilcox" class="jump-button">Wilcoxon Rank-sum test</a></p>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="art/stoch_larger.png" style="width:88.0%" alt="A multi-panel figure comparing a sample from a normal distribution with mean 3 against one from a standard normal. The histogram panel shows two well-separated bells; the CDF panel shows two non-crossing step functions; the ranks panel plots the position of each observation in the pooled, sorted sample, where the observations from the mean-3 sample occupy almost all of the high ranks and the standard normal observations almost all of the low ranks. The clean separation of ranks is the signal a rank-sum test detects."></p>
+<figcaption><span class="math inline">\(\NormRV(3,1) \stackrel{st}{&gt;} \NormRV(0,1)\)</span>: Histograms, CDFs and ranks in the combined sample.</figcaption>
+</figure>
+</div>
+</section>
+<section id="alt" class="slide level2">
+<h2>Location-shift model</h2>
+<p>What happens if I take two distributions to be <span class="math inline">\(\NormRV(0,1)\)</span> and <span class="math inline">\(\NormRV(\half,1)\)</span>??</p>
+<div class="fragment">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="art/stoch_similar.png" style="width:85.0%" alt="The same three-panel layout as the previous figure, but for two normal samples whose means differ by only one half. The histograms overlap heavily, the two empirical CDFs run close together and nearly touch along their length, and in the ranks panel the observations from the two samples are thoroughly interleaved rather than separated. One distribution is still stochastically larger, but the visual evidence is weak."></p>
+<figcaption><span class="math inline">\(\NormRV(\half,1) \stackrel{st}{&gt;} \NormRV(0,1)\)</span>: Histograms, CDFs and ranks.</figcaption>
+</figure>
+</div>
+</div>
+<p>Stochastically larger, but difference might NOT be ‘statistically’ significant.</p>
+</section>
+<section id="wilcox" class="slide level2 smaller">
+<h2>Wilcoxon Rank-Sum Statistics</h2>
+<ul>
+<li>For distribution with heavy tails, there may be extremely large/small values, and thus make t-test invalid or lack of power.</li>
+<li>Instead of comparing the sample mean of the observations from two groups, we compare the <strong>ranks</strong>.</li>
+<li>Let <span class="math inline">\(\Delta = \mu_X - \mu_Y\)</span> and we want to test <span class="math inline">\(H_0: \Delta = 0\)</span>. (No Location Shift).</li>
+<li>Combine <span class="math inline">\(X_1, \ldots, X_m\)</span> and <span class="math inline">\(Y_1, \ldots, Y_n\)</span> into a combined sample of <span class="math inline">\(m+n\)</span> observations.</li>
+<li>Let <span class="math inline">\(R_i\)</span> be the rank of <span class="math inline">\(X_i\)</span> for <span class="math inline">\(i = 1, \ldots,m\)</span> and <span class="math inline">\(S_j\)</span> be the rank of <span class="math inline">\(Y_j\)</span> for <span class="math inline">\(j = 1, \ldots, n\)</span> <strong>in the combined sample</strong>. (Like Wilcoxon’s other test, use mid-rank for ties).</li>
+<li><strong>Idea:</strong> If <span class="math inline">\(\Delta &gt; 0\)</span>, i.e.&nbsp;<span class="math inline">\(\mu_X &gt; \mu_Y\)</span>, <span class="math inline">\(R_i\)</span>’s would take higher values than <span class="math inline">\(S_j\)</span>’s in the combined sample.</li>
+</ul>
+</section>
+<section id="worked-example-ranks-in-the-combined-sample" class="slide level2">
+<h2>Worked example: ranks in the combined sample</h2>
+<p>Old example: Two testing methods: old and new. We want to know if the mean difference is <span class="math inline">\(0\)</span> or higher than <span class="math inline">\(0\)</span>.</p>
+<table class="data-table caption-top" data-quarto-postprocess="true">
+<caption>Scores and their ranks in the combined sample of six observations, with group means and rank sums.</caption>
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th" scope="col"></th>
+<th data-quarto-table-cell-role="th" scope="col">Obs. 1</th>
+<th data-quarto-table-cell-role="th" scope="col">Obs. 2</th>
+<th data-quarto-table-cell-role="th" scope="col">Obs. 3</th>
+<th data-quarto-table-cell-role="th" scope="col">Mean</th>
+<th data-quarto-table-cell-role="th" scope="col">Rank sum</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th" scope="row">New X</td>
+<td>37</td>
+<td>55</td>
+<td>57</td>
+<td>49.7</td>
+<td></td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th" scope="row">Rank R</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td></td>
+<td>12</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th" scope="row">Traditional Y</td>
+<td>23</td>
+<td>31</td>
+<td>70</td>
+<td>41.3</td>
+<td></td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th" scope="row">Rank S</td>
+<td>1</td>
+<td>2</td>
+<td>6</td>
+<td></td>
+<td>9</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>The Wilcoxon rank sum test uses the same approach as permutation test, where the statistic of interest is: <span class="math inline">\(W\)</span> = sum of ranks from group 1 (or 2):</li>
+</ul>
+<p><span class="math display">\[
+W_X = \sum_{i=1}^{m} R_i, \quad W_Y = \sum_{j=1}^{n} S_j
+\]</span></p>
+<ul>
+<li>Note that <span class="math inline">\(W_X + W_Y = 1 + 2 + \ldots + N = \frac{N(N+1)}{2}\)</span>, where <span class="math inline">\(N = m+n\)</span> is the size of the combined sample.</li>
+</ul>
+</section>
+<section id="repeat-permutation-test-with-wilcoxon-rank-sum-statistics" class="slide level2">
+<h2>Repeat: Permutation Test with Wilcoxon Rank Sum Statistics</h2>
+<ul>
+<li>Let <span class="math inline">\(\Delta = \mu_X - \mu_Y\)</span>, <span class="math inline">\(\mu_X,\mu_Y\)</span> could be any measure of central tendency (mean, median, mode).</li>
+<li>Test <span class="math inline">\(H_0: \Delta = 0\)</span> vs.&nbsp;<span class="math inline">\(H_L: \Delta \neq 0\)</span> or <span class="math inline">\(\Delta &gt; 0\)</span> etc.</li>
+<li><strong>Intuition:</strong> If there is no difference between the two samples, we can partition the <span class="math inline">\((m+n)\)</span> observations in any way between the two groups and the statistics of interest (here <span class="math inline">\(W_X\)</span> or <span class="math inline">\(W_Y\)</span>) should be similar to the one observed.</li>
+<li>In other words, all possible shufflings are equally likely, and under the null hypothesis of no difference the group labels do not matter.</li>
+<li>For this example: <span class="math inline">\(\binom{6}{3} = 20\)</span>. We can manually list all <span class="math inline">\(20\)</span> permutations!!</li>
+</ul>
+</section>
+<section id="how-to-reject" class="slide level2">
+<h2>How to reject</h2>
+<ul>
+<li>Remember: <span class="math inline">\(\Delta = \mu_X - \mu_Y\)</span> and we want to test <span class="math inline">\(H_0: \Delta = 0\)</span>.</li>
+<li>The alternative will either be specified, or, it will be clear from the context of the story.</li>
+<li>In other words, when you apply <code>alternative="less"</code> or <code>alternative = "greater"</code>, be careful you are using the correct direction.</li>
+<li>Correct test with wrong direction will give you the exact opposite conclusion.</li>
+</ul>
+<div class="fragment">
+<ol type="1">
+<li><span class="math inline">\(H_A : \Delta &gt; 0\)</span>: <span class="math inline">\(X\)</span> is shifted to the right. Reject <span class="math inline">\(H_0\)</span> when <span class="math inline">\(W_x\)</span> is large, or equivalently when <span class="math inline">\(W_y\)</span> is small.</li>
+<li><span class="math inline">\(H_A : \Delta &lt; 0\)</span>: <span class="math inline">\(X\)</span> is shifted to the left. Reject <span class="math inline">\(H_0\)</span> when <span class="math inline">\(W_x\)</span> is small, or equivalently when <span class="math inline">\(W_y\)</span> is large.</li>
+<li><span class="math inline">\(H_A : \Delta \neq 0\)</span>. Reject <span class="math inline">\(H_0\)</span> when <span class="math inline">\(W_x\)</span> is either too small or too large.</li>
+</ol>
+</div>
+</section>
+<section id="why-rank-sum-tests" class="slide level2">
+<h2>Why Rank-sum tests?</h2>
+<ul>
+<li>Benefit of conducting test based on ranks: <em>the test will not be affected by extreme values (ranks but not magnitudes matter)</em></li>
+<li>Under <span class="math inline">\(H_0\)</span>, <span class="math inline">\(E(W)\)</span> and <span class="math inline">\(V(W)\)</span> are only functions of <span class="math inline">\(m\)</span> and <span class="math inline">\(n\)</span>, so the critical values of <span class="math inline">\(W\)</span> for upper-tailed and lower-tailed tests can be tabulated.</li>
+</ul>
+<div class="fragment">
+<ul>
+<li>It will be a very long table. <strong>Gibbons and Chakraborti: Table J: pp.&nbsp;574 - 582</strong>! You want every possible combination of <span class="math inline">\(m\)</span> and <span class="math inline">\(n\)</span> until a moderate value of <span class="math inline">\(n\)</span> or <span class="math inline">\(m\)</span>.</li>
+<li>However, for small <span class="math inline">\(m\)</span> and <span class="math inline">\(n\)</span> it’s easy to do manually, and for large <span class="math inline">\(m,n\)</span> we have <span class="smallcaps">R</span> as well as normal approximations using CLT.</li>
+</ul>
+</div>
+</section>
+<section id="how-to-test" class="slide level2" data-background-color="#dceefc">
+<h2>How to test?</h2>
+<div class="center-heading">
+<p>We will see the Permutation test approach now, and learn CLT after we learn an exactly equivalent two-sample test called Mann–Whitney U test.</p>
+</div>
+</section>
+<section id="null-distribution-of-w" class="slide level2">
+<h2>Null distribution of <span class="math inline">\(W\)</span></h2>
+<ul>
+<li>The null distribution of <span class="math inline">\(W\)</span> is needed to obtain the critical values and the p-value.</li>
+<li>Under <span class="math inline">\(H_0\)</span>, as in the permutation test, the <span class="math inline">\(\binom{m+n}{n}\)</span> partitions have the equal chance to occur, each yielding one value of <span class="math inline">\(W\)</span>.</li>
+<li>So we can obtain the null distribution of <span class="math inline">\(W\)</span> by looking at all permutations when <span class="math inline">\(m\)</span> and <span class="math inline">\(n\)</span> are small.</li>
+<li>I will repeat myself: I can get away with this because the sample size is small, these calculations will be tedious and not feasible for larger sample sizes.</li>
+<li>Refer to the in-class example: <strong>Calculation of p-value (hand-out)</strong></li>
+<li>The observed test statistic value <span class="math inline">\(W_{obs} = 12\)</span> (sum of ranks for group <span class="math inline">\(X\)</span>).</li>
+</ul>
+</section>
+<section id="manual-calculation" class="slide level2 scrollable">
+<h2>Manual calculation</h2>
+<table class="data-table compact caption-top" data-quarto-postprocess="true">
+<caption>All 20 permutations of the six ranks into an X group and a Y group, with the resulting rank sum for the X group and an indicator of whether it is at least the observed value of 12.</caption>
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th" scope="col">k</th>
+<th colspan="3" data-quarto-table-cell-role="th" scope="colgroup">Ranks permuted <span class="math inline">\(X_i\)</span></th>
+<th colspan="3" data-quarto-table-cell-role="th" scope="colgroup">Ranks permuted <span class="math inline">\(Y_i\)</span>'s</th>
+<th data-quarto-table-cell-role="th" scope="col">Rank sum <span class="math inline">\(W_k^*\)</span></th>
+<th data-quarto-table-cell-role="th" scope="col"><span class="math inline">\(I\{W_k^* \geq 12\}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th" scope="row">1</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>1</td>
+<td>2</td>
+<td>6</td>
+<td>12</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th" scope="row">2</td>
+<td>3</td>
+<td>4</td>
+<td>1</td>
+<td>5</td>
+<td>2</td>
+<td>6</td>
+<td>8</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th" scope="row">3</td>
+<td>3</td>
+<td>4</td>
+<td>2</td>
+<td>5</td>
+<td>1</td>
+<td>6</td>
+<td>9</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th" scope="row">4</td>
+<td>3</td>
+<td>4</td>
+<td>6</td>
+<td>5</td>
+<td>1</td>
+<td>2</td>
+<td>13</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th" scope="row">5</td>
+<td>3</td>
+<td>5</td>
+<td>1</td>
+<td>4</td>
+<td>2</td>
+<td>6</td>
+<td>9</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th" scope="row">6</td>
+<td>3</td>
+<td>5</td>
+<td>2</td>
+<td>4</td>
+<td>1</td>
+<td>6</td>
+<td>10</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th" scope="row">7</td>
+<td>3</td>
+<td>5</td>
+<td>6</td>
+<td>4</td>
+<td>1</td>
+<td>2</td>
+<td>14</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th" scope="row">8</td>
+<td>3</td>
+<td>1</td>
+<td>2</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>6</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th" scope="row">9</td>
+<td>3</td>
+<td>1</td>
+<td>6</td>
+<td>4</td>
+<td>5</td>
+<td>2</td>
+<td>10</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th" scope="row">10</td>
+<td>3</td>
+<td>2</td>
+<td>6</td>
+<td>4</td>
+<td>5</td>
+<td>1</td>
+<td>11</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th" scope="row">11</td>
+<td>4</td>
+<td>5</td>
+<td>1</td>
+<td>3</td>
+<td>2</td>
+<td>6</td>
+<td>10</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th" scope="row">12</td>
+<td>4</td>
+<td>5</td>
+<td>2</td>
+<td>3</td>
+<td>1</td>
+<td>6</td>
+<td>11</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th" scope="row">13</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>3</td>
+<td>1</td>
+<td>2</td>
+<td>15</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th" scope="row">14</td>
+<td>4</td>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th" scope="row">15</td>
+<td>4</td>
+<td>1</td>
+<td>6</td>
+<td>3</td>
+<td>5</td>
+<td>2</td>
+<td>11</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th" scope="row">16</td>
+<td>4</td>
+<td>2</td>
+<td>6</td>
+<td>3</td>
+<td>5</td>
+<td>1</td>
+<td>12</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th" scope="row">17</td>
+<td>5</td>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>6</td>
+<td>8</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th" scope="row">18</td>
+<td>5</td>
+<td>1</td>
+<td>6</td>
+<td>3</td>
+<td>4</td>
+<td>2</td>
+<td>12</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th" scope="row">19</td>
+<td>5</td>
+<td>2</td>
+<td>6</td>
+<td>3</td>
+<td>4</td>
+<td>1</td>
+<td>13</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th" scope="row">20</td>
+<td>1</td>
+<td>2</td>
+<td>6</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>9</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="manual-calculation-1" class="slide level2">
+<h2>Manual calculation</h2>
+<ul>
+<li>Among <span class="math inline">\(20\)</span> permutations, total <span class="math inline">\(7\)</span> of <span class="math inline">\(W_k^*\)</span> are greater than <span class="math inline">\(W_{obs} = 12\)</span>.</li>
+<li>Therefore, the exact p-value for the <strong>upper-tailed</strong> test is <span class="math inline">\(p = \frac{7}{20} = 0.35\)</span>.</li>
+<li>The p-value for two-tailed test is twice that of the one-sided p-value, i.e.&nbsp;<span class="math inline">\(p = 2\times 0.35 = 0.7\)</span>.</li>
+<li>Since <span class="math inline">\(\#\{ W_k^* \leq 12 \}= 16\)</span>, the exact p-value for the <strong>lower-tailed</strong> test is <span class="math inline">\(16/20 = 0.8\)</span>.</li>
+<li>In general, for
+<ul>
+<li>upper-tailed test: p-value = <span class="math inline">\(\#\{ W_k^* \geq W_{obs}\} / \binom{m+n}{m}\)</span>.</li>
+<li>lower-tailed test: p-value = <span class="math inline">\(\#\{ W_k^* \leq W_{obs}\} / \binom{m+n}{m}\)</span></li>
+<li>two-tailed test: double of the p-value for the one-tailed test.</li>
+</ul></li>
+</ul>
+<p><a href="#/alt" class="jump-button">Back to: Location-shift model</a></p>
+</section></section>
+<section>
+<section id="mann-whitney-u-test" class="title-slide slide level1 center">
+<h1>Mann-Whitney U Test</h1>
+
+</section>
+<section id="mann-whitney-u-test-1" class="slide level2">
+<h2>Mann-Whitney U Test</h2>
+<ul>
+<li>Two-sample tests for location are based on the idea that the particular pattern exhibited by the combined ordered arrangement of the <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> random variables provide information about their relationship.</li>
+<li>Wald–Wolfowitz runs test*: Measures the tendency to cluster by total number of runs of <span class="math inline">\(X\)</span>’s and <span class="math inline">\(Y\)</span>’s.</li>
+<li>Wald–Wolfowitz runs test rejects the null hypothesis <span class="math inline">\(F_X = F_Y\)</span> if there’s too few runs.</li>
+</ul>
+<div class="fragment">
+<ul>
+<li>We will not cover this in class since K-S test is more powerful and easy to understand/apply.</li>
+<li>Mann–Whitney test: position of <span class="math inline">\(Y\)</span>’s and <span class="math inline">\(X\)</span>’s in the combined and sorted sample. If most of the <span class="math inline">\(Y\)</span>’s are greater than most of the <span class="math inline">\(X\)</span>’s (or vice versa), there is evidence against the null.</li>
+</ul>
+</div>
+</section>
+<section id="mannwhitney-u-test" class="slide level2">
+<h2>Mann–Whitney <span class="math inline">\(U\)</span> Test</h2>
+<ul>
+<li>The <span class="hl-gold">Mann–Whitney</span> U test statistics is defined as the number of times a <span class="math inline">\(Y\)</span> precedes an <span class="math inline">\(X\)</span> in the combined ordered arrangement of the two independent random samples into a single sample.</li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Define <span class="math inline">\(m \times n\)</span> indicator random variables as:</li>
+</ul>
+<p><span class="math display">\[
+D_{ij} = \begin{cases}
+1 &amp; \mbox{ if } Y_j &lt; X_i \\
+0 &amp; \mbox{ if } Y_j &gt; X_i \quad \mbox{for } i = 1,2, \ldots,m, \; j = 1,2,\ldots,n.
+\end{cases}
+\]</span></p>
+<ul>
+<li>Mann–Whitney U statistic can be written in symbols as:</li>
+</ul>
+<p><span class="math display">\[
+U = \sum_{i=1}^{m}\sum_{j=1}^{n} D_{ij}
+\]</span></p>
+</div>
+<div class="fragment">
+<ul>
+<li><span class="math inline">\(U\)</span> = # of pairs <span class="math inline">\((X_i, Y_j)\)</span> for which <span class="math inline">\(X_i &gt; Y_j\)</span>.</li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>We reject the null <span class="hl-indigo"><span class="math inline">\(H_0: F_X = F_Y\)</span></span> if <span class="math inline">\(U\)</span> is either too large or too small, depending on the alternative.</li>
+</ul>
+</div>
+</section>
+<section id="mannwhitney-u-test-1" class="slide level2">
+<h2>Mann–Whitney <span class="math inline">\(U\)</span> Test</h2>
+<ul>
+<li>Direct method: For each observation in one set (either <span class="math inline">\(X\)</span> or <span class="math inline">\(Y\)</span>), count the number of times this first value wins over any observations in the other set (the other value loses if this first is larger). Count 0.5 for any ties.</li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Suppose <span class="math inline">\(m = 3\)</span>, <span class="math inline">\(n = 4\)</span> and all <span class="math inline">\(X\)</span>’s are smaller than all <span class="math inline">\(Y\)</span>’s. Sorted sample would look like: <span class="math inline">\((\textcolor{#4C4C9E}{X_1, X_2, X_3}, Y_1, Y_2, Y_3, Y_4)\)</span>: U-statistic for <span class="math inline">\(X\)</span> ?</li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li><span class="math inline">\(U_X\)</span> = # times <span class="math inline">\(X_1\)</span> wins + # times <span class="math inline">\(X_2\)</span> wins + # times <span class="math inline">\(X_3\)</span> wins = 0 + 0 + 0 = 0.</li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li><span class="math inline">\(U_X\)</span> is small if <span class="math inline">\(X\)</span>’s are smaller than <span class="math inline">\(Y\)</span>’s.</li>
+</ul>
+</div>
+</section>
+<section id="mannwhitney-u-test-2" class="slide level2">
+<h2>Mann–Whitney <span class="math inline">\(U\)</span> Test</h2>
+<ul>
+<li>Again, <span class="math inline">\(m = 3\)</span>, <span class="math inline">\(n = 4\)</span> and all <span class="math inline">\(X\)</span>’s are larger than all <span class="math inline">\(Y\)</span>’s. Sorted sample would look like: <span class="math inline">\((Y_1, Y_2, Y_3, Y_4, \textcolor{#4C4C9E}{X_1, X_2, X_3})\)</span>: U-statistic for <span class="math inline">\(X\)</span>?</li>
+</ul>
+<div class="fragment">
+<ul>
+<li><span class="math inline">\(U_X\)</span> = # times <span class="math inline">\(X_1\)</span> wins + # times <span class="math inline">\(X_2\)</span> wins + # times <span class="math inline">\(X_3\)</span> wins = 4 + 4 + 4 = 12.</li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li><span class="math inline">\(U_X\)</span> is large if <span class="math inline">\(X\)</span>’s are larger than <span class="math inline">\(Y\)</span>’s.</li>
+</ul>
+</div>
+</section>
+<section id="mannwhitney-u-test-3" class="slide level2">
+<h2>Mann–Whitney <span class="math inline">\(U\)</span> Test</h2>
+<ul>
+<li>Now, suppose <span class="math inline">\(X\)</span>’s and <span class="math inline">\(Y\)</span>’s are mixed: <span class="math inline">\((\textcolor{#4C4C9E}{X_1, X_2}, Y_1, Y_2, Y_3, Y_4, \textcolor{#4C4C9E}{X_3})\)</span>: U-statistic for <span class="math inline">\(X\)</span>? <span class="math inline">\(U_X = 0 + 0 + 4 = 4\)</span>.</li>
+</ul>
+<div class="fragment">
+<ul>
+<li><span class="math inline">\(U_X\)</span> = # times <span class="math inline">\(X_1\)</span> wins + # times <span class="math inline">\(X_2\)</span> wins + # times <span class="math inline">\(X_3\)</span> wins = 0 + 0 + 4 = 4.</li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>If <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> samples are well mixed, <span class="math inline">\(U_X\)</span> should neither be too large or too small.</li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>Now, how about the U-statistics for <span class="math inline">\(Y\)</span>-sample?</li>
+</ul>
+</div>
+</section>
+<section id="u-for-both-samples" class="slide level2">
+<h2><span class="math inline">\(U\)</span> for both samples</h2>
+<ul>
+<li>Direct method: For each observation in one set (either <span class="math inline">\(X\)</span> or <span class="math inline">\(Y\)</span>), count the number of times this first value wins over any observations in the other set (the other value loses if this first is larger). Count 0.5 for any ties.</li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Suppose <span class="math inline">\(m = 3\)</span>, <span class="math inline">\(n = 4\)</span> and all <span class="math inline">\(X\)</span>’s are smaller than all <span class="math inline">\(Y\)</span>’s. Sorted sample : <span class="math inline">\((\textcolor{#4C4C9E}{X_1, X_2, X_3}, Y_1, Y_2, Y_3, Y_4)\)</span>: U-statistic for <span class="math inline">\(X\)</span> = 0. U-statistic for <span class="math inline">\(Y\)</span> = 3 + 3 + 3 + 3 = 12.</li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>Again, <span class="math inline">\(m = 3\)</span>, <span class="math inline">\(n = 4\)</span> and all <span class="math inline">\(X\)</span>’s are larger than all <span class="math inline">\(Y\)</span>’s. Sorted sample : <span class="math inline">\((Y_1, Y_2, Y_3, Y_4, \textcolor{#4C4C9E}{X_1, X_2, X_3})\)</span>: U-statistic for <span class="math inline">\(X\)</span> = 4 + 4 + 4 = 12. U-statistic for <span class="math inline">\(Y\)</span> = ?</li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>Now, suppose <span class="math inline">\(X\)</span>’s and <span class="math inline">\(Y\)</span>’s are mixed: <span class="math inline">\((\textcolor{#4C4C9E}{X_1, X_2}, Y_1, Y_2, Y_3, Y_4, \textcolor{#4C4C9E}{X_3})\)</span>: U-statistic for <span class="math inline">\(X\)</span>? <span class="math inline">\(U_X = 0 + 0 + 4 = 4\)</span>. U-statistic for <span class="math inline">\(Y\)</span> = 2 + 2 + 2 + 2 = 8. (Each <span class="math inline">\(Y_i\)</span> wins twice!).</li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>We don’t need separate calculation: <span class="math inline">\(U_Y = \mbox{\# of all possible pairs} - U_X = mn - U_X = 12 - 4 = 8\)</span>.</li>
+</ul>
+</div>
+</section>
+<section id="theory-behind-mannwhitney-u-test" class="slide level2">
+<h2>Theory behind Mann–Whitney <span class="math inline">\(U\)</span> Test</h2>
+<ul>
+<li>Statisticians worry about <strong>consistency</strong> (<em>outcome of the procedure with unlimited data should identify the underlying truth.</em>)</li>
+<li>For Mann-Whitney test, the underlying truth is not the two medians or distributions but the true probability that <span class="math inline">\(Y\)</span> is less than <span class="math inline">\(X\)</span>, or, <span class="math inline">\(p = P(Y &lt; X)\)</span>.</li>
+<li>If the two samples come from the same distribution, which is our null hypothesis, then <span class="math inline">\(p = 1/2\)</span>.</li>
+</ul>
+<div title="Consistency">
+<div class="callout callout-important no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong>Consistency</strong></p>
+</div>
+<div class="callout-content">
+<p>Let <span class="math inline">\(U\)</span> be the Mann–Whitney <span class="math inline">\(U\)</span> statistics for testing location shift between two independent samples <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> of size <span class="math inline">\(m\)</span> and <span class="math inline">\(n\)</span> respectively, then as <span class="math inline">\(m,n \to \infty\)</span>:</p>
+<p><span class="math display">\[
+\frac{U}{mn} \to p, \quad \text{and under} \; H_0, \frac{U}{mn}\to \half
+\]</span></p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="proof" class="slide level2">
+<h2>Proof</h2>
+<p><span class="math display">\[
+\begin{aligned}
+p = P(Y &lt; X) &amp; = \int_{-\infty}^{\infty} P(Y \leq x) f_X(x)\, dx\\
+&amp; = \int_{-\infty}^{\infty} F_Y(x) f_X(x)\, dx\\
+&amp; = \int_{-\infty}^{\infty} \textcolor{#C00000}{F_Y(x)}\,\textcolor{#0B4F9C}{d F_X(x)} &amp;&amp; \mbox{$\dif F_x(x)/ \dif x = f_X(x)$}\\
+&amp; = \int_{-\infty}^{\infty} \textcolor{#C00000}{F_X(x)}\,\textcolor{#0B4F9C}{d F_X(x)} &amp;&amp; \mbox{(Because, under the null $F_Y = F_X$)}\\
+&amp; = \int_{0}^{1} \textcolor{#C00000}{u}\,\textcolor{#0B4F9C}{du} &amp;&amp; \mbox{Change of variable $F_x(x) = u$}\\
+&amp; = \int_{0}^{1} \textcolor{#C00000}{u}\,\textcolor{#0B4F9C}{du} = 0.5.
+\end{aligned}
+\]</span></p>
+<p>Hence, <span class="math inline">\(p = P(Y &lt; X) = 1/2\)</span> when the null hypothesis is true <span class="math inline">\(F_X = F_Y\)</span>.</p>
+</section>
+<section id="theory-behind-mann-whitneys-u" class="slide level2">
+<h2>Theory behind Mann-Whitney’s U</h2>
+<ul>
+<li>What did I just do? I’ve shown under the null hypothesis, <span class="math inline">\(P(Y &lt; X) = 1/2\)</span>.</li>
+<li>Now, definition of <span class="math inline">\(U\)</span>-statistic is # of pairs <span class="math inline">\((X_i, Y_j)\)</span> for which <span class="math inline">\(X_i &gt; Y_j\)</span>, i.e.</li>
+</ul>
+<p><span class="math display">\[
+U_X = \sum_{i=1}^{m} \sum_{j=1}^{n} \underbrace{I\{X_i &gt; Y_j\}}_{probability = p} \; \Rightarrow \; E(U_X) = mnp
+\]</span></p>
+<ul>
+<li>Under <span class="math inline">\(H_0\)</span>, <span class="math inline">\(p = \half\)</span>, i.e.&nbsp;<span class="math inline">\(E(U_X) = E(U_Y) = mn/2\)</span>. Each sample should win about half of the pairwise competitions.</li>
+<li>Derivation of the variance formula is more involved: I’ll just leave the expression here:</li>
+</ul>
+<p><span class="math display">\[
+Var(U_X \mid H_0) = Var(U_Y \mid H_0)= \frac{m n (m+n+1)}{12} \quad \mbox{Need it for CLT}.
+\]</span></p>
+</section>
+<section id="mann-whitney-equiv-wilcoxon-rank-sum" class="slide level2">
+<h2>Mann-Whitney <span class="math inline">\(\equiv\)</span> Wilcoxon rank-sum</h2>
+<ul>
+<li>Mann-Whitney test is equivalent to Wilcoxon rank-sum test, which is why we people sometimes club them together and call the procedure a Mann-Whiteny-Wilcoxon test.</li>
+<li>If you know one, you know the other.</li>
+<li><span class="hl-navy">In <span class="smallcaps">R</span>, the function is called <code>wilcox.test(x,y,paired=FALSE)</code> and it returns the <span class="math inline">\(U\)</span> statistics!</span></li>
+<li><strong>Wilcoxon rank-sum and Mann–Whitney U are equivalent.</strong></li>
+</ul>
+<p><span class="math display">\[
+\begin{aligned}
+U_x &amp; = W_x - \sum_{i=1}^{m} i = W_x - m(m+1)/2 , \; \text{and} \\
+U_y &amp; = W_y - \sum_{i=1}^{n} i = W_y - n(n+1)/2.
+\end{aligned}
+\]</span></p>
+</section>
+<section id="mann-whitney-wilcoxon-rank-sum." class="slide level2">
+<h2>Mann-Whitney &amp; Wilcoxon rank sum.</h2>
+<ul>
+<li>The <span class="math inline">\(U\)</span> statistic is a function in the rank sum:</li>
+<li><span class="math inline">\(U_x = W_x - \sum_{i=1}^{m} i = W_x - m(m+1)/2\)</span> and equivalently: <span class="math inline">\(U_y = W_y - \sum_{i=1}^{n} i = W_y - n(n+1)/2\)</span></li>
+</ul>
+<div class="fragment">
+<ul>
+<li>We only need to calculate one of these statistics, <span class="math inline">\(U_x\)</span> or <span class="math inline">\(U_y\)</span>, since <span class="math inline">\(U_x + U_y = mn\)</span>.</li>
+<li><span class="boxed">In R, <code>wilcox.test(x,y,paired=F)</code> returns the <span class="math inline">\(U\)</span> statistics.</span></li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>Consider two toy examples:</li>
+<li><span class="math inline">\(x = (1,2,3), y = (4,5,6)\)</span>, What is <span class="math inline">\(W_x\)</span>? What is <span class="math inline">\(U\)</span>?</li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li><span class="math inline">\(x = (1,2,3), y = (4,5,6)\)</span>, <span class="math inline">\(W_x = 1+2+3 =6\)</span>. <span class="math inline">\(U = 0\)</span>.</li>
+<li>In R: <code>wilcox.test(c(1,2,3),c(4,5,6),paired=F)</code> returns W = 0, p-value = 0.1 (U statistics!)</li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>Switch <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>: <span class="math inline">\(x = (4,5,6), y = (1,2,3)\)</span>, What is <span class="math inline">\(W_x\)</span>? What is <span class="math inline">\(U\)</span>?</li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>Switch <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>: <span class="math inline">\(x = (4,5,6), y = (1,2,3)\)</span>, <span class="math inline">\(W_x = 4+5+6 = 15\)</span>. <span class="math inline">\(U = 3+3+3 = 9\)</span>.</li>
+<li>In R: <code>wilcox.test(c(4,5,6),c(1,2,3),paired=F)</code> returns W = 9, p-value = 0.1. (U statistics!)</li>
+</ul>
+</div>
+</section>
+<section id="normal-approximation-for-u-statistic" class="slide level2">
+<h2>Normal approximation for <span class="math inline">\(U\)</span>-statistic</h2>
+<ul>
+<li>Under <span class="math inline">\(H_0\)</span>: the expectation or mean of <span class="math inline">\(U\)</span> is <span class="math inline">\(\E(U) = mn/2\)</span>.</li>
+<li>It can be proved that <span class="math inline">\(\Var(U) = \frac{mn(m+n+1)}{12}\)</span> (discussed next).</li>
+<li>The normal approximation should be:</li>
+</ul>
+<p><span class="math display">\[
+Z = \frac{U - mn/2}{\sqrt{\frac{mn(m+n+1)}{12}}}
+\]</span></p>
+<ul>
+<li>The Normal approximation works well for <span class="math inline">\(min\{m,n\} \ge 6\)</span>. We can also use the continuity correction since we are approximating a discrete distribution by a continuous one.</li>
+<li>We can use the value of <span class="math inline">\(Z\)</span> above, along with the Normal table to calculate the P-value.</li>
+</ul>
+</section>
+<section id="problem" class="slide level2">
+<h2>Problem</h2>
+<p>The goal of this exercise is to calculate U-statistics and Wilcoxon rank-sum for a small sample and use normal approximation to calculate the P-value. Let’s consider the following problem from our textbook:</p>
+<p>The following are 12 independent observations of pouring times of a metal grouped into before and after lunch. The metallurgical engineer suspects that the pouring time before lunch was shorter than the pouring time after lunch. We want to find the P-value for the alternative that the median pouring time before lunch is indeed shorter.</p>
+<table class="data-table caption-top" data-quarto-postprocess="true">
+<caption>Twelve independent pouring times of a metal, six recorded before lunch and six after lunch.</caption>
+<thead>
+<tr class="header">
+<th colspan="2" data-quarto-table-cell-role="th" scope="colgroup">Before lunch</th>
+<th colspan="2" data-quarto-table-cell-role="th" scope="colgroup">After lunch</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>12.6</td>
+<td>11.2</td>
+<td>16.4</td>
+<td>15.4</td>
+</tr>
+<tr class="even">
+<td>11.4</td>
+<td>9.4</td>
+<td>14.1</td>
+<td>14</td>
+</tr>
+<tr class="odd">
+<td>13.2</td>
+<td>12</td>
+<td>13.4</td>
+<td>11.3</td>
+</tr>
+</tbody>
+</table>
+<p>What is the <span class="math inline">\(U\)</span> statistics for <span class="math inline">\(Y\)</span>?</p>
+<p>Calculate the number of times an observation from the second group is larger than an observation from the first group. That is your <span class="math inline">\(U\)</span> stat for the <span class="math inline">\(Y\)</span> sample.</p>
+</section></section>
+<section>
+<section id="consistency" class="title-slide slide level1 center">
+<h1>Consistency</h1>
+
+</section>
+<section id="two-probability-results" class="slide level2">
+<h2>Two Probability Results</h2>
+<div title="Theorem (Markov)">
+<div class="callout callout-note no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong>Theorem (Markov)</strong></p>
+</div>
+<div class="callout-content">
+<p>If <span class="math inline">\(X\)</span> is a non-negative random variable with a finite mean <span class="math inline">\(\E(X) = \mu\)</span>, and <span class="math inline">\(c\)</span> is any positive number.</p>
+<p><span class="math display">\[
+P(X \ge c) \le \frac{\mathbb{E}(X)}{c}
+\]</span></p>
+</div>
+</div>
+</div>
+</div>
+<div title="Theorem (Chebyshev/Tchebycheff)">
+<div class="callout callout-note no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong>Theorem (Chebyshev/Tchebycheff)</strong></p>
+</div>
+<div class="callout-content">
+<p>If <span class="math inline">\(X\)</span> is random variable with finite first and second moments, i.e.&nbsp;finite mean and variance <span class="math inline">\(\E(X) = \mu &lt; \infty\)</span> and <span class="math inline">\(\Var(X) = \sigma^2 &lt; \infty\)</span>, and <span class="math inline">\(k\)</span> is any positive number:</p>
+<p><span class="math display">\[
+P( \abs{X-\mu} \ge k \sigma) \le \frac{1}{k^2}
+\]</span></p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="inequalities" class="slide level2">
+<h2>Inequalities</h2>
+<ul>
+<li>The virtue of these two inequalities are that they are very general: they don’t assume restrictive conditions on <span class="math inline">\(X\)</span>:</li>
+<li>Markov assumes non-negativity of <span class="math inline">\(X\)</span> and existence of mean.</li>
+<li>Chebyshev assumes existence of <span class="math inline">\(\E(X)\)</span> and <span class="math inline">\(\Var(X)\)</span>.</li>
+<li>Both mean and variance must exist!</li>
+<li>Example of random variable where mean is finite but the variance is not : Let <span class="math inline">\(X\)</span> be a discrete random variable with probability mass function:</li>
+</ul>
+<p><span class="math display">\[
+p(x) = \frac{4}{x(x+1)(x+2)} \mbox{ for } x = 1,2, \ldots
+\]</span></p>
+<p>Then <span class="math inline">\(\E(X) = 2\)</span> but <span class="math inline">\(\Var(X) = \infty\)</span>.</p>
+<ul>
+<li>Application: Consistency.</li>
+</ul>
+</section>
+<section id="consistency-1" class="slide level2">
+<h2>Consistency</h2>
+<ul>
+<li>Before I begin: these concepts are useful for understanding the theory behind nonparametric tests, but you don’t need to remember the long formulas, or memorize the proofs, ever!</li>
+</ul>
+<div class="fragment">
+<ul>
+<li><strong>Consistency of a point estimate:</strong> Suppose <span class="math inline">\(X_1, X_2, \ldots, X_n \iid F(\theta_0)\)</span> and <span class="math inline">\(\hat\theta_n\)</span> is an unbiased estimator, such that <span class="math inline">\(\E(\hat\theta_n) = \theta_0\)</span>. Then <span class="math inline">\(\hat\theta_n\)</span> is called a consistent estimator of <span class="math inline">\(\theta_0\)</span> if</li>
+</ul>
+<p><span class="math display">\[
+P( \abs{\hat \theta_n - \theta_0} &gt; \epsilon) \to 0 \quad as \quad n \to \infty, \mbox{ for all } \epsilon &gt;0
+\]</span></p>
+<ul>
+<li>An useful definition is: <span class="math inline">\(\hat\theta_n\)</span> is called a consistent estimator of <span class="math inline">\(\theta_0\)</span> if <span class="math inline">\(\E(\hat\theta_n) \to \theta_0\)</span> and <span class="math inline">\(\Var(\hat\theta_n) \to 0\)</span> as <span class="math inline">\(n \to \infty\)</span>. Example: <span class="math inline">\(\bar{X}\)</span>: mean of <span class="math inline">\(n\)</span> standard normal random variables <span class="math inline">\(X_1, \ldots, X_n\)</span>.</li>
+</ul>
+</div>
+</section>
+<section id="consistency-2" class="slide level2">
+<h2>Consistency</h2>
+<p><strong>Consistency of a test:</strong></p>
+<ul>
+<li>Suppose <span class="math inline">\(X_1, X_2, \ldots, X_n \iid F(\theta)\)</span> and you are testing <span class="math inline">\(H_0: \theta = \theta_0\)</span> vs.&nbsp;<span class="math inline">\(H_A: \theta \neq \theta_0\)</span> at significance level <span class="math inline">\(\alpha\)</span>.</li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Your test statistics is <span class="math inline">\(T_n \doteq T(X_1, \ldots, X_n)\)</span>, and your testing rule is: Reject the null <span class="math inline">\(H_0\)</span> if <span class="math inline">\(T_n \ge C_{\alpha}\)</span>.</li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>Such a test is called consistent if the power of the test goes to 1 as <span class="math inline">\(n \to \infty\)</span>, for a given <span class="math inline">\(\alpha\)</span> and given <span class="math inline">\(H_A\)</span>.</li>
+<li>An useful definition is: A test based on the test statistics <span class="math inline">\(T_n\)</span> is called a consistent test for a parameter <span class="math inline">\(\theta\)</span> if</li>
+</ul>
+<p><span class="math display">\[
+\E(T_n) \to \theta \; \mbox{ for all } \theta, \; \mbox{and} \; \Var(T_n) \to 0\; \mbox{ as } n \to \infty
+\]</span></p>
+</div>
+</section>
+<section id="example-1-z-test" class="slide level2">
+<h2>Example 1: <span class="math inline">\(Z\)</span>-test</h2>
+<ul>
+<li>Parametric <span class="math inline">\(Z\)</span>-test: based on <span class="math inline">\(\bar{X}\)</span>: mean of <span class="math inline">\(n\)</span> random variables <span class="math inline">\(X_1, \ldots, X_n \iid \NormRV(\mu,\sigma)\)</span>.</li>
+<li><span class="math inline">\(H_0: \mu = \mu_0\)</span> vs.&nbsp;<span class="math inline">\(H_A: \mu \neq \mu_0\)</span>: Test statistics: <span class="math inline">\(\E(\bar{X}) = \mu\)</span> and <span class="math inline">\(\Var(\bar{X}) = \sigma^2/n \to 0\)</span> as <span class="math inline">\(n \to \infty\)</span>.</li>
+<li>Hence, <span class="math inline">\(Z\)</span>-test is consistent for testing equality of population means.</li>
+</ul>
+</section>
+<section id="example-2-sign-test" class="slide level2">
+<h2>Example 2: Sign Test</h2>
+<ul>
+<li>Nonparametric Sign test: based on <span class="math inline">\(S\)</span> = number of positive differences. Testing <span class="math inline">\(H_0: \mu = \mu_0\)</span> is equivalent to testing <span class="math inline">\(H_0: p = \half\)</span> where <span class="math inline">\(p = P(X - \mu_0 \ge 0)\)</span>.</li>
+<li><span class="math inline">\(S \sim \mbox{Bin}(n,p)\)</span> which implies <span class="math inline">\(\E(S/n) = p\)</span> and <span class="math inline">\(\Var(S/n) = \frac{p(1-p)}{n} \to 0\)</span> as <span class="math inline">\(n \to \infty\)</span>.</li>
+<li>Hence, sign test is consistent for one-sample or paired-sample test for differences in median.</li>
+</ul>
+</section>
+<section id="back-to-mannwhitney" class="slide level2">
+<h2>Back to Mann–Whitney</h2>
+<div class="center-heading">
+<p>Now let’s go back to Mann–Whiteny U test. Is it consistent?</p>
+</div>
+</section>
+<section id="mannwhitney-u-test-4" class="slide level2">
+<h2>Mann–Whitney <span class="math inline">\(U\)</span> Test</h2>
+<ul>
+<li>The <span class="hl-gold">Mann–Whitney</span> U test statistics is defined as the number of times a <span class="math inline">\(Y\)</span> precedes an <span class="math inline">\(X\)</span> in the combined ordered arrangement of the two independent random samples into a single sample.</li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Define <span class="math inline">\(m \times n\)</span> indicator random variables as:</li>
+</ul>
+<p><span class="math display">\[
+D_{ij} = \begin{cases}
+1 &amp; \mbox{ if } Y_j &lt; X_i \\
+0 &amp; \mbox{ if } Y_j &gt; X_i \quad \mbox{for } i = 1,2, \ldots,m, \; j = 1,2,\ldots,n.
+\end{cases}
+\]</span></p>
+<ul>
+<li>Mann–Whitney U statistic can be written in symbols as:</li>
+</ul>
+<p><span class="math display">\[
+U = \sum_{i=1}^{m}\sum_{j=1}^{n} D_{ij}
+\]</span></p>
+</div>
+<div class="fragment">
+<ul>
+<li><span class="math inline">\(U \equiv U_X\)</span> = # of pairs <span class="math inline">\((X_i, Y_j)\)</span> for which <span class="math inline">\(X_i &gt; Y_j\)</span>.</li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>If your alternative is <span class="hl-indigo"><span class="math inline">\(H_A: F_Y(x) \le F_X(x)\)</span></span> with strict inequality for some <span class="math inline">\(x\)</span>, (<span class="math inline">\(Y_i\)</span>s are stochastically larger than <span class="math inline">\(X_i\)</span>’s) then logically you should reject for <strong>small values of <span class="math inline">\(U\)</span></strong>.</li>
+</ul>
+</div>
+</section>
+<section id="consistency-of-u-statistic" class="slide level2">
+<h2>Consistency of <span class="math inline">\(U\)</span>-statistic</h2>
+<ul>
+<li>Let <span class="math inline">\(p\)</span> the probability that <span class="math inline">\(D_{i,j} = 1\)</span>, i.e.&nbsp;<span class="math inline">\(P(Y &lt; X) = p\)</span>, then <span class="math inline">\(D_{i,j} \sim \mbox{Bernoulli}(p)\)</span> (Coin toss).</li>
+<li>We have shown before <span class="math inline">\(E(U/mn) = p\)</span> for all values of <span class="math inline">\(p\)</span>.</li>
+<li>The variance of <span class="math inline">\(U\)</span> has a long formula. I will not derive the formula but give you the idea behind it:</li>
+</ul>
+<div class="fragment">
+<ul>
+<li><span class="math inline">\(\Var(U) = \Var\bigg(\sum_{i=1}^{m} \sum_{j=1}^{n} D_{i,j} \bigg)\)</span>.</li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>But the <span class="math inline">\(D_{i,j}\)</span>’s are not all independent, so <span class="math inline">\(\Var\bigg(\sum_{i=1}^{m} \sum_{j=1}^{n} D_{i,j} \bigg) \neq \sum_{i=1}^{m} \sum_{j=1}^{n} \Var(D_{i,j})\)</span>. It will involve covariance terms!</li>
+</ul>
+</div>
+</section>
+<section id="consistency-of-u-statistics" class="slide level2">
+<h2>Consistency of <span class="math inline">\(U\)</span>-statistics</h2>
+<ul>
+<li>The full formula is quite complicated and it’s not worth remembering!</li>
+</ul>
+<p><span class="math display">\[
+\begin{aligned}
+\Var(U) &amp; = mnp(1-p)+mn(n-1)(p_1 - p^2)+nm(m-1)(p_2-p^2)\\
+\mbox{where } &amp; p_1 = P(Y_j &lt; X_i \cap Y_k &lt; X_i) \; , \mbox{and} \; p_2 = P(X_i &gt; Y_j \cap X_h &gt; Y_j) \\
+\mbox{Implying} &amp; \; \Var(U) = mn\{ p-p^2(m+n-1) + (n-1)p_1 + (m-1)p_2 \} \\
+\mbox{that is} &amp; \; \textcolor{#C00000}{\Var(U/mn) =\frac{\{ p-p^2(m+n-1) + (n-1)p_1 + (m-1)p_2 \}}{mn}}
+\end{aligned}
+\]</span></p>
+<div class="fragment">
+<ul>
+<li>TL;DR: <span class="math inline">\(\lim_{m,n \to \infty} E(U/mn) = p, \quad \mbox{and} \quad \lim_{m,n \to \infty} Var{[U/mn]} \to 0\)</span></li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>So for any value of <span class="math inline">\(p\)</span> (not just <span class="math inline">\(p = 1/2\)</span>) the test statistic converges to <span class="math inline">\(p\)</span>, and our <span class="math inline">\(U\)</span>-test is consistent.</li>
+</ul>
+</div>
+</section>
+<section id="normal-approximation-for-u-statistic-1" class="slide level2">
+<h2>Normal approximation for <span class="math inline">\(U\)</span>-statistic</h2>
+<ul>
+<li>Under <span class="math inline">\(H_0\)</span>: <span class="math inline">\(p_1 = p_2 = 1/3\)</span>, which implies: <span class="math inline">\(\Var(U) = \frac{mn(m+n+1)}{12}\)</span>.</li>
+<li>The normal approximation should be:</li>
+</ul>
+<p><span class="math display">\[
+Z = \frac{U - mn/2}{\sqrt{\frac{mn(m+n+1)}{12}}}
+\]</span></p>
+<ul>
+<li>The Normal approximation works well for <span class="math inline">\(min\{m,n\} \ge 6\)</span>. We can also use the continuity correction since we are approximating a discrete distribution by a continuous one.</li>
+<li>We can use the value of <span class="math inline">\(Z\)</span> above, along with the Normal table to calculate the P-value.</li>
+</ul>
+</section>
+<section id="normal-approximation-for-u-statistic-2" class="slide level2">
+<h2>Normal approximation for <span class="math inline">\(U\)</span>-statistic</h2>
+<ul>
+<li>Under <span class="math inline">\(H_0\)</span>: <span class="math inline">\(p_1 = p_2 = 1/3\)</span>, which implies: <span class="math inline">\(\Var(U) = \frac{mn(m+n+1)}{12}\)</span>.</li>
+<li>Which leads to the normal approximation we used earlier:</li>
+</ul>
+<p><span class="math display">\[
+Z = \frac{U - mn/2}{\sqrt{\frac{mn(m+n+1)}{12}}}
+\]</span></p>
+<ul>
+<li>The Normal approximation works well for <span class="math inline">\(min\{m,n\} \ge 6\)</span>. We can also use the continuity correction since we are approximating a discrete distribution by a continuous one.</li>
+<li>We can use the value of <span class="math inline">\(Z\)</span> above, along with the Normal table to calculate the P-value.</li>
+</ul>
+</section></section>
+<section>
+<section id="relative-efficiency" class="title-slide slide level1 center">
+<h1>Relative efficiency</h1>
+
+</section>
+<section id="why-relative-efficiency" class="slide level2">
+<h2>Why relative efficiency?</h2>
+<div class="center-heading">
+<p>Now we will discuss relative efficiency, which gives us more information about what test to use when!</p>
+</div>
+</section>
+<section id="relative-efficiency-1" class="slide level2">
+<h2>Relative efficiency</h2>
+<ul>
+<li>Apart from Consistency, another type of objective criterion is useful for comparing between two types of tests is the concept of <em>Pitman Efficiency</em>.</li>
+<li>For point estimation, efficiency of two unbiased estimates is the ratio of their variances:</li>
+<li><span class="math inline">\(\hat\theta_1\)</span> and <span class="math inline">\(\hat\theta_2\)</span> both estimate <span class="math inline">\(\theta\)</span>, <span class="math inline">\(\E(\hat\theta_1) = \E(\hat\theta_2) = \theta\)</span>, and let <span class="math inline">\(\Var(\hat\theta_1) = \sigma_1^2\)</span>, and <span class="math inline">\(\Var(\hat\theta_2) = \sigma_2^2\)</span>. Then,</li>
+</ul>
+<p><span class="math display">\[
+RE(\hat\theta_1, \hat\theta_2) = \frac{\sigma_2^2}{\sigma_1^2}, \quad \textcolor{#C00000}{A}RE(\hat\theta_1, \hat\theta_2) = \lim_{n \to \infty} \frac{\sigma_2^2}{\sigma_1^2}
+\]</span></p>
+</section>
+<section id="asymptotic-relative-efficiency" class="slide level2">
+<h2>Asymptotic Relative Efficiency</h2>
+<ul>
+<li>ARE of procedure 1 wrt procedure 2:</li>
+</ul>
+<p><span class="math display">\[
+\begin{aligned}
+ARE (1,2) &gt; 1 &amp; \quad \Rightarrow \text{ procedure 1 is ``better" (more efficient)} \\
+ARE (1,2) &lt; 1 &amp; \quad \Rightarrow \text{ procedure 2 is ``better" (more efficient)} \\
+ARE (1,2) = 1 &amp; \quad \Rightarrow \text{ two procedures are asymptotically ``equivalent"}
+\end{aligned}
+\]</span></p>
+</section>
+<section id="example-of-are-estimating-normal-mean" class="slide level2">
+<h2>Example of ARE: Estimating Normal Mean</h2>
+<ul>
+<li>Estimating normal mean: <span class="math inline">\(X_1, \ldots, X_{n_1}, X_{n_1+1}, \ldots, X_{n_1+n_2} \iid \NormRV(\mu, \sigma)\)</span>.</li>
+<li>Two estimates: Using <span class="math inline">\(n_1\)</span> observations, and using all <span class="math inline">\(n_1+n_2\)</span> observations: <span class="math inline">\(\bar{X}_1\)</span> and <span class="math inline">\(\bar{X}_2\)</span>, respectively.</li>
+<li>Then, intuitively <span class="math inline">\(\bar{X}_1\)</span> is less efficient estimate than <span class="math inline">\(\bar{X}_2\)</span>, since it uses less observations.</li>
+</ul>
+<p><span class="math display">\[
+RE(\bar X_1, \bar X_2) = \frac{\Var(\bar X_2)}{\Var(\bar X_1)} = \frac{\sigma^2/(n_1+n_2)}{\sigma^2/n_1} &lt; \frac{n_1}{n_1+n_2} &lt; 1
+\]</span></p>
+<ul>
+<li>More observations = more efficient!</li>
+</ul>
+</section>
+<section id="efficiency" class="slide level2">
+<h2>Efficiency</h2>
+<p>Two tests: <strong>test A</strong> and <strong>test B</strong>, where both tests are for:</p>
+<ol type="1">
+<li>the same simple null and alternative hypotheses,</li>
+<li>the same type of rejection region, and</li>
+<li>the same significance level</li>
+</ol>
+<p>The (relative) power efficiency of a test A relative to a test B is the ratio <span class="math inline">\(n_b/n_a\)</span>, where <span class="math inline">\(n_a\)</span> is the number of observations required by test A for the power of test A to equal the power of test B when <span class="math inline">\(n_B\)</span> observations are employed.</p>
+</section>
+<section id="asymptotic-relative-efficiency-1" class="slide level2">
+<h2>Asymptotic Relative Efficiency</h2>
+<ul>
+<li>The ARE of a test A relative to a test B, where both tests are for:
+<ol type="1">
+<li>the same simple null and alternative hypotheses,</li>
+<li>the same type of rejection region, and</li>
+<li>the same significance level</li>
+</ol>
+is the <span class="hl-red">limiting value</span> of ratio <span class="math inline">\(n_b/n_a\)</span>, while simultaneously letting <span class="math inline">\(n_b \to \infty\)</span> and <span class="math inline">\(H_1 \to H_0\)</span>.</li>
+</ul>
+<p><span class="math display">\[
+ARE(\text{test A, test B}) = \lim_{H_1 \to H_0, n_b \to \infty} \left \{ \frac{n_b}{n_a} \right \}
+\]</span></p>
+<ul>
+<li>As before, <span class="math inline">\(n_a\)</span> is the number of observations required by test A for the power of test A to equal the power of test B when <span class="math inline">\(n_B\)</span> observations are employed.</li>
+</ul>
+</section>
+<section id="asymptotic-relative-efficiency-2" class="slide level2">
+<h2>Asymptotic Relative Efficiency</h2>
+<p>ARE of test A wrt test B:</p>
+<p><span class="math display">\[
+\begin{aligned}
+ARE(\text{test A, test B}) &gt; 1 &amp; \quad \Rightarrow \text{ test A is ``better" (fewer samples/more power)} \\
+ARE(\text{test A, test B}) &lt; 1 &amp; \quad \Rightarrow \text{ test B is ``better" (fewer samples/more power)} \\
+ARE(\text{test A, test B}) = 1 &amp; \quad \Rightarrow \text{ two tests are asymptotically ``equivalent"}
+\end{aligned}
+\]</span></p>
+</section>
+<section id="one-sample-and-paired-sample-tests" class="slide level2">
+<h2>One-sample and paired-sample tests</h2>
+<p><img data-src="art/ARE_1.jpg" style="width:92.0%" alt="A table of asymptotic relative efficiencies for one-sample and paired-sample tests. Rows and columns are the competing procedures — the sign test, the Wilcoxon signed-rank test and the t-test — and the cells give the ARE of the row test relative to the column test under several assumed population shapes, including the normal, uniform, logistic, double exponential and Cauchy. Under normality the signed-rank test retains about 0.955 of the efficiency of the t-test and the sign test about 0.637, while for heavy-tailed populations such as the double exponential and Cauchy the rank-based tests are the more efficient ones."></p>
+</section>
+<section id="two-sample-tests" class="slide level2">
+<h2>Two-sample tests</h2>
+<p><img data-src="art/ARE_2.jpg" style="width:92.0%" alt="A table of asymptotic relative efficiencies for two-sample tests, laid out like the previous one. It compares the Wilcoxon rank-sum (Mann–Whitney) test with the two-sample t-test and other competitors across assumed population shapes including the normal, uniform, logistic, double exponential and Cauchy. Under normality the rank-sum test keeps roughly 0.955 of the efficiency of the t-test, never falls below about 0.864 for any continuous distribution, and is substantially more efficient than the t-test for heavy-tailed populations."></p>
+
+</section></section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<p><img src="art/vtlogo_1.png" class="slide-logo"></p>
+<div class="footer footer-default">
+<p>Two-Sample Tests</p>
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="twosample_tests_files/libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="twosample_tests_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="twosample_tests_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="twosample_tests_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="twosample_tests_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="twosample_tests_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="twosample_tests_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="twosample_tests_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="twosample_tests_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="twosample_tests_files/libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': false,
+'previewLinksAuto': true,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: true,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: true,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1050,
+
+        height: 700,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    <script>
+      // Small accessibility touch-ups applied after reveal.js has built the DOM.
+      document.addEventListener("DOMContentLoaded", function () {
+
+        // 1. The VT logo repeats on every slide and adds no information that the
+        //    title slide does not already state in text. Repeating "Virginia Tech
+        //    logo" ~70 times is noise, so it is marked decorative instead
+        //    (WCAG 1.1.1, decorative-image exception).
+        document.querySelectorAll("img.slide-logo").forEach(function (el) {
+          el.setAttribute("alt", "");
+          el.setAttribute("role", "presentation");
+          el.setAttribute("aria-hidden", "true");
+        });
+
+        // 2. Give the slide region a programmatic name so screen-reader users can
+        //    find and skip it (WCAG 1.3.1 / 2.4.1).
+        var slides = document.querySelector(".reveal .slides");
+        if (slides) {
+          slides.setAttribute("role", "region");
+          slides.setAttribute("aria-label", "Two-Sample Tests slide deck");
+        }
+
+        // 3. Any image that somehow reached the page without alt text is flagged in
+        //    the console during authoring rather than failing silently for users.
+        document.querySelectorAll(".reveal .slides img:not([alt])").forEach(function (el) {
+          console.warn("Accessibility: image is missing alt text ->", el.getAttribute("src"));
+        });
+      });
+    </script>
+    
+
+    <script>
+
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+
+      // slide changes (different for each slide format).
+
+      (function () {
+
+        // dispatch for htmlwidgets
+
+        function fireSlideEnter() {
+
+          const event = window.document.createEvent("Event");
+
+          event.initEvent("slideenter", true, true);
+
+          window.document.dispatchEvent(event);
+
+        }
+
+    
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+
+          fireSlideEnter();
+
+    
+
+          // dispatch for shiny
+
+          if (window.jQuery) {
+
+            if (previousSlide) {
+
+              window.jQuery(previousSlide).trigger("hidden");
+
+            }
+
+            if (currentSlide) {
+
+              window.jQuery(currentSlide).trigger("shown");
+
+            }
+
+          }
+
+        }
+
+    
+
+        // hookup for slidy
+
+        if (window.w3c_slidy) {
+
+          window.w3c_slidy.add_observer(function (slide_num) {
+
+            // slide_num starts at position 1
+
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+
+          });
+
+        }
+
+    
+
+      })();
+
+    </script>
+
+    
+
+    <script id="quarto-html-after-body" type="application/javascript">
+    window.document.addEventListener("DOMContentLoaded", function (event) {
+      const toggleBodyColorMode = (bsSheetEl) => {
+        const mode = bsSheetEl.getAttribute("data-mode");
+        const bodyEl = window.document.querySelector("body");
+        if (mode === "dark") {
+          bodyEl.classList.add("quarto-dark");
+          bodyEl.classList.remove("quarto-light");
+        } else {
+          bodyEl.classList.add("quarto-light");
+          bodyEl.classList.remove("quarto-dark");
+        }
+      }
+      const toggleBodyColorPrimary = () => {
+        const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+        if (bsSheetEl) {
+          toggleBodyColorMode(bsSheetEl);
+        }
+      }
+      toggleBodyColorPrimary();  
+      const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+      tabsets.forEach(function(tabset) {
+        const tabby = new Tabby('#' + tabset.id);
+      });
+      const isCodeAnnotation = (el) => {
+        for (const clz of el.classList) {
+          if (clz.startsWith('code-annotation-')) {                     
+            return true;
+          }
+        }
+        return false;
+      }
+      const onCopySuccess = function(e) {
+        // button target
+        const button = e.trigger;
+        // don't keep focus
+        button.blur();
+        // flash "checked"
+        button.classList.add('code-copy-button-checked');
+        var currentTitle = button.getAttribute("title");
+        button.setAttribute("title", "Copied!");
+        let tooltip;
+        if (window.bootstrap) {
+          button.setAttribute("data-bs-toggle", "tooltip");
+          button.setAttribute("data-bs-placement", "left");
+          button.setAttribute("data-bs-title", "Copied!");
+          tooltip = new bootstrap.Tooltip(button, 
+            { trigger: "manual", 
+              customClass: "code-copy-button-tooltip",
+              offset: [0, -8]});
+          tooltip.show();    
+        }
+        setTimeout(function() {
+          if (tooltip) {
+            tooltip.hide();
+            button.removeAttribute("data-bs-title");
+            button.removeAttribute("data-bs-toggle");
+            button.removeAttribute("data-bs-placement");
+          }
+          button.setAttribute("title", currentTitle);
+          button.classList.remove('code-copy-button-checked');
+        }, 1000);
+        // clear code selection
+        e.clearSelection();
+      }
+      const getTextToCopy = function(trigger) {
+          const codeEl = trigger.previousElementSibling.cloneNode(true);
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+      }
+      const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+        text: getTextToCopy
+      });
+      clipboard.on('success', onCopySuccess);
+      if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+        const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+          text: getTextToCopy,
+          container: window.document.getElementById('quarto-embedded-source-code-modal')
+        });
+        clipboardModal.on('success', onCopySuccess);
+      }
+        var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+        var mailtoRegex = new RegExp(/^mailto:/);
+          var filterRegex = new RegExp('/' + window.location.host + '/');
+        var isInternal = (href) => {
+            return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+        }
+        // Inspect non-navigation links and adorn them if external
+     	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+        for (var i=0; i<links.length; i++) {
+          const link = links[i];
+          if (!isInternal(link.href)) {
+            // undo the damage that might have been done by quarto-nav.js in the case of
+            // links that we want to consider external
+            if (link.dataset.originalHref !== undefined) {
+              link.href = link.dataset.originalHref;
+            }
+              // target, if specified
+              link.setAttribute("target", "_blank");
+              if (link.getAttribute("rel") === null) {
+                link.setAttribute("rel", "noopener");
+              }
+              // default icon
+              link.classList.add("external");
+          }
+        }
+      function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+        const config = {
+          allowHTML: true,
+          maxWidth: 500,
+          delay: 100,
+          arrow: false,
+          appendTo: function(el) {
+              return el.closest('section.slide') || el.parentElement;
+          },
+          interactive: true,
+          interactiveBorder: 10,
+          theme: 'light-border',
+          placement: 'bottom-start',
+        };
+        if (contentFn) {
+          config.content = contentFn;
+        }
+        if (onTriggerFn) {
+          config.onTrigger = onTriggerFn;
+        }
+        if (onUntriggerFn) {
+          config.onUntrigger = onUntriggerFn;
+        }
+          config['offset'] = [0,0];
+          config['maxWidth'] = 700;
+        window.tippy(el, config); 
+      }
+      const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+      for (var i=0; i<noterefs.length; i++) {
+        const ref = noterefs[i];
+        tippyHover(ref, function() {
+          // use id or data attribute instead here
+          let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+          try { href = new URL(href).hash; } catch {}
+          const id = href.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note) {
+            return note.innerHTML;
+          } else {
+            return "";
+          }
+        });
+      }
+      const findCites = (el) => {
+        const parentEl = el.parentElement;
+        if (parentEl) {
+          const cites = parentEl.dataset.cites;
+          if (cites) {
+            return {
+              el,
+              cites: cites.split(' ')
+            };
+          } else {
+            return findCites(el.parentElement)
+          }
+        } else {
+          return undefined;
+        }
+      };
+      var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+      for (var i=0; i<bibliorefs.length; i++) {
+        const ref = bibliorefs[i];
+        const citeInfo = findCites(ref);
+        if (citeInfo) {
+          tippyHover(citeInfo.el, function() {
+            var popup = window.document.createElement('div');
+            citeInfo.cites.forEach(function(cite) {
+              var citeDiv = window.document.createElement('div');
+              citeDiv.classList.add('hanging-indent');
+              citeDiv.classList.add('csl-entry');
+              var biblioDiv = window.document.getElementById('ref-' + cite);
+              if (biblioDiv) {
+                citeDiv.innerHTML = biblioDiv.innerHTML;
+              }
+              popup.appendChild(citeDiv);
+            });
+            return popup.innerHTML;
+          });
+        }
+      }
+    });
+    </script>
+    
+
+</body></html>

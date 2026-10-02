@@ -1,0 +1,29 @@
+<script>
+  // Small accessibility touch-ups applied after reveal.js has built the DOM.
+  document.addEventListener("DOMContentLoaded", function () {
+
+    // 1. The VT logo repeats on every slide and adds no information that the
+    //    title slide does not already state in text. Repeating "Virginia Tech
+    //    logo" ~70 times is noise, so it is marked decorative instead
+    //    (WCAG 1.1.1, decorative-image exception).
+    document.querySelectorAll("img.slide-logo").forEach(function (el) {
+      el.setAttribute("alt", "");
+      el.setAttribute("role", "presentation");
+      el.setAttribute("aria-hidden", "true");
+    });
+
+    // 2. Give the slide region a programmatic name so screen-reader users can
+    //    find and skip it (WCAG 1.3.1 / 2.4.1).
+    var slides = document.querySelector(".reveal .slides");
+    if (slides) {
+      slides.setAttribute("role", "region");
+      slides.setAttribute("aria-label", "Two-Sample Tests slide deck");
+    }
+
+    // 3. Any image that somehow reached the page without alt text is flagged in
+    //    the console during authoring rather than failing silently for users.
+    document.querySelectorAll(".reveal .slides img:not([alt])").forEach(function (el) {
+      console.warn("Accessibility: image is missing alt text ->", el.getAttribute("src"));
+    });
+  });
+</script>

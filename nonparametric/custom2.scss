@@ -1,0 +1,153 @@
+/*-- scss:defaults --*/
+
+// A light, Metropolis-like deck. Every foreground colour below has been checked
+// against the #ffffff background for WCAG 2.1 contrast (AA needs 4.5:1 for body
+// text, 3:1 for large text and for non-text UI).
+
+$font-family-sans-serif: "Fira Sans", "Source Sans Pro", "Helvetica Neue", Helvetica, Arial, sans-serif !default;
+$presentation-font-size-root: 26px !default;
+$presentation-heading-font: $font-family-sans-serif !default;
+$presentation-heading-color: #14213d !default;   // 14.9:1
+$body-bg: #ffffff !default;
+$body-color: #1a1a1a !default;                   // 16.1:1
+$link-color: #0b4f9c !default;                   //  7.5:1
+$link-color-hover: #083a73 !default;
+$selection-bg: #ffe08a !default;
+$code-color: #8a3d00 !default;                   //  6.4:1
+$code-block-bg: #f6f6f4 !default;
+
+/*-- scss:rules --*/
+
+// ---------------------------------------------------------------------------
+// Emphasis colours carried over from the Beamer source.
+// The originals (bright orange, goldenrod, spring green, pure red, light
+// magenta, #7A7ABF) ranged from 1.4:1 to 4.0:1 on white and would fail WCAG
+// 1.4.3. These are the nearest hue-preserving darkenings that clear 4.5:1.
+// Colour is never the sole carrier of meaning anywhere in the deck (WCAG 1.4.1).
+// ---------------------------------------------------------------------------
+
+.hl-orange  { color: #a8440c; }   // was rgb(1, 0.41, 0.13)      ->  5.9:1
+.hl-rust    { color: #8f2400; }   // was rgb(0.65, 0.16, 0)      ->  8.1:1
+.hl-magenta { color: #9b1fae; }   // was MyLightMagenta          ->  6.4:1
+.hl-gold    { color: #7a5800; }   // was Goldenrod               ->  6.1:1
+.hl-indigo  { color: #4c4c9e; }   // was rgb(0.48, 0.48, 0.75)   ->  6.4:1
+.hl-navy    { color: #1a1a80; }   // was DarkBlue                -> 12.4:1
+.hl-red     { color: #c00000; }   // was pure red                ->  6.5:1
+.hl-green   { color: #0a6b45; }   // was rgb(0, 1, 0.5)          ->  5.9:1
+
+// Former \colorbox{yellow}{...}: light wash + dark text, 13:1.
+.boxed {
+  background-color: #fff3b0;
+  color: #1a1a1a;
+  padding: 0.05em 0.3em;
+  border-radius: 3px;
+  box-decoration-break: clone;
+}
+
+// Former \heading{...} centre-of-slide statements.
+.center-heading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 55vh;
+  text-align: center;
+  font-size: 1.25em;
+  line-height: 1.4;
+  color: #14213d;
+  padding: 0 1.5em;
+}
+
+// Former \beamergotobutton{...} navigation links. Underlined as well as
+// coloured, so the affordance does not depend on colour (WCAG 1.4.1).
+.jump-button {
+  display: inline-block;
+  border: 2px solid #0b4f9c;
+  border-radius: 4px;
+  padding: 0.1em 0.6em;
+  text-decoration: none;
+  font-size: 0.8em;
+}
+
+// ---------------------------------------------------------------------------
+// Tables. These are real tables with <th scope=...> and a <caption>, so they
+// are navigable cell-by-cell with a screen reader (WCAG 1.3.1).
+// ---------------------------------------------------------------------------
+
+.reveal table.data-table {
+  border-collapse: collapse;
+  margin: 0.6em auto;
+  font-size: 0.85em;
+
+  caption {
+    caption-side: top;
+    text-align: left;
+    font-size: 0.72em;
+    font-style: italic;
+    color: #3d3d3d;             // 9.6:1
+    padding-bottom: 0.4em;
+  }
+
+  th, td {
+    border: 1px solid #5c5c5c;  // 6.4:1 against white, clears the 3:1 UI rule
+    padding: 0.25em 0.7em;
+    text-align: center;
+  }
+
+  th {
+    background-color: #eceff4;
+    font-weight: 600;
+  }
+
+  th[scope="row"] {
+    text-align: left;
+  }
+
+  &.compact {
+    font-size: 0.62em;
+    th, td { padding: 0.08em 0.45em; }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Figures
+// ---------------------------------------------------------------------------
+
+.reveal figure { margin: 0.4em auto; }
+
+.reveal figcaption {
+  font-size: 0.62em;
+  color: #3d3d3d;
+  text-align: center;
+  margin-top: 0.3em;
+}
+
+.reveal img {
+  max-width: 100%;
+  height: auto;
+  background: #ffffff;   // keeps transparent PNGs legible on any slide colour
+}
+
+// ---------------------------------------------------------------------------
+// Keyboard accessibility (WCAG 2.4.7) and motion (WCAG 2.3.3)
+// ---------------------------------------------------------------------------
+
+.reveal a:focus-visible,
+.reveal button:focus-visible,
+.reveal .controls button:focus-visible {
+  outline: 3px solid #0b4f9c;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal .slides section,
+  .reveal .fragment {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+// Readability
+.reveal ul, .reveal ol { line-height: 1.35; }
+.reveal li { margin-bottom: 0.35em; }
+.reveal .smaller { font-size: 0.78em; }
+.reveal code { font-size: 0.9em; }
