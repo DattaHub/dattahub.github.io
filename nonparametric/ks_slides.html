@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Order Statistics, Ranks, and the KS Test</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Jyotishka Datta" />
+    <script src="libs/header-attrs-2.28/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="custom.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Order Statistics, Ranks, and the KS Test
+]
+.subtitle[
+## Nonparametric Statistics
+]
+.author[
+### Jyotishka Datta
+]
+.institute[
+### Virginia Tech
+]
+
+---
+
+
+
+
+class: inverse, center, middle
+
+# Part 1: Order Statistics
+
+---
+
+## What Are Order Statistics?
+
+Given a random sample `\(X_1, X_2, \ldots, X_n\)`, the **order statistics** are
+the sample values arranged in non-decreasing order:
+
+`$$X_{(1)} \leq X_{(2)} \leq \cdots \leq X_{(n)}$$`
+
+- `\(X_{(1)}\)` = **sample minimum**
+- `\(X_{(n)}\)` = **sample maximum**
+- `\(X_{(i)}\)` = `\(i^{\text{th}}\)` smallest value
+
+--
+
+**Derived summaries:**
+
+- **Median:** `\(M = X_{((n+1)/2)}\)` for `\(n\)` odd; average of two middle values for `\(n\)` even
+- **Sample range:** `\(X_{(n)} - X_{(1)}\)`
+- **Midrange:** `\((X_{(n)} + X_{(1)})/2\)`
+
+&gt; Order statistics are **random quantities**, i.e., their distribution depends on the parent `\(F\)`.
+
+---
+
+## Distribution of the Maximum
+
+Let `\(X_1, \ldots, X_n \overset{\text{iid}}{\sim} F\)` (continuous). Let `\(G\)` be the CDF of `\(X_{(n)}\)`.
+
+The maximum is `\(\leq t\)` iff **every** observation is `\(\leq t\)`:
+
+`$$G(t) = P(X_{(n)} \leq t) = F^n(t) \qquad \Rightarrow \qquad \boxed{g(t) = n\,F^{n-1}(t)\,f(t)}$$`
+
+--
+
+For the **minimum** `\(X_{(1)}\)`:
+
+`$$H(t) = 1 - (1 - F(t))^n \qquad \Rightarrow \qquad \boxed{h(t) = n\,(1-F(t))^{n-1}\,f(t)}$$`
+
+---
+
+## General `\(r^{\text{th}}\)` Order Statistic
+
+`$$\boxed{f_{X_{(r)}}(x) = \frac{n!}{(r-1)!\,(n-r)!}\,F^{r-1}(x)\,(1-F(x))^{n-r}\,f(x)}$$`
+
+**Memory aid:** Think multinomial: 
+
+- `\((r-1)\)` observations **below** `\(x\)`: probability `\(F^{r-1}(x)\)`
+- **One** observation **at** `\(x\)`: probability `\(f(x)dx\)`
+- `\((n-r)\)` observations **above** `\(x\)`: probability `\((1-F(x))^{n-r}\)`
+
+--
+
+.callout[
+**Key fact:** When `\(F = \text{Uniform}(0,1)\)`, this is **Beta$(r,\; n-r+1)$**.  
+This is central to the distribution-free property of the KS test.
+]
+
+---
+
+## Simulating Order Statistic Densities
+
+
+``` r
+set.seed(42); n &lt;- 10; B &lt;- 50000
+sims &lt;- replicate(B, sort(runif(n)))
+par(mfrow = c(1, 3), mar = c(4, 3, 2.5, 1))
+hist(sims[1,],  breaks=40, freq=FALSE, col="#22222255", border="white",
+     main=expression(X[(1)]~"~ Beta(1,10)"), xlab="x")
+curve(dbeta(x,1,n), add=TRUE, col="#1a1a1a", lwd=2)
+hist(sims[5,],  breaks=40, freq=FALSE, col="#22222255", border="white",
+     main=expression(X[(5)]~"~ Beta(5,6)"), xlab="x")
+curve(dbeta(x,5,6), add=TRUE, col="#1a1a1a", lwd=2)
+hist(sims[10,], breaks=40, freq=FALSE, col="#22222255", border="white",
+     main=expression(X[(10)]~"~ Beta(10,1)"), xlab="x")
+curve(dbeta(x,n,1), add=TRUE, col="#1a1a1a", lwd=2)
+```
+
+&lt;img src="ks_slides_files/figure-html/order-stat-demo-1.png" width="576" style="display: block; margin: auto;" /&gt;
+
+``` r
+par(mfrow=c(1,1))
+```
+
+---
+
+class: inverse, center, middle
+
+# Part 2: Ranks
+
+---
+
+## Ranks 
+
+Definition:
+
+The **rank** of `\(X_i\)` in a sample `\(X_1, \ldots, X_n\)` is the number of
+observations `\(\leq X_i\)`:
+
+`$$\text{rank}(X_i) = n \times S_n(X_i) = \sum_{j=1}^{n} \mathbf{1}(X_j \leq X_i)$$`
+
+**Key facts:**
+- Ranks are integers in `\(\{1, 2, \ldots, n\}\)`
+- The `\(r^{\text{th}}\)` order statistic has rank `\(r\)`: `\(\text{rank}(X_{(r)}) = r\)`
+- Ties `\(\to\)` use **mid-ranks** (average of tied positions)
+
+--
+
+&gt; Ranks discard the actual values and retain only relative ordering.  
+&gt; This is the foundation of **nonparametric statistics**.
+
+---
+
+## Two-Sample Ranks
+
+With `\(m\)` observations `\(X_1,\ldots,X_m\)` (group 1) and `\(n\)` observations `\(Y_1,\ldots,Y_n\)` (group 2),
+rank in the **combined sample** of `\(m+n\)`:
+
+`$$\text{rank}(Y_{(j)}) = \underbrace{\sum_{i=1}^{m} \mathbf{1}(X_i \leq Y_{(j)})}_{\text{how many } X\text{'s are} \leq Y_{(j)}} + \underbrace{j}_{\text{how many } Y\text{'s are} \leq Y_{(j)}}$$`
+
+This is the structure behind the **Wilcoxon rank-sum test** (coming up).
+
+---
+
+class: inverse, center, middle
+
+# Part 3: The Empirical CDF
+
+---
+
+## Empirical Distribution Function (EDF)
+
+Given i.i.d. `\(X_1, \ldots, X_n \sim F_X\)`, the **EDF** is:
+
+`$$S_n(x) = \frac{1}{n}\sum_{i=1}^{n} \mathbf{1}(X_i \leq x)$$`
+
+In terms of order statistics:
+
+`$$S_n(x) = \begin{cases} 0 &amp; x &lt; X_{(1)} \\ i/n &amp; X_{(i)} \leq x &lt; X_{(i+1)} \\ 1 &amp; x \geq X_{(n)} \end{cases}$$`
+
+A **right-continuous step function** with jumps of `\(1/n\)` at each observation.
+
+---
+
+## Properties of the EDF
+
+For each fixed `\(x\)`, `\(T_n(x) = nS_n(x) \sim \text{Binomial}(n, F_X(x))\)`. Therefore:
+
+`$$\mathbb{E}[S_n(x)] = F_X(x) \quad \text{(unbiased)}$$`
+
+`$$\text{Var}[S_n(x)] = \frac{F_X(x)(1-F_X(x))}{n} \to 0 \quad \text{(consistent)}$$`
+
+--
+
+**Glivenko–Cantelli Theorem (Fundamental Theorem of Statistics):**
+
+`$$P\!\left[\lim_{n\to\infty} \sup_{x\in\mathbb{R}} |S_n(x) - F_X(x)| = 0\right] = 1$$`
+
+`\(S_n\)` converges to `\(F_X\)` **uniformly** over all `\(x\)`, **almost surely**.
+
+&gt; **Under `\(H_0: F_X = F_0\)`**, the supremum `\(\sup_x |S_n(x) - F_0(x)|\)` should be **small** for large `\(n\)`.  
+&gt; This motivates the KS test. 
+
+---
+
+## EDF in Action
+
+
+``` r
+set.seed(7)
+par(mfrow=c(1,2))
+for(n in c(20, 50)){
+  x &lt;- rnorm(n)
+  plot(ecdf(x), main=paste0("n = ", n), xlab="x",
+       ylab=expression(S[n](x)), col="#1a1a1a", lwd=2, xlim=c(-3,3))
+  curve(pnorm(x), add=TRUE, col="#888888", lwd=2, lty=2)
+  legend("topleft", c("EDF", "True CDF N(0,1)"),
+         col=c("#1a1a1a","#888888"), lwd=2, lty=c(1,2), bty="n", cex=0.85)
+}
+```
+
+&lt;img src="ks_slides_files/figure-html/edf-demo-1.png" width="576" style="display: block; margin: auto;" /&gt;
+
+``` r
+par(mfrow=c(1,1))
+```
+
+---
+
+class: inverse, center, middle
+
+# Part 4: Probability Integral Transform
+
+---
+
+## The PIT 
+
+We need one key result before proving the KS distribution-free property.
+
+**Theorem (Probability Integral Transform).**
+Let `\(X\)` have a **continuous** CDF `\(F\)`. Then:
+`$$U = F(X) \sim \text{Uniform}(0,1)$$`
+
+**Proof.** For `\(u \in (0,1)\)`:
+`$$P(F(X) \leq u) = P(X \leq F^{-1}(u)) = F(F^{-1}(u)) = u \quad \checkmark$$`
+
+--
+
+**Shorthand to remember:**
+`$$X \sim F \;\Rightarrow\; F(X) \sim U[0,1] \;\Rightarrow\; F^{-1}(U) \sim F$$`
+
+&gt; **Continuity is essential.** For discrete `\(F\)`, `\(F(X)\)` is *not* uniform. This has direct consequences for the KS test.
+
+---
+
+## The Inverse CDF Method (Recap)
+
+We have studied this in detail previously. The key result:
+
+**Algorithm (Inverse CDF Method)**
+1. Generate `\(U_1, \ldots, U_n \overset{\text{iid}}{\sim} \text{Uniform}(0,1)\)`
+2. Set `\(X_i = F^{-1}(U_i)\)`
+
+Then `\(X_1, \ldots, X_n \overset{\text{iid}}{\sim} F\)`.
+
+**Interactive demo:** https://dattahub.github.io/iqs/rvgen.html
+
+
+&gt; We will now use the PIT in a completely different way: to prove that the KS statistic is **distribution-free**.
+
+---
+
+class: inverse, center, middle
+
+# Part 5: The Kolmogorov–Smirnov Test
+
+---
+
+## Setup
+
+We observe `\(X_1, \ldots, X_n\)` and want to test:
+
+`$$H_0: F_X(x) = F_0(x) \quad \text{for all } x \in \mathbb{R}$$`
+
+where `\(F_0\)` is a **completely specified** continuous CDF.
+
+**Idea:** By Glivenko–Cantelli, `\(S_n \approx F_X\)`.  
+Under `\(H_0\)`, `\(S_n \approx F_0\)`, so `\(\sup_x |S_n(x) - F_0(x)|\)` should be **small**.
+
+**Large values `\(\to\)` evidence against `\(H_0\)`.**
+
+---
+
+## The KS Statistics
+
+`$$D_n^+ = \sup_{x}\, [S_n(x) - F_0(x)] \qquad \text{(upper one-sided)}$$`
+
+`$$D_n^- = \sup_{x}\, [F_0(x) - S_n(x)] \qquad \text{(lower one-sided)}$$`
+
+`$$\boxed{D_n = \sup_{x}\, |S_n(x) - F_0(x)| = \max(D_n^+,\, D_n^-)}$$`
+
+`\(D_n\)` is the **two-sided** statistic — the one we almost always use.
+
+Reject `\(H_0\)` when `\(D_n\)` is **large** (exceeds the critical value).
+
+---
+
+## The Distribution-Free Property
+
+**Theorem.** Under `\(H_0\)`, the distributions of `\(D_n\)`, `\(D_n^+\)`, `\(D_n^-\)` are **independent of `\(F_0\)`**, provided `\(F_0\)` is continuous.
+
+**Proof sketch for `\(D_n^+\)`.** Using the step-function form of `\(S_n\)`:
+
+`$$D_n^+ = \max_{0\leq i\leq n}\left[\frac{i}{n} - F_0(X_{(i)})\right]$$`
+
+--
+
+Since `\(X_{(i)}\)` are order statistics from `\(F_0\)`, by the **PIT**:
+
+`$$F_0(X_{(i)}) \sim \text{order statistics from } U[0,1]$$`
+
+**regardless of what `\(F_0\)` is.**
+
+So `\(D_n^+\)` depends on `\(F_0\)` only through uniform order statistics `\(\Rightarrow\)` distribution-free. `\(\square\)`
+
+---
+
+## Critical Consequences
+
+**1. Universal critical values.**  
+The same table works for *any* continuous null distribution.
+
+**2. Requirements that must hold:**
+
+| Requirement | What breaks if violated |
+|-------------|------------------------|
+| `\(F_0\)` must be **continuous** | PIT fails; KS table invalid for discrete data |
+| `\(F_0\)` must be **completely specified** | If parameters estimated from data, critical values too large `\(\to\)` test is conservative |
+
+---
+
+## Hand Calculation Formula
+
+`$$D_n = \max_{i=1,\ldots,n}\left\{
+  \left|\frac{i}{n} - F_0(X_{(i)})\right|,\;
+  \left|\frac{i-1}{n} - F_0(X_{(i)})\right|
+\right\}$$`
+
+The two terms capture the jump from both sides of the step function.
+
+**In R:**
+
+```r
+ks.test(x, "pnorm", mean = 0, sd = 1)   # test against N(0,1)
+ks.test(x, "pexp",  rate = 2)            # test against Exp(2)
+```
+
+---
+
+## Worked Example
+
+
+``` r
+x_obs &lt;- c(0.0123,0.1039,0.1954,0.2621,0.2802,
+           0.3217,0.3645,0.3919,0.4240,0.4814,
+           0.5139,0.5846,0.6275,0.6541,0.6889,
+           0.7621,0.8320,0.8871,0.9249,0.9634)
+y &lt;- sqrt(x_obs)   # test if sqrt(x) ~ Uniform(0,1)
+ks.test(y, "punif")
+```
+
+```
+## 
+## 	Exact one-sample Kolmogorov-Smirnov test
+## 
+## data:  y
+## D = 0.36196, p-value = 0.007456
+## alternative hypothesis: two-sided
+```
+
+`\(D_{20} = 0.36 &gt; 0.352\)` (critical value at `\(\alpha = 0.01\)`) `\(\Rightarrow\)` **reject `\(H_0\)`**
+
+---
+
+## Visualising the KS Statistic
+
+
+``` r
+plot(ecdf(y), col="#1a1a1a", lwd=2,
+     main=expression("EDF of"~sqrt(x)~"vs Uniform(0,1)"),
+     xlab="x", ylab="CDF")
+abline(0, 1, col="#888888", lwd=2, lty=2)
+# Mark the maximum gap
+i_max &lt;- which.max(pmax(abs((1:20)/20 - y), abs((0:19)/20 - y)))
+segments(y[i_max], (i_max-1)/20, y[i_max], y[i_max],
+         col="#1a1a1a", lwd=3)
+text(y[i_max]+0.05, ((i_max-1)/20+y[i_max])/2,
+     expression(D[n]), col="#1a1a1a", cex=1.1)
+legend("topleft", c("EDF of sqrt(x)","Uniform CDF"),
+       col=c("#1a1a1a","#888888"), lwd=2, lty=c(1,2), bty="n")
+```
+
+&lt;img src="ks_slides_files/figure-html/ks-plot-1.png" width="576" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Asymptotic Distribution
+
+**Theorem (Kolmogorov 1933, Smirnov 1939).** For any continuous `\(F_X\)` and `\(d &gt; 0\)`:
+`$$\lim_{n\to\infty} P\!\left(D_n \leq \frac{d}{\sqrt{n}}\right) = L(d) = 1 - \sum_{i=1}^{\infty}(-1)^{i-1} e^{-2i^2 d^2}$$`
+
+Good approximation for `\(n \geq 35\)`.
+
+**For `\(n &gt; 40\)`, critical values:**
+
+| `\(\alpha\)` | 0.20 | 0.10 | 0.05 | 0.02 | 0.01 |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| Critical value | `\(1.07/\sqrt{n}\)` | `\(1.22/\sqrt{n}\)` | `\(1.36/\sqrt{n}\)` | `\(1.52/\sqrt{n}\)` | `\(1.63/\sqrt{n}\)` |
+
+---
+
+class: inverse, center, middle
+
+# Part 6: Simulation-Based p-values for KS
+
+---
+
+## The Problem with the Asymptotic Table
+
+The Kolmogorov–Smirnov table assumes `\(n\)` is large and `\(F_0\)` is fully specified.
+
+But what if:
+- `\(n\)` is small (say `\(n = 15\)`)?
+- We are unsure whether the approximation is adequate?
+- We want to understand where the p-value actually comes from?
+
+--
+
+**Solution:** Generate the null distribution of `\(D_n\)` by **simulation**.
+
+&gt; This is the philosophy of permutation tests: if we know the null hypothesis, we can simulate from it directly.
+
+---
+
+## Simulation-Based KS p-value: Algorithm
+
+**Setup:** Observed data `\(x_1, \ldots, x_n\)`. Null hypothesis `\(H_0: F_X = F_0\)`.
+
+**Step 1.** Compute the observed KS statistic:
+`$$D_n^{\text{obs}} = \sup_x |S_n(x) - F_0(x)|$$`
+
+**Step 2.** Repeat `\(B\)` times (e.g. `\(B = 10{,}000\)`):
+- Generate `\(x_1^*, \ldots, x_n^* \overset{\text{iid}}{\sim} F_0\)`
+- Compute `\(D_n^{(b)} = \sup_x |S_n^*(x) - F_0(x)|\)`
+
+**Step 3.** The simulation-based p-value is:
+`$$\hat{p} = \frac{1}{B}\sum_{b=1}^{B} \mathbf{1}\!\left(D_n^{(b)} \geq D_n^{\text{obs}}\right)$$`
+
+---
+
+## Implementation in R
+
+
+``` r
+x_data &lt;- rexp(20, rate = 1.5)   # 20 observations
+D_obs  &lt;- ks.test(x_data, "pexp", rate = 1.5)$statistic
+cat("Observed D_n:", round(D_obs, 4), "\n")
+```
+
+```
+## Observed D_n: 0.2285
+```
+
+``` r
+# Simulate null distribution
+B &lt;- 10000; n &lt;- length(x_data)
+D_null &lt;- replicate(B, {
+  x_star &lt;- rexp(n, rate = 1.5)    # draw from F_0
+  ks.test(x_star, "pexp", rate = 1.5)$statistic
+})
+# Simulation-based p-value
+(p_sim &lt;- mean(D_null &gt;= D_obs))
+```
+
+```
+## [1] 0.2088
+```
+
+``` r
+# Compare with asymptotic
+(p_asy &lt;- ks.test(x_data, "pexp", rate = 1.5)$p.value)
+```
+
+```
+## [1] 0.2118354
+```
+
+---
+
+## Visualising the Null Distribution
+
+
+``` r
+hist(D_null, breaks=60, freq=FALSE,
+     col="#88888855", border="white",
+     main=expression("Null distribution of D"[n]~"(n=20, B=10000)"),
+     xlab=expression(D[n]))
+abline(v=D_obs, col="#1a1a1a", lwd=2.5, lty=2)
+text(D_obs+0.01, par("usr")[4]*0.85,paste0("D[obs] = ", round(D_obs,3),"\np = ", round(p_sim,3)),
+     adj=0, cex=0.9)
+# shade the p-value region
+x_shade &lt;- seq(D_obs, max(D_null), length.out=200)
+d_shade &lt;- density(D_null, from=D_obs)
+polygon(c(D_obs, d_shade$x[d_shade$x &gt;= D_obs], max(D_null)),c(0, d_shade$y[d_shade$x &gt;= D_obs], 0),col="#1a1a1a44", border=NA)
+```
+
+&lt;img src="ks_slides_files/figure-html/ks-null-dist-1.png" width="576" style="display: block; margin: auto;" /&gt;
+
+---
+
+## When Is Simulation-Based Better?
+
+.pull-left[
+**Use simulation when:**
+- `\(n\)` is small (the asymptotic approximation needs `\(n \geq 35\)`)
+- You want an exact finite-sample p-value
+- Also makes the p-value conceptually transparent
+
+
+]
+
+.pull-right[
+**Use the asymptotic table / `ks.test` when:**
+- `\(n \geq 35\)` (approximation is good)
+- `\(F_0\)` is a standard distribution
+- Speed matters (simulation takes `\(B \times n\)` draws)
+
+
+|Method               | p-value|
+|:--------------------|-------:|
+|Asymptotic           |  0.2118|
+|Simulation (B=1000)  |  0.2260|
+|Simulation (B=10000) |  0.2088|
+]
+
+---
+
+## The Big Picture: Two Ways to Get a p-value
+
+&lt;img src="ks_slides_files/figure-html/two-ways-1.png" width="576" style="display: block; margin: auto;" /&gt;
+
+---
+
+class: inverse, center, middle
+
+# Part 7: The Lilliefors Test
+
+---
+
+## The Problem with Estimated Parameters
+
+Suppose data come from `\(N(\mu, \sigma^2)\)` with **unknown** `\(\mu, \sigma\)`.
+
+**Tempting:** plug in `\(\hat\mu = \bar X\)`, `\(\hat\sigma = S\)`, run KS against `\(N(\hat\mu, \hat\sigma^2)\)`.
+
+**Why this fails:**
+- The fitted distribution is forced closer to the data
+- KS statistic is systematically **smaller** than it would be under a truly specified `\(F_0\)`
+- Standard KS critical values are **too large** `\(\to\)` test is **conservative**
+
+--
+
+The simulation approach gives us a way to understand this directly:
+
+```r
+# WRONG: uses standard KS table with estimated parameters
+ks.test(x, "pnorm", mean = mean(x), sd = sd(x))
+
+# RIGHT: Lilliefors test with corrected critical values
+library(nortest)
+lillie.test(x)
+```
+
+---
+
+## Lilliefors' Fix
+
+**Lilliefors (1967)** derived corrected critical values by simulation. So, essentially the same idea as what we just did, but for the composite null `\(H_0\)`: `\(F\)` is Normal (parameters unknown).
+
+**Procedure:**
+1. Compute `\(\hat\mu = \bar X\)`, `\(\hat\sigma = S\)`
+2. Form the KS statistic `\(D_n\)` against `\(N(\hat\mu, \hat\sigma^2)\)`
+3. Compare to **Lilliefors critical values** (smaller than standard KS)
+
+---
+
+## Lilliefors' Fix
+
+
+
+``` r
+set.seed(2024)
+x_norm &lt;- rnorm(50, mean=100, sd=10)
+x_exp  &lt;- rexp(50, rate=0.1)
+lillie.test(x_norm)   # should NOT reject
+```
+
+```
+## 
+## 	Lilliefors (Kolmogorov-Smirnov) normality test
+## 
+## data:  x_norm
+## D = 0.11573, p-value = 0.09172
+```
+
+``` r
+lillie.test(x_exp)    # should reject
+```
+
+```
+## 
+## 	Lilliefors (Kolmogorov-Smirnov) normality test
+## 
+## data:  x_exp
+## D = 0.18576, p-value = 0.00017
+```
+
+---
+
+## KS vs Lilliefors: Decision Table
+
+| Scenario | Test |
+|----------|------|
+| `\(H_0\)`: `\(F = F_0\)` fully specified | **Kolmogorov–Smirnov** |
+| `\(H_0\)`: `\(F\)` is Normal, `\(\mu,\sigma\)` unknown | **Lilliefors** |
+| `\(H_0\)`: `\(F\)` is Exponential, `\(\lambda\)` unknown | **Lilliefors (exp variant)** |
+| Discrete data | **Neither** — use `\(\chi^2\)` GoF |
+
+
+---
+
+## KS vs Lilliefors: IQ Example
+
+**IQ Example:** Scores of 18 girls: 114, 81, 87, 114, 113, 87, 111, 89, 93, 108, 99, 93, 100, 95, 93, 95, 106, 108
+
+
+``` r
+iq &lt;- c(114,81,87,114,113,87,111,89,93,108,99,93,100,95,93,95,106,108)
+lillie.test(iq)                           # (a) unknown mu, sigma
+```
+
+```
+## 
+## 	Lilliefors (Kolmogorov-Smirnov) normality test
+## 
+## data:  iq
+## D = 0.15704, p-value = 0.2838
+```
+
+``` r
+ks.test(iq, "pnorm", mean=100, sd=10)    # (b) mu=100, sigma=10 specified
+```
+
+```
+## 
+## 	Asymptotic one-sample Kolmogorov-Smirnov test
+## 
+## data:  iq
+## D = 0.19146, p-value = 0.5243
+## alternative hypothesis: two-sided
+```
+
+---
+
+class: inverse, center, middle
+
+# Part 8: Other GoF Tests
+
+---
+
+## Anderson–Darling: Tail-Sensitive KS
+
+`$$A^2 = -n - \sum_{i=1}^{n} \frac{2i-1}{n}\left[\log F_0(X_{(i)}) + \log(1-F_0(X_{(n+1-i)}))\right]$$`
+
+- Gives **more weight to the tails** of the distribution
+- Uniformly more powerful than KS for many alternatives
+- Available with parameter estimation corrections
+
+
+``` r
+library(nortest)
+set.seed(42); x &lt;- rnorm(100)
+ad.test(x)
+```
+
+```
+## 
+## 	Anderson-Darling test of goodness-of-fit
+## 	Null hypothesis: uniform distribution
+## 	Parameters assumed to be fixed
+## 
+## data:  x
+## An = Inf, p-value = 6e-06
+```
+
+---
+
+## Cramér–von Mises and Shapiro–Wilk
+
+**Cramér–von Mises**; integrated squared gap:
+`$$W^2 = \frac{1}{12n} + \sum_{i=1}^{n}\!\left(F_0(X_{(i)}) - \frac{2i-1}{2n}\right)^2$$`
+
+
+``` r
+library(goftest)
+set.seed(42); x &lt;- rnorm(100)
+cvm.test(x, "pnorm")$p.value      # Cramer-von Mises
+shapiro.test(x)$p.value           # Shapiro-Wilk (normality only)
+```
+
+```
+## [1] 0.5401898
+## [1] 0.1654119
+```
+
+**Shapiro–Wilk** : most powerful normality test for `\(n \leq 2000\)`:
+`$$W = \frac{\left(\sum a_i X_{(i)}\right)^2}{\sum(X_i-\bar X)^2} \in (0,1]$$`
+
+Values close to 1 `\(\Rightarrow\)` consistent with normality.
+
+---
+
+## Comparison Table
+
+| Test | Null `\(H_0\)` | Needs continuous `\(F\)`? | Params known? | Tail focus |
+|------|-----------|:-:|:-:|:-:|
+| `\(\chi^2\)` GoF | Any (binned) | No | Yes/No | Low |
+| KS | Specific `\(F_0\)` | **Yes** | **Yes** | Middle |
+| Lilliefors | Normal/Exp | Yes | **No** | Middle |
+| Cramér–von Mises | Specific `\(F_0\)` | Yes | Yes | Uniform |
+| Anderson–Darling | Specific `\(F_0\)` | Yes | Yes | **High** |
+| Shapiro–Wilk | **Normality only** | Yes | No | **High** |
+
+**Practical guide:**
+- Normality, small `\(n\)`: **Shapiro–Wilk**
+- Normality, unknown params: **Lilliefors** or **Anderson–Darling**
+- Fully specified `\(F_0\)`: **KS** or **Cramér–von Mises**
+- Discrete data: **$\chi^2$ GoF**
+
+---
+
+## Summary
+
+.pull-left[
+**Order statistics** `\(X_{(1)} \leq \cdots \leq X_{(n)}\)`
+
+**Ranks** strip values to relative order — basis of nonparametric inference
+
+**EDF** `\(S_n(x)\)` estimates `\(F_X\)`; Glivenko–Cantelli gives uniform convergence
+
+**PIT** `\(X \sim F \Rightarrow F(X) \sim U[0,1]\)`: powers both RV generation and the KS distribution-free property
+]
+
+.pull-right[
+**KS test** `\(D_n = \sup_x|S_n(x)-F_0(x)|\)` requires `\(F_0\)` continuous and **fully specified**
+
+**Simulation-based p-values**: generate samples from `\(F_0\)`, compute `\(D_n\)` each time, see where observed `\(D_n\)` lands; exact for any `\(n\)`
+
+**Lilliefors** corrects KS for estimated parameters
+
+**AD / SW** offer greater power for normality testing
+]
+
+---
+
+## Exercises
+
+1. Derive the density of `\(X_{(3)}\)` for `\(n=10\)`, `\(X_i \sim \text{Exp}(2)\)`. Verify by simulation.
+
+2. Given 10 observations `\((0.12, 0.28, 0.37, 0.45, 0.52, 0.61, 0.70, 0.79, 0.88, 0.95)\)`, test `\(H_0: F = U(0,1)\)` by computing `\(D_{10}\)` by hand.
+
+3. Why does plugging in `\(\hat\mu, \hat\sigma\)` into the KS test make it **conservative**? Which direction does the actual type I error deviate from `\(\alpha\)`?
+
+4. Write R code to compute a simulation-based p-value for testing `\(H_0: F = N(5, 4)\)` using `\(n=25\)` observations and `\(B=5000\)` replicates.
+
+5. Generate 30 observations from `\(t_3\)`. Apply KS, Lilliefors, AD, and Shapiro–Wilk for normality. Which is most powerful here? Why?
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
