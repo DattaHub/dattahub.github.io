@@ -126,7 +126,7 @@ rho <- cor(x,y)
 ## How do they look like?
 
 <div style="text-align:center" markdown="1">
-![ ](what-correlation-looks-like-1.png "Different correlation"){width=80%}
+![ ](art/what-correlation-looks-like-1.png "Different correlation"){width=80%}
 </div>
 
 ## Remember {.smaller}
@@ -328,7 +328,7 @@ mod$coefficients
 - Residuals or estimated errors: $\hat{\epsilon}_i = Y_i - \hat{Y}_i$. These are the vertical distances between actual data $(X_i, Y_i$ and fitted data $(X_i, \hat{Y}_i)$. 
 
 <div style="text-align:center" markdown="1">
-![ ](residuals.png "Residuals"){width=40%}
+![ ](art/residuals.png "Residuals"){width=40%}
 </div>
 
 ## Assumptions 
