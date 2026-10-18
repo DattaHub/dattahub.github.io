@@ -1,0 +1,70 @@
+<script>
+  // Accessibility touch-ups applied once reveal.js has built the DOM.
+  document.addEventListener("DOMContentLoaded", function () {
+
+    // 1. The VT logo repeats on every slide and adds nothing the title slide
+    //    does not already say in text, so it is marked decorative rather than
+    //    announced ~40 times (WCAG 1.1.1, decorative-image exception).
+    document.querySelectorAll("img.slide-logo").forEach(function (el) {
+      el.setAttribute("alt", "");
+      el.setAttribute("role", "presentation");
+      el.setAttribute("aria-hidden", "true");
+    });
+
+    // 2. Name the slide region so it can be found and skipped (WCAG 1.3.1).
+    var slides = document.querySelector(".reveal .slides");
+    if (slides) {
+      slides.setAttribute("role", "region");
+      slides.setAttribute("aria-label", "Nonparametric tests for associations: slides");
+    }
+
+    // 3. Any <pre> that scrolls must be reachable and scrollable by keyboard
+    //    alone (WCAG 2.1.1). Giving it a tabindex makes it a focus stop.
+    document.querySelectorAll(".reveal pre").forEach(function (el) {
+      if (el.scrollHeight > el.clientHeight + 4) {
+        el.setAttribute("tabindex", "0");
+        el.setAttribute("role", "region");
+        el.setAttribute("aria-label", "Scrollable code output");
+      }
+    });
+
+    // 4. knitr::kable emits a plain markdown table, so the leading label cell
+    //    of each body row is a <td>. Promote it to a row header and tag the
+    //    column headers, which is what lets a screen reader announce a cell as
+    //    "Judge 2, tea E, 2" rather than a bare number (WCAG 1.3.1).
+    document.querySelectorAll(".reveal table").forEach(function (tbl) {
+      tbl.querySelectorAll("thead th").forEach(function (th) {
+        th.setAttribute("scope", "col");
+      });
+      tbl.querySelectorAll("tbody tr").forEach(function (tr) {
+        var first = tr.firstElementChild;
+        if (!first || !first.textContent.trim()) return;
+        if (first.tagName === "TD") {
+          var th = document.createElement("th");
+          th.innerHTML = first.innerHTML;
+          th.className = first.className;
+          tr.replaceChild(th, first);
+          first = th;
+        }
+        first.setAttribute("scope", "row");
+      });
+    });
+
+    // 5. Authoring aid: warn in the console about any figure that reached the
+    //    page without alt text, and about content overflowing its slide.
+    document.querySelectorAll(".reveal .slides img:not([alt])").forEach(function (el) {
+      console.warn("Accessibility: image missing alt text ->", el.getAttribute("src"));
+    });
+
+    // 6. Flag slides whose content runs past the bottom edge.
+    if (window.Reveal) {
+      Reveal.on("slidechanged", function (event) {
+        var s = event.currentSlide;
+        if (s && s.scrollHeight > s.clientHeight + 8) {
+          console.warn("Layout: content overflows slide ->",
+                       (s.querySelector("h1,h2,h3") || {}).textContent || s.id);
+        }
+      });
+    }
+  });
+</script>

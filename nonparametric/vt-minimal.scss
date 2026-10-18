@@ -1,0 +1,270 @@
+/*-- scss:defaults --*/
+
+// A minimal, xaringan-flavoured theme: white page, left-aligned headings,
+// one accent colour, no chrome. Every foreground colour below has been
+// checked for WCAG 2.1 AA contrast (>= 4.5:1) against the white background.
+
+$font-family-sans-serif: "Fira Sans", "Lato", "Source Sans Pro",
+                         -apple-system, "Segoe UI", Helvetica, Arial, sans-serif !default;
+$font-family-monospace:  "Fira Mono", "Source Code Pro", "SFMono-Regular",
+                         Consolas, monospace !default;
+
+// 26px rather than reveal's 34px: these slides are dense, and a single global
+// size avoids the jumpiness of tagging individual slides as {.smaller}.
+$presentation-font-size-root: 30px !default;
+$presentation-line-height: 1.35 !default;
+
+$body-bg:    #ffffff !default;
+$body-color: #1a1a1a !default;                 // 16.1:1
+
+// $presentation-heading-font: $font-family-sans-serif !default;
+// $presentation-heading-color: #861F41 !default; // VT Chicago Maroon, 9.0:1
+// $presentation-heading-font-weight: 600 !default;*/
+
+$presentation-h1-font-size: 1.85em !default;
+$presentation-h2-font-size: 1.28em !default;
+$presentation-h3-font-size: 1.08em !default;
+
+$link-color:       #17365C !default;           // 11.4:1
+$link-color-hover: #861F41 !default;
+$code-color:       #8a3d00 !default;           //  6.4:1
+$code-block-bg:    #f7f6f4 !default;
+$selection-bg:     #ffe9a8 !default;
+
+/*-- scss:rules --*/
+
+// ---------------------------------------------------------------------------
+// Headings: a thin accent rule under each slide title, xaringan style.
+// ---------------------------------------------------------------------------
+
+.reveal h2 {
+  text-align: left;
+  margin: 0 0 0.6em 0;
+  padding-bottom: 0.22em;
+  border-bottom: 2px solid #E5751F;   // VT Burnt Orange, decorative only
+  letter-spacing: -0.01em;
+}
+
+.reveal h1 {
+  text-align: left;
+  letter-spacing: -0.02em;
+}
+
+// Section-break slides: heading centred, nothing else on the page.
+.reveal section.quarto-title-block + *,
+.reveal .slides > section > section > h1 {
+  text-align: left;
+}
+
+.reveal .slides section[data-background-color] h1 {
+  border: none;
+}
+
+// ---------------------------------------------------------------------------
+// Title slide
+// ---------------------------------------------------------------------------
+
+#title-slide {
+  text-align: left;
+
+  .title {
+    font-size: 1.9em;
+    line-height: 1.15;
+    color: $presentation-heading-color;
+    margin-bottom: 0.25em;
+  }
+
+  .subtitle {
+    font-size: 0.95em;
+    color: #3d3d3d;                    // 9.6:1
+    font-weight: 400;
+    margin-bottom: 1.4em;
+  }
+
+  .author, .quarto-title-affiliation, .institute {
+    font-size: 0.78em;
+    color: #1a1a1a;
+    margin: 0.1em 0;
+  }
+
+  .date {
+    font-size: 0.68em;
+    color: #3d3d3d;
+    margin-top: 0.9em;
+  }
+
+  // the accent rule that gives the xaringan look
+  .title::after {
+    content: "";
+    display: block;
+    width: 3.2em;
+    height: 3px;
+    background: #E5751F;
+    margin-top: 0.45em;
+  }
+}
+
+// The VT logo repeats on every slide and carries no information the title
+// slide does not already state in text; a11y.html marks it decorative.
+.reveal .slide-logo {
+  max-height: 44px !important;
+  opacity: 0.9;
+}
+
+// ---------------------------------------------------------------------------
+// Body text and lists
+// ---------------------------------------------------------------------------
+
+.reveal p { margin-bottom: 0.7em; }
+.reveal ul, .reveal ol { margin-bottom: 0.7em; }
+.reveal li { margin-bottom: 0.38em; }
+.reveal ul ul, .reveal ol ol { font-size: 0.95em; }
+
+.reveal strong { font-weight: 600; color: #000000; }
+
+// Emphasis colours, each >= 4.5:1 on white; colour never carries meaning alone.
+.hl-rust    { color: #A8520F; }   // darkened VT orange, 5.3:1
+.hl-maroon  { color: #861F41; }   // 9.0:1
+.hl-navy    { color: #17365C; }   // 11.4:1
+
+.reveal .smallcaps { font-variant: small-caps; letter-spacing: 0.02em; }
+
+// ---------------------------------------------------------------------------
+// Code: keep long console output inside the slide rather than off the bottom.
+// ---------------------------------------------------------------------------
+
+.reveal pre {
+  box-shadow: none;
+  width: 100%;
+  margin: 0.5em 0;
+  font-size: 0.62em;
+  line-height: 1.32;
+  max-height: 440px;
+  overflow: auto;
+}
+
+.reveal pre code {
+  padding: 0.7em 0.9em;
+  max-height: none;
+  background: $code-block-bg;
+  border-left: 3px solid #d8d4cf;
+  border-radius: 2px;
+}
+
+// Printed R output: distinguish it from input without colour alone.
+.reveal pre.sourceCode code { border-left-color: #861F41; }
+
+.reveal code:not(.sourceCode) {
+  font-size: 0.92em;
+  color: $code-color;
+}
+
+// For the few chunks whose output really is long.
+.scroll-out {
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+// ---------------------------------------------------------------------------
+// Tables: real tables with headers and captions, not pictures of tables.
+// ---------------------------------------------------------------------------
+
+.reveal table {
+  margin: 0.5em auto;
+  border-collapse: collapse;
+  font-size: 0.78em;
+}
+
+.reveal table th,
+.reveal table td {
+  border: none;
+  border-bottom: 1px solid #c9c4be;
+  padding: 0.22em 0.75em;
+  text-align: right;
+}
+
+.reveal table thead th {
+  border-bottom: 2px solid #5c5c5c;   // 6.4:1, clears the 3:1 non-text rule
+  font-weight: 600;
+  background: none;
+}
+
+.reveal table tbody tr:last-child td { border-bottom: 2px solid #5c5c5c; }
+
+.reveal table tbody th,
+.reveal table tbody td:first-child { text-align: left; font-weight: 600; }
+
+.reveal caption,
+.reveal .caption,
+.reveal table caption {
+  caption-side: top;
+  text-align: left;
+  font-size: 0.78em;
+  font-style: italic;
+  color: #3d3d3d;
+  padding-bottom: 0.35em;
+}
+
+// ---------------------------------------------------------------------------
+// Figures: never wider than the slide, never taller than the space left.
+// ---------------------------------------------------------------------------
+
+.reveal figure { margin: 0.4em auto; }
+
+.reveal img {
+  max-width: 100%;
+  max-height: 480px;
+  height: auto;
+  background: #ffffff;
+  border: none;
+  box-shadow: none;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.reveal figcaption {
+  font-size: 0.62em;
+  color: #3d3d3d;
+  text-align: center;
+  margin-top: 0.3em;
+}
+
+// ---------------------------------------------------------------------------
+// Footnotes and links
+// ---------------------------------------------------------------------------
+
+.reveal .footnotes,
+.reveal .footnote-ref { font-size: 0.72em; }
+.reveal .footnotes p  { color: #3d3d3d; }
+
+.reveal a { text-decoration-thickness: 1px; text-underline-offset: 2px; }
+
+// ---------------------------------------------------------------------------
+// Accessibility: visible focus (WCAG 2.4.7), reduced motion (WCAG 2.3.3)
+// ---------------------------------------------------------------------------
+
+.reveal a:focus-visible,
+.reveal button:focus-visible,
+.reveal .controls button:focus-visible,
+.reveal pre:focus-visible,
+.scroll-out:focus-visible {
+  outline: 3px solid #17365C;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal .slides section,
+  .reveal .fragment,
+  .reveal .progress span {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+// Keep the slide-number chrome quiet but legible (4.6:1).
+.reveal .slide-number {
+  background: none;
+  color: #6b6b6b;
+  font-size: 0.5em;
+}

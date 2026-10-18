@@ -1,0 +1,734 @@
+---
+title: "Nonparametric Tests for Associations"
+subtitle: "Spearman's $r_s$, Kendall's $\\tau$, and tests for trend"
+author: "Jyotishka Datta"
+institute: "Virginia Tech"
+date: last-modified
+date-format: "D MMMM YYYY"
+lang: en
+format:
+  revealjs:
+    theme: [default, vt-minimal.scss]
+    logo: art/vt.png
+    slide-number: c/t
+    show-slide-number: all
+    hash: true
+    menu: true
+    controls: true
+    controls-tutorial: true
+    progress: true
+    touch: true
+    auto-stretch: false
+    center: false
+    fig-align: center
+    link-external-newwindow: true
+    link-external-icon: true
+    html-math-method: mathjax
+    include-after-body: a11y.html
+execute:
+  echo: false
+  warning: false
+  message: false
+knitr:
+  opts_chunk:
+    comment: "#>"
+    collapse: true
+    fig.width: 8
+    fig.height: 3.6
+    fig.align: "center"
+    out.width: "78%"
+    dpi: 150
+---
+
+```{r}
+#| label: setup
+#| include: false
+knitr::opts_chunk$set(
+  dev = "png",
+  fig.retina = 2
+)
+# A quiet, high-contrast base-R look that matches the deck.
+vt_par <- function() {
+  par(
+    mar    = c(4.2, 4.2, 2.2, 1.0),
+    mgp    = c(2.5, 0.7, 0),
+    cex    = 1.15,
+    cex.lab = 1.0,
+    las    = 1,
+    bty    = "n",
+    col.axis = "#333333",
+    col.lab  = "#1a1a1a",
+    col.main = "#1a1a1a",
+    fg     = "#5c5c5c"
+  )
+}
+maroon <- "#861F41"   # VT Chicago Maroon
+rust   <- "#A8520F"   # darkened VT orange: 5.3:1 on white
+navy   <- "#17365C"
+```
+
+::: {.hidden}
+$$
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\NormRV}{\mathcal{N}}
+\newcommand{\Nor}{\mathcal{N}}
+\newcommand{\sgn}{\operatorname{sgn}}
+$$
+:::
+
+## Outline {.title-slide-follow}
+
+Two nonparametric measures of association between a pair of **continuous**
+variables:
+
+1. **Spearman's rank correlation**, $r_s$
+2. **Kendall's tau**, $\tau$
+
+We will build each one up from the parametric baseline (Pearson's $r$), work
+a small example by hand, and then reproduce it in [R]{.smallcaps}.
+
+::: {.fragment}
+At the end: using both statistics to test for a **trend** in time-ordered data.
+:::
+
+# Pearson's correlation {background-color="#f4f1ee"}
+
+## Pearson's correlation coefficient
+
+The `cars` data set: stopping distance against speed for 50 cars.
+
+```{r}
+#| echo: true
+head(cars)
+```
+
+::: {.fragment}
+$$
+r = \frac{\sum_{i=1}^n (X_i - \bar X)(Y_i - \bar Y)}
+         {\sqrt{\sum (X_i - \bar X)^2 \sum (Y_i - \bar Y)^2}}
+$$
+:::
+
+## Scatter plot
+
+```{r}
+#| label: fig-cars-scatter
+#| fig-alt: "Scatter plot of stopping distance in feet against speed in miles per hour
+#|   for the 50 cars observations. The cloud of points rises steadily from left to
+#|   right, from roughly 2 feet of stopping distance at 4 mph to about 120 feet at
+#|   25 mph, with the spread of distances widening as speed increases."
+vt_par()
+plot(cars$speed, cars$dist,
+     xlab = "Speed (mph)", ylab = "Stopping distance (ft)",
+     pch = 19, col = adjustcolor(maroon, 0.7))
+```
+
+The relationship is clearly increasing: a **positive** association.
+
+## Adding a fit
+
+```{r}
+#| label: fig-cars-fit
+#| fig-alt: "The same scatter plot of stopping distance against speed, now with two
+#|   fitted curves overlaid. A straight least-squares line and a smooth lowess curve
+#|   both rise from lower left to upper right and lie almost on top of each other,
+#|   with the lowess curve bending slightly upward at the highest speeds."
+vt_par()
+plot(cars$speed, cars$dist,
+     xlab = "Speed (mph)", ylab = "Stopping distance (ft)",
+     pch = 19, col = adjustcolor("#5c5c5c", 0.55))
+abline(lm(dist ~ speed, data = cars), col = maroon, lwd = 2.5)
+lines(lowess(cars$speed, cars$dist, f = 2/3, iter = 3), col = navy, lwd = 2.5, lty = 2)
+legend("topleft", legend = c("Least squares", "Lowess"),
+       col = c(maroon, navy), lwd = 2.5, lty = c(1, 2), bty = "n", cex = 0.9)
+```
+
+## Correlation in [R]{.smallcaps}
+
+```{r}
+#| echo: true
+cor(cars$speed, cars$dist)
+```
+
+```{r}
+#| echo: true
+#| class-output: scroll-out
+cor.test(cars$speed, cars$dist)
+```
+
+## Log transform?
+
+```{r}
+#| label: fig-cars-log
+#| fig-alt: "Scatter plot of the same cars data drawn on logarithmic scales for both
+#|   axes. On the log scale the points fall much closer to a single straight line than
+#|   on the original scale, and the widening spread at high speeds largely disappears."
+vt_par()
+plot(cars$speed, cars$dist, log = "xy",
+     xlab = "Speed (mph, log scale)", ylab = "Stopping distance (ft, log scale)",
+     pch = 19, col = adjustcolor(maroon, 0.7))
+```
+
+## Does the correlation improve?
+
+```{r}
+#| echo: true
+cor(cars$speed, cars$dist)
+cor(log(cars$speed), log(cars$dist))
+```
+
+::: {.fragment}
+Pearson's $r$ **is not** invariant to a monotone transformation : the number
+moved from $0.807$ to $0.856$ even though no car changed its ranking.
+:::
+
+## Three things to remember
+
+1. $X \perp Y \Rightarrow \rho_{X,Y}=0$, but **not** the converse : unless
+   $X, Y$ are jointly normal.
+2. Correlation $\not\Rightarrow$ causation. There may be a **lurking**
+   variable creating a **spurious** relationship.
+3. Plenty of entertaining examples at
+   [Spurious Correlations](http://tylervigen.com/spurious-correlations).
+
+## Zero correlation, perfect dependence
+
+Here $\rho_{X,Y}=0$ exactly, yet $Y = X^2$: dependent, but not *linearly* so.
+
+```{r}
+#| echo: true
+
+x <- c(-5, -4, -3, -2, -1, 1, 2, 3, 4, 5)
+y <- x^2
+cor(x, y)
+```
+
+```{r}
+#| label: fig-parabola
+#| fig-height: 2.6
+#| out-width: "48%"
+#| fig-alt: "Scatter plot of y equals x squared for the ten integer values of x from
+#|   minus five to five excluding zero. The ten points trace a symmetric U-shaped
+#|   parabola with its minimum at x equals zero, so the relationship is perfectly
+#|   deterministic even though the linear correlation is exactly zero."
+vt_par()
+plot(x, y, pch = 19, col = maroon, xlab = "x", ylab = expression(y == x^2))
+```
+
+# Spearman's rank correlation {background-color="#f4f1ee"}
+
+## Motivation
+
+Pearson's $r$ measures only the **linear** part of a relationship.
+
+```{r}
+#| echo: true
+x <- 1:7
+y <- x^4
+cor(x, y)                       # Pearson: 0.89, not 1
+cor(x, y, method = "spearman")  # Spearman: exactly 1
+```
+
+::: {.fragment}
+$y = x^4$ is a *perfect* increasing function of $x$. 
+
+Spearman's correlation is 1, but Pearson is less than 1.
+:::
+
+## Definition
+
+- Spearman's $r_s$ is **Pearson's correlation applied to the ranks** of the
+  $X_i$ and the $Y_i$.
+- It measures the degree of **monotone** relationship. With no ties,
+  $r_s = 1$ (or $-1$) means one variable is a perfect monotone increasing
+  (or decreasing) function of the other.
+
+::: {.fragment}
+- $r_s$ [does **not** change]{.hl-rust} when the same monotone function is
+  applied to both samples : the ranks do not change. It cares about *relative*
+  magnitudes, not absolute ones.
+- For ties, use **midranks** within $X_i$ (or within $Y_i$). Ties *across*
+  samples do not matter.
+:::
+
+## Transformation invariance in [R]{.smallcaps}
+
+```{r}
+#| echo: true
+cor(cars$speed, cars$dist, method = "spearman")
+cor(log(cars$speed), log(cars$dist), method = "spearman")
+cor((cars$speed)^2, (cars$dist)^2, method = "spearman")
+```
+
+All three agree, because $\log$ and $x^2$ (on positive data) are monotone.
+
+## Large-sample approximation
+
+For large $n$, under $H_0$ of independence:
+
+$$
+\Var(r_s) = \frac{1}{n-1},
+\qquad
+Z = \frac{r_s}{\sqrt{\Var(r_s)}} = \sqrt{n-1}\; r_s \;\sim\; \NormRV(0,1)
+$$
+
+::: {.fragment}
+There is disagreement in the literature about the accuracy of this for
+moderate $n$. Some authors prefer
+
+$$
+t = \frac{r_s\sqrt{n-2}}{\sqrt{1-r_s^2}} \;\sim\; t_{(n-2)}
+$$
+
+which is claimed to be more accurate for moderate $n$.[^tex4]
+:::
+
+[^tex4]: The 4th edition of the textbook gives this formula incorrectly.
+
+## Simplifying $r_s$
+
+Let $R_i = \operatorname{rank}(X_i)$ and $S_i = \operatorname{rank}(Y_i)$, so
+
+$$
+r_s = \frac{\sum_{i=1}^{n}(R_i-\bar R)(S_i-\bar S)}
+           {\sqrt{\sum (R_i-\bar R)^2 \sum (S_i-\bar S)^2}}
+$$
+
+Since the ranks are a permutation of $\{1,2,\dots,n\}$:
+
+$$
+\begin{aligned}
+\sum_{i=1}^{n} R_i &= \sum_{i=1}^{n} S_i = \sum_{i=1}^{n} i = \frac{n(n+1)}{2}
+  \Rightarrow\; \bar R = \bar S = \frac{n+1}{2} \\[1ex]
+\sum (R_i-\bar R)^2 &= \sum (S_i-\bar S)^2
+  = \sum_{i=1}^{n}\Bigl(i-\tfrac{n+1}{2}\Bigr)^{2}
+  = \frac{n(n^{2}-1)}{12}
+\end{aligned}
+$$
+
+## Simplifying $r_s$ (contd.)
+
+Substituting the constants:
+
+$$
+\begin{aligned}
+r_s &= \frac{12\sum_{i=1}^{n}(R_i-\bar R)(S_i-\bar S)}{n(n^{2}-1)} \\[1ex]
+    &= \frac{12\bigl[\sum_{i=1}^{n}R_i S_i - \tfrac{n(n^{2}+1)}{4}\bigr]}{n(n^{2}-1)} \\[1ex]
+    &= \frac{12\sum_{i=1}^{n}R_i S_i}{n(n^{2}-1)} - \frac{3(n+1)}{n-1}
+\end{aligned}
+$$
+
+- This is a simpler formula where you need to calculate just $\sum_{i=1}^{n}R_i S_i$ from the observed data and know the sample size $n$.
+
+## The working formula
+
+There is an even simpler looking formula in terms of the differences. 
+
+Let the rank differences be $D_i = R_i - S_i$:
+
+$$
+\boxed{\;r_s = 1 - \frac{6\sum_{i=1}^{n} D_i^{2}}{n(n^{2}-1)}\;}
+$$
+
+::: {.fragment}
+Let's do an example.
+:::
+
+## Example: nine teas
+
+Two judges ranked nine teas on taste and full-bodied properties, with **1**
+the highest ranking. Calculate the Kendall and Spearman measures of
+association, test the null hypothesis of independence, and find the
+appropriate one-tailed $P$-value in each case.
+
+```{r}
+#| label: tbl-tea
+#| tbl-cap: "Tea ratings by two judges (rank 1 = highest)."
+tea <- data.frame(
+  Tea     = LETTERS[1:9],
+  Judge_1 = c(1, 5, 9, 7, 4, 6, 8, 2, 3),
+  Judge_2 = c(4, 3, 6, 8, 2, 7, 9, 1, 5)
+)
+knitr::kable(
+  rbind("Judge 1" = tea$Judge_1, "Judge 2" = tea$Judge_2),
+  col.names = tea$Tea,
+  align = "r"
+)
+```
+
+## Solution: Spearman
+
+```{r}
+#| label: tbl-spearman
+#| tbl-cap: "Calculation of Spearman's rank correlation, teas sorted by Judge 1."
+sol <- tea[order(tea$Judge_1), ]
+sol$D  <- sol$Judge_1 - sol$Judge_2
+sol$D2 <- sol$D^2
+knitr::kable(
+  sol,
+  col.names = c("Tea", "Judge 1", "Judge 2", "$D$", "$D^2$"),
+  row.names = FALSE,
+  align = "rrrrr"
+)
+```
+
+$$
+r_s = 1 - \frac{6\sum D_i^{2}}{n(n^{2}-1)}
+    = 1 - \frac{6 \times 34}{9\,(9^{2}-1)} = 0.7167
+$$
+
+## Testing Spearman's $r_s$
+
+- **Z-test:** $\;Z = \sqrt{n-1}\,r_s \sim \NormRV(0,1)$
+- **t-test:** $\;t = \dfrac{r_s\sqrt{n-2}}{\sqrt{1-r_s^2}} \sim t_{(n-2)}$
+
+::: {.fragment}
+Using the Z-test with $n = 9$:
+
+$$
+Z = \sqrt{8}\times 0.7167 = 2.0268,
+\qquad P(Z \ge 2.0268) = 0.0213
+$$
+
+One-sided $P$-value against $H_1:\rho>0$ is $0.0213$ : **reject** $H_0$.
+:::
+
+## The same test in [R]{.smallcaps}
+
+```{r}
+#| echo: true
+#| class-output: scroll-out
+cor.test(tea$Judge_1, tea$Judge_2, method = "spearman",
+         alternative = "greater")
+```
+
+## CLT by hand: the Z-test
+
+Let's apply the CLT calculation for Spearman's $r_s$ for the cars dataset. 
+
+First the Z-test with Normal approximation. 
+
+- **Z-test:** $\;Z = \sqrt{n-1}\,r_s \sim \NormRV(0,1)$
+
+
+```{r}
+#| echo: true
+(r_s <- cor(cars$speed, cars$dist, method = "spearman"))
+n   <- length(cars$speed)
+(Z   <- sqrt(n - 1) * r_s)
+(p_two_sided = 2 * (1 - pnorm(Z)))
+```
+
+The Z-score is large: `r Z` which leads to a very small p-value `r p_two_sided`. We would reject the null hypothesis in favour of a strong positive monotone relationship.
+
+
+## CLT by hand: the t-test
+
+Same dataset, but we apply CLT with the Student's t distribution approximation.
+
+- **t-test:** $\;t = \dfrac{r_s\sqrt{n-2}}{\sqrt{1-r_s^2}} \sim t_{(n-2)}$
+
+```{r}
+#| echo: true
+tstat <- sqrt(n - 2) * r_s / sqrt(1 - r_s^2)
+c(t = tstat, p_two_sided = 2 * (1 - pt(tstat, df = n - 2)))
+```
+
+The t test statistics is large: `r tstat` which leads to a very small p-value `r p_two_sided`. We would, again, reject the null hypothesis in favour of a strong positive monotone relationship. 
+
+::: {.fragment}
+Both reject decisively here; the two approximations disagree only in the far
+tail, this is where a moderate sample size $n$ matters.
+:::
+
+# Kendall's tau {background-color="#f4f1ee"}
+
+## Concordance and discordance
+
+Kendall's $\tau$ is built from the probability of **concordance** $p_c$ and of
+**discordance** $p_d$:
+
+$$
+p_c = P\bigl[(X_i-X_j)(Y_i-Y_j) > 0\bigr],
+\qquad
+p_d = P\bigl[(X_i-X_j)(Y_i-Y_j) < 0\bigr]
+$$
+
+::: {.fragment}
+$$
+\tau = p_c - p_d = 2p_c - 1 = 1 - 2p_d \quad [\text{no ties}]
+$$
+:::
+
+## Reading $\tau$
+
+| Association | $p_c$ vs $p_d$ | $\tau$ |
+|:---|:---|:---|
+| Positive | high $p_c$, low $p_d$ | near $+1$ |
+| Negative | high $p_d$, low $p_c$ | near $-1$ |
+| Zero | $p_c \approx p_d$ | near $0$ |
+
+Estimated from data by
+
+$$
+\hat\tau = \frac{\#\{\text{concordant pairs}\} - \#\{\text{discordant pairs}\}}{\binom{n}{2}}
+$$
+
+## Relation to Pearson's $\rho$
+
+For a bivariate normal pair, $\;\tau = \dfrac{2}{\pi}\arcsin(\rho)$.
+
+```{r}
+#| label: fig-tau-rho
+#| fig-height: 3.2
+#| out-width: "62%"
+#| fig-alt: "Line plot with Pearson's rho on the horizontal axis from 0 to 1 and
+#|   Kendall's tau on the vertical axis. The curve for two over pi times arcsine of
+#|   rho starts at the origin, rises below the 45 degree reference line throughout,
+#|   and meets it again only at the point (1, 1). The gap is widest near rho of about
+#|   0.6, where tau is roughly 0.41 against a rho of 0.6."
+vt_par()
+rho <- seq(0, 1, length.out = 200)
+plot(rho, 2 / pi * asin(rho), type = "l", lwd = 2.5, col = maroon,
+     xlab = expression(rho), ylab = expression(tau))
+lines(rho, rho, col = navy, lwd = 2, lty = 2)
+legend("topleft", legend = c(expression(tau == frac(2, pi) * asin(rho)),
+                             expression(tau == rho)),
+       col = c(maroon, navy), lwd = c(2.5, 2), lty = c(1, 2), bty = "n", cex = 0.85)
+```
+
+## Computing $\hat\tau$ by hand
+
+**Equivalent recipe when there are no ties:**
+
+1. Order the pairs $(X_i, Y_i)$ so the $X$'s increase:
+   $X_1 < X_2 < \dots < X_n$.
+2. Count the pairs $(Y_i, Y_j)$, $j>i$, with $Y_i < Y_j$. If $Y_i = Y_j$,
+   add $1/2$.
+3. Then
+   $$\hat\tau = \frac{2 \times (\text{sum in step 2})}{\binom{n}{2}} - 1$$
+
+## Large-sample approximation for $\hat\tau$
+
+Under $H_0$ of zero association, $\hat\tau$ is approximately normal with
+
+$$
+\E(\hat\tau) = 0,
+\qquad
+\Var(\hat\tau) = \frac{4n+10}{9n(n-1)}
+$$
+
+so that
+
+$$
+Z = \frac{3\sqrt{n(n-1)}\; T}{\sqrt{2(2n+5)}} \;\sim\; \NormRV(0,1)
+$$
+
+::: {.fragment}
+You do not need to memorise this : you do need to know **what the test is**.
+:::
+
+## Back to the teas
+
+```{r}
+#| label: tbl-sorted
+#| tbl-cap: "The nine teas re-ordered so that Judge 1's ranks increase; the column headers are the teas in their new order."
+sorted <- tea[order(tea$Judge_1), ]
+knitr::kable(
+  rbind("Judge 1" = sorted$Judge_1, "Judge 2" = sorted$Judge_2),
+  col.names = sorted$Tea,
+  align = "r"
+)
+```
+
+The original order is in the tea-ratings table above. Now apply\nsteps 1--3 to the sorted row of Judge 2.
+
+## Solution: Kendall
+
+The last row counts how many times $Y_i < Y_j$ for all $j > i$.
+
+```{r}
+#| label: tbl-kendall
+#| tbl-cap: "Counting, for each sorted tea, how many of the later Judge 2 ranks exceed it. The counts sum to 28."
+y     <- sorted$Judge_2
+later <- vapply(seq_along(y), function(i) sum(y[i] < y[-seq_len(i)]), numeric(1))
+later_chr <- as.character(later)
+later_chr[length(later_chr)] <- "--"
+knitr::kable(
+  rbind("Judge 1"             = as.character(sorted$Judge_1),
+        "Judge 2"             = as.character(sorted$Judge_2),
+        "Count $Y_i < Y_j$"   = later_chr),
+  col.names = sorted$Tea,
+  align = "r"
+)
+```
+
+$$
+\hat\tau = \frac{2 \times 28}{\binom{9}{2}} - 1 = 0.5556
+$$
+
+## Checking against [R]{.smallcaps}
+
+```{r}
+#| echo: true
+#| class-output: scroll-out
+cor(tea$Judge_1, tea$Judge_2, method = "kendall")
+cor.test(tea$Judge_1, tea$Judge_2, method = "kendall",
+         alternative = "greater")
+```
+
+## Ties need care
+
+- Ties need special treatment in **all** nonparametric procedures, but in
+  Kendall's $\tau$ the problem is subtler.
+- Ties **within** a sample ($X_i = X_j$ *or* $Y_i = Y_j$): ignore them, or
+  add $1/2$ as above.
+- Ties **in both** ($X_i = X_j$ *and* $Y_i = Y_j$): neither fix works.
+  [Can anyone guess why?]{.hl-rust}
+
+::: {.fragment}
+There are no longer $\binom{n}{2}$ distinguishable pairs to check for
+concordance, so $\hat\tau$ computed the ordinary way **cannot reach 1** even
+under perfect agreement.
+:::
+
+## The Goodman--Kruskal $\gamma$
+
+Many fixes exist; the simplest is to change the measure. The only way to
+define a tau coefficient that *always* equals one under perfect agreement or
+disagreement is
+
+$$
+\gamma = \frac{C - Q}{C + Q}
+$$
+
+the number of concordant untied pairs minus the number of discordant untied
+pairs, divided by the total number of **untied** pairs : the
+**Goodman--Kruskal gamma coefficient**.
+
+## $\tau$ is also transformation invariant
+
+```{r}
+#| echo: true
+cor(cars$speed, cars$dist, method = "kendall")
+cor(log(cars$speed), log(cars$dist), method = "kendall")
+cor((cars$speed)^2, (cars$dist)^2, method = "kendall")
+```
+
+# Tests for trend {background-color="#f4f1ee"}
+
+## From association to trend
+
+So far, we have talked about *association*. The next question is how do we look for a trend?
+
+::: {.fragment}
+- Treat **time** as the $X$ variable and the time-ordered observations as the
+  $Y$ variable.
+- An association between $X$ and $Y$ is then evidence of a **trend**.
+- The degree of concordance between such $X$ and $Y$ becomes a measure of
+  trend, so Kendall's $\tau$ can test whether that trend is significant.
+- A more formal approach is covered in a time series course.
+:::
+
+## The key idea
+
+[A hypothesis of randomness in a single set of $n$ time-ordered observations
+is the same as a hypothesis of independence between those observations and
+the numbers $1, 2, \ldots, n$.]{.hl-rust}
+
+::: {.fragment}
+Taking $x_i = i$, the statistic becomes
+
+$$
+T = \frac{\sum\sum_{1 \le i < j \le n} \sgn(Y_j - Y_i)}{\binom{n}{2}}
+$$
+
+: the usual Kendall's $\tau$ with a cleaner formula.
+:::
+
+::: {.fragment}
+Reject for large **positive** $T$ against an upward trend, large **negative**
+$T$ against a downward one. This use of $T$ is the **Mann test**.
+:::
+
+## Example: US divorce rates
+
+```{r}
+#| label: tbl-divorce
+#| tbl-cap: "Divorce rates per 1000 US population, from the World Almanac and Book of Facts."
+divorce <- data.frame(
+  Year = seq(1945, 1985, by = 5),
+  Rate = c(3.5, 2.6, 2.3, 2.2, 2.5, 3.5, 4.8, 5.2, 5.0)
+)
+knitr::kable(t(setNames(divorce$Rate, divorce$Year)),
+             col.names = as.character(divorce$Year), align = "r")
+```
+
+Do these data show a positive trend?
+
+## Plot the series 
+
+```{r}
+#| label: fig-divorce
+#| fig-height: 3.2
+#| out-width: "72%"
+#| fig-alt: "Line plot of the US divorce rate per 1000 population against year from
+#|   1945 to 1985 at five-year intervals. The rate starts at 3.5 in 1945, falls to a
+#|   minimum of 2.2 in 1960, then climbs steadily to a peak of 5.2 in 1980 before
+#|   easing slightly to 5.0 in 1985. The series is therefore U-shaped rather than
+#|   monotone, which is what makes the rank-based trend tests interesting here."
+vt_par()
+plot(divorce$Year, divorce$Rate, type = "b", pch = 19, lwd = 2,
+     col = maroon, xlab = "Year", ylab = "Divorce rate per 1000")
+```
+
+The series dips and then rises : **not** monotone. What will $\tau$ say?
+
+## The Mann test in [R]{.smallcaps}
+
+```{r}
+#| echo: true
+#| class-output: scroll-out
+cor.test(divorce$Year, divorce$Rate, method = "kendall",
+         alternative = "greater")
+```
+
+## Daniels' test
+
+As with Kendall's $\tau$, Spearman's $r_s$ can be treated as a measure of
+trend in a single sequence of time-ordered observations, and used to test
+$H_0$ of no trend. That application is **Daniels' test**.
+
+```{r}
+#| echo: true
+#| class-output: scroll-out
+cor.test(divorce$Year, divorce$Rate, method = "spearman",
+         alternative = "greater", exact = FALSE)
+```
+
+## Comparing all methods
+
+```{r}
+#| echo: true
+sapply(c("pearson", "spearman", "kendall"), function(m)
+  unname(cor(divorce$Year, divorce$Rate, method = m)))
+```
+
+::: {.fragment}
+All three are positive but modest : the early decline cancels part of the
+later rise. 
+
+A trend test answers "is it monotone?", not "did it change?".
+:::
+
+## Resources
+
+Full [R]{.smallcaps} companion for these slides:
+
+<http://dattahub.github.io/nonparametric/association_demo.html>
+
+::: {.fragment}
+Reference: Gibbons & Chakraborti, *Nonparametric Statistical Inference*,
+chapters on measures of association and tests for trend.
+:::
