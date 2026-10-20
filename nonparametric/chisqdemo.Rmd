@@ -413,6 +413,173 @@ For our example, $OR = 2.04$ means that:
 2.  the odds of getting a cold given vitamin C are 1/2.04 = 0.49 times the odds of getting cold given a placebo.
 3.   getting cold is less likely given vitamin C than given a placebo.
 
+## Statistical and practical significance
+
+- Statistical significance depends on **sample size**.
+- Data on French skiers who took either vitamin C or a placebo, and either
+  caught a cold or did not.
+
+```{r}
+#| label: tbl-cold
+#| echo: true
+cold <- matrix(
+  c(31, 109,
+    17, 122),
+  nrow = 2, byrow = TRUE,
+  dimnames = list(Treatment = c("Placebo", "Ascorbic acid"),
+                  Outcome   = c("Cold", "No cold"))
+)
+addmargins(cold)
+```
+
+## The test at the observed sample size
+
+- Statistical significance depends on **sample size**.
+
+```{r}
+#| echo: true
+#| class-output: scroll-out
+chisq.test(cold)
+```
+
+::: {.fragment}
+Strong evidence against the null.
+:::
+
+## Multiply every cell by 10
+
+- Statistical significance depends on **sample size**.
+- Now we multiply each cell by 10 — the *same* association, ten times the data.
+
+```{r}
+#| echo: true
+#| class-output: scroll-out
+chisq.test(cold * 10)
+```
+
+::: {.fragment}
+VERY strong evidence against the null — not because the association has
+increased, but because the sample size is higher.
+:::
+
+## Divide every cell by 10
+
+- Statistical significance depends on **sample size**.
+- Now we divide each cell by 10 and round.
+
+```{r}
+#| echo: true
+#| warning: true
+#| class-output: scroll-out
+cold_small <- matrix(
+  c(3, 11,
+    2, 12),
+  nrow = 2, byrow = TRUE, dimnames = dimnames(cold)
+)
+chisq.test(cold_small)
+```
+
+::: {.fragment}
+Little or no evidence against independence — but is that because the
+association is weak, or because the sample size is low? Note the warning: the
+smallest expected count is 2.5, so the approximation is no longer reliable.
+:::
+
+## Odds ratio
+
+- The most common measure of association for a $2\times 2$ table.
+- The **odds** are a ratio of the probabilities of "success" and "failure"
+  within a given row — a ratio of two conditional probabilities from the
+  *same* conditional distribution.
+- For the last example, the odds of catching a cold versus not, given the
+  skier took the placebo:
+  $$\text{odds}_1 = \frac{P(Z = \text{cold} \mid Y = \text{placebo})}{P(Z = \text{no cold} \mid Y = \text{placebo})}$$
+- And given the skier took vitamin C:
+  $$\text{odds}_2 = \frac{P(Z = \text{cold} \mid Y = \text{Vit-C})}{P(Z = \text{no cold} \mid Y = \text{Vit-C})}$$
+
+## Odds ratio: reading the value
+
+- If the odds equal 1, "success" and "failure" are equally likely.
+- If the odds are $> 1$, then "success" is more likely than "failure".
+- If the odds are $< 1$, then "success" is less likely than "failure".
+
+Let $C$ = cold, $NC$ = no cold, $Pl$ = placebo, $VitC$ = vitamin C. The **odds
+ratio** is the ratio of $\text{odds}_1$ and $\text{odds}_2$:
+
+$$
+OR = \frac{P(Z = C \mid Y = Pl) \times P(Z = NC \mid Y = VitC)}
+          {P(Z = NC \mid Y = Pl) \times P(Z = C \mid Y = VitC)}
+$$
+
+## Calculation
+
+Generalize: a $2\times 2$ table with two binary variables $Y$ and $Z$.
+
+| | $Z = 1$ | $Z = 2$ |
+|:---|:---|:---|
+| $Y = 1$ | $n_{11},\; \pi_{11}$ | $n_{12},\; \pi_{12}$ |
+| $Y = 2$ | $n_{21},\; \pi_{21}$ | $n_{22},\; \pi_{22}$ |
+
+$$
+\theta = \text{Odds ratio} = \frac{\pi_{11}\pi_{22}}{\pi_{12}\pi_{21}}
+$$
+
+Natural estimate:
+
+$$
+\hat\theta = \text{Estimated odds ratio} = \frac{n_{11}n_{22}}{n_{12}n_{21}}
+$$
+
+## Interpretation
+
+- **Independence:** $\theta = 1$.
+- **Dependence:** $\pi_{1|1} > \pi_{1|2}$ implies $\theta > 1$ — the odds of
+  success in row 1 are higher than the odds of success in row 2.
+- Or $\pi_{1|1} < \pi_{1|2}$ implies $\theta < 1$ — the odds of success in
+  row 1 are lower than the odds of success in row 2.
+
+## The odds ratio and sample size
+
+The odds ratio depends on the cell **probabilities**, which do not change when
+the sample size does:
+
+```{r}
+#| echo: true
+odds_ratio <- function(x) (x[1, 1] * x[2, 2]) / (x[1, 2] * x[2, 1])
+
+c(observed = odds_ratio(cold),
+  times_10 = odds_ratio(cold * 10))
+```
+
+::: {.fragment}
+```{r}
+#| echo: true
+# For contrast: Q does change, by exactly the same factor as N.
+c(observed = unname(chisq.test(cold, correct = FALSE)$statistic),
+  times_10 = unname(chisq.test(cold * 10, correct = FALSE)$statistic))
+```
+
+$Q$ scales with $N$; the odds ratio does not move at all.
+:::
+
+## Interpretation: our example
+
+```{r}
+#| echo: true
+cold
+odds_ratio(cold)
+```
+
+$OR = 2.04$ means that:
+
+1. the odds of catching a cold given a placebo are 2.04 times greater than the
+   odds given vitamin C;
+2. the odds of catching a cold given vitamin C are $1/2.04 = 0.49$ times the
+   odds given a placebo;
+3. catching a cold is [less likely]{.hl-rust} given vitamin C than given a
+   placebo.
+
+
 ## McNemar's test 
 
 ```{r, echo = TRUE}
