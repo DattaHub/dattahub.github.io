@@ -1,0 +1,1655 @@
+---
+title: "Count Data Analysis"
+subtitle: "Associations and other tests"
+author: "Jyotishka Datta"
+institute: "Virginia Tech"
+date: last-modified
+date-format: "D MMMM YYYY"
+lang: en
+format:
+  revealjs:
+    theme: [default, vt-minimal.scss]
+    logo: art/vt.png
+    slide-number: c/t
+    show-slide-number: all
+    hash: true
+    menu: true
+    controls: true
+    controls-tutorial: true
+    progress: true
+    touch: true
+    auto-stretch: false
+    center: false
+    fig-align: center
+    link-external-newwindow: true
+    link-external-icon: true
+    html-math-method: mathjax
+    embed-resources: true
+    include-after-body: a11y.html
+execute:
+  echo: false
+  warning: false
+  message: false
+knitr:
+  opts_chunk:
+    comment: "#>"
+    collapse: true
+    fig.width: 8
+    fig.height: 3.6
+    fig.align: "center"
+    out.width: "78%"
+    dpi: 150
+---
+
+```{r}
+#| label: setup
+#| include: false
+knitr::opts_chunk$set(dev = "png", fig.retina = 2)
+
+# A quiet, high-contrast base-R look that matches the deck.
+vt_par <- function(...) {
+  par(
+    mar = c(4.2, 4.2, 2.2, 1.0), mgp = c(2.5, 0.7, 0),
+    cex = 1.15, cex.lab = 1.0, las = 1, bty = "n",
+    col.axis = "#333333", col.lab = "#1a1a1a", col.main = "#1a1a1a",
+    fg = "#5c5c5c", ...
+  )
+}
+maroon <- "#861F41"   # VT Chicago Maroon
+rust   <- "#A8520F"
+navy   <- "#17365C"
+teal   <- "#0A6B45"
+```
+
+::: {.hidden}
+$$
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\NormRV}{\mathcal{N}}
+\newcommand{\Nor}{\mathcal{N}}
+$$
+:::
+
+## Recap
+
+- Drawbacks of Pearson's correlation coefficient?
+- Nonparametric measures of association between a pair of **continuous**
+  variables:
+  1. Spearman's rank correlation.
+  2. Kendall's tau.
+- Today we will start discussing association between two **qualitative**
+  variables.
+
+## Recap in [R]{.smallcaps}
+
+The three coefficients on the `cars` data, for comparison:
+
+```{r}
+#| echo: true
+sapply(c("pearson", "spearman", "kendall"), function(m)
+  cor(cars$speed, cars$dist, method = m))
+```
+
+::: {.fragment}
+Pearson's $r$ measures only the **linear** part; the two rank-based measures
+are invariant to any monotone transformation of either variable. None of them
+applies when the variables are *categories* rather than numbers.
+:::
+
+# Introduction and basic idea {background-color="#f4f1ee"}
+
+## Introduction
+
+- Main goal: basic analysis of data presented in a two-way table with $r$ rows
+  and $k$ columns, called an $r \times k$ **contingency table**, where the cell
+  counts refer to the number of sample observations that have certain cross
+  characteristics.
+- Here we have a test for the null hypothesis that the characteristics are
+  **independent** or have **no association**.
+- We will also calculate the **contingency coefficient** or the **phi
+  coefficient** to measure the degree of association or dependence.
+
+## Introduction (contd.)
+
+- A special case is the analysis of $k \times 2$ contingency tables. We will
+  present some special results for that.
+- Another special case of contingency tables is the $2 \times 2$ table with
+  fixed row and column totals: **Fisher's exact test**.
+- We also cover **McNemar's test** for comparing two probabilities of success
+  based on paired or dependent samples.
+
+## Example 1: Music and Wine
+
+- Market researchers know that background music can influence the mood and
+  purchasing behavior of customers.
+- One study compared 3 treatments: no music, French accordion music, and
+  Italian string music.
+- Under each condition, the researchers recorded the number of bottles of
+  French, Italian, and other wine purchased.
+
+## Example 1 continued
+
+The data can be presented as a $3 \times 3$ table (contingency table): total
+243 bottles were sold.
+
+```{r}
+#| label: tbl-music-wine
+#| echo: true
+wine <- matrix(
+  c(30, 39, 30,
+    11,  1, 19,
+    43, 35, 35),
+  nrow = 3, byrow = TRUE,
+  dimnames = list(Wine  = c("French", "Italian", "Other"),
+                  Music = c("None", "French", "Italian"))
+)
+wine
+```
+
+```{r}
+#| echo: true
+sum(wine)
+```
+
+## Questions
+
+- **Joint distribution:** what percent of French wine was purchased from a
+  store with French music playing?
+- Asking a question about **both** the variables / characteristics.
+- Start with the entire table; at each cell divide the count by the total
+  number of observations.
+
+## Joint distribution
+
+- **Joint distribution:** what percent of French wine was purchased from a
+  store with French music playing?
+
+```{r}
+#| label: tbl-joint
+#| echo: true
+round(prop.table(wine), 3)
+```
+
+::: {.fragment}
+The $(\text{French wine}, \text{French music})$ cell is $39/243 = 0.160$, the
+largest single cell in the table.
+:::
+
+## Generalize / formalize
+
+- Two qualitative attributes $A$ and $B$ (e.g. $A$ is Music and $B$ is Wine).
+- Suppose there are $r$ categories of the type $A$ attribute and $k$ categories
+  of the $B$ attribute, and each of $N$ experimental units is classified into
+  exactly one of the $rk$ cross-categories.
+- In an $r \times k$ layout, the entry in the $(i,j)$ cell, denoted by
+  $X_{ij}$, is the number of items having the cross-classification
+  $A_i \cap B_j$.
+
+## The $r \times k$ contingency table
+
+| $A$ categories | $B_1$ | $B_2$ | $\ldots$ | $B_k$ | Row total |
+|:---|---:|---:|---:|---:|---:|
+| $A_1$ | $x_{11}$ | $x_{12}$ | $\ldots$ | $x_{1k}$ | $x_{1\cdot}$ |
+| $A_2$ | $x_{21}$ | $x_{22}$ | $\ldots$ | $x_{2k}$ | $x_{2\cdot}$ |
+| $\vdots$ | $\vdots$ | $\vdots$ | $\vdots$ | $\vdots$ | $\vdots$ |
+| $A_r$ | $x_{r1}$ | $x_{r2}$ | $\ldots$ | $x_{rk}$ | $x_{r\cdot}$ |
+| Column total | $x_{\cdot 1}$ | $x_{\cdot 2}$ | $\ldots$ | $x_{\cdot k}$ | $x_{\cdot\cdot} = N$ |
+
+1. The entry in the $(i,j)$ cell, denoted by $X_{ij}$, is the number of items
+   having the cross-classification $A_i \cap B_j$.
+2. We are interested in the probabilities, so the joint probabilities and
+   their estimates are
+   $$p_{ij} = P(A_i \cap B_j) \stackrel{\text{est.}}{=} \frac{x_{ij}}{x_{\cdot\cdot}} = \frac{x_{ij}}{N}$$
+
+## Marginal
+
+- What percent of wine bought was Italian?
+- What percent of wine was purchased from a store with no music playing?
+- We only ask about **one** of the variables. Use only the bottom row or the
+  far-right column — that is, the row sum or the column sum.
+- The total number of items classified into the categories $A_i$ and $B_j$ are
+  the row and column totals $x_{i\cdot}$ and $x_{\cdot j}$:
+  $$x_{i\cdot} = \sum_{j=1}^{k} x_{ij}, \qquad x_{\cdot j} = \sum_{i=1}^{r} x_{ij}$$
+- In terms of probability:
+  $$P(A_i) = p_{i\cdot} = \frac{x_{i\cdot}}{N}, \qquad P(B_j) = p_{\cdot j} = \frac{x_{\cdot j}}{N}$$
+
+## Marginal probabilities
+
+```{r}
+#| label: tbl-marginal
+#| echo: true
+round(100 * addmargins(prop.table(wine)), 1)
+```
+
+- What percent of wine bought was Italian? **12.8%**
+- What percent of wine was purchased from a store with no music playing?
+  **34.6%**
+
+## Conditional distribution
+
+- **Of the Italian wine purchased**, what percent was from a store playing
+  French music?
+- What percent of the wine purchased from **French music-playing stores** was
+  French?
+- Asks about both variables but narrows the table down by one of them ahead of
+  time.
+- Conditional distribution of $A_i$ when we have narrowed things down by $B_j$
+  ahead of time:
+  $$P(A_i \mid B_j) = \frac{P(A_i \cap B_j)}{P(B_j)}$$
+
+::: {.fragment}
+$$
+P(A_i \mid B_j) = \frac{P(A_i \cap B_j)}{P(B_j)} = \frac{X_{ij}}{X_{\cdot j}},
+\qquad
+P(B_j \mid A_i) = \frac{P(A_i \cap B_j)}{P(A_i)} = \frac{X_{ij}}{X_{i\cdot}}
+$$
+:::
+
+## Conditional distributions in [R]{.smallcaps}
+
+`margin = 2` divides by the column totals, giving the wine distribution
+*within* each music condition:
+
+```{r}
+#| echo: true
+round(prop.table(wine, margin = 2), 3)
+```
+
+::: {.fragment}
+Of wine sold under French music, 52% was French; under Italian music, only
+36% was. That difference is what the test below is about.
+:::
+
+## Main goal
+
+We want to test if there is any association between the two
+categorical/qualitative variables.
+
+**Null hypothesis $H_0$:**
+: There is NO association between music and wine in the population.
+
+**Alternative $H_a$:**
+: There is an association between music and wine in the population.
+
+::: {.center-heading-sm}
+How do we test for association between two events $A_i$ and $B_j$?
+:::
+
+::: {.fragment}
+::: {.center-heading-sm}
+If $A_i$ is independent of $B_j$, then
+$P(A_i \cap B_j) = P(A_i) \times P(B_j)$, or $p_{ij} = p_{i\cdot}\, p_{\cdot j}$.
+:::
+:::
+
+## The hypotheses, formally
+
+**Null hypothesis $H_0$:**
+: NO association: $p_{ij} = p_{i\cdot} \times p_{\cdot j}$ for all
+  $i = 1,\ldots,r$ and $j = 1,\ldots,k$.
+
+**Alternative $H_a$:**
+: Association: $p_{ij} \neq p_{i\cdot} \times p_{\cdot j}$ for at least one
+  $i$ and $j$.
+
+- If $p_{i\cdot}$ and $p_{\cdot j}$ were completely specified for $i$ and $j$,
+  it would be a simple goodness-of-fit test, but they are not known.
+- Hence we estimate the unspecified parameters from the data, and use the
+  chi-square test developed before.
+
+## Steps for the test
+
+1. We can estimate the marginal probabilities by the observed proportions
+   (just like we have done before):
+   $$\hat p_{i\cdot} = \frac{x_{i\cdot}}{N} \quad \text{and} \quad \hat p_{\cdot j} = \frac{x_{\cdot j}}{N}$$
+2. Similarly joint probabilities: $\;\hat p_{ij} = x_{ij}/N$.
+3. If $H_0$ is true, $\hat p_{ij}$ (observed) should be close to the product
+   $\hat p_{i\cdot}\hat p_{\cdot j}$ (expected under $H_0$).
+
+::: {.fragment}
+4. Test statistic:
+   $$Q = \sum_{i=1}^{r}\sum_{j=1}^{k} \frac{\bigl(x_{ij} - x_{i\cdot}x_{\cdot j}/N\bigr)^2}{x_{i\cdot}x_{\cdot j}/N}$$
+5. **Under $H_0$ (no association), $Q$ has approximately the chi-square
+   distribution with $(r-1)(k-1)$ degrees of freedom.**
+:::
+
+## Remarks
+
+- If any expected cell frequency is too small, say less than 5, the chi-square
+  approximation is improved by combining cells and reducing the degrees of
+  freedom accordingly.
+- The extension of this to higher-order contingency tables is obvious.
+
+::: {.fragment}
+- Joint distribution should be close to the product of marginal distributions.
+- For an $r_1 \times r_2 \times r_3$ table,
+  $H_0: p_{ijk} = p_{i\cdot\cdot}\, p_{\cdot j\cdot}\, p_{\cdot\cdot k}$ for all
+  $i = 1,\ldots,r_1$, $j = 1,\ldots,r_2$ and $k = 1,\ldots,r_3$.
+:::
+
+::: {.fragment}
+- We will not discuss this in class, but do remember that contingency tables
+  can be *any*-dimensional.
+:::
+
+## Expected counts for Music & Wine
+
+Under $H_0$, the expected count in cell $(i,j)$ is
+$x_{i\cdot}x_{\cdot j}/N$:
+
+```{r}
+#| echo: true
+fit <- chisq.test(wine, correct = FALSE)
+round(fit$expected, 2)
+```
+
+```{r}
+#| echo: true
+min(fit$expected)   # smallest expected count
+```
+
+All expected counts exceed 5, so the chi-square approximation is safe here.
+
+## Results for Music & Wine
+
+**Null hypothesis $H_0$:**
+: There is NO association between music and wine in the population.
+
+**Alternative $H_a$:**
+: There is an association between music and wine in the population.
+
+Answer:
+
+1. Chi-square test statistic: $Q = 18.279$.
+2. Degrees of freedom: $(r-1)(k-1) = 4$.
+3. $P$-value $\approx 0.001$.
+
+## The same test in [R]{.smallcaps}
+
+```{r}
+#| echo: true
+#| class-output: scroll-out
+chisq.test(wine, correct = FALSE)
+```
+
+::: {.fragment}
+Music and wine purchase are **not** independent. Looking back at the
+conditional distributions tells you *how*: Italian music sells Italian wine.
+:::
+
+## Where does $Q$ come from?
+
+The cell-by-cell contributions $(\text{obs}-\text{exp})^2/\text{exp}$ show
+which cells drive the result:
+
+```{r}
+#| echo: true
+contrib <- (wine - fit$expected)^2 / fit$expected
+round(contrib, 2)
+```
+
+```{r}
+#| echo: true
+sum(contrib)
+```
+
+::: {.fragment}
+Almost half of $Q$ comes from one cell: only **1** bottle of Italian wine was
+sold under French music, against 9.6 expected.
+:::
+
+## When is the chi-square test appropriate?
+
+- **Tables larger than $2\times 2$:**
+  1. the average of the expected counts $\ge 5$,
+  2. and the smallest expected count $\ge 1$,
+  3. and $<20\%$ of cells have expected counts $<5$.
+- **$2\times 2$ tables:** all 4 expected cell counts $\ge 5$.
+
+## In-class activity {.center-slide}
+
+::: {.center-heading}
+In-class activity: RMS Titanic example
+:::
+
+## Titanic data in [R]{.smallcaps}
+
+`Titanic` ships with R as a $4 \times 2 \times 2 \times 2$ table. Here is the description that you get by typing `?Titanic` on the R Console.
+
+```
+This data set provides information on the fate of passengers on the fatal maiden voyage of the ocean liner ‘Titanic’, summarized according to economic status (class), sex, age and survival.
+
+Usage
+Titanic
+Format
+A 4-dimensional array resulting from cross-tabulating 2201 observations on 4 variables. The variables and their levels are as follows:
+
+No	Name	Levels
+1	Class	1st, 2nd, 3rd, Crew
+2	Sex	Male, Female
+3	Age	Child, Adult
+4	Survived	No, Yes
+```
+
+**Note that the numbers are slightly different from what you see on the in-class activity, but close.**
+
+## Titanic data in [R]{.smallcaps}
+
+Collapse it
+to survival by passenger class:
+
+```{r}
+#| echo: true
+tc <- margin.table(Titanic, c(1, 4))
+tc
+```
+
+```{r}
+#| echo: true
+round(prop.table(tc, margin = 1), 3)   # survival rate within each class
+```
+
+## Titanic: the test
+
+```{r}
+#| echo: true
+#| class-output: scroll-out
+chisq.test(tc)
+```
+
+::: {.fragment}
+Try it yourself with `margin.table(Titanic, c(2, 4))` for sex, or
+`c(3, 4)` for age.
+:::
+
+# A second example {background-color="#f4f1ee"}
+
+<!-- ## Recap: chi-square test for association -->
+
+<!-- - Two qualitative attributes $A$ and $B$ (e.g. $A$ is Music and $B$ is Wine, -->
+<!--   or, for example, $A$ is a preventable habit or trait and $B$ is survival). -->
+<!-- - Suppose there are $r$ categories of the type $A$ attribute and $k$ categories -->
+<!--   of the $B$ attribute, and each of $N$ experimental units is classified into -->
+<!--   exactly one of the $rk$ cross-categories. -->
+<!-- - In an $r \times k$ layout, the entry in the $(i,j)$ cell, denoted by -->
+<!--   $X_{ij}$, is the number of items having the cross-classification -->
+<!--   $A_i \cap B_j$. -->
+
+<!-- ## Recap: contingency tables -->
+
+<!-- | $A$ categories | $B_1$ | $B_2$ | $\ldots$ | $B_k$ | Row total | -->
+<!-- |:---|---:|---:|---:|---:|---:| -->
+<!-- | $A_1$ | $x_{11}$ | $x_{12}$ | $\ldots$ | $x_{1k}$ | $x_{1\cdot}$ | -->
+<!-- | $A_2$ | $x_{21}$ | $x_{22}$ | $\ldots$ | $x_{2k}$ | $x_{2\cdot}$ | -->
+<!-- | $\vdots$ | $\vdots$ | $\vdots$ | $\vdots$ | $\vdots$ | $\vdots$ | -->
+<!-- | $A_r$ | $x_{r1}$ | $x_{r2}$ | $\ldots$ | $x_{rk}$ | $x_{r\cdot}$ | -->
+<!-- | Column total | $x_{\cdot 1}$ | $x_{\cdot 2}$ | $\ldots$ | $x_{\cdot k}$ | $x_{\cdot\cdot} = N$ | -->
+
+<!-- 1. The entry in the $(i,j)$ cell, $X_{ij}$, is the number of items having the -->
+<!--    cross-classification $A_i \cap B_j$. -->
+<!-- 2. The joint probabilities $P(A_i \cap B_j)$ are denoted by $p_{ij}$; the -->
+<!--    marginal probabilities by $P(A_i) = p_{i\cdot}$ and $P(B_j) = p_{\cdot j}$. -->
+<!-- 3. We are interested in testing for association between $A$ and $B$. -->
+
+<!-- ## Recap: independence and the test -->
+
+<!-- If two events $A_i$ and $B_j$ are independent, then -->
+<!-- $P(A_i \cap B_j) = P(A_i)P(B_j)$, or, in our notation, -->
+<!-- $$p_{ij} = p_{i\cdot} \times p_{\cdot j}$$ -->
+
+<!-- **Null hypothesis $H_0$:** -->
+<!-- : NO association: $p_{ij} = p_{i\cdot} \times p_{\cdot j}$ for all $i$ and $j$. -->
+
+<!-- **Alternative $H_a$:** -->
+<!-- : Association: $p_{ij} \neq p_{i\cdot} \times p_{\cdot j}$ for at least one -->
+<!--   $i$ and $j$. -->
+
+<!-- - If $p_{i\cdot}$ and $p_{\cdot j}$ were completely specified it would be a -->
+<!--   simple goodness-of-fit test, but they are not known. -->
+<!-- - Hence we estimate the unspecified parameters from the data, and use the -->
+<!--   chi-square test developed before. -->
+
+<!-- ## Recap: steps for the chi-square test -->
+
+<!-- 1. Estimate the marginal probabilities by the observed proportions: -->
+<!--    $$\hat p_{i\cdot} = \frac{x_{i\cdot}}{N} \quad \text{and} \quad \hat p_{\cdot j} = \frac{x_{\cdot j}}{N}$$ -->
+<!-- 2. Similarly joint probabilities: $\;\hat p_{ij} = x_{ij}/N$. -->
+<!-- 3. If $H_0$ is true, $\hat p_{ij}$ (observed) should be close to the product -->
+<!--    $\hat p_{i\cdot}\hat p_{\cdot j}$ (expected under $H_0$). -->
+
+<!-- ::: {.fragment} -->
+<!-- 4. Test statistic: -->
+<!--    $$Q = \sum_{i=1}^{r}\sum_{j=1}^{k} \frac{\bigl(x_{ij} - x_{i\cdot}x_{\cdot j}/N\bigr)^2}{x_{i\cdot}x_{\cdot j}/N}$$ -->
+<!-- 5. **Under $H_0$ (no association), $Q$ has approximately the chi-square -->
+<!--    distribution with $(r-1)(k-1)$ degrees of freedom.** -->
+<!-- ::: -->
+
+<!-- ## Remarks -->
+
+<!-- - If any expected cell frequency is too small, say less than 5, the chi-square -->
+<!--   approximation is improved by combining cells and reducing the degrees of -->
+<!--   freedom accordingly. -->
+<!-- - The extension of this to higher-order contingency tables is obvious. -->
+
+<!-- ::: {.fragment} -->
+<!-- - Joint distribution should be close to the product of marginal distributions. -->
+<!-- - For an $r_1 \times r_2 \times r_3$ table, -->
+<!--   $H_0: p_{ijk} = p_{i\cdot\cdot}\, p_{\cdot j\cdot}\, p_{\cdot\cdot k}$. -->
+<!-- ::: -->
+
+<!-- ::: {.fragment} -->
+<!-- - We will not discuss this in class, but do remember that contingency tables -->
+<!--   can be *any*-dimensional. -->
+<!-- ::: -->
+
+## Pet ownership and heart disease
+
+Psychological and social factors can influence the survival of patients with
+serious diseases. One study examined the relationship between survival of
+patients with coronary heart disease and pet ownership.
+
+Each of 92 patients was classified as having a pet or not, and by whether they
+survived for one year. The researchers suspect that having a pet might be
+connected to the patient status.
+
+## The data
+
+The original counts are given below:
+
+```{r}
+#| label: tbl-pets
+#| echo: true
+pets <- matrix(
+  c(28, 50,
+    11,  3),
+  nrow = 2, byrow = TRUE,
+  dimnames = list(Status = c("Alive", "Dead"),
+                  Pet    = c("No", "Yes"))
+)
+addmargins(pets)
+```
+
+## Proportions
+
+```{r}
+#| echo: true
+round(addmargins(prop.table(pets)), 3)
+```
+
+- We can answer conditional, joint or marginal probability questions.
+- E.g. what percentage of pet owners were alive after one year,
+  $P(\text{alive} \mid \text{owner})$?
+
+```{r}
+#| echo: true
+round(prop.table(pets, margin = 2), 3)
+```
+
+## Chi-square test
+
+$H_0$:
+: There is NO association between pet ownership and patient status in the
+  population.
+
+$H_1$:
+: There is an association between pet ownership and patient status in the
+  population.
+
+Test statistic
+: $Q = 8.851$. Degrees of freedom $= 1$.
+
+$P$-value
+: $p = 0.003 \ll 0.05$: there is significant association between pet ownership
+  and survival.
+
+Conclusion
+: We have enough evidence to say that there is an association between pet
+  ownership and patient status in the population.
+
+Appropriate?
+: It is appropriate to use the chi-square test because none of the cells have
+  expected counts $< 5$.
+
+## Pet ownership in [R]{.smallcaps}
+
+```{r}
+#| echo: true
+#| class-output: scroll-out
+chisq.test(pets, correct = FALSE)
+```
+
+```{r}
+#| echo: true
+round(chisq.test(pets)$expected, 2)   # all above 5
+```
+
+::: {.fragment}
+`correct = FALSE` matters: R applies Yates' continuity correction to
+$2\times 2$ tables by default, which would give $Q = 7.19$ instead of
+$8.851$.
+:::
+
+## Recap: when is it appropriate?
+
+- **Tables larger than $2\times 2$:**
+  1. the average of the [expected]{.hl-red} counts $\ge 5$,
+  2. and the smallest [expected]{.hl-red} count $\ge 1$,
+  3. and $<20\%$ of cells have [expected]{.hl-red} counts $<5$.
+- **$2\times 2$ tables:** all 4 [expected]{.hl-red} cell counts $\ge 5$.
+- Important to remember the distinction between **expected** and **observed**
+  counts: it is entirely possible to have a contingency table with a small
+  observed count but larger expected counts, making it suitable for the
+  chi-square test.
+- One such example is the pet-ownership and survival analysis.
+
+# Contingency coefficients {background-color="#f4f1ee"}
+
+## Contingency coefficient $\phi$ (phi)
+
+- A contingency coefficient is a (standardized) measure of the degree of
+  association: a value near 1 indicates strong association and a value near 0
+  indicates no association or independence.
+- The easiest measure is called the $\phi$ (phi) coefficient, which adjusts the
+  chi-square test statistic by the sample size:
+  $$\phi = \sqrt{\frac{Q}{N}}, \qquad \phi^2 = \frac{Q}{N}$$
+- It is very easy to calculate $\phi$ from the output.
+- For the music and wine example, $Q = 18.279$ and $N = 243$ bottles. Hence
+  $\phi = \sqrt{Q/N} = 0.274$ and $\phi^2 = 0.075$.
+- $\phi$ is always less than 1, and it is reported just as a measure, without
+  distributional properties (such as $P$-values).
+
+## Another contingency coefficient, $C$
+
+- A slightly different measure of association is
+  $$C = \sqrt{\frac{Q}{Q+N}}$$
+- Since $\phi^2 = Q/N$, it is easy to see that
+  $$C = \sqrt{\frac{\phi^2}{1+\phi^2}}$$
+- $C = 0$ if there is no association, but it is less than 1 for all $N$ — a
+  disadvantage.
+- For a two-way table of dimensions $r \times k$, the maximum value of $C$ is
+  $$C_{\max} = \sqrt{\frac{t-1}{t}} \quad \text{where} \quad t = \min(r,k)$$
+- So two $C$ values are not comparable unless they have the same value of
+  $\min(r,k)$. Some people prefer the ratio $C/C_{\max}$ for this reason.
+
+## The last contingency coefficient: Cramér's $V$
+
+- One final chi-square based measure of association is Cramér's $V$:
+  $$V = \sqrt{\frac{\phi^2}{t}} = \sqrt{\frac{Q}{Nt}}, \qquad t = \min(r-1,\,k-1)$$
+- By using the information concerning the dimensions of the table, Cramér's $V$
+  corrects for the problem that measures of association for tables of different
+  dimension may be difficult to compare directly.
+- Cramér's $V$ equals 0 when there is no relationship between the two
+  variables, and generally has a maximum value of 1, regardless of the
+  dimension of the table or the sample size.
+- This makes it possible to use Cramér's $V$ to compare the strength of
+  association between any two cross-classification tables.
+
+## All three in [R]{.smallcaps}
+
+```{r}
+#| echo: true
+assoc <- function(tab) {
+  Q   <- unname(chisq.test(tab, correct = FALSE)$statistic)
+  N   <- sum(tab)
+  phi <- sqrt(Q / N)
+  t_C <- min(dim(tab))
+  t_V <- min(dim(tab) - 1)
+  c(Q = Q, N = N, phi = phi, phi_sq = phi^2,
+    C = sqrt(Q / (Q + N)), C_max = sqrt((t_C - 1) / t_C),
+    V = sqrt(Q / (N * t_V)))
+}
+round(assoc(wine), 4)
+```
+
+::: {.fragment}
+```{r}
+#| echo: true
+round(assoc(pets), 4)
+```
+
+For a $2\times2$ table, $t = \min(r-1,k-1) = 1$, so Cramér's $V$ coincides
+with $\phi$.
+:::
+
+## Another example
+
+Streissguth et al. (1984) investigated the effect of alcohol and nicotine
+consumption during pregnancy on the resulting children by examining the
+children's attention span and reaction time at age four. First, the 452
+mothers in the study were classified according to their levels of consumption
+of alcohol and nicotine. Test the null hypothesis of no association between
+levels of consumption.
+
+```{r}
+#| echo: true
+#| eval: false
+# Rows = alcohol level, columns = nicotine level
+streissguth <- matrix(
+  c(105, 7, 11,
+    58, 5, 13,
+    84, 37, 42,
+    57, 16, 17),
+  nrow = 4, byrow = TRUE,
+  dimnames = list(Alcohol  = c("0", "0.01-0.10", "0.11-0.99", "1+"),
+                  Nicotine = c("0", "1-15", "16+"))
+)
+chisq.test(streissguth, correct = FALSE)
+round(assoc(streissguth), 4)
+```
+
+# $K \times 2$ tables {background-color="#f4f1ee"}
+
+## First special case: $K \times 2$ tables
+
+- First note that a categorical variable with only two categories is basically
+  a **binary** variable (like Yes/No, Alive/Dead etc.).
+- So a $K \times 2$ contingency table is simply a table with counts of "successes" for each of the $K$ categories of the variable $A$.
+
+## First special case: $K \times 2$ tables
+
+::: {.fragment}
+- Example: a marketing research firm has conducted a survey of businesses of
+  different sizes. Questionnaires were sent to 200 randomly selected businesses
+  of each of three sizes. The data on responses are given below. Is there a
+  significant difference in the proportions of nonresponses by small, medium
+  and large firms?
+
+```{r}
+#| label: tbl-survey
+#| echo: true
+survey <- matrix(
+  c(125, 81,  40,
+     75, 119, 160),
+  nrow = 2, byrow = TRUE,
+  dimnames = list(Reply = c("Response", "Nonresponse"),
+                  Size  = c("Small", "Medium", "Large"))
+)
+addmargins(survey)
+```
+:::
+
+::: {.fragment}
+- We don't need both the rows — if column totals are known, one of them is
+  redundant.
+:::
+
+## $K \times 2$ tables (contd.)
+
+- The usual test statistic for the chi-square test of association has a simpler
+  form for a $K \times 2$ table:
+  $$
+  \begin{aligned}
+  Q &= \sum_{i=1}^{K}\sum_{j=1}^{2} \frac{(x_{ij} - x_{i\cdot}x_{\cdot j}/N)^2}{x_{i\cdot}x_{\cdot j}/N}
+     = \sum_{i=1}^{K}\frac{(Y_i - n_i\hat p)^2}{n_i \hat p (1-\hat p)} \\
+  &\text{where} \quad Y_i = X_{i1}, \quad n_i - Y_i = X_{i2}, \quad \hat p = \sum_{i=1}^{K}\frac{Y_i}{N}
+  \end{aligned}
+  $$
+- The chi-square test statistic for the $K \times 2$ special case is just the
+  sum of the squares of $K$ standardized Binomial variables with parameter $p$
+  estimated from the whole data.
+- This is why the chi-square test for the $K \times 2$ problem is also called
+  the *test for equality of $K$ proportions*.
+
+## Back to the example
+
+Is there a [**significant difference in the proportions of
+nonresponses**]{.hl-red} by small, medium and large firms?
+
+- Recall:
+  $$Q = \sum_{i=1}^{K}\frac{(Y_i - n_i \hat p)^2}{n_i \hat p(1-\hat p)}$$
+- Proportion of non-response from the whole data:
+  $\hat p = (75+119+160)/600 = 0.59$.
+- Test statistic: $Q = 74.70$ with degrees of freedom $= K-1 = 2$. The
+  $P$-value would be $< 0.001$.
+- Significant evidence that the proportions of non-responses are not the same.
+
+## The $K \times 2$ test in [R]{.smallcaps}
+
+```{r}
+#| echo: true
+#| class-output: scroll-out
+chisq.test(survey, correct = FALSE)
+```
+
+::: {.fragment}
+`prop.test` presents exactly the same test as a comparison of $K$ proportions:
+
+```{r}
+#| echo: true
+#| class-output: scroll-out
+prop.test(x = survey["Nonresponse", ], n = colSums(survey))
+```
+:::
+
+## Statistical vs. practical significance[^psu]
+
+[^psu]: <https://online.stat.psu.edu/stat504/>
+
+- When the null hypothesis of independence is rejected, the nature of the
+  dependence — its direction and magnitude — needs to be measured.
+- A statistic that measures the direction and magnitude of the relationship
+  between two variables is called [an effect size]{.hl-rust} or a
+  [measure of association]{.hl-rust}.
+- A test statistic or $P$-value is a measure of the evidence against a null
+  hypothesis, and this evidence depends on the **sample size**. An effect size,
+  however, should not change if $n$ is arbitrarily increased.
+- In some situations there may be an artificial dependency of statistical
+  significance on sample size.
+- We will look at one such example.
+
+## Why effect size, not $P$-value
+
+Take the pet-ownership table and simply multiply every count by 1, 2, 5 and
+10. The association is *identical* in strength, but the evidence is not:
+
+```{r}
+#| echo: true
+t(sapply(c(1, 2, 5, 10), function(m) {
+  tab <- pets * m
+  ct  <- chisq.test(tab, correct = FALSE)
+  c(multiplier = m, N = sum(tab),
+    Q = unname(ct$statistic), p_value = ct$p.value,
+    phi = sqrt(unname(ct$statistic) / sum(tab)))
+}))
+```
+
+::: {.fragment}
+$Q$ grows linearly with $N$ and the $P$-value collapses, while $\phi$ does not
+budge. With a large enough sample, *any* departure from independence becomes
+"significant".
+:::
+
+# McNemar's test {background-color="#f4f1ee"}
+
+## McNemar's test
+
+- Suppose that a $2\times 2$ table of data arises when a success or failure
+  response is observed on each of $N$ subjects **before and after** some
+  treatment.
+- The paired data are dependent within a pair but independent across pairs.
+- Let $X_{11}$ = the number of subjects whose responses are successes both
+  before and after the treatment,
+- $X_{22}$ = the number of subjects whose responses are failures both before
+  and after the treatment,
+- and let $X_{12}$ and $X_{21}$ denote the numbers of **reversals**: $X_{12}$ is
+  the number of subjects whose initial (before treatment) response was success
+  but became failure after the treatment.
+
+## McNemar's test: the table
+
+The data can be summarized in the following $2\times 2$ table:
+
+| Before treatment | After: success | After: failure | Row total |
+|:---|---:|---:|---:|
+| Success | $x_{11}$ | $x_{12}$ | $x_{1\cdot}$ |
+| Failure | $x_{21}$ | $x_{22}$ | $x_{2\cdot}$ |
+| Column total | $x_{\cdot 1}$ | $x_{\cdot 2}$ | $N$ |
+
+The two groups of interest are the subjects before and after the treatment,
+and the [**hypothesis of interest is that the probability of success is the
+same before and after the treatment**]{.hl-coral}.
+
+## McNemar's test: cell probabilities
+
+- Let $\theta_{11}, \theta_{12}, \theta_{21}, \theta_{22}$ denote the four cell
+  probabilities for the table, with
+  $\theta_{11}+\theta_{12}+\theta_{21}+\theta_{22} = 1$.
+
+::: {.fragment}
+- $\theta_{11}$ denotes the probability of success before *and* after treatment.
+
+| Before treatment | After: success | After: failure | Row total |
+|:---|---:|---:|---:|
+| Success | $x_{11}, \theta_{11}$ | $x_{12}, \theta_{12}$ | $x_{1\cdot}, \theta_{1\cdot}$ |
+| Failure | $x_{21}, \theta_{21}$ | $x_{22}, \theta_{22}$ | $x_{2\cdot}, \theta_{2\cdot}$ |
+| Column total | $x_{\cdot 1}, \theta_{\cdot 1}$ | $x_{\cdot 2}, \theta_{\cdot 2}$ | $N$ |
+:::
+
+::: {.fragment}
+- The sum $\theta_{\cdot 1} = \theta_{11}+\theta_{21}$ is the marginal
+  probability of success *after* treatment, and
+  $\theta_{1\cdot} = \theta_{11}+\theta_{12}$ the marginal probability of
+  success *before*.
+:::
+
+::: {.fragment}
+- So the hypothesis of interest becomes $H_0: \theta_{1\cdot} = \theta_{\cdot 1}$.
+:::
+
+## Reducing the hypothesis
+
+- [**Hypothesis of interest: the probability of success is the same before and
+  after the treatment**]{.hl-coral} — that is,
+  $H_0: \theta_{1\cdot} = \theta_{\cdot 1}$.
+
+::: {.fragment}
+- Note that $\theta_{1\cdot} = \theta_{\cdot 1}$ is equivalent to
+  $\theta_{12} = \theta_{21}$.
+:::
+
+::: {.fragment}
+- In other words, the null hypothesis can be viewed as testing that the
+  probability of a **reversal in either direction** is the same.
+:::
+
+::: {.fragment}
+- For $H_0: \theta_{1\cdot} = \theta_{\cdot 1}$ it is natural to consider a
+  test based on $T = x_{1\cdot} - x_{\cdot 1}$, an unbiased estimator of the
+  difference $\theta_{1\cdot} - \theta_{\cdot 1}$.
+:::
+
+::: {.fragment}
+- Since $x_{1\cdot} = x_{11}+x_{12}$ and $x_{\cdot 1} = x_{11}+x_{21}$, like
+  $H_0$, $T$ also reduces to $\;\boxed{T = x_{12} - x_{21}}$.
+:::
+
+## McNemar's test statistic
+
+- McNemar's test: $H_0: \theta_{1\cdot} = \theta_{\cdot 1}$ vs. the two-sided
+  alternative $H_1: \theta_{1\cdot} \ne \theta_{\cdot 1}$.
+- The test should be based on the statistic
+  $\;\boxed{T = x_{12} - x_{21}}$.
+
+::: {.fragment}
+- $T$ is the difference between the proportions of discordant pairs (numbers in
+  the off-diagonal positions divided by $N$). Under the null hypothesis the
+  mean of $T$ is zero and the variance of $T$ can be shown to be
+  $(\theta_{12}+\theta_{21})/N$.
+:::
+
+::: {.fragment}
+- McNemar's test for $H_0$ against the two-sided alternative uses
+  $$Q = \frac{(x_{12}-x_{21})^2}{x_{12}+x_{21}}$$
+  and $Q$ is approximately distributed as a chi-square with 1 degree of freedom.
+:::
+
+::: {.fragment}
+- *As always, the accuracy is low for small expected cell frequencies.*
+:::
+
+## One-sided McNemar's test
+
+- In real life we are often more interested in one-sided tests, e.g. "did the
+  pain reduce after treatment?". Just saying that the two are different is
+  usually not enough.
+- A one-sided test in McNemar's set-up is usually that the treatment is
+  effective, e.g. $H_1: \theta_{1\cdot} > \theta_{\cdot 1}$, or equivalently
+  $H_1: \theta_{12} > \theta_{21}$.
+- The test statistic for the one-sided McNemar's test is
+  $$Z = \frac{x_{12}-x_{21}}{\sqrt{x_{12}+x_{21}}} \sim \NormRV(0,1)$$
+- We reject $H_0$ in favour of $H_1: \theta_{12} > \theta_{21}$ if $Z$ is large.
+- Similarly, for $H_1: \theta_{12} < \theta_{21}$ the rejection region is the
+  left tail of the normal density.
+- As we said before, for a two-sided $H_1$ people usually use $Q = Z^2$, which
+  is $\chi^2_{1\,\text{d.f.}}$.
+
+## Example
+
+Suppose that a random sample of 100 subjects is evaluated for pain. Under a
+placebo, 35 of the subjects reported some relief but the remaining 65 did not.
+Under a new drug, 55 of the subjects reported some relief while 45 did not. Of
+the 65 people who reported no relief under the placebo, 30 also reported no
+relief under the new drug. Is there any evidence that the new drug is more
+effective than the placebo?
+
+```{r}
+#| label: tbl-pain
+#| echo: true
+pain <- matrix(
+  c(20, 15,
+    35, 30),
+  nrow = 2, byrow = TRUE,
+  dimnames = list(Placebo   = c("Some relief", "No relief"),
+                  New_drug  = c("Some relief", "No relief"))
+)
+addmargins(pain)
+```
+
+We want to test if the new drug is better, i.e. whether we have evidence in
+favour of $H_1: \theta_{21} > \theta_{12}$.
+
+## Example: the calculation
+
+- The one-sided test statistic:
+  $$Z = \frac{x_{12}-x_{21}}{\sqrt{x_{12}+x_{21}}} = \frac{15-35}{\sqrt{15+35}} = -2.83$$
+- The continuity correction:
+  $$Z_c = \frac{x_{12}-x_{21}+0.5}{\sqrt{x_{12}+x_{21}}} = \frac{15-35+0.5}{\sqrt{15+35}} = -2.76$$
+- $P$-value (uncorrected): $\Phi(-2.83)$, `pnorm(-2.83) = 0.0023` $< 0.05$.
+  There is sufficient evidence that the new drug is more effective than the
+  placebo.
+- The value of McNemar's statistic for a two-sided alternative is
+  $Q = Z^2 = 20^2/50 = 8.0$, with $P$-value
+  `1 - pchisq(8.0, df = 1) = 0.004678`. Reject the null.
+
+## Example in [R]{.smallcaps}
+
+```{r}
+#| echo: true
+x12 <- pain[1, 2]; x21 <- pain[2, 1]
+Z <- (x12 - x21) / sqrt(x12 + x21)
+c(Z = Z, p_one_sided = pnorm(Z),
+  Zc = (x12 - x21 + 0.5) / sqrt(x12 + x21),
+  Q = Z^2, p_two_sided = 1 - pchisq(Z^2, df = 1))
+```
+
+::: {.fragment}
+```{r}
+#| echo: true
+#| class-output: scroll-out
+mcnemar.test(pain, correct = FALSE)
+```
+:::
+
+## Example in class
+
+A group of 28 salespersons were rated on their sales presentations and then
+asked to view a training film on improving selling techniques. Each person was
+then rated a second time. For the data in the following table, determine
+whether the training film has a positive effect on the ratings.
+
+```{r}
+#| label: tbl-sales
+#| echo: true
+sales <- matrix(
+  c( 5,  4,
+    13,  6),
+  nrow = 2, byrow = TRUE,
+  dimnames = list(Before = c("Acceptable", "Unacceptable"),
+                  After  = c("Acceptable", "Unacceptable"))
+)
+addmargins(sales)
+```
+
+::: {.fragment}
+Work out $T = x_{12} - x_{21}$, then $Z$ and $Q$, before running
+`mcnemar.test(sales, correct = FALSE)`.
+:::
+
+# Simpson's paradox {background-color="#f4f1ee"}
+
+## Gender bias at UC Berkeley
+
+A study of gender bias among graduate school admissions to the University of
+California, Berkeley. The admission figures for the fall of 1973 showed that
+men applying were more likely than women to be admitted, and the difference
+was so large that it was unlikely to be due to chance (as a result UC Berkeley
+was sued for gender discrimination).
+
+| | Applicants | Admitted |
+|:---|---:|---:|
+| **Men** | 8442 | **44%** |
+| **Women** | 4321 | 35% |
+
+## Gender bias at UC Berkeley (contd.)
+
+- But when examining the individual departments, it appeared that six out of 85
+  departments were significantly biased **against men**, whereas only four were
+  significantly biased against women.
+- When researchers looked at the evidence, they uncovered something surprising:
+  "[If the data are properly pooled… there is a small but statistically
+  significant bias in favor of women]{.hl-coral}" (p. 403).
+- The data from the six largest departments is listed below.
+
+| Department | Men: applicants | Men: admitted | Women: applicants | Women: admitted |
+|:---|---:|---:|---:|---:|
+| A | 825 | 62% | 108 | [82%]{.hl-rust} |
+| B | 560 | 63% | 25 | [68%]{.hl-rust} |
+| C | 325 | [37%]{.hl-rust} | 593 | 34% |
+| D | 417 | 33% | 375 | [35%]{.hl-rust} |
+| E | 191 | [28%]{.hl-rust} | 393 | 24% |
+| F | 373 | 6% | 341 | 7% |
+
+It was a textbook case of [Simpson's paradox]{.boxed}.
+
+## Simpson's paradox, drawn
+
+```{r}
+#| label: fig-simpson
+#| fig-height: 3.4
+#| out-width: "80%"
+#| fig-alt: "Scatter plot illustrating Simpson's paradox with four coloured groups of
+#|   points. Each group forms a downward-sloping cloud, so within either colour the
+#|   relationship between x and y is negative, and a dashed line of best fit through
+#|   each group slopes down. But the clouds sit in opposite corners of the plot - 
+#|   stretching from low x and low y, to high x and high y — so the solid line fitted
+#|   to all the points ignoring colour slopes clearly upward. The pooled association
+#|   is therefore positive while every within-group association is negative."
+
+library(MASS)
+library(tidyverse)
+
+plotTheme <- function() {
+  theme(
+    plot.title = element_text(size = 16, family = "sans", face = "plain", hjust = 0),
+    plot.subtitle=element_text(size = 14, family = "sans", hjust = 0),
+    plot.caption=element_text(size = 14, family = "sans", face = "italic", hjust = 0), 
+    axis.title.x = element_text(size = 14, family = "sans", face = "plain", hjust = 1, vjust = -0.5),
+    axis.title.y = element_text(size = 14, family = "sans", face = "plain", hjust = 1, vjust = 1),
+    axis.text = element_text(size = rel(1), family = "sans", face = "plain"),
+    panel.background = element_blank(),
+    panel.grid.minor = element_line(colour = "gray"),
+    panel.grid.major = element_line(colour = "gray"),
+    axis.ticks = element_blank(),
+    legend.title = element_text(size = 10, family = "sans"),
+    legend.text = element_text(size = 9, family = "sans"),
+    axis.line = element_blank()
+  )
+}
+set.seed(5)
+### build the g1
+
+mu<-c(0,0)
+sigma<-rbind(c(1,-0.5),c(-0.5,1))
+g1<-as.data.frame(mvrnorm(n=1000, mu=mu, Sigma=sigma))
+g1$group<-c("Group 1")
+
+
+### build the g2
+
+mu<-c(-2,-2)
+sigma<-rbind(c(1,-0.5),c(-0.5,1))
+g2<-as.data.frame(mvrnorm(n=1000, mu=mu, Sigma=sigma))
+g2$group<-c("Group 2")
+
+# ### build the g3
+mu<-c(-1,-1)
+sigma<-rbind(c(1,-0.5),c(-0.5,1))
+g3<-as.data.frame(mvrnorm(n=1000, mu=mu, Sigma=sigma))
+g3$group<-c("Group 3")
+
+# ### build the g4
+mu<-c(1,1)
+sigma<-rbind(c(1,-0.5),c(-0.5,1))
+g4<-as.data.frame(mvrnorm(n=1000, mu=mu, Sigma=sigma))
+g4$group<-c("Group 4")
+
+
+# the combined data of all three groups
+df<-rbind(g1,g2,g3,g4)
+
+
+plt1 <- df%>%ggplot(aes(x=V1, y=V2))+geom_point()+ 
+    # coord_flip()+
+    scale_fill_discrete()+
+    geom_smooth(method='lm')+theme_bw() + 
+    labs(title = "All groups together", x = "x-axis", y = "y-axis")+plotTheme()
+
+plt2 <- df%>%ggplot(aes(x=V1, y=V2, group=group, color = group))+
+    # coord_flip()+
+    # scale_fill_hue()+
+    scale_color_brewer(direction = 1, name = "Groups", 
+                         palette = "Set2") +
+    geom_point()+ geom_smooth(method='lm', col='black')+ 
+    labs(title = "All groups separate", x = "x-axis", y = "y-axis")+theme_bw()+
+     plotTheme()
+
+library(patchwork)
+
+plt1 + plt2 + plot_annotation(
+  title = "Simpson's paradox")
+```
+
+Here $x$ appears to have a positive correlation with $y$, but the opposite is
+true when you account for colour. $y$ is the explained variable, $x$ the
+observed explanatory variable, and colour the **lurking** explanatory variable.
+
+## Simpson's paradox
+
+- Simpson's paradox usually involves three variables:
+  1. the response variable ($y$),
+  2. the explanatory variable ($x$),
+  3. a **lurking** variable ($z$).
+- If the association between the response variable and the explanatory variable
+  **changes direction** when you account for the lurking variable, you have got
+  a Simpson's paradox.
+
+## The numbers, pooled and split
+
+```{r}
+#| echo: true
+# UCBAdmissions ships with R: the six largest departments, fall 1973.
+round(100 * prop.table(margin.table(UCBAdmissions, c(1, 2)), 2), 1)
+```
+
+::: {.fragment}
+```{r}
+#| echo: true
+round(100 * apply(UCBAdmissions, 3, function(d) prop.table(d, 2)["Admitted", ]), 1)
+```
+
+Pooled, men are admitted at a higher rate. Split by department, women do as
+well or better in four of the six.
+:::
+
+## UC Berkeley example
+
+- The two observed variables were **Gender** and **Admission**, and the lurking
+  variable was **Department**.
+- The effect reverses when we break down by the department!
+- The research paper by Bickel et al. concluded [that women tended to apply to
+  competitive departments with low rates of admission even among qualified
+  applicants (such as in the English Department), whereas men tended to apply
+  to less-competitive departments with high rates of admission among the
+  qualified applicants (such as in engineering and chemistry)]{.hl-coral}.
+
+
+## Another example
+
+- Real-life example from medical studies.
+- The table below shows the success rates and numbers of treatments for both
+  small and large kidney stones, with two treatment procedures: Treatment A and
+  Treatment B. The numbers in parentheses indicate the number of success cases
+  over the total size of the group.
+
+| | Treatment A | Treatment B |
+|:---|:---|:---|
+| Small stones | **93% (81/87)** | 87% (234/270) |
+| Large stones | **73% (192/263)** | 69% (55/80) |
+| Both | 78% (273/350) | **83% (289/350)** |
+
+::: {.fragment}
+- Treatment A is more effective when used on small stones, and also when used
+  on large stones, yet treatment B is more effective when considering both
+  sizes at the same time.
+:::
+
+::: {.fragment}
+- The "lurking" variable (or confounding variable) is the **severity of the
+  case** — the doctors' tendency to favour B for less severe cases — which was
+  not previously known to be important until its effects were included.
+:::
+
+## Kidney stones in [R]{.smallcaps}
+
+```{r}
+#| echo: true
+stones <- data.frame(
+  stone     = c("Small", "Small", "Large", "Large"),
+  treatment = c("A", "B", "A", "B"),
+  success   = c(81, 234, 192, 55),
+  total     = c(87, 270, 263, 80)
+)
+stones$rate <- round(100 * stones$success / stones$total, 1)
+stones
+```
+
+```{r}
+#| echo: true
+# pooled over stone size
+with(stones, round(100 * tapply(success, treatment, sum) /
+                         tapply(total,   treatment, sum), 1))
+```
+
+## Importance
+
+- Simpson's paradox often fools us when we want to compare performances.
+- The last example shows why Simpson's paradox matters. It would be dangerous
+  if doctors prescribed ineffective or inferior treatments based on aggregate
+  data.
+- Another famous example shows that Wisconsin beats Texas on elementary school
+  test scores overall, but if you break down by ethnic group, Texas almost
+  always does better.
+- Again, this shows the importance of understanding counter-intuitive results
+  in statistics. A wrong conclusion could lead to a wild goose chase or a
+  waste of public funds.
+- Reference:
+  <http://educationnext.org/are-wisconsin-schools-better-than-those-in-texas/>
+
+<!-- ## A COVID example -->
+
+<!-- ```{r} -->
+<!-- #| label: fig-israel -->
+<!-- #| fig-height: 3.5 -->
+<!-- #| out-width: "88%" -->
+<!-- #| fig-alt: "Grouped bar chart of severe COVID-19 case rates per 100,000 in Israel as -->
+<!-- #|   of 15 August 2021, comparing unvaccinated with fully vaccinated people in three -->
+<!-- #|   strata. Under 50, the unvaccinated rate is 3.9 and the vaccinated rate 0.3, an -->
+<!-- #|   efficacy of 91.8 percent. For 50 and over the rates are 91.9 and 13.6, an -->
+<!-- #|   efficacy of 85.2 percent. Pooled across all ages the rates are 16.4 and 5.3, an -->
+<!-- #|   apparent efficacy of only 67.5 percent — lower than in either age group taken -->
+<!-- #|   separately. The bars are drawn on a logarithmic scale because the over-50 rates -->
+<!-- #|   are more than twenty times the under-50 rates." -->
+<!-- isr <- data.frame( -->
+<!--   stratum = factor(c("Under 50", "50 and over", "All ages"), -->
+<!--                    levels = c("Under 50", "50 and over", "All ages")), -->
+<!--   unvax = c(3.9, 91.9, 16.4), -->
+<!--   vax   = c(0.3, 13.6,  5.3), -->
+<!--   ve    = c(91.8, 85.2, 67.5) -->
+<!-- ) -->
+
+<!-- vt_par(mar = c(4.2, 4.4, 2.6, 1)) -->
+<!-- bp <- barplot(t(as.matrix(isr[, c("unvax", "vax")])), beside = TRUE, -->
+<!--               names.arg = isr$stratum, log = "y", ylim = c(0.1, 400), -->
+<!--               col = c(maroon, navy), border = NA, -->
+<!--               ylab = "Severe cases per 100,000", xlab = "") -->
+<!-- text(colMeans(bp), 230, labels = paste0("VE ", isr$ve, "%"), -->
+<!--      cex = 0.85, col = "#1a1a1a") -->
+<!-- legend("topleft", legend = c("Unvaccinated", "Fully vaccinated"), -->
+<!--        fill = c(maroon, navy), border = NA, bty = "n", cex = 0.85) -->
+<!-- ``` -->
+
+<!-- Discrepancy between overall and age-stratified effectiveness (Israeli data, -->
+<!-- 15 August 2021). Source: -->
+<!-- [covid-datascience.com](https://www.covid-datascience.com/post/israeli-data-how-can-efficacy-vs-severe-disease-be-strong-when-60-of-hospitalized-are-vaccinated) -->
+
+<!-- ## Simpson's, continued -->
+
+<!-- "*The reason for this paradoxical result is that both dosage and recovery -->
+<!-- probability were systematically higher in one group (younger) and lower in the -->
+<!-- other group (older). This creates a specific type of confounding that can -->
+<!-- produce such a paradox.*" -->
+
+<!-- From a blog article 'Israeli data: How can efficacy -->
+<!-- vs. severe disease be strong when 60% of hospitalized are vaccinated?' by -->
+<!-- Prof. Jeff Morris. -->
+
+<!-- ::: {.fragment} -->
+<!-- 85.7% of Israel's unvaccinated population was under 50 — the stratum where -->
+<!-- severe disease is rare regardless of vaccination. Pooling hides that. -->
+<!-- ::: -->
+
+# Exact test {background-color="#f4f1ee"}
+
+## A note before we start {.center-slide}
+
+::: {.center-heading}
+This section involves a little bit of discrete probability calculation — in
+particular, we will need the **hypergeometric distribution**.
+:::
+
+## Fisher's exact test
+
+- The chi-square test works well when the expected cell counts are moderately
+  large.
+- If sample sizes are small, the $P$-values cannot be trusted.
+- In such cases we need to rely on *exact* rather than large-sample
+  approximations (asymptotic tests).
+- One such method is **Fisher's exact test**.
+
+## Set-up for Fisher's exact test
+
+Fisher's exact test is valid when:
+
+a. the row totals $n_{i\cdot}$ and the column totals $n_{\cdot j}$ are both
+   fixed by design of the study;[^fixed]
+b. the usual chi-square is not valid — e.g. when we have a small sample size
+   $N$, and more than 20% of cells have expected cell counts less than 5, and
+   no expected cell count is less than 1.
+
+- However, keep in mind that $P$-values from exact tests are **conservative**.
+- Still, in many situations Fisher's exact test is the only valid option.
+
+[^fixed]: This doesn't always happen.
+
+## Famous experiment: Lady tasting tea[^fisher]
+
+[^fisher]: *The Design of Experiments* (London, Oliver and Boyd, 260pp.), Sir R. A. Fisher.
+
+::: {.quote-block}
+*A Lady declares that by tasting a cup of tea made with milk she can
+discriminate whether the milk or the tea infusion was first added to the cup.
+We will consider the problem of designing an experiment by means of which this
+assertion can be tested.*
+:::
+
+## Lady tasting tea[^fisher2]
+
+[^fisher2]: *The Design of Experiments*, Sir R. A. Fisher.
+
+- Our experiment consists in mixing eight cups of tea, **four in one way and
+  four in the other**, and presenting them to the subject for judgment **in a
+  random order**.
+- The subject has been told in advance of what the test will consist, namely
+  that she will be asked to taste eight cups, that these shall be four of each
+  kind, and that they shall be presented to her in a random order, **that is in
+  an order not determined arbitrarily by human choice, but by the actual
+  manipulation of the physical apparatus used in games of chance, cards, dice,
+  roulettes, etc.**, …
+- Her task is to divide the 8 cups into two sets of 4, agreeing, if possible,
+  with the treatments received.
+
+## Lady tasting tea: combinatorial argument
+
+1. There are $\binom{8}{4} = 70$ ways to distribute the four "milk-first" cups
+   among the 8.
+
+::: {.fragment}
+2. Under the null hypothesis that the lady cannot taste any difference, her
+   labeling of the 8 cups — 4 milk-first and 4 tea-infusion-first — can be
+   thought of as fixed in advance.
+:::
+
+::: {.fragment}
+3. The probability that her labeling exactly matches the truth is thus $1/70$.
+:::
+
+::: {.fragment}
+4. A test that rejects the null hypothesis only when she matches all 8 cups has
+   significance level $1/70 = 1.4\%$.
+:::
+
+## Lady tasting tea: combinatorial argument (contd.)
+
+1. If she misses one cup, she must in fact miss at least two, because she will
+   have mislabeled a milk-first as tea-first, and vice versa.
+
+::: {.fragment}
+2. The possible numbers of "hits" are 0, 2, 4, 6, and 8.
+:::
+
+::: {.fragment}
+3. To get 6 hits, she must label as milk-first three of the four true
+   milk-first cups, and must mislabel as milk-first one of the four tea-first
+   cups.
+:::
+
+::: {.fragment}
+4. The number of arrangements that give exactly 6 hits is thus
+   $\binom{4}{3}\times\binom{4}{1} = 16$.
+:::
+
+::: {.fragment}
+5. Thus if we reject the null hypothesis when she correctly identifies 6 of the
+   8 cups or all 8 of the 8 cups, the significance level of the test is
+   $(16+1)/70 = 24.3\%$.
+:::
+
+::: {.fragment}
+6. Such good performance is pretty likely to occur by chance — **about as
+   likely as getting two heads in two tosses of a fair coin** — even if the
+   lady and the tea are in different parlors.
+:::
+
+## The real data
+
+- What really happened?
+- In a summer tea-party in Cambridge, England, a lady claimed to be able to
+  discern, by taste alone, whether a cup of tea with milk had the tea poured
+  first or the milk poured first.
+- An experiment was performed by Sir R. A. Fisher himself, then and there, to
+  see if her claim is valid. The outcomes were as follows:
+
+```{r}
+#| label: tbl-tea
+#| echo: true
+tea <- matrix(
+  c(3, 1,
+    1, 3),
+  nrow = 2, byrow = TRUE,
+  dimnames = list(`Poured first` = c("Tea", "Milk"),
+                  `Lady says`    = c("Tea first", "Milk first"))
+)
+tea
+```
+
+## Hypergeometric distribution
+
+- The hypergeometric distribution describes the probability that in a sample of
+  $n$ distinctive units drawn from a finite population of size $N$ **without
+  replacement**, there are $k$ successes.
+- Consider that you draw $n$ balls from a box with red and blue balls, where
+  there is a total of $N$ balls. There are a total of $D$ red balls in the box.
+  What's the probability that we will get exactly $k$ red balls?
+
+| | draw | no draw | total |
+|:---|---:|---:|---:|
+| red | $k$ | ? | $\mathbf{D}$ |
+| blue | ? | ? | ? |
+| total | $\mathbf{n}$ | ? | $\mathbf{N}$ |
+
+$$
+P(k \mid n, D, N) = \frac{\binom{D}{k}\binom{N-D}{n-k}}{\binom{N}{n}},
+\qquad k = 0, 1, 2, \ldots, n
+$$
+
+## Hypergeometric distribution and $P$-value
+
+Filling in the cells that the margins determine:
+
+| | draw | no draw | total |
+|:---|---:|---:|---:|
+| red | $k$ | $D-k$ | $\mathbf{D}$ |
+| blue | $n-k$ | $N+k-n-D$ | $N-D$ |
+| total | $\mathbf{n}$ | $N-n$ | $\mathbf{N}$ |
+
+$$
+P(k \mid n, D, N) = \frac{\binom{D}{k}\binom{N-D}{n-k}}{\binom{N}{n}},
+\qquad k = 0, 1, 2, \ldots, n
+$$
+
+## $P$-value
+
+| | draw | no draw | total |
+|:---|---:|---:|---:|
+| red | $k$ | $D-k$ | $D$ |
+| blue | $n-k$ | $N+k-n-D$ | $N-D$ |
+| total | $n$ | $N-n$ | $N$ |
+
+- This is exactly like Fisher's lady tasting tea example: fixed column totals
+  and margins.
+- Recall that a $P$-value is the probability of getting a result as extreme or
+  more extreme than the event you actually did observe, if $H_0$ is true.
+- In this example, the $P$-value is $P(k \ge t_0)$, where $t_0$ is the observed
+  value of $k$ — in this case 3.
+
+## Calculation
+
+1. Under $H_0$: "the lady has no discerning ability", i.e. the four cups she
+   calls "tea first" are a random sample from the eight.
+
+::: {.fragment}
+2. If she selects four at random, the probability that three of these four are
+   actually "tea first" comes from the hypergeometric distribution. Here
+   $N = 8$, $D = 4$, $n = 4$:
+   $$P(k=3) = \frac{\binom{4}{3}\binom{4}{1}}{\binom{8}{4}} = \frac{16}{70} = 0.229$$
+:::
+
+::: {.fragment}
+3. The only result more extreme is that the lady selects all four of the cups
+   that are truly "tea first":
+   $$P(k=4) = \frac{\binom{4}{4}\binom{4}{0}}{\binom{8}{4}} = \frac{1}{70} = 0.014$$
+:::
+
+::: {.fragment}
+4. The $P$-value is $0.229 + 0.014 = 0.243$, which is only weak evidence
+   against the null. There is not enough evidence to reject our hypothesis that
+   the lady is purely guessing.
+:::
+
+## The calculation in [R]{.smallcaps}
+
+`dhyper(k, D, N - D, n)` gives the whole null distribution of the $(1,1)$ cell:
+
+```{r}
+#| echo: true
+k <- 0:4
+data.frame(k = k, prob = round(dhyper(k, m = 4, n = 4, k = 4), 4))
+```
+
+```{r}
+#| echo: true
+sum(dhyper(3:4, m = 4, n = 4, k = 4))   # P(k >= 3)
+```
+
+## Fisher's exact test in [R]{.smallcaps}
+
+```{r}
+#| echo: true
+#| class-output: scroll-out
+fisher.test(tea, alternative = "greater")
+```
+
+::: {.fragment}
+The one-sided $P$-value is $17/70 = 0.243$, exactly the combinatorial answer.
+:::
+
+## Another way
+
+- The basic idea behind exact tests is that they **enumerate all possible
+  tables that have the same margins**, e.g. row sums and column sums.
+- Then, to compute the relevant statistic, e.g. $\chi^2$, you look for all
+  tables where the values are more extreme than the one you have observed. The
+  $P$-value is the sum of the probabilities of all such "more extreme" tables.
+
+```{r}
+#| echo: true
+# Every 2x2 table with all margins equal to 4, indexed by the (1,1) cell.
+for (k in 0:4) {
+  cat("k =", k, ":  [", k, 4 - k, "/", 4 - k, k, "]   P =",
+      round(dhyper(k, 4, 4, 4), 4), "\n")
+}
+```
+
+## Computing[^sheffield]
+
+[^sheffield]: Adapted from a University of Sheffield tutorial on Fisher's exact test.
+
+- The key here is that in the set of tables with the same margins,
+  [once you know the value in one cell, you know the rest of the cells]{.boxed}.
+  Therefore, to find the probability of observing a table, we need to find the
+  probability of only one cell in the table (rather than the probabilities of
+  four cells). [Typically we use the value of cell $(1,1)$.]{.hl-rust}
+- Under the null hypothesis of independence, the probability distribution of
+  that one cell (e.g. $n_{11}$) is hypergeometric, as discussed before.
+- Note that these tests can be **conservative**. Because of the discreteness of
+  the data, and the small number of possible realizations, e.g. tables, the
+  Type I error rate will be smaller than the intended one (e.g.
+  $\alpha = 0.05$).
+
+## Alternative approaches
+
+There are other experiments we might construct to test this hypothesis.
+Lindley (1984, *A Bayesian Lady Tasting Tea*) lists two, which he attributes
+to Neyman:
+
+1. Present the lady with $n$ **pairs** of cups of tea with milk, where one cup
+   in each pair (determined randomly) has milk added first and one has tea
+   added first. Tell the lady that each pair has one of each kind of cup; ask
+   her to identify which member of each pair had the milk added first. Count
+   the number of pairs she categorizes correctly.
+
+::: {.fragment}
+2. Present the lady with $n$ cups of tea with milk, each of which has
+   probability $1/2$ of having the milk added first and probability $1/2$ of
+   having the tea added first. Do **not** tell the lady how many of each sort
+   of cup there are. Ask her to identify for each cup whether milk or tea was
+   added first. Count the number of cups she categorizes correctly.
+:::
+
+::: {.fragment}
+Each design implies a different null distribution — binomial rather than
+hypergeometric — and so a different test.
+:::
+
+## Summary
+
+| Situation | Test | [R]{.smallcaps} |
+|:---|:---|:---|
+| $r \times k$ table, large expected counts | chi-square for association | `chisq.test()` |
+| $K \times 2$ table | equality of $K$ proportions | `prop.test()` |
+| Strength of association | $\phi$, $C$, Cramér's $V$ | from $Q$ and $N$ |
+| Paired $2 \times 2$ | McNemar | `mcnemar.test()` |
+| Small counts, fixed margins | Fisher's exact | `fisher.test()` |
+| Three variables, reversal | Simpson's paradox | stratify before pooling |
+
+
