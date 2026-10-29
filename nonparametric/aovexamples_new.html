@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>ANOVA and Kruskal-Wallis Test</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Jyotishka Datta" />
+    <script src="aovexamples_new_files/header-attrs-2.28/header-attrs.js"></script>
+    <link href="aovexamples_new_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="aovexamples_new_files/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# ANOVA and Kruskal-Wallis Test
+]
+.subtitle[
+## K-sample comparisons
+]
+.author[
+### Jyotishka Datta
+]
+.date[
+### Updated: 2025-04-15
+]
+
+---
+
+
+
+
+
+## R Markdown
+
+I will show here the R codes for ANOVA. The two examples are taken from the following websites.
+
+  -  [Spray Insects Example](http://homepages.inf.ed.ac.uk/bwebb/statistics/ANOVA_in_R.pdf)
+  -  [Migraine Example (Martin Lindquist)](http://www.stat.columbia.edu/~martin/W2024/R3.pdf)
+
+---
+## The Data
+
+We first read the InsectSprays dataset that has data on pain levels for three types of drugs. We create a data frame in R to store the data. 
+
+
+```r
+pain = c(4, 5, 4, 3, 2, 4, 3, 4, 4, 6, 8, 4, 5, 4, 6, 5, 
+         8, 6, 6, 7, 6, 6, 7, 5, 6, 5, 5)
+drug = c(rep("A",9), rep("B",9), rep("C",9))
+migraine = data.frame(pain,drug)
+str(migraine)
+```
+
+```
+## 'data.frame':	27 obs. of  2 variables:
+##  $ pain: num  4 5 4 3 2 4 3 4 4 6 ...
+##  $ drug: chr  "A" "A" "A" "A" ...
+```
+
+---
+## Descriptive statistics
+-  Mean, variance, number of elements in each cell
+-  Visualise the data - boxplot; look at distribution, look for outliers
+-  We'll use the tapply() function which is a helpful shortcut in processing data. 
+-  tapply() basically allows you to specify a response variable, a factor (or factors) and a function that should be applied to each subset of the response variable defined by each level of the factor. 
+
+---
+## Descriptive Statistics
+Instead of doing 
+
+```r
+options(digits=10)
+mean(pain[drug=="A"])
+```
+
+```
+## [1] 3.666666667
+```
+
+```r
+mean(pain[drug=="B"])
+```
+
+```
+## [1] 5.777777778
+```
+We can simply call 
+
+```r
+tapply(pain, drug, mean)
+```
+
+```
+##           A           B           C 
+## 3.666666667 5.777777778 5.888888889
+```
+---
+## Descriptive Statistics
+
+-  We need the sample variances, i.e. `\(s_j^2\)` for `\(j = 1, 2, 3\)`.
+
+```r
+tapply(pain, drug, var)
+```
+
+```
+##            A            B            C 
+## 0.7500000000 2.1944444444 0.6111111111
+```
+-  We also need the sample sizes for each group. (Note: it will not always be equal or obvious!)
+
+```r
+tapply(pain, drug, length)
+```
+
+```
+## A B C 
+## 9 9 9
+```
+---
+## Use `dplyr`
+
+
+
+```r
+library(dplyr)
+migraine %&gt;% group_by(drug) %&gt;% summarize(mean = mean(pain),
+                                          median = median(pain),
+                                          sd = sd(pain), count = n())
+```
+
+```
+## # A tibble: 3 × 5
+##   drug   mean median    sd count
+##   &lt;chr&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;
+## 1 A      3.67      4 0.866     9
+## 2 B      5.78      6 1.48      9
+## 3 C      5.89      6 0.782     9
+```
+
+---
+## Visual comparison 
+
+We can look at the boxplot for the three groups: 
+
+
+```r
+library(ggplot2)
+migraine %&gt;% ggplot(aes(y = pain, x = drug)) + 
+             geom_boxplot() + theme_bw()
+```
+
+![](aovexamples_new_files/figure-html/unnamed-chunk-7-1.png)&lt;!-- --&gt;
+
+---
+## ANOVA Sum of squares 
+-  We need to calculate two sum of squares for the F-statistic. 
+-  The numerator is between groups variation or `\(\sum_{j=1}^{K} n_j (\bar{x}_j - \bar{X})^2\)`. ($n_j$: sample size of the `\(j^{th}\)` group).
+- We have calculated the `\(n_j\)`'s and the `\(\bar{x}_j\)`'s before using tapply().
+
+
+```r
+n_j = tapply(pain,drug,length)
+SST_j = n_j * (tapply(pain,drug,mean)-mean(pain))^2
+SST = sum(SST_j)
+cat("SST = ", SST, '\n')
+```
+
+```
+## SST =  28.22222222
+```
+
+---
+## SSE
+Variation within the treatments = Sum of squares for Error (SSE):
+$$
+SSE = (n_1 -1)s_1^2 + (n_2 - 1)s_2^2 + \cdots + (n_K -1)s_K^2 
+$$
+
+
+```r
+SSE_j = (n_j-1)*tapply(pain,drug,var)
+SSE = sum(SSE_j)
+cat("SSE =", SSE, "\n")
+```
+
+```
+## SSE = 28.44444444
+```
+
+---
+## F-statistic 
+
+-  Mean square for treatments = MST = `\(\frac{SST}{k-1} = \frac{28.2}{2} = 14.11\)`
+-  Mean square for errors = MSE = `\(\frac{SSE}{n-k} = \frac{28.4}{27-3} = 1.19\)`.
+-  The ratio of the variability among the treatment means to that within the treatment means is an `\(F\)`-statistic with `\(k-1 = 2\)` numerator and `\(n-k = 24\)` denominator degrees of freedom.
+
+
+
+$$
+F_{k-1,n-k} = \frac{MST}{MSE} = \frac{14.11}{1.19} = 11.9
+$$
+
+
+```r
+p.value = 1-pf(11.9,2,24); cat("P value =", p.value)
+```
+
+```
+## P value = 0.0002566847936
+```
+Reject the null hypothesis. There is a statistically significant difference between the mean pain levels for the three drugs. 
+
+---
+## ANOVA in R 
+
+Of course, we can skip the step-by-step calculation and use a pre-canned package in R: 
+
+
+```r
+results &lt;- aov(pain~drug, data=migraine)
+summary(results)
+```
+
+```
+##             Df   Sum Sq   Mean Sq  F value     Pr(&gt;F)    
+## drug         2 28.22222 14.111111 11.90625 0.00025588 ***
+## Residuals   24 28.44444  1.185185                        
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+---
+## Pairwise tests 
+
+-  ANOVA tells you whether there is a significant difference between the means, but it does not provide any more information about which ones are different. 
+-  The R function pairwise.t.test() compares all possible pairs with **corrections for multiple testing**. 
+
+
+```r
+ pairwise.t.test(pain, drug, p.adjust="bonferroni")
+```
+
+```
+## 
+## 	Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  pain and drug 
+## 
+##   A          B         
+## B 0.00118576 -         
+## C 0.00068444 1.00000000
+## 
+## P value adjustment method: bonferroni
+```
+
+
+---
+## Compare with the exploratory plot
+
+
+
+```r
+migraine %&gt;% ggplot(aes(y = pain, x = drug)) + 
+             geom_boxplot() + theme_bw()
+```
+
+![](aovexamples_new_files/figure-html/unnamed-chunk-13-1.png)&lt;!-- --&gt;
+
+***A is different from both B and C, but B &amp; C are similar***
+
+
+---
+## Tukey's HSD
+
+-  Another multiple comparisons procedure is Tukey's method (a.k.a. Tukey's Honest Significance Test). 
+
+-  The function `TukeyHSD()` creates a set of confidence
+intervals on the differences between means with the specified family-wise probability of coverage. 
+
+
+```r
+results = aov(pain ~ drug, data=migraine)
+TukeyHSD(results, conf.level = 0.95)
+```
+
+```
+##   Tukey multiple comparisons of means
+##     95% family-wise confidence level
+## 
+## Fit: aov(formula = pain ~ drug, data = migraine)
+## 
+## $drug
+##             diff           lwr         upr        p adj
+## B-A 2.1111111111  0.8295027637 3.392719459 0.0011107264
+## C-A 2.2222222222  0.9406138748 3.503830570 0.0006452913
+## C-B 0.1111111111 -1.1704972363 1.392719459 0.9745173137
+```
+
+
+---
+## Assumptions in ANOVA | Conditions required for a Valid ANOVA F-Test:
+1. Completely Randomized Design: The samples are randomly selected in an
+independent manner from the k treatment populations.
+2.  All k sampled populations have distributions that are approximately normal.
+3.  The k population variances are equal.
+
+*There are ways to check (both visually and numerically) if these assumptions are satisfied*
+
+
+---
+## Testing homogeneity of variances
+
+The homogeneity of variance test is called Bartlett test.
+
+
+```r
+bartlett.test(pain ~ drug, data=migraine)
+```
+
+```
+## 
+## 	Bartlett test of homogeneity of variances
+## 
+## data:  pain by drug
+## Bartlett's K-squared = 3.8192, df = 2, p-value = 0.1481
+```
+-  ***The P-value is larger than 0.05. This implies no evidence for significant difference between the group variance, which means we can safely assume that the k population variances are equal.***
+
+
+---
+# Another Example
+
+---
+## Insect and Sprays
+
+We are going to see another data-set InsectSprays. 6 different insect sprays (1 Categorical Variable with 6 levels) were tested to see if there was a difference in the number of insects found in the field after each spraying (Dependent Variable).
+
+```r
+attach(InsectSprays)
+data(InsectSprays)
+str(InsectSprays)
+```
+
+```
+## 'data.frame':	72 obs. of  2 variables:
+##  $ count: num  10 7 20 14 14 12 10 23 17 20 ...
+##  $ spray: Factor w/ 6 levels "A","B","C","D",..: 1 1 1 1 1 1 1 1 1 1 ...
+```
+---
+## Descriptive Statistics 
+
+
+```r
+library(dplyr)
+
+InsectSprays %&gt;% group_by(spray) %&gt;% summarize(mean = mean(count),
+                                          median = median(count),
+                                          sd = sd(count), count = n())
+```
+
+```
+## # A tibble: 6 × 5
+##   spray  mean median    sd count
+##   &lt;fct&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;
+## 1 A     14.5    14    4.72    12
+## 2 B     15.3    16.5  4.27    12
+## 3 C      2.08    1.5  1.98    12
+## 4 D      4.92    5    2.50    12
+## 5 E      3.5     3    1.73    12
+## 6 F     16.7    15    6.21    12
+```
+
+---
+## More Visual comparisons
+
+
+
+```r
+library(ggplot2)
+InsectSprays %&gt;% ggplot(aes(y = count, x = spray)) + 
+             geom_boxplot() + theme_bw()
+```
+
+![](aovexamples_new_files/figure-html/unnamed-chunk-18-1.png)&lt;!-- --&gt;
+
+---
+## Density for the three groups
+
+
+```r
+InsectSprays %&gt;% ggplot(aes(x = count, fill = spray)) + 
+  geom_density(alpha = 0.1) + theme_bw()
+```
+
+![](aovexamples_new_files/figure-html/unnamed-chunk-19-1.png)&lt;!-- --&gt;
+
+---
+## ANOVA Sum of squares 
+
+-  We need to calculate two sum of squares for the F-statistic. 
+-  The numerator is between groups variation or `\(\sum_{j=1}^{K} n_j (\bar{x}_j - \bar{X})^2\)`. 
+-  Here `\(n_j\)` : sample size of the `\(j^{th}\)` group.
+- We have calculated the `\(n_j\)`'s and the `\(\bar{x}_j\)`'s before using `tapply()` or `dplyr` functions.
+
+
+```r
+n_j = tapply(count,spray,length)
+SST_j = n_j * (tapply(count,spray,mean)-mean(count))^2
+SST = sum(SST_j)
+cat("SST = ", SST, '\n')
+```
+
+```
+## SST =  2668.833
+```
+
+
+---
+## SSE
+
+Variation within the treatments = Sum of squares for Error (SSE):
+$$
+SSE = (n_1 -1)s_1^2 + (n_2 - 1)s_2^2 + \cdots + (n_K -1)s_K^2 
+$$
+
+
+```r
+SSE_j = (n_j-1)*tapply(count,spray,var)
+SSE = sum(SSE_j)
+cat("SSE =", SSE, "\n")
+```
+
+```
+## SSE = 1015.167
+```
+
+---
+## F-statistic 
+
+-  Mean square for treatments = MST = `\(\frac{SST}{k-1} = \frac{2669}{5} = 533.8\)`
+-  Mean square for errors = MSE = `\(\frac{SSE}{n-k} = \frac{1015}{72-6} = 15.378\)`.
+-  The ratio of the variability among the treatment means to that within the treatment means is an `\(F\)`-statistic with `\(k-1 = 5\)` numerator and `\(n-k = 66\)` denominator degrees of freedom
+
+-  That is, 
+
+$$
+F_{k-1,n-k} = \frac{MST}{MSE} = \frac{533.8}{15.378} = 34.7
+$$
+
+- We can use this in R: 
+
+
+```r
+(p.value = 1-pf(34.7,5,66))
+```
+
+```
+## [1] 0
+```
+Reject the null.
+
+---
+## ANOVA in R 
+
+Of course, we can skip the step-by-step calculation and use a pre-canned package in R: 
+
+
+```r
+results &lt;- aov(count~spray, data=InsectSprays)
+summary(results)
+```
+
+```
+##             Df Sum Sq Mean Sq F value Pr(&gt;F)    
+## spray        5   2669   533.8    34.7 &lt;2e-16 ***
+## Residuals   66   1015    15.4                   
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+
+---
+## Pairwise tests 
+
+-  Pairwise test tell us which ones are different. 
+-  The R function pairwise.t.test() compares all possible pairs with **corrections for multiple testing**. 
+
+```r
+ pairwise.t.test(count, spray, p.adjust="bonferroni")
+```
+
+```
+## 
+## 	Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  count and spray 
+## 
+##   A       B       C       D       E      
+## B 1       -       -       -       -      
+## C 1.1e-09 1.3e-10 -       -       -      
+## D 1.5e-06 1.8e-07 1       -       -      
+## E 4.1e-08 4.9e-09 1       1       -      
+## F 1       1       4.2e-12 6.1e-09 1.6e-10
+## 
+## P value adjustment method: bonferroni
+```
+
+
+---
+## Always compare with visualization
+
+
+```r
+InsectSprays %&gt;% ggplot(aes(y = count, x = spray)) + 
+  geom_boxplot(aes(fill = spray), alpha = 0.1) + theme_bw()
+```
+
+![](aovexamples_new_files/figure-html/unnamed-chunk-25-1.png)&lt;!-- --&gt;
+
+***A, B and F are similar, C, D and E are similar. But each of A, B &amp; F are different from each of C, D and E !***
+
+
+---
+## Tukey's HSD 
+
+```r
+results = aov(count ~ spray, data=InsectSprays)
+TukeyHSD(results, conf.level = 0.95)
+```
+
+```
+##   Tukey multiple comparisons of means
+##     95% family-wise confidence level
+## 
+## Fit: aov(formula = count ~ spray, data = InsectSprays)
+## 
+## $spray
+##            diff        lwr       upr     p adj
+## B-A   0.8333333  -3.866075  5.532742 0.9951810
+## C-A -12.4166667 -17.116075 -7.717258 0.0000000
+## D-A  -9.5833333 -14.282742 -4.883925 0.0000014
+## E-A -11.0000000 -15.699409 -6.300591 0.0000000
+## F-A   2.1666667  -2.532742  6.866075 0.7542147
+## C-B -13.2500000 -17.949409 -8.550591 0.0000000
+## D-B -10.4166667 -15.116075 -5.717258 0.0000002
+## E-B -11.8333333 -16.532742 -7.133925 0.0000000
+## F-B   1.3333333  -3.366075  6.032742 0.9603075
+## D-C   2.8333333  -1.866075  7.532742 0.4920707
+## E-C   1.4166667  -3.282742  6.116075 0.9488669
+## F-C  14.5833333   9.883925 19.282742 0.0000000
+## E-D  -1.4166667  -6.116075  3.282742 0.9488669
+## F-D  11.7500000   7.050591 16.449409 0.0000000
+## F-E  13.1666667   8.467258 17.866075 0.0000000
+```
+
+
+---
+## Assumptions in ANOVA | Conditions required for a Valid ANOVA F-Test:
+1. Completely Randomized Design: The samples are randomly selected in an
+independent manner from the k treatment populations.
+2.  All k sampled populations have distributions that are approximately normal.
+3.  The k population variances are equal.
+
+*There are ways to check (both visually and numerically) if these assumptions are satisfied*
+
+
+---
+## Testing homogeneity of variances
+
+The homogeneity of variance test is called Bartlett test.
+
+
+```r
+bartlett.test(count ~ spray, data=InsectSprays)
+```
+
+```
+## 
+## 	Bartlett test of homogeneity of variances
+## 
+## data:  count by spray
+## Bartlett's K-squared = 25.96, df = 5, p-value = 9.085e-05
+```
+-  ***Note that this implies a significant difference between the group variance, which means we cannot assume that the k population variances are equal.***
+-  ***We cannot trust the ANOVA results for this data***
+
+
+---
+## Model checking plots
+
+
+```r
+results = aov(count ~ spray, data=InsectSprays)
+opar &lt;- par(mfrow = c(2,2), oma = c(0, 0, 1.1, 0))
+plot(results, las = 1)      # Residuals, Fitted, ...
+```
+
+![](aovexamples_new_files/figure-html/unnamed-chunk-28-1.png)&lt;!-- --&gt;
+
+```r
+par(opar)
+```
+
+---
+## Kruskal-Wallis Test
+
+-  When the assumptions for a parametric ANOVA are violated, we use a nonparametric alternative. 
+-  For one-way ANOVA, the alternative is known as is known as Kruskal-Wallis test. 
+
+```r
+# Kruskal Wallis Test One Way Anova by Ranks 
+kruskal.test(count ~ spray, data=InsectSprays) 
+```
+
+```
+## 
+## 	Kruskal-Wallis rank sum test
+## 
+## data:  count by spray
+## Kruskal-Wallis chi-squared = 54.691, df = 5, p-value = 1.511e-10
+```
+Reject the null hypothesis! 
+
+---
+## First example revisited | Testing homogeneity of variances
+
+
+```r
+bartlett.test(pain ~ drug, data=migraine)
+```
+
+```
+## 
+## 	Bartlett test of homogeneity of variances
+## 
+## data:  pain by drug
+## Bartlett's K-squared = 3.8192, df = 2, p-value = 0.1481
+```
+-  ***Note that although this does not imply a significant difference between the group variance, the P-value is low. We have to be careful!***
+
+
+---
+## Model checking plots
+
+![](aovexamples_new_files/figure-html/unnamed-chunk-31-1.png)&lt;!-- --&gt;
+
+
+---
+## Kruskal-Wallis Test
+
+-  When the assumptions for a parametric ANOVA are violated, we use a nonparametric alternative. 
+-  For one-way ANOVA, the alternative is known as is known as Kruskal-Wallis test. 
+
+```r
+# Kruskal Wallis Test One Way Anova by Ranks 
+kruskal.test(pain ~ drug, data=migraine) 
+```
+
+```
+## 
+## 	Kruskal-Wallis rank sum test
+## 
+## data:  pain by drug
+## Kruskal-Wallis chi-squared = 14.395, df = 2, p-value = 0.0007483
+```
+Reject the null hypothesis! 
+
+---
+# Let's discuss Kruskal-Wallis in more details! 
+
+## In class example 
+We simulate data in three groups by sampling from three different Normal distributions with different means but the same variance. The observations for three groups are randomly sampled from from `\(N(15, 9^2)\)`, `\(N(25, 9^2)\)` and `\(N(30, 9^2)\)`. 
+
+
+```r
+## generate the simulation data
+set.seed(1238991)
+n=5
+trt1 = rnorm(n, 15, 9)
+trt2 = rnorm(n, 25, 9)
+trt3 = rnorm(n, 30, 9)
+y = c(trt1, trt2, trt3)
+grps = rep(c("A", "B", "C"), each=n)
+```
+
+---
+## Visualize (Boxplot)
+
+
+```r
+simdata = data.frame(y, as.factor(grps))
+simdata %&gt;% ggplot(aes(y = y, x = grps)) + 
+             geom_boxplot() + theme_bw()
+```
+
+![](aovexamples_new_files/figure-html/unnamed-chunk-34-1.png)&lt;!-- --&gt;
+
+
+---
+## ANOVA
+
+
+```r
+#ANOVA based on the assumption of normal distribution with equal variance
+summary(aov(y ~ factor(grps), data = simdata))
+```
+
+```
+##              Df Sum Sq Mean Sq F value Pr(&gt;F)  
+## factor(grps)  2  401.7  200.84   3.181 0.0779 .
+## Residuals    12  757.6   63.13                 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+
+---
+## Kruskal-Wallis Test 
+
+
+```r
+options(digits=10)
+# Kruskal-Wallis test with chi-square approximation
+kruskal.test(y,grps)
+```
+
+```
+## 
+## 	Kruskal-Wallis rank sum test
+## 
+## data:  y and grps
+## Kruskal-Wallis chi-squared = 6.62, df = 2, p-value = 0.03651617
+```
+
+Now compare the test statistics and the P-values that you have calculated. 
+
+---
+## Another way 
+
+Kruskal-Wallis test statistic value can also be calculated by the output of ANOVA test on the ranks! 
+
+
+```r
+## Calculate the ranks of x
+rank.y = rank(y)
+N = length(y)
+summary(aov(rank.y ~ factor(grps)))
+```
+
+```
+##              Df Sum Sq Mean Sq F value   Pr(&gt;F)  
+## factor(grps)  2  132.4    66.2 5.38211 0.021457 *
+## Residuals    12  147.6    12.3                   
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+Although ANOVA does a different test, we can recover the value of the Kruskal-Wallis test statistics from the output. 
+
+---
+## Kruskal-Wallis from ANOVA
+
+Here is the test statistics (SST)
+
+
+```r
+SST = summary(aov(rank.y ~ factor(grps)))[[1]][1,2]
+H = SST*12/(N*(N+1))
+cat("Kruskal Wallis Test Statistics = ", H, "\n")
+```
+
+```
+## Kruskal Wallis Test Statistics =  6.62
+```
+
+```r
+cat("P value = ", 1 -pchisq(H,2))
+```
+
+```
+## P value =  0.03651617375
+```
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create();
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
